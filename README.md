@@ -18,7 +18,7 @@ One click to clock in. Six email-driven reports, two bosses, malware traps, shop
 - Calculator: use the keypad or keyboard and insert the answer into the selected spreadsheet cell.
 - Shop: spend credits on equipment, defence, healing and performance upgrades. Formula Auto-Pilot costs 85 credits and fills subsequent report formulas instantly; entering formulas and dragging are free.
 - Defend against the boss's telegraphed heavy attacks, or risk an OVERLOAD.
-- Each report reward has a short source-linked research case note, showing why we made the game, why the issue matters, a relevant class/game concept or a balanced perspective. Personnel Files and Help contain optional deeper evidence.
+- The first email includes a brief 'why this game, why now' with research sources. Each report reward presents an in-context case note; later notes respond to advertisement choices and purchased automation while connecting workplace gamification to game-design scholarship. Personnel Files and Help contain optional deeper evidence.
 - Every intrusive ad can be ignored for focus score or opened for a fight. Spam and ordinary email share the same Mark as Junk action; rewards and penalties appear after the choice.
 - Click the speaker icon to mute/unmute. All music, UI cues, combat effects and ambience are original Web Audio synthesis.
 - Save/progress persists in your browser. This game is desktop-first.
