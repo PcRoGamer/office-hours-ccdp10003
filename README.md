@@ -12,7 +12,7 @@ One click to clock in. Six email-driven reports, two bosses, malware traps, shop
 ## Controls
 - Click CLOCK IN to start your shift, or click the monitor to focus on the desktop.
 - Postbox: open the latest assignment and its spreadsheet.
-- Department Sheets: type 3*40 or =B2*C2 in the Total cell, then press Enter. Click D2 and drag its green corner down to copy the formula into D3 and D4. You can also double-click the fill handle, press Ctrl+D, or use the guided FILL DOWN shortcut. Addition =B2+C2 and SUM(B2:C2) also work.
+- Department Sheets: type 3*40 or =B2*C2 in the Total cell, then press Enter. Drag the filled D2 cell down to D4 to copy its formula into D3 and D4, or drag the green corner handle. You can also double-click the fill handle, press Ctrl+D, or use the guided FILL DOWN shortcut. Addition =B2+C2 and SUM(B2:C2) also work.
 - Calculator: use the keypad or keyboard and insert the answer into the selected spreadsheet cell.
 - Shop: spend credits on equipment, defence, healing and performance upgrades. Formula Auto-Pilot costs 85 credits and fills subsequent report formulas instantly; entering formulas and dragging are free.
 - Defend against the boss's telegraphed heavy attacks, or risk an OVERLOAD.
