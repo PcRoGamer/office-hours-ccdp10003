@@ -1,25 +1,27 @@
 # OFFICE HOURS
 
-A playable first-person office game about attention, gamified work, interruptions, and who benefits from the rules.
+A playable 3D office-survival game about gamified work, attention, advertisements and escalating corporate demands.
 
-## Play
-[Launch the game](https://pcrogamer.github.io/office-hours-ccdp10003/)
+**Play:** https://pcrogamer.github.io/office-hours-ccdp10003/
 
-Best experienced on a desktop or laptop with a mouse and keyboard, in a modern WebGL-capable browser.
+**Screenshot gallery:** https://pcrogamer.github.io/office-hours-ccdp10003/gallery.html
+
+## The game
+One click to clock in. Six email-driven reports, two bosses, malware traps, shop upgrades, a calculator, arcade diversions, and an ending. Everything happens through a fictional Windows-era OS projected onto a physical 3D monitor. No forced research essay or tutorial.
 
 ## Controls
-1. Click **FOCUS MONITOR**, then **CLOCK IN**.
-2. Begin the employee-orientation tutorial, delivered within the OS.
-3. Open Postbox for tasks, Department Sheets for editable spreadsheets, and Calculator for the totals.
-4. Explore the shop, arcade, browser, and Research app. Some spam messages and ads trigger battles.
-5. Clear all six reports and both bosses to finish the shift.
-
-## Assessment context
-An interactive response for the University of Melbourne **CCDP10003 Video Games: Remaking Reality, Project 2 (2026)**.
-
-CCDP concepts and independently sourced research are clearly marked inside the Employee Orientation and Research Library. This is a fictional satire; its scores and metrics are not empirical findings.
+- Click CLOCK IN to start your shift, or click the monitor to focus on the desktop.
+- Postbox: open the latest assignment and its spreadsheet.
+- Department Sheets: enter three calculated totals, then file the report.
+- Calculator: use the keypad or keyboard and insert the answer into the selected spreadsheet cell.
+- Shop: spend credits on equipment, defence, healing and performance upgrades.
+- Defend against the boss's telegraphed heavy attacks, or risk an OVERLOAD.
+- The Research / Personnel Files and Help app contain optional evidence, with CCDP lecture references distinguished from independent studies.
+- Click the speaker icon to mute/unmute. All music, UI cues, combat effects and ambience are original Web Audio synthesis.
+- Save/progress persists in your browser. This game is desktop-first.
 
 ## Technical
-Static Vite/React + React Three Fiber (Three.js) release build. The office and monitor are truly three-dimensional, with the computer desktop perspective-projected onto the monitor. No server or login is required.
+Static React, React Three Fiber / Three.js, perspective-mapped in-world operating system, Vite build. No authentication, backend, media downloads or embedded paid assets.
 
-This repository contains the deployable **release build**, not private subject materials or the game-studio workspace.
+## Academic context
+Game-inspired response for the University of Melbourne's CCDP10003 Video Games: Remaking Reality, 2026 Project 2. This repository contains *only* the deployable release and screenshots, not university materials, private submissions or the studio source project.
