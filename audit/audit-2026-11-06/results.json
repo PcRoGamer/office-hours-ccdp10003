@@ -1,0 +1,295 @@
+{
+  "url": "https://pcrogamer.github.io/office-hours-ccdp10003/?release=73e624e",
+  "steps": [
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "01-welcome-title.png",
+        "bytes": 398100
+      },
+      "at": "2026-11-05T22:11:59.112Z"
+    },
+    {
+      "step": "first-play-research-integrated",
+      "detail": {
+        "references": 2,
+        "visible": true,
+        "intro": "WHY THIS SHIFT · WHY NOW?\n\nWe chose ordinary paperwork because deadlines and pings feel familiar. Games make chores feel like"
+      },
+      "at": "2026-11-05T22:11:59.291Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "02-first-inbox.png",
+        "bytes": 451452
+      },
+      "at": "2026-11-05T22:11:59.663Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "03-mail-maximised.png",
+        "bytes": 297134
+      },
+      "at": "2026-11-05T22:12:04.926Z"
+    },
+    {
+      "step": "window-controls",
+      "detail": {
+        "original": 1013.3834228515625,
+        "maximised": 1249.2468338012695
+      },
+      "at": "2026-11-05T22:12:04.951Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "04-inbox-after-misfile.png",
+        "bytes": 362272
+      },
+      "at": "2026-11-05T22:12:05.135Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "05-source-drag-first-formula.png",
+        "bytes": 302562
+      },
+      "at": "2026-11-05T22:12:05.502Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "06-wrong-formula-recovery.png",
+        "bytes": 313028
+      },
+      "at": "2026-11-05T22:12:05.653Z"
+    },
+    {
+      "step": "report-1",
+      "detail": {
+        "quest": 1,
+        "coins": 115,
+        "xp": 70,
+        "source": "https://doi.org/10.1108/JWL-09-2024-0193"
+      },
+      "at": "2026-11-05T22:12:06.911Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "07-report-1.png",
+        "bytes": 303719
+      },
+      "at": "2026-11-05T22:12:07.010Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "08-ad-interruption.png",
+        "bytes": 345106
+      },
+      "at": "2026-11-05T22:12:07.976Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "09-shop-after-purchase.png",
+        "bytes": 350397
+      },
+      "at": "2026-11-05T22:12:08.393Z"
+    },
+    {
+      "step": "report-2",
+      "detail": {
+        "quest": 2,
+        "coins": 87,
+        "xp": 145,
+        "source": "https://doi.org/10.1145/1357054.1357072"
+      },
+      "at": "2026-11-05T22:12:09.910Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "10-report-2.png",
+        "bytes": 303952
+      },
+      "at": "2026-11-05T22:12:10.012Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "11-spam-reading.png",
+        "bytes": 348619
+      },
+      "at": "2026-11-05T22:12:10.172Z"
+    },
+    {
+      "step": "report-3",
+      "detail": {
+        "quest": 3,
+        "coins": 174,
+        "xp": 237,
+        "source": "https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/"
+      },
+      "at": "2026-11-05T22:12:11.680Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "12-report-3.png",
+        "bytes": 300410
+      },
+      "at": "2026-11-05T22:12:11.794Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "13-boss-first-start.png",
+        "bytes": 283796
+      },
+      "at": "2026-11-05T22:12:12.039Z"
+    },
+    {
+      "step": "boss-first",
+      "detail": {
+        "turns": 4,
+        "hp": 100
+      },
+      "at": "2026-11-05T22:12:12.546Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "14-boss-first-victory.png",
+        "bytes": 307728
+      },
+      "at": "2026-11-05T22:12:12.679Z"
+    },
+    {
+      "step": "resume-after-boss",
+      "detail": {
+        "quest": 3
+      },
+      "at": "2026-11-05T22:12:12.839Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "15-arcade-memory.png",
+        "bytes": 286141
+      },
+      "at": "2026-11-05T22:12:18.562Z"
+    },
+    {
+      "step": "report-4",
+      "detail": {
+        "quest": 4,
+        "coins": 360,
+        "xp": 452,
+        "source": "https://www.stanleyparable.com/"
+      },
+      "at": "2026-11-05T22:12:20.104Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "16-report-4.png",
+        "bytes": 296464
+      },
+      "at": "2026-11-05T22:12:20.217Z"
+    },
+    {
+      "step": "report-5",
+      "detail": {
+        "quest": 5,
+        "coins": 473,
+        "xp": 542,
+        "source": "https://canvas.lms.unimelb.edu.au/courses/239834/modules"
+      },
+      "at": "2026-11-05T22:12:21.728Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "17-report-5.png",
+        "bytes": 303128
+      },
+      "at": "2026-11-05T22:12:21.844Z"
+    },
+    {
+      "step": "report-6",
+      "detail": {
+        "quest": 6,
+        "coins": 608,
+        "xp": 637,
+        "source": "https://ianbogost.com/books/persuasive-games/"
+      },
+      "at": "2026-11-05T22:12:23.338Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "18-report-6.png",
+        "bytes": 302040
+      },
+      "at": "2026-11-05T22:12:23.440Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "19-boss-final-start.png",
+        "bytes": 299729
+      },
+      "at": "2026-11-05T22:12:23.576Z"
+    },
+    {
+      "step": "boss-final",
+      "detail": {
+        "turns": 7,
+        "hp": 100
+      },
+      "at": "2026-11-05T22:12:24.053Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "20-final-victory-reflection.png",
+        "bytes": 211675
+      },
+      "at": "2026-11-05T22:12:24.127Z"
+    },
+    {
+      "step": "completed",
+      "detail": {
+        "reports": 6,
+        "won": true,
+        "score": 1951,
+        "health": 100,
+        "coins": 718,
+        "adsIgnored": 1,
+        "malwareOpened": 0
+      },
+      "at": "2026-11-05T22:12:24.129Z"
+    },
+    {
+      "step": "screenshot",
+      "detail": {
+        "file": "21-reset-ready.png",
+        "bytes": 543308
+      },
+      "at": "2026-11-05T22:12:24.334Z"
+    },
+    {
+      "step": "COMPREHENSIVE_FOCUS_PATH_PASS",
+      "detail": {
+        "screenshots": 21,
+        "browserErrors": 0
+      },
+      "at": "2026-11-05T22:12:24.334Z"
+    }
+  ],
+  "errors": []
+}
