@@ -16,12 +16,16 @@ One click to clock in. Six email-driven reports, two bosses, malware traps, shop
 - Calculator: use the keypad or keyboard and insert the answer into the selected spreadsheet cell.
 - Shop: spend credits on equipment, defence, healing and performance upgrades. Formula Auto-Pilot costs 85 credits and fills subsequent report formulas instantly; entering formulas and dragging are free.
 - Defend against the boss's telegraphed heavy attacks, or risk an OVERLOAD.
-- The Research / Personnel Files and Help app contain optional evidence, with CCDP lecture references distinguished from independent studies.
+- Each report reward has a short source-linked research case note, showing why we made the game, why the issue matters, a relevant class/game concept or a balanced perspective. Personnel Files and Help contain optional deeper evidence.
+- Every intrusive ad can be ignored for focus score or opened for a fight. Spam and ordinary email share the same Mark as Junk action; rewards and penalties appear after the choice.
 - Click the speaker icon to mute/unmute. All music, UI cues, combat effects and ambience are original Web Audio synthesis.
 - Save/progress persists in your browser. This game is desktop-first.
 
 ## Technical
 Static React, React Three Fiber / Three.js, perspective-mapped in-world operating system, Vite build. No authentication, backend, media downloads or embedded paid assets.
+
+## Production disclosure
+OpenAI ChatGPT assisted with game-design planning, code and UX development, research wording and automated tests. The original concept evolved from an earlier CCDP group proposal; exact group eligibility and assessment-specific AI authorization must be verified before Canvas submission. See the full handoff kept in the working project.
 
 ## Academic context
 Game-inspired response for the University of Melbourne's CCDP10003 Video Games: Remaking Reality, 2026 Project 2. This repository contains *only* the deployable release and screenshots, not university materials, private submissions or the studio source project.
