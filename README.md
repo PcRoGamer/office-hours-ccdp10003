@@ -6,6 +6,8 @@ A playable 3D office-survival game about gamified work, attention, advertisement
 
 **Screenshot gallery:** https://pcrogamer.github.io/office-hours-ccdp10003/gallery.html
 
+**Full E2E and rubric audit:** https://pcrogamer.github.io/office-hours-ccdp10003/audit/
+
 ## The game
 One click to clock in. Six email-driven reports, two bosses, malware traps, shop upgrades, a calculator, arcade diversions, and an ending. Everything happens through a fictional Windows-era OS projected onto a physical 3D monitor. No forced research essay or tutorial.
 
@@ -24,8 +26,5 @@ One click to clock in. Six email-driven reports, two bosses, malware traps, shop
 ## Technical
 Static React, React Three Fiber / Three.js, perspective-mapped in-world operating system, Vite build. No authentication, backend, media downloads or embedded paid assets.
 
-## Production disclosure
-OpenAI ChatGPT assisted with game-design planning, code and UX development, research wording and automated tests. The original concept evolved from an earlier CCDP group proposal; exact group eligibility and assessment-specific AI authorization must be verified before Canvas submission. See the full handoff kept in the working project.
-
 ## Academic context
-Game-inspired response for the University of Melbourne's CCDP10003 Video Games: Remaking Reality, 2026 Project 2. This repository contains *only* the deployable release and screenshots, not university materials, private submissions or the studio source project.
+Game-inspired response for the University of Melbourne's CCDP10003 Video Games: Remaking Reality, 2026 Project 2. This repository contains the deployable release and gameplay screenshots, not private university materials or submissions.
