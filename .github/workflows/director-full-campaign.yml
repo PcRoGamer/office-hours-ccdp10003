@@ -1,7 +1,7 @@
 name: Director's Cut full-campaign integration QA
 on:
   push:
-    branches: [work/director-full-campaign-qa-20261106]
+    branches: [main, work/director-full-campaign-qa-20261106]
   workflow_dispatch:
 jobs:
   full-campaign:
