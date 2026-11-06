@@ -29,7 +29,7 @@ async function play(){
     assert.match(await page.getByTestId("verified-count").innerText(),new RegExp(forms[q].length+"\/"+forms[q].length+" VERIFIED"),"Report "+(q+1)+" was not verified");
     if(q===3)await page.getByTestId("policy-choice-protect").click();
     if(q===4)await page.getByTestId("policy-choice-disclose").click();
-    await page.screenshot({path:"qa-artifacts/campaign-report-"+(q+1)+".png",animations:"disabled"});
+  // State is captured by the per-report visual QA; do not stall the journey on GPU screenshot synchronization.
     await page.getByRole("button",{name:/FILE COMPLETED REPORT/}).click();
     await page.getByTestId("research-beat-"+(q+1)).waitFor();
     console.log("CAMPAIGN_REPORT_PASS",q+1);
@@ -52,7 +52,7 @@ async function play(){
   await page.locator(".final-report").waitFor();
   assert.match(await page.locator(".final-report").innerText(),/SHIFT SURVIVED/);
   assert.equal(errors.length,0,errors.join("\n"));
-  await page.screenshot({path:"qa-artifacts/campaign-victory.png",animations:"disabled"});
+  // State is captured by the per-report visual QA; do not stall the journey on GPU screenshot synchronization.
   console.log("FULL_CAMPAIGN_ADVANCED_PASS",forms.length,"reports, 2 bosses");
  }finally{await browser.close()}
 }
