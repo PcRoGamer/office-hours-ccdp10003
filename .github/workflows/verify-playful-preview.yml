@@ -1,0 +1,29 @@
+name: Verify isolated playful preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - preview-playful.html
+      - assets/index-Playful-Preview.js
+      - assets/playful-workbook.css
+      - qa/playful-preview.test.cjs
+      - .github/workflows/verify-playful-preview.yml
+  workflow_dispatch:
+jobs:
+  preview-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save playwright@1.58.2
+      - run: node --check assets/index-Playful-Preview.js
+      - name: Serve build
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/preview-http.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          exit 1
+      - run: node qa/playful-preview.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
