@@ -50,7 +50,7 @@ async function main(){
      await page.locator('[data-ow=slide-answer][data-field="'+field+'"][data-value=truth]').click();
     }
     assert.equal(await page.locator("[data-ow=move-slide]").count(),6,"Deck must support actual slide reordering");
-    await page.locator("[data-ow=move-slide][data-dir="-1"]").nth(1).click();
+    await page.locator('[data-ow=move-slide][data-dir="-1"]').nth(1).click();
     await page.locator("[data-ow=choose][data-field=policy][data-value=disclose]").click();
     await page.screenshot({path:"qa-workday-screens/05-slides.png",animations:"disabled",timeout:30000});
     await page.locator(".ow-window [data-ow=submit]").click();
