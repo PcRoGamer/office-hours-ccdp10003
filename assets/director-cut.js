@@ -179,7 +179,7 @@
     if(mode==='idle'&&!g.combat&&!g.gameOver&&!g.won&&g.quest>=3&&g.quest<6&&!g.directorEvidence&&!state.midDone&&!state.shown&&document.querySelector('.office-game.os-immersive')&&!document.querySelector('.reward-backdrop,.battle-panel,.final-mask')){
       midPrompt();return;
     }
-    if(mode==='idle'&&state.deferred&&!state.midDone&&g.quest>=3&&!g.won&&document.querySelector('.office-game.os-immersive')){
+    if(mode==='idle'&&(state.deferred||state.shown)&&!state.midDone&&g.quest>=3&&!g.won&&document.querySelector('.office-game.os-immersive')){
       const icon=document.createElement('button');icon.className='dc-recurring';icon.setAttribute('data-dc','reopen');icon.textContent='✉ STAFF FILE';
       if(!host.querySelector('.dc-recurring')){host.className='dc-prompting';host.appendChild(icon);icon.addEventListener('click',seeFile)}
     }
