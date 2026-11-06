@@ -26,6 +26,10 @@ jobs:
       - run: node qa/deep-workbook.test.cjs
         env:
           TEST_BASE_URL: http://127.0.0.1:4173/
+      - name: Verify original drag gestures and advanced reasoning
+        run: node qa/deep-drag.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
       - name: Complete full player journey
         run: node qa/deep-campaign.test.cjs
         env:
