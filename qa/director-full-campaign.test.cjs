@@ -63,7 +63,11 @@ async function run(){
   assert.equal(midSeen,1,"Midpoint chapter should occur exactly once");
   await page.locator(".dc-eval-grade").waitFor({timeout:20000});
   await page.locator("[data-dc=toggle-people]").click();
-  await page.locator("[data-dc=toggle-focus]").click();
+  const focus=page.locator("[data-dc=toggle-focus]");
+  const baseline=await page.evaluate(()=>JSON.parse(localStorage.getItem("office-hours-game-state-v3")||"{}"));
+  const interruptions=(baseline.adsSeen||0)+(baseline.adsDismissed||0)+(baseline.adClicked||0);
+  if(await focus.isEnabled())await focus.click();
+  else assert.equal(interruptions,0,"Attention controls should be disabled only when no interruptions happened");
   await page.screenshot({path:"qa-artifacts/full-02-calibration.png",animations:"disabled"});
   await page.locator("[data-dc=seal]").click();
   await page.locator(".dc-signature").waitFor();
