@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save playwright@1.58.2
-      - run: npx playwright install --with-deps chromium
+      - run: /usr/bin/google-chrome --version
       - run: node --check assets/index-DeepWorkbook-20261106.js
       - name: Serve candidate site
         run: |

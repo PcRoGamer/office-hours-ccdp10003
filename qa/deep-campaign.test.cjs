@@ -10,7 +10,7 @@ const forms=[
  ["=ROUND(B2*C2*(1+E2/100),2)","=B3*C3-E3","=ROUND(B4*C4*(1-E4/100),2)","=SUM(D2:D4)"]
 ];
 async function play(){
- const browser=await chromium.launch({headless:true,args:["--enable-webgl","--use-gl=angle","--use-angle=swiftshader","--no-sandbox","--disable-gpu-sandbox"]});
+ const browser=await chromium.launch({headless:true,...(require("fs").existsSync("/usr/bin/google-chrome")?{executablePath:"/usr/bin/google-chrome"}:{}),args:["--enable-webgl","--use-gl=angle","--use-angle=swiftshader","--no-sandbox","--disable-gpu-sandbox"]});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:900}});
   page.setDefaultTimeout(16000);
