@@ -16,6 +16,15 @@ async function start(browser,quest,macro){
  await page.getByRole("button",{name:/RESUME SHIFT/}).click();
  await page.getByTestId("launcher-sheets").click();
  await page.getByTestId("excel-sheet").waitFor();
+ // Native fullscreen and the 3D projection animate separately. Do not send
+ // pointer coordinates while the desktop is moving beneath the cursor.
+ await page.waitForTimeout(950);
+ await page.waitForFunction(()=>{
+  const el=document.querySelector('[data-testid="sheet-cell-B2"]');
+  if(!el)return false;
+  const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+  return hit===el||el.contains(hit);
+ },null,{timeout:7000});
  return page;
 }
 async function dragBetween(page,startSel,endSel){
@@ -31,18 +40,22 @@ async function run(){
  try{
   let page=await start(browser,0,0);
   await dragBetween(page,'[data-testid="sheet-cell-B2"]','[data-testid="sheet-cell-C2"]');
+  await page.waitForFunction(()=>document.querySelector('[data-testid="sheet-formula-bar"]')?.value==="=B2*C2",null,{timeout:6500});
   const formula=await page.getByTestId("sheet-formula-bar").inputValue();
   assert.equal(formula,"=B2*C2","Old B2/C2 tutorial drag lost its arithmetic: "+formula);
   assert.match(await page.getByTestId("verified-count").innerText(),/1\/3 VERIFIED/);
   await page.getByTestId("total-0").click();
   await dragBetween(page,'[data-testid="fill-handle-0"]','[data-testid="sheet-cell-D4"]');
+  await page.waitForFunction(()=>document.querySelector('[data-testid="verified-count"]')?.textContent?.includes("3/3"),null,{timeout:6500});
   assert.match(await page.getByTestId("verified-count").innerText(),/3\/3 VERIFIED/,"Original D2→D4 fill-down broken");
   console.log("FIRST_REPORT_DRAG_RIGHT_AND_DOWN_PASS");
   await page.close();
   page=await start(browser,2,0);
   await dragBetween(page,'[data-testid="sheet-cell-B3"]','[data-testid="sheet-cell-C3"]');
+  await page.waitForFunction(()=>document.querySelector('[data-testid="sheet-formula-bar"]')?.value==="=B3",null,{timeout:6500});
   assert.equal(await page.getByTestId("sheet-formula-bar").inputValue(),"=B3","Advanced drag must insert a reference without choosing an operation");
   await page.getByTestId("formula-operators").getByRole("button",{name:"−"}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-testid="sheet-formula-bar"]')?.value==="=B3-",null,{timeout:6500});
   assert.equal(await page.getByTestId("sheet-formula-bar").inputValue(),"=B3-");
   await page.getByTestId("total-1").fill("=B3-C3");
   await page.getByTestId("total-1").press("Enter");
@@ -54,6 +67,7 @@ async function run(){
   await page.getByTestId("total-0").press("Enter");
   await page.getByTestId("total-0").click();
   await dragBetween(page,'[data-testid="fill-handle-0"]','[data-testid="sheet-cell-D4"]');
+  await page.waitForFunction(()=>document.querySelector('[data-testid="total-2"]')?.value!=="",null,{timeout:6500});
   const count=await page.getByTestId("verified-count").innerText();
   assert.match(count,/1\/4 VERIFIED/,"Advanced copying one formula must not solve other operations: "+count);
   await page.getByTestId("total-1").fill("=B3-C3");
