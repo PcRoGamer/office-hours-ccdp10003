@@ -21,3 +21,20 @@
 .excel-sheet:has(.sheet-operations) .sheet-tab{min-height:25px}
 .excel-sheet:has(.sheet-operations) .excel-hint{font:700 9px 'DM Mono',monospace;letter-spacing:0}
 @media(max-width:1000px){.excel-sheet .sheet-operations button{padding:3px 4px;min-width:22px}.excel-sheet .sheet-ledger{gap:5px}.excel-sheet .sheet-ledger b{min-width:125px}}
+
+/* Fix discovered in actual 1440x900 screenshots: the fourth row could scroll
+   the workbook's ribbon above the window. Keep editing tools visible and
+   compress row padding rather than clipping essential UI. */
+.excel-sheet:has(.sheet-operations){overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#7aafa4 #e9f3e9}
+.excel-sheet:has(.sheet-operations) .sheet-ribbon{position:sticky;top:0;z-index:30;flex:0 0 29px;height:29px!important;background:linear-gradient(#fff,#dfece1)}
+.excel-sheet:has(.sheet-operations) .sheet-name{position:sticky;top:29px;z-index:29;flex:0 0 32px;height:32px!important;background:#f2f8ed}
+.excel-sheet:has(.sheet-operations) .sheet-brief,.excel-sheet:has(.sheet-operations) .sheet-ledger,.excel-sheet:has(.sheet-operations) .sheet-bottom,.excel-sheet:has(.sheet-operations) .sheet-policy,.excel-sheet:has(.sheet-operations) .policy-confirmed,.excel-sheet:has(.sheet-operations) .sheet-tab{flex-shrink:0}
+.excel-sheet:has(.sheet-operations) .sheet-cells{flex-shrink:0;margin:0}
+.excel-sheet:has(.sheet-operations) .sheet-cells tbody td{height:34px!important;padding:2px 5px!important}
+.excel-sheet:has(.sheet-operations) .sheet-cells thead th{height:26px!important;padding:2px 5px 4px!important}
+.excel-sheet:has(.sheet-operations) .sheet-cells tbody .sheet-target input{min-height:26px;height:26px!important;padding:2px 5px!important}
+.excel-sheet:has(.sheet-operations) .sheet-row-label{min-height:24px}
+.excel-sheet:has(.sheet-operations) .sheet-brief{min-height:35px!important;padding:5px 9px!important}
+.excel-sheet:has(.sheet-operations) .sheet-ledger{padding:3px 8px}
+.excel-sheet:has(.sheet-operations) .sheet-bottom{min-height:48px;padding:6px 11px!important}
+.excel-sheet:has(.sheet-operations) .sheet-tab{height:25px;min-height:25px!important}

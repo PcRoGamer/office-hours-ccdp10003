@@ -51,6 +51,18 @@ async function run(){
    }
    counter=await page.getByTestId("verified-count").innerText();
    assert.match(counter,new RegExp("^"+a.expect+"\/"+a.expect+" VERIFIED"),"valid formulas failed on quest "+a.quest+": "+counter);
+
+   if(a.quest>0){
+     const bar=await page.locator(".sheet-ribbon").boundingBox();
+     const namebar=await page.locator(".sheet-name").boundingBox();
+     const area=await page.locator(".os-app-body").boundingBox();
+     assert(bar&&namebar&&area,"Missing workbook geometry");
+     assert(bar.y>=area.y-3&&bar.y+bar.height<=area.y+area.height,
+       "Workbook ribbon clipped after editing row 5: "+JSON.stringify({bar,area}));
+     assert(namebar.y>=bar.y+bar.height-4,
+       "Formula bar obscures ribbon: "+JSON.stringify({bar,namebar}));
+     console.log("WORKBOOK_LAYOUT_PASS",a.quest+1,JSON.stringify({ribbonY:bar.y,areaY:area.y}));
+   }
    if(a.policy){
      await page.getByTestId("policy-decision").waitFor();
      await page.getByTestId("policy-choice-"+a.policy).click();
