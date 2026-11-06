@@ -1,0 +1,22 @@
+name: Workday preview smoke
+on:
+  push:
+    branches: [work/office-apps-notifications-20261106, main]
+    paths: [workday.html, qa/workday-preview.test.cjs, .github/workflows/workday-preview.yml]
+  workflow_dispatch:
+jobs:
+  browser-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save playwright@1.58.2
+      - run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/office-workday.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/workday.html >/dev/null && exit 0; sleep 1; done
+          exit 1
+      - run: node qa/workday-preview.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/workday.html
