@@ -1,0 +1,45 @@
+/* THREE-ROW WORKBOOK / concise operation picker.
+   Challenge is choosing a relationship, not typing formula syntax. */
+.excel-sheet .sheet-choose{
+ display:flex;align-items:center;gap:10px;min-height:49px;
+ padding:5px 10px;background:#edf6e8;border-top:1px solid #b5cbb4;
+ border-bottom:1px solid #93b9a0;color:#2a554a
+}
+.excel-sheet .sheet-choose-context{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.excel-sheet .sheet-choose-context strong{
+ font:900 13px/1.1 'Barlow Condensed',Arial,sans-serif;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.excel-sheet .sheet-choose-context small{
+ font:500 11px/1.2 'Outfit',system-ui,sans-serif;color:#637c70;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.excel-sheet .sheet-choose-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.excel-sheet .operation-choice{
+ display:flex;gap:5px;align-items:center;justify-content:center;
+ min-width:75px;min-height:36px;padding:4px 7px;border:1px solid #8caf96;
+ border-radius:4px;background:#fffdf4;box-shadow:0 2px 0 #91a99555;
+ color:#235448;cursor:pointer;font-family:'Outfit',system-ui,sans-serif
+}
+.excel-sheet .operation-choice b{font:bold 17px/1 Arial,sans-serif;min-width:15px;text-align:center}
+.excel-sheet .operation-choice span{font-weight:800;font-size:9px;letter-spacing:.015em}
+.excel-sheet .operation-choice:hover,.excel-sheet .operation-choice:focus-visible{
+ background:#d1ecd7;border-color:#398c60;outline:2px solid #398c60
+}
+.excel-sheet .operation-choice:active{transform:translateY(1px);box-shadow:none}
+.excel-sheet:has(.sheet-choose) .sheet-brief{padding:7px 9px;min-height:46px}
+.excel-sheet:has(.sheet-choose) .sheet-cells td{height:42px}
+.excel-sheet:has(.sheet-choose) .sheet-bottom{padding:8px 10px}
+.excel-sheet:has(.sheet-choose) .sheet-ribbon{height:35px}
+.excel-sheet:has(.sheet-choose) .sheet-name{height:32px}
+.excel-sheet:has(.sheet-choose) .sheet-cells input{min-height:27px}
+.os-window.sheet-split .excel-sheet .sheet-choose{gap:4px;padding:4px 5px}
+.os-window.sheet-split .excel-sheet .operation-choice{gap:2px;min-width:52px;padding:4px}
+.os-window.sheet-split .excel-sheet .operation-choice span{font-size:8px}
+@media(max-width:750px){
+ .excel-sheet .sheet-choose{gap:4px;padding:4px 6px}
+ .excel-sheet .operation-choice{min-width:50px;padding:4px;gap:2px}
+ .excel-sheet .operation-choice span{font-size:8px}
+ .excel-sheet .sheet-choose-context small{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.excel-sheet .operation-choice{transition:none}}
