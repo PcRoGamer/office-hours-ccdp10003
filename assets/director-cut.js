@@ -133,7 +133,7 @@
       <p>The facts are fixed. Change what the company counts, and watch its verdict change.</p></div>
       <div class="dc-calibration"><div class="dc-algorithm-screen"><div class="dc-algorithm-label">ASTER / EMPLOYEE EVALUATION MODEL <span>LIVE</span></div>
         <div class="dc-model-face" aria-hidden="true"><span class="dc-face-eye"></span><span class="dc-face-eye"></span><span class="dc-face-mouth"></span></div>
-        <span class="dc-eval-label">EMPLOYEE #001 · CURRENT VERDICT</span><strong class="dc-eval-grade" data-testid="director-grade">${grade}</strong>
+        <span class="dc-eval-label">EMPLOYEE #001 · CURRENT VERDICT</span><strong class="dc-eval-grade" data-testid="director-grade">${grade}</strong><span class="dc-model-number" data-testid="director-index">MODEL INDEX ${Math.round(score)} / 100</span>
         <div class="dc-model-stamp">${signed?'POLICY CERTIFIED':grade==='A+'?'EXCEEDING TARGET':'UNDER REVIEW'}</div>
         <p class="dc-result-narrative">${signed?'The scoring rule has been recorded. Your decisions still happened.':(!countPeople&&!countFocus?'The system currently counts finished reports. Nothing else.':'The same shift is being evaluated under a different rule.')}</p>
       </div><div class="dc-rules"><div class="dc-rule-head"><strong>WHAT SHOULD COUNT?</strong><small>RECALIBRATE THE MACHINE</small></div>
