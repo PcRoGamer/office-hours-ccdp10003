@@ -22,6 +22,8 @@ async function main(){
   const page=mid.page;
   await page.locator(".dc-incoming").waitFor({timeout:20000});
   await page.screenshot({path:"qa-artifacts/01-incoming.png",animations:"disabled"});
+  await page.waitForFunction(()=>typeof window.__officeDirectorPlay==="function");
+  await page.evaluate(()=>{const original=window.__officeDirectorPlay;window.__directorSoundLog=[];window.__officeDirectorPlay=cue=>{window.__directorSoundLog.push(cue);original(cue)}});
   await page.locator("[data-dc=open]").click();
   await page.locator(".dc-track").waitFor();
   await page.screenshot({path:"qa-artifacts/02-evidence-game.png",animations:"disabled"});
@@ -45,7 +47,9 @@ async function main(){
   assert.equal(state.teamTrust,62,"The story action must change actual game mechanics");
   assert.equal(state.kpiPressure,4,"The story action must have a real cost");
   assert.equal(mid.errors.length,0,mid.errors.join(" | "));
-  console.log("MIDPOINT_MOUSE_PRECISION_AND_CONSEQUENCES_PASS");
+  const cues=await page.evaluate(()=>window.__directorSoundLog);
+  assert(cues.includes("select")&&cues.includes("success")&&cues.includes("jobClear"),"Story scenes must use original game audio cues: "+cues.join(","));
+  console.log("MIDPOINT_MOUSE_PRECISION_AND_CONSEQUENCES_PASS",cues);
   await page.close();
   const finish=await setup(browser,saved(6,true));
   const end=finish.page;
