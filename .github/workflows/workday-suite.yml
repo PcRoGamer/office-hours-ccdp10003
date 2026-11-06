@@ -20,6 +20,7 @@ jobs:
           node-version: '22'
       - run: npm install --no-save playwright@1.58.2
       - run: node --check assets/workday-suite.js
+      - run: node --check qa/workday-full.test.cjs
       - name: Serve the unmodified 2D game and expanded Workday edition
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/workday.log 2>&1 &
