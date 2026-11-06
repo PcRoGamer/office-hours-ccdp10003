@@ -22,6 +22,10 @@ jobs:
       - run: node qa/playful-workbook.test.cjs
         env:
           TEST_BASE_URL: http://127.0.0.1:4173/
+      - name: Play complete six-report shift
+        run: node qa/playful-campaign.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
