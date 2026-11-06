@@ -11,7 +11,7 @@ async function setup(browser,gameState,viewport={width:1440,height:900}){
  await page.addInitScript(g=>{localStorage.setItem("office-hours-started-v3","yes");localStorage.setItem("office-hours-game-state-v3",JSON.stringify(g));localStorage.removeItem("office-hours-director-v1")},gameState);
  const r=await page.goto(base+"director.html",{waitUntil:"domcontentloaded",timeout:45000});assert.equal(r.status(),200);
  const resume=page.getByRole("button",{name:/RESUME SHIFT/});
- if(await resume.count())await resume.click();
+ if(!gameState.won&&await resume.count())await resume.click();
  await page.locator("#oh-director-root").waitFor({timeout:30000});
  return {page,errors};
 }
