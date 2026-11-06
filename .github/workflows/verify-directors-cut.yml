@@ -1,7 +1,7 @@
 name: Director's Cut visual & gameplay QA
 on:
   push:
-    branches: [work/shift-file-directors-cut-20261106]
+    branches: [main, work/shift-file-directors-cut-20261106, work/director-audio-story-20261106]
   workflow_dispatch:
 jobs:
   browser-review:

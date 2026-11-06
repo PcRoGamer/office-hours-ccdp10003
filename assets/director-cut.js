@@ -10,6 +10,8 @@
   let state={...initial(),...(read(D)||{})},mode='idle',host=null,lastTick='',drag=null;
   const escapeHTML=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const persist=()=>{try{localStorage.setItem(D,JSON.stringify(state))}catch{}};
+  // Share the native soundtrack and its existing mute preference; no second audio engine.
+  const sound=cue=>{try{window.__officeDirectorPlay?.(cue)}catch{}};
   const game=()=>read(K);
   const getHost=()=>{
     const anchor=document.fullscreenElement||document.querySelector('.office-game')||document.body;
@@ -71,6 +73,7 @@
   }
   function intercept(){
     if(!drag)return;
+    sound('warn');
     drag=null;state.intercepts=(state.intercepts||0)+1;persist();
     const track=host.querySelector('.dc-track');track?.classList.remove('dc-is-dragging');track?.classList.add('dc-intercepted');
     const p=host.querySelector('.dc-packet');if(p){p.style.left='20px';p.style.top='50%';p.style.transform='translateY(-50%)';}
@@ -98,7 +101,7 @@
       if(traps.some(t=>overlaps(pr,t.getBoundingClientRect(),10))){try{packet.releasePointerCapture(e.pointerId)}catch{};intercept();return;}
       if(overlaps(pr,tr,18)){
         try{packet.releasePointerCapture(e.pointerId)}catch{};
-        drag=null;track.classList.remove('dc-is-dragging');mode='decision';renderEvidence(true);
+        drag=null;track.classList.remove('dc-is-dragging');sound('success');mode='decision';renderEvidence(true);
       }
     });
     packet.addEventListener('pointerup',e=>{if(!drag||drag.id!==e.pointerId)return;drag=null;track.classList.remove('dc-is-dragging');});
@@ -106,6 +109,7 @@
   }
   function makeChoice(which){
     if(!['staff','board'].includes(which))return;
+    sound(which==='staff'?'jobClear':'select');
     state.midDone=true;state.midChoice=which;state.deferred=false;persist();
     if(typeof window.__officeDirectorDispatch==='function')window.__officeDirectorDispatch({type:'DIRECTOR_EVIDENCE',choice:which});
     pauseOverlay();getHost();notify(which==='staff'?'SECURE DELIVERY CONFIRMED · MIRA HAS THE FILE':'CORPORATE ARCHIVE UPDATED · BONUS RECORDED');
@@ -149,18 +153,18 @@
     bind();
   }
   function launchFinal(){mode='final';activateOverlay();finalReview(!!state.finalChoice)}
-  function chooseFinal(){state.finalChoice='output'+(state.countFocus?'+focus':'')+(state.countPeople?'+people':'');state.finalSeen=true;persist();finalReview(true)}
+  function chooseFinal(){sound('jobClear');state.finalChoice='output'+(state.countFocus?'+focus':'')+(state.countPeople?'+people':'');state.finalSeen=true;persist();finalReview(true)}
   function bind(){
     if(!host)return;
     host.querySelectorAll('[data-dc]').forEach(el=>el.addEventListener('click',e=>{
       const key=el.getAttribute('data-dc');
-      if(key==='open'){seeFile();return}
+      if(key==='open'){sound('select');seeFile();return}
       if(key==='later'){promptLater();return}
       if(key==='close'){if(mode==='final'&&!state.finalSeen){state.finalSeen=true;persist()}pauseOverlay();return}
-      if(key==='accessible'){mode='decision';renderEvidence(true);return}
+      if(key==='accessible'){sound('success');mode='decision';renderEvidence(true);return}
       if(key==='staff'||key==='board'){makeChoice(key);return}
-      if(key==='toggle-focus'){state.countFocus=!state.countFocus;persist();finalReview(false);return}
-      if(key==='toggle-people'){state.countPeople=!state.countPeople;persist();finalReview(false);return}
+      if(key==='toggle-focus'){sound('tap');state.countFocus=!state.countFocus;persist();finalReview(false);return}
+      if(key==='toggle-people'){sound('tap');state.countPeople=!state.countPeople;persist();finalReview(false);return}
       if(key==='seal'){chooseFinal();return}
       if(key==='reopen'){seeFile();return}
       if(key==='viewfinal'){launchFinal();return}
