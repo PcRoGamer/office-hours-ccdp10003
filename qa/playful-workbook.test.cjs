@@ -59,11 +59,12 @@ async function main(){
      assert.match(await p.getByTestId("choose-clue").innerText(),/Not quite/);
     }
     await pick(p,1,operations[quest][1]);
-    await pick(p,2,operations[quest][2]);
-    assert.match(await p.getByTestId("verified-count").innerText(),/3\/3 VERIFIED/,"Report not completed");
     const row=await p.locator(".sheet-choose").boundingBox();
     const area=await p.locator(".os-app-body").boundingBox();
     assert(row&&area&&row.y>=area.y-3&&row.y+row.height<area.y+area.height-4,"Operator controls clipped");
+    await p.screenshot({path:"qa-playful-screens/report-"+(quest+1)+"-choose.png",animations:"disabled",timeout:20000});
+    await pick(p,2,operations[quest][2]);
+    assert.match(await p.getByTestId("verified-count").innerText(),/3\/3 VERIFIED/,"Report not completed");
    }
    if(quest===3||quest===4){
     await p.getByTestId("policy-decision").waitFor();
