@@ -1,7 +1,7 @@
 name: Deep workbook integration QA
 on:
   push:
-    branches: [work/deeper-spreadsheets-20261106]
+    branches: [work/deeper-spreadsheets-20261106, main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -26,6 +26,23 @@ jobs:
       - run: node qa/deep-workbook.test.cjs
         env:
           TEST_BASE_URL: http://127.0.0.1:4173/
+      - name: Complete full player journey
+        run: node qa/deep-campaign.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - name: Verify Pages serves the published bundle
+        if: github.ref == 'refs/heads/main'
+        run: |
+          for i in $(seq 1 40); do
+            code=$(curl -Ls --max-time 15 'https://pcrogamer.github.io/office-hours-ccdp10003/?build='"${GITHUB_SHA}" || true)
+            if echo "$code" | grep -q 'index-DeepWorkbook-20261106.js'; then
+              echo "PAGES_DEPLOYED_PASSED"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "PAGES_DEPLOYMENT_NOT_VERIFIED"
+          exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
