@@ -25,6 +25,10 @@ async function main(){
   await page.locator("[data-dc=open]").click();
   await page.locator(".dc-track").waitFor();
   await page.screenshot({path:"qa-artifacts/02-evidence-game.png",animations:"disabled"});
+  await page.locator("[data-dc=close]").click();
+  await page.locator(".dc-recurring").waitFor({timeout:5000});
+  await page.locator(".dc-recurring").click();
+  await page.locator(".dc-track").waitFor();
   const packet=page.locator(".dc-packet"),track=page.locator(".dc-track"),traps=page.locator(".dc-trap");
   const pb=await packet.boundingBox(),tb=await track.boundingBox(),p1=await traps.nth(0).boundingBox(),p2=await traps.nth(1).boundingBox();
   assert(pb&&tb&&p1&&p2,"Visible evidence course not rendered");
