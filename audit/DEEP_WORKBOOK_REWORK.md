@@ -10,7 +10,7 @@ The branch `work/deeper-spreadsheets-20261106` changes the **real workbook**, no
 |---|---|---|
 | 1: Reimbursements | Learn the interface | Multiply; source drag; ordinary fill-down |
 | 2: Supply Reconciliation | Handling fee versus returned credit | Multiply, percentage handling fee, subtract, SUM(D2:D3)-D4 |
-| 3: Headcount | Transfers in and transfers out have opposite effects | Add, subtract, SUM(D2:D4) |
+| 3: Headcount | Transfers in and transfers out have opposite effects | Add, subtract, DIVIDE to find staff per shift, then total only the headcount cells |
 | 4: IT renewals | Percentage discount versus fixed setup charge | E3/E4 adjustment cells, ROUND, cross-row sum, followed by licence policy |
 | 5: Campaign audit | Billed fee, percentage surcharge and refund are different | E3 adjustment, grouped arithmetic, SUM, followed by marketing policy |
 | 6: Board pack | Tax, rebate and discount depend on different rules | E2/E3/E4 ledger, ROUND, compound formulas, final reconciled total |

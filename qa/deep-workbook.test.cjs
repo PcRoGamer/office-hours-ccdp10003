@@ -5,7 +5,7 @@ const out=process.env.SCREENSHOT_DIR||"qa-artifacts";fs.mkdirSync(out,{recursive
 const scenarios=[
  {quest:0,expect:3,formulas:["=B2*C2","=B3*C3","=B4*C4"],macroRows:3,extra:false},
  {quest:1,expect:4,formulas:["=B2*C2","=ROUND(B3*C3*1.10,2)","=B4*C4","=SUM(D2:D3)-D4"],macroRows:1,extra:false},
- {quest:2,expect:4,formulas:["=B2+C2","=B3-C3","=B4+C4","=SUM(D2:D4)"],macroRows:1,extra:false},
+ {quest:2,expect:4,formulas:["=B2+C2","=B3-C3","=ROUND(B4/C4,1)","=SUM(D2:D3)+B4"],macroRows:1,extra:false},
  {quest:3,expect:4,formulas:["=B2*C2","=ROUND(B3*C3*(1-E3/100),2)","=B4*C4+E4","=SUM(D2:D4)"],macroRows:1,extra:true,policy:"protect"},
  {quest:4,expect:4,formulas:["=B2+C2","=ROUND((B3+C3)*(1+E3/100),2)","=B4-C4","=SUM(D2:D4)"],macroRows:1,extra:true,policy:"disclose"},
  {quest:5,expect:4,formulas:["=ROUND(B2*C2*(1+E2/100),2)","=B3*C3-E3","=ROUND(B4*C4*(1-E4/100),2)","=SUM(D2:D4)"],macroRows:1,extra:true}
@@ -40,7 +40,7 @@ async function run(){
      const wrong=page.getByTestId("total-1");
      await wrong.fill("=B3*C3");
      await wrong.press("Enter");
-     if(a.quest===1||a.quest===3||a.quest===4||a.quest===5){
+     if(a.quest>0){
        counter=await page.getByTestId("verified-count").innerText();assert.match(counter,/1\/4 VERIFIED/,"wrong operation passed");
      }
    }
