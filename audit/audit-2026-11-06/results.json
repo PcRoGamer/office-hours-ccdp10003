@@ -1,13 +1,13 @@
 {
-  "url": "https://pcrogamer.github.io/office-hours-ccdp10003/?e2e=9f56187",
+  "url": "http://127.0.0.1:4173/",
   "steps": [
     {
       "step": "screenshot",
       "detail": {
         "file": "01-welcome-title.png",
-        "bytes": 398107
+        "bytes": 397992
       },
-      "at": "2026-11-05T23:56:46.500Z"
+      "at": "2026-11-06T00:14:21.772Z"
     },
     {
       "step": "first-play-research-integrated",
@@ -16,55 +16,55 @@
         "visible": true,
         "intro": "WHY THIS SHIFT · WHY NOW?\n\nWe chose ordinary paperwork because deadlines and pings feel familiar. Games make chores feel like"
       },
-      "at": "2026-11-05T23:56:46.933Z"
+      "at": "2026-11-06T00:14:22.063Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "02-first-inbox.png",
-        "bytes": 365761
+        "bytes": 359587
       },
-      "at": "2026-11-05T23:56:47.551Z"
+      "at": "2026-11-06T00:14:22.884Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "03-mail-maximised.png",
-        "bytes": 299087
+        "bytes": 261799
       },
-      "at": "2026-11-05T23:56:48.003Z"
+      "at": "2026-11-06T00:14:23.635Z"
     },
     {
       "step": "window-controls",
       "detail": {
-        "original": 992.0291137695312,
-        "maximised": 1249.248275756836
+        "original": 1126.3359375,
+        "maximised": 1417.5
       },
-      "at": "2026-11-05T23:56:48.043Z"
+      "at": "2026-11-06T00:14:23.669Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "04-inbox-after-misfile.png",
-        "bytes": 360060
+        "bytes": 292460
       },
-      "at": "2026-11-05T23:56:48.285Z"
+      "at": "2026-11-06T00:14:23.913Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "05-source-drag-first-formula.png",
-        "bytes": 301257
+        "bytes": 272574
       },
-      "at": "2026-11-05T23:56:48.762Z"
+      "at": "2026-11-06T00:14:24.435Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "06-wrong-formula-recovery.png",
-        "bytes": 311648
+        "bytes": 267874
       },
-      "at": "2026-11-05T23:56:48.998Z"
+      "at": "2026-11-06T00:14:24.664Z"
     },
     {
       "step": "report-1",
@@ -74,31 +74,31 @@
         "xp": 70,
         "source": "https://doi.org/10.1108/JWL-09-2024-0193"
       },
-      "at": "2026-11-05T23:56:50.313Z"
+      "at": "2026-11-06T00:14:25.989Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "07-report-1.png",
-        "bytes": 305460
+        "bytes": 294841
       },
-      "at": "2026-11-05T23:56:50.471Z"
+      "at": "2026-11-06T00:14:26.150Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "08-ad-interruption.png",
-        "bytes": 342614
+        "bytes": 345861
       },
-      "at": "2026-11-05T23:56:51.497Z"
+      "at": "2026-11-06T00:14:27.158Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "09-shop-after-purchase.png",
-        "bytes": 350228
+        "bytes": 339873
       },
-      "at": "2026-11-05T23:56:52.013Z"
+      "at": "2026-11-06T00:14:27.664Z"
     },
     {
       "step": "report-2",
@@ -108,23 +108,23 @@
         "xp": 145,
         "source": "https://doi.org/10.1145/1357054.1357072"
       },
-      "at": "2026-11-05T23:56:53.597Z"
+      "at": "2026-11-06T00:14:29.251Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "10-report-2.png",
-        "bytes": 303926
+        "bytes": 290943
       },
-      "at": "2026-11-05T23:56:53.761Z"
+      "at": "2026-11-06T00:14:29.374Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "11-spam-reading.png",
-        "bytes": 348585
+        "bytes": 329494
       },
-      "at": "2026-11-05T23:56:54.023Z"
+      "at": "2026-11-06T00:14:29.552Z"
     },
     {
       "step": "report-3",
@@ -134,23 +134,23 @@
         "xp": 237,
         "source": "https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/"
       },
-      "at": "2026-11-05T23:56:55.587Z"
+      "at": "2026-11-06T00:14:31.082Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "12-report-3.png",
-        "bytes": 300405
+        "bytes": 285863
       },
-      "at": "2026-11-05T23:56:55.754Z"
+      "at": "2026-11-06T00:14:31.214Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "13-boss-first-start.png",
-        "bytes": 283678
+        "bytes": 307470
       },
-      "at": "2026-11-05T23:56:56.053Z"
+      "at": "2026-11-06T00:14:31.513Z"
     },
     {
       "step": "boss-first",
@@ -158,30 +158,30 @@
         "turns": 4,
         "hp": 100
       },
-      "at": "2026-11-05T23:56:56.587Z"
+      "at": "2026-11-06T00:14:32.107Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "14-boss-first-victory.png",
-        "bytes": 308112
+        "bytes": 349024
       },
-      "at": "2026-11-05T23:56:56.757Z"
+      "at": "2026-11-06T00:14:32.303Z"
     },
     {
       "step": "resume-after-boss",
       "detail": {
         "quest": 3
       },
-      "at": "2026-11-05T23:56:56.955Z"
+      "at": "2026-11-06T00:14:32.744Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "15-arcade-memory.png",
-        "bytes": 288724
+        "bytes": 260388
       },
-      "at": "2026-11-05T23:57:02.717Z"
+      "at": "2026-11-06T00:14:34.247Z"
     },
     {
       "step": "report-4",
@@ -191,15 +191,15 @@
         "xp": 452,
         "source": "https://www.stanleyparable.com/"
       },
-      "at": "2026-11-05T23:57:04.296Z"
+      "at": "2026-11-06T00:14:35.794Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "16-report-4.png",
-        "bytes": 296558
+        "bytes": 269045
       },
-      "at": "2026-11-05T23:57:04.451Z"
+      "at": "2026-11-06T00:14:35.916Z"
     },
     {
       "step": "report-5",
@@ -209,15 +209,15 @@
         "xp": 542,
         "source": "https://canvas.lms.unimelb.edu.au/courses/239834/modules"
       },
-      "at": "2026-11-05T23:57:06.069Z"
+      "at": "2026-11-06T00:14:37.447Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "17-report-5.png",
-        "bytes": 303429
+        "bytes": 290188
       },
-      "at": "2026-11-05T23:57:06.229Z"
+      "at": "2026-11-06T00:14:37.578Z"
     },
     {
       "step": "report-6",
@@ -227,23 +227,23 @@
         "xp": 637,
         "source": "https://ianbogost.com/books/persuasive-games/"
       },
-      "at": "2026-11-05T23:57:07.793Z"
+      "at": "2026-11-06T00:14:39.099Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "18-report-6.png",
-        "bytes": 302298
+        "bytes": 290702
       },
-      "at": "2026-11-05T23:57:07.931Z"
+      "at": "2026-11-06T00:14:39.223Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "19-boss-final-start.png",
-        "bytes": 299665
+        "bytes": 327486
       },
-      "at": "2026-11-05T23:57:08.161Z"
+      "at": "2026-11-06T00:14:39.446Z"
     },
     {
       "step": "boss-final",
@@ -251,15 +251,15 @@
         "turns": 7,
         "hp": 100
       },
-      "at": "2026-11-05T23:57:08.770Z"
+      "at": "2026-11-06T00:14:40.055Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "20-final-victory-reflection.png",
-        "bytes": 210611
+        "bytes": 118619
       },
-      "at": "2026-11-05T23:57:08.882Z"
+      "at": "2026-11-06T00:14:40.145Z"
     },
     {
       "step": "completed",
@@ -272,15 +272,15 @@
         "adsIgnored": 1,
         "malwareOpened": 0
       },
-      "at": "2026-11-05T23:57:08.884Z"
+      "at": "2026-11-06T00:14:40.148Z"
     },
     {
       "step": "screenshot",
       "detail": {
         "file": "21-reset-ready.png",
-        "bytes": 538576
+        "bytes": 584365
       },
-      "at": "2026-11-05T23:57:09.206Z"
+      "at": "2026-11-06T00:14:40.556Z"
     },
     {
       "step": "COMPREHENSIVE_FOCUS_PATH_PASS",
@@ -288,7 +288,7 @@
         "screenshots": 21,
         "browserErrors": 0
       },
-      "at": "2026-11-05T23:57:09.207Z"
+      "at": "2026-11-06T00:14:40.556Z"
     }
   ],
   "errors": []

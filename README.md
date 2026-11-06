@@ -9,10 +9,10 @@ A playable 3D office-survival game about gamified work, attention, advertisement
 **Full E2E and rubric audit:** https://pcrogamer.github.io/office-hours-ccdp10003/audit/
 
 ## The game
-One click to clock in. Six email-driven reports, two bosses, malware traps, shop upgrades, a calculator, arcade diversions, and an ending. Everything happens through a fictional Windows-era OS projected onto a physical 3D monitor. No forced research essay or tutorial.
+One click to clock in. AsterOS transitions from the physical 3D monitor into true native browser fullscreen, with a sharp, viewport-filling desktop and an Office View button to return to the room. Six reports, two bosses, malware traps, shop upgrades, arcade diversions, and a replayable ending. No forced research essay or tutorial.
 
 ## Controls
-- Click CLOCK IN to start your shift, or click the monitor to focus on the desktop.
+- Click CLOCK IN to enter native fullscreen. Use OFFICE VIEW in the taskbar or Escape to return to the 3D office; RESUME SHIFT re-enters. If browser fullscreen is blocked, AsterOS still fills the browser viewport.
 - Postbox: open the latest assignment and its spreadsheet.
 - Department Sheets: type 3*40 or =B2*C2 in the Total cell, then press Enter. Drag B2 across C2 to calculate D2, then drag the green D2 corner handle down to fill D3 and D4. You can also double-click the fill handle, press Ctrl+D, or use the guided FILL DOWN shortcut. Addition =B2+C2 and SUM(B2:C2) also work.
 - Calculator: use the keypad or keyboard and insert the answer into the selected spreadsheet cell.
