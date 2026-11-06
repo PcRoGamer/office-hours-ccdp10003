@@ -1,0 +1,23 @@
+/* Deep-workbook follow-on. Designed for AsterOS's 1024x600 logical canvas.
+   Original ledger, controls, and game windows are retained. */
+.excel-sheet:has(.sheet-operations) .sheet-ribbon{min-height:29px;padding-top:4px;padding-bottom:4px}
+.excel-sheet:has(.sheet-operations) .sheet-name{min-height:32px;display:flex;align-items:center;flex-wrap:nowrap;gap:5px}
+.excel-sheet .sheet-operations{display:flex;align-items:center;justify-content:flex-end;flex-wrap:nowrap;gap:3px;margin-left:auto}
+.excel-sheet .sheet-operations button{padding:4px 6px;min-width:25px;min-height:24px;cursor:pointer;background:#e2eee4;color:#23564a;border:1px solid #a0b9a9;font:800 10px 'DM Mono',monospace;border-radius:3px}
+.excel-sheet .sheet-operations button:hover,.excel-sheet .sheet-operations button:focus-visible{background:#c7e5cf;border-color:#327b53;outline:1px solid #327b53}
+.excel-sheet .sheet-ledger{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;background:#e8eddb;border-top:1px solid #c4cdae;border-bottom:1px solid #c4cdae;padding:5px 9px;color:#345245;font:700 10px 'DM Mono',monospace}
+.excel-sheet .sheet-ledger b{color:#6d603d;min-width:162px;font:800 10px/1.15 'Barlow Condensed',sans-serif;letter-spacing:.02em;flex:1}
+.excel-sheet .sheet-ledger span{background:#fbfcf4;border:1px solid #c0c6ad;padding:3px 6px;white-space:nowrap;font:700 10px 'DM Mono',monospace}
+.excel-sheet .sheet-row-label{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;max-width:100%;min-height:25px;text-align:left;gap:1px}
+.excel-sheet .sheet-row-label>span{font:800 10px/1.1 'Outfit',sans-serif;color:#224c4e;overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}
+.excel-sheet .sheet-row-label>small{font:500 9px/1.1 'Outfit',sans-serif;color:#6b706c;overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}
+.excel-sheet:has(.sheet-operations) .sheet-cells td{height:34px}
+.excel-sheet:has(.sheet-operations) .sheet-cells th{height:29px}
+.excel-sheet:has(.sheet-operations) .sheet-target input{height:29px}
+.excel-sheet:has(.sheet-operations) .sheet-brief{padding-top:7px;padding-bottom:7px;min-height:41px;gap:6px}
+.excel-sheet:has(.sheet-operations) .sheet-brief span{line-height:1.23}
+.excel-sheet:has(.sheet-operations) .sheet-policy{padding:5px 8px}
+.excel-sheet:has(.sheet-operations) .policy-options button{min-height:56px;padding:5px 8px}
+.excel-sheet:has(.sheet-operations) .sheet-tab{min-height:25px}
+.excel-sheet:has(.sheet-operations) .excel-hint{font:700 9px 'DM Mono',monospace;letter-spacing:0}
+@media(max-width:1000px){.excel-sheet .sheet-operations button{padding:3px 4px;min-width:22px}.excel-sheet .sheet-ledger{gap:5px}.excel-sheet .sheet-ledger b{min-width:125px}}

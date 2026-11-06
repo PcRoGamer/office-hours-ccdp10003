@@ -1,0 +1,33 @@
+name: Deep workbook integration QA
+on:
+  push:
+    branches: [work/deeper-spreadsheets-20261106]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  run-browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: node --check assets/index-DeepWorkbook-20261106.js
+      - name: Serve candidate site
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/office-http.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/office-http.log
+          exit 1
+      - run: node qa/deep-workbook.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workbook-browser-screenshots
+          path: qa-artifacts/
