@@ -1,0 +1,36 @@
+name: Office Hours Workday (2D) full campaign
+on:
+  push:
+    branches: [main, work/office-suite-notifications-20261106]
+    paths:
+      - 'workday.html'
+      - 'assets/workday-suite.js'
+      - 'assets/workday-suite.css'
+      - 'qa/workday-full.test.cjs'
+      - '.github/workflows/workday-suite.yml'
+  workflow_dispatch:
+jobs:
+  play:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.58.2
+      - run: node --check assets/workday-suite.js
+      - name: Serve the unmodified 2D game and expanded Workday edition
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/workday.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/workday.html >/dev/null && exit 0; sleep 1; done
+          exit 1
+      - name: Full six-task 2D gameplay with apps, evidence, bosses and score
+        run: node qa/workday-full.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workday-browser-screenshots
+          path: qa-workday-screens/
