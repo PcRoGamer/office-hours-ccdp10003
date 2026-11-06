@@ -36,4 +36,16 @@ Formula Auto-Pilot remains a worthwhile early purchase, but in advanced reports 
 
 The growing complexity reinforces the course's temporal-design and game-economy strategies: first the game makes menial work rewarding, then automation removes the boring labour, but interpretation becomes harder. Reports 4–5 distinguish **accurate arithmetic** from **judgment about what to count and who benefits**, which expresses the argument through mechanics rather than an afterword.
 
-**Status:** Experimental branch. Await browser integration tests and real screenshot review. The live main branch is unchanged until verification.
+**Status: Published and browser-verified on the production main branch (6 November 2026).** GitHub Actions verified all six report worksheets, both boss fights in a continuous shift, the B2→C2/D2→D4 tutorial gestures, formula-operator selection, numeric-answer rejection, and the public GitHub Pages bundle. Original browser screenshots are available in [the release gallery](../gallery.html). These tests do not guarantee an academic mark or replace first-time human usability testing.
+
+**Source maintenance note:** The canonical published release includes `assets/index-DeepWorkbook-20261106.js` and `assets/deep-workbook.css`. The separate local Vite/React source checkout on the Windows laptop was not synchronised because its remote-computer connector reached a usage limit. **Do not rebuild and republish the laptop's older source without first porting these workbook changes.** The source-level porting requirements are recorded below and can be implemented when direct source access is restored.
+
+### Port these changes to the editable source before the next Vite rebuild
+
+- `src/gameData.js`: the revised `JOBS` dataset, four-row advanced reports, `solutions`, `rowNotes`, `extraCols` and `autoRows`.
+- `src/sheetLogic.js` (or the existing module that defines the formula evaluator): E-column cell references for per-row adjustment values, and advanced expected-result checks using formula-derived values and actual cell-reference expressions.
+- `src/Spreadsheet.jsx`: reference-only advanced source dragging, formula-operator strip, E-column adjustment ledger, mixed-operation guidance, advanced Auto-Pilot limited to routine entries, and four-row formatting.
+- `src/MissionGuide.jsx`: instructions that adapt to audit reasoning rather than always teaching drag-fill.
+- Workbook CSS: compact 4-row layout, visible row notes, sticky ribbon/formula input and the E ledger. Preserve the first report's original B/C drag and D-handle behaviour.
+
+The branch `work/deeper-spreadsheets-20261106` preserves the incremental development history; `qa/deep-workbook.test.cjs`, `qa/deep-drag.test.cjs` and `qa/deep-campaign.test.cjs` are the release acceptance tests.
