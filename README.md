@@ -14,9 +14,9 @@ One click to clock in. AsterOS transitions from the physical 3D monitor into tru
 ## Controls
 - Click CLOCK IN to enter native fullscreen. Use OFFICE VIEW in the taskbar or Escape to return to the 3D office; RESUME SHIFT re-enters. If browser fullscreen is blocked, AsterOS still fills the browser viewport.
 - Postbox: open the latest assignment and its spreadsheet.
-- Department Sheets: type 3*40 or =B2*C2 in the Total cell, then press Enter. Drag B2 across C2 to calculate D2, then drag the green D2 corner handle down to fill D3 and D4. You can also double-click the fill handle, press Ctrl+D, or use the guided FILL DOWN shortcut. Addition =B2+C2 and SUM(B2:C2) also work.
+- Department Sheets: type 3*40 or =B2*C2 in the Total cell, then press Enter. Drag B2 across C2 to calculate D2, then drag the green D2 corner handle down to fill D3 and D4. You can also double-click the fill handle, press Ctrl+D, or use the guided FILL DOWN shortcut. Report 1 teaches these gestures. Later reports demand subtraction, division, percentage adjustments, ROUND, SUM and cross-row formulas in four-row workbooks.
 - Calculator: use the keypad or keyboard and insert the answer into the selected spreadsheet cell.
-- Shop: spend credits on equipment, defence, healing and performance upgrades. Formula Auto-Pilot costs 85 credits and fills report formulas, not managerial policy choices; entering formulas and dragging are free.
+- Shop: spend credits on equipment, defence, healing and performance upgrades. Formula Auto-Pilot costs 85 credits and prepares routine entries. Reports 2–6 require mixed formulas, percentages and cross-row reconciliation; policy choices remain manual. Dragging and entering formulas are free.
 - After completing Reports 4 and 5, choose how each accurate report is filed. Protecting employees costs credits and builds team backing. Hitting management targets earns credits but increases KPI pressure. These choices change the final boss and ending.
 - Defend against the boss's telegraphed heavy attacks, or risk an OVERLOAD.
 - The first email includes a brief 'why this game, why now' with research sources. Each report reward presents an in-context case note; later notes respond to advertising and policy choices while connecting workplace gamification to game-design scholarship. Personnel Files and Help contain optional deeper evidence.
