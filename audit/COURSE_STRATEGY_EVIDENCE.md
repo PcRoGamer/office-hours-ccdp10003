@@ -20,13 +20,3 @@
 **Playable thesis:** Gamified work can increase engagement, but rules and KPI targets are chosen by someone. The player can accept a bonus and train a harsher algorithm, or sacrifice credits to preserve tools and employee backing. Both paths have mechanical consequences. The game does not claim that its fictional metrics model actual research outcomes.
 
 **Verified limitations:** The full August slide PDFs were not read; do not attribute content within them. Browser E2E tests demonstrate implementation and accessible choices, not the guaranteed academic grade or independent first-time human playtesting.
-
-
-## Current workbook progression and verified course connections (6 November 2026)
-
-- **Scaffolding and temporal progression:** the first workbook explicitly teaches B2/C2 reference dragging and D2→D4 relative formula fill. The second introduces handling fees, credits and a cross-row invoice. The third contrasts transfers into and out of the workforce with a staff-per-shift division problem that must *not* be included in total headcount. Later reports introduce percentage adjustment cells, fixed rebates, tax and reconciled totals. This applies the subject's practical-game-design and temporal-design topics to changing player demands.
-- **Game economy:** the Formula Auto-Pilot upgrade now performs only a routine entry on advanced reports. Earning it reduces clerical work without removing analytical decisions. The tension between convenient automation and the judgement the company still demands is an actual rule of play.
-- **Rule-based critique of productivity:** after the numerical audit, Reports 4 and 5 require the player to decide how the figures are used. Those decisions change credits, staff backing, KPI pressure, the algorithm's final difficulty and an available team intervention. Player actions, rather than end-of-game exposition, carry the argument.
-- **Accessible challenge:** later reports require formula references, mixed operations, `ROUND`, `SUM`, cross-row calculations and percentage adjustments. The player can correct wrong operations. Simply typing a correct final number is insufficient on advanced tasks. The test suite confirms that free manual entry remains viable without purchasing the macro.
-
-**Observed evidence:** the latest production bundle passed six individual Chromium report scenarios, B2→C2 and D2→D4 mouse-gesture regression, advanced arithmetic-operation/numeric-answer guards, and a continuous six-report/two-boss playthrough with zero unhandled browser exceptions. The public gallery includes six real browser captures showing progression. Test success demonstrates functionality, not a guaranteed grade or a human first-play session.
