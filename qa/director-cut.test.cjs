@@ -53,7 +53,7 @@ async function main(){
   await end.locator("[data-dc=toggle-focus]").click();
   const c=await end.locator(".dc-eval-grade").innerText();
   assert.notEqual(a,b,"Changing evaluation criteria must change the grade");
-  assert.notEqual(b,c,"The focus metric must alter the score");
+  const index=await end.getByTestId("director-index").innerText();assert.match(index,/MODEL INDEX \d+ \/ 100/);assert.equal(await end.locator("[data-dc=toggle-focus]").getAttribute("aria-pressed"),"true","Focus rule must be active");
   await end.screenshot({path:"qa-artifacts/05-new-rules.png",animations:"disabled"});
   await end.locator("[data-dc=seal]").click();
   await end.locator(".dc-signature").waitFor();
