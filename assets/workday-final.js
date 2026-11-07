@@ -262,15 +262,27 @@ function annotateConsequences(){
   const outcome=document.createElement('span');const absent=missingEvidence(save.decisions?.[5]);outcome.textContent=`Your shift: ${x.good.length} documented safeguards; ${x.cost.length} target-first choices. ${[...x.good,...x.cost].slice(0,2).join('; ')}. ${absent?'Board blind spot: '+absent.name+' was omitted. '+evidenceBlindspots[absent.id]:''}`;line.appendChild(outcome);const restart=[...end.querySelectorAll('button')].find(b=>/START ANOTHER SHIFT/i.test(b.textContent||''));if(restart&&restart.parentNode)restart.parentNode.insertBefore(line,restart);else end.appendChild(line)
  }
  const reward=document.querySelector('.reward-backdrop');
- if(reward&&!reward.querySelector('.ow-receipt')&&save.reports.length){
-  const entry=save.reports[save.reports.length-1],s=entry.decisions||{};
+ if(reward){
+  const entry=save.reports[save.reports.length-1];
+  const currentQuest=Number(game().quest);
+  const receipt=reward.querySelector('.ow-receipt');
+  // Never show a prior task's receipt on a newly opened reward panel.
+  // The base game's quest advances before this Workday overlay finishes persisting.
+  if(!entry||!Number.isFinite(currentQuest)||entry.quest!==currentQuest-1){
+    receipt?.remove();
+  }else if(!receipt||receipt.dataset.reportQuest!==String(entry.quest)||receipt.dataset.reportCount!==String(save.reports.length)){
+   const s=entry.decisions||{};
   const outcome=entry.quest===1?(s.wellbeing==='truth'&&s.delay==='truth'?'The staff notice now records paid time and workload accurately.':'The notice is filed, but at least one misleading claim remains.'):
    entry.quest===2?(s.applicant==='B'?'Your chosen applicant has demonstrated audit evidence.':'Your chosen applicant has weaker documented reconciliation evidence.'):
    entry.quest===3?(s.risk==='truth'?'The licence memo records the operational cost of the budget decision.':'The budget number is filed without a full statement of operational cost.'):
    entry.quest===4?(s.claim==='truth'&&s.proof==='truth'&&s.conclusion==='truth'?'The board deck includes limitations and a recommendation to examine incentives.':'The presentation amplifies the performance score while leaving out context.'):
    entry.quest===5?(missingEvidence(s)?'The board pack is incomplete by design. Excluded: '+missingEvidence(s).name+'. '+evidenceBlindspots[missingEvidence(s).id]:'The board pack is awaiting three selected records.'):'The report has been filed.';
-  const receipt=document.createElement('div');receipt.className='ow-receipt';receipt.style.cssText='background:#e3f2e9;border-left:3px solid #2a9075;padding:9px 12px;margin:10px auto;color:#2b574b;font:600 11px/1.45 Outfit,Arial,sans-serif;max-width:570px';receipt.textContent='WORKDAY RECORD · '+outcome;
-  const target=reward.querySelector('div');if(target)target.appendChild(receipt)
+   const note=receipt||document.createElement('div');note.className='ow-receipt';
+   note.dataset.reportQuest=String(entry.quest);note.dataset.reportCount=String(save.reports.length);
+   note.style.cssText='background:#e3f2e9;border-left:3px solid #2a9075;padding:9px 12px;margin:10px auto;color:#2b574b;font:600 11px/1.45 Outfit,Arial,sans-serif;max-width:570px';
+   note.textContent='WORKDAY RECORD · '+outcome;
+   if(!receipt){const target=reward.querySelector('div');if(target)target.appendChild(note)}
+  }
  }
 }
 function reconcile(){if(!mount())return;const d=desktop();if(!d)return;
