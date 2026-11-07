@@ -165,3 +165,11 @@
 @media(prefers-reduced-motion:reduce){.ow-impact-bar,.ow-chart-track i{animation:none!important;transition:none!important}}
 /* Confirmation stays away from the next task's submit controls. */
 #oh-director-root .dc-toast{right:16px;bottom:auto;top:52px;max-width:360px;padding:9px 12px;font-size:10px;line-height:1.35;border-width:2px}
+
+/* Optional, reversible baseline inspection for the Workday engagement slide. */
+.ow-chart-audit-row{display:flex;align-items:center;gap:8px;margin:8px 0 0;flex-wrap:wrap}
+.ow-chart-audit-row button{flex:none;padding:7px 10px;border:1px solid #277766;border-radius:3px;background:#e4f4ea;color:#236152;font:850 10px/1.2 'Outfit',Arial,sans-serif;cursor:pointer}
+.ow-chart-audit-row button:hover,.ow-chart-audit-row button:focus-visible{background:#d0ebdf;outline:2px solid #da9c5d;outline-offset:2px}
+.ow-chart-audit-row button[aria-pressed=true]{background:#2d7864;color:#fff}
+.ow-chart-audit-row small{font:600 10px/1.3 'Outfit',Arial,sans-serif;color:#566a68}
+@media(max-width:800px){.ow-chart-audit-row{gap:5px}.ow-chart-audit-row small{font-size:9px}}
