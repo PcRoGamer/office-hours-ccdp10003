@@ -45,7 +45,7 @@ jobs:
               assert 'function atlasPose(' in t
               assert 'characterAtlasReady' in t
           assert Path('arcade.html').read_bytes()==Path('arcade-v3.html').read_bytes()
-          assert not any(bad in a.read_text() for bad in ('<script','<foreignObject','http://','https://'))
+          assert not any(bad in a.read_text() for bad in ('<script','<foreignObject','href=','xlink:href'))
           print('GENERATED_SPRITE_ATLAS_STRUCTURE_PASS')
           PY
           python3 - <<'PY'
