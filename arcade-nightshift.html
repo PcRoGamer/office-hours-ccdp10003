@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QUOTA PANIC · NIGHT SHIFT</title><meta name="description" content="Six fast, ridiculous office microgames. A vicious office arcade with precision, interference, a hostile printer and a rigged performance review.">
+<style>
+:root{color-scheme:dark;--ink:#111c20;--cream:#f3ecde;--gold:#e6b44a;--mint:#24c49c;--red:#df4b37}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#141e21;font-family:'Arial Narrow','Liberation Sans Narrow','Impact',Arial,sans-serif;touch-action:none}
+body{display:block;background:#141e21}
+#wrap{position:fixed;inset:0;width:100vw;height:100dvh;box-shadow:none;border:0;border-radius:0;overflow:hidden}
+canvas{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;outline:none}
+#links{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:15px;pointer-events:none;opacity:.9}
+#links a{pointer-events:auto;font-size:12px;color:#376675;text-decoration:underline;text-underline-offset:3px}
+#help{position:absolute;inset:0;z-index:5;background:#061929db;color:#fff0d3;display:none;align-items:center;justify-content:center;padding:20px}
+#help.show{display:flex}#help article{width:min(670px,94%);max-height:91%;overflow:auto;background:#173746;border:2px solid #89e5cd;border-radius:18px;padding:24px 30px;box-shadow:0 12px 40px #0008}
+#help h2{margin:0 0 10px;color:#f5c376;letter-spacing:-1px;font-size:25px}#help p{line-height:1.5;font-size:14px;margin:10px 0}#help a{color:#93e7d3}#help button{background:#f5bf65;border:0;border-radius:9px;color:#173544;font-weight:900;padding:12px 20px;cursor:pointer}
+#sr{position:absolute;left:-10000px;top:auto;height:1px;overflow:hidden}
+@media(max-width:650px){#wrap{width:100vw;border-radius:0;border:none}#links{bottom:3px}#links a{font-size:8px}}
+</style></head><body>
+<div id="wrap"><canvas id="game" width="1200" height="760" tabindex="0" role="application" aria-label="Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes."></canvas>
+<div id="links"><a href="#" id="sources-link">THE REAL RESEARCH</a><a href="#" id="how-link">HOW TO PLAY</a></div>
+<div id="help" role="dialog" aria-modal="true" aria-label="Game controls and research"><article><h2 id="help-title">THE REAL RESEARCH</h2><div id="help-body"></div><button id="help-close">BACK TO THE CHAOS</button></article></div>
+<div id="sr" aria-live="polite"></div>
+</div>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('game'),c=canvas.getContext('2d'),W=1200,H=760;
+const INK='#182629',DARK='#141e21',MINT='#38c7a5',GOLD='#f0bc55',RED='#e64c3b',PAPER='#f6efdf',BLUE='#447c86';const stageColors=['#233536','#183536','#353330','#24373c','#41342c','#222b30'];
+const arena={x:0,y:0,w:1200,h:760};const PLAY_SCALE=1.45,PLAY_OFFSET=215;const stagePoint=y=>y*PLAY_SCALE-PLAY_OFFSET,logicPoint=y=>(y+PLAY_OFFSET)/PLAY_SCALE;
+const stages=[
+ {name:'STAMP RUSH',tag:'PAPERWORK, BUT VIOLENT',icon:'✦',objective:'STAMP THE GOOD STUFF',hint:'CLICK THE GREEN FORMS · LEAVE THE RED SPAM',target:8,seconds:34,source:'WORK GAMIFICATION',url:'https://doi.org/10.1016/j.elerap.2020.100994',take:'Points make the dull stuff exciting. That is the hook.'},
+ {name:'FILE FRENZY',tag:'DRAG & DROP DISASTER',icon:'↗',objective:'FLING THE FILES HOME',hint:'DRAG TEAL FILES LEFT · CORAL FILES RIGHT',target:6,seconds:38,source:'MDA · HUNICKE ET AL.',url:'https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/',take:'A tiny rule turns ordinary movement into a challenge.'},
+ {name:'PRINTER REVENGE',tag:'THE PAPER FIGHTS BACK',icon:'▣',objective:'DEFEAT THE JAM-O-TRON',hint:'CLICK THE PRINTER TO STAMP · DODGE FLYING PAPER',target:12,seconds:44,source:'INTERRUPTIONS · MARK ET AL.',url:'https://doi.org/10.1145/1357054.1357072',take:'Interruptions may speed us up, but they raise the pressure.'},
+ {name:'SLIDE SHOWDOWN',tag:'HIDE NOTHING. HIDE EVERYTHING.',icon:'◫',objective:'PUNCH HOLES IN THE HYPE',hint:'TRACK THE GREEN EVIDENCE WITH YOUR SPOTLIGHT · AVOID RED' ,target:8,seconds:38,source:'PERSUASIVE GAMES · BOGOST',url:'https://mitpress.mit.edu/9780262026147/persuasive-games/',take:'The rules decide which numbers look like success.'},
+ {name:'RECRUITMENT RUMBLE',tag:'THE RESUMES ARE ALIVE',icon:'★',objective:'RESCUE YOUR COWORKERS',hint:'HOLD MOUSE & SWEEP UP STAFF · AVOID HR BOTS',target:6,seconds:37,source:'WORKPLACE PLAY · BUTLER & SPOELSTRA',url:'https://link.springer.com/article/10.1007/s10551-023-05584-w',take:'Real play can be shared. A scoreboard belongs to someone.'},
+ {name:'THE KPI MONSTER',tag:'YOUR BOSS IS A SPREADSHEET',icon:'!',objective:'REWRITE THE RULES',hint:'STAMP THE BOSS · DODGE THE DATA · CLOSE POP-UPS',target:18,seconds:63,source:'GAME ECONOMIES · CCDP10003',url:'https://canvas.lms.unimelb.edu.au/courses/239834/modules',take:'Who gets to say what counts as a win?'}
+];
+let seed=76249;function random(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};function rr(a,b){return a+random()*(b-a)};function clamp(a,l,h){return Math.max(l,Math.min(h,a))};
+const state={screen:'title',phase:0,progress:0,target:0,clock:0,spawn:0,adTimer:0,score:0,combo:0,best:0,health:4,maxHealth:4,team:0,kpi:0,collect:0,choice:'',finalChoice:'',entities:[],ads:[],particles:[],floats:[],time:0,touch:false,muted:false,clickCool:0,shake:0,flash:0,stageDone:false,helpFrom:'title',bossPattern:0,misses:0,adSeen:0,adClosed:0,adOpened:0,adUsed:0,adMissed:0,realSeen:0,spamSeen:0,bonus:1,stamps:0,stats:[],titleAnim:0,runCount:0,strikes:0,bossCheckpoint:0,bossRetries:0,ward:0,wardMax:0,secondsBonus:0,helpChance:0,aim:0,slowed:false,slowUntil:0,slowSpeed:1,comboGuard:false,perks:[],draftOffer:[],draftOpen:false,runSeed:76249};
+const perkPool=[
+ {id:'coffee',title:'DOUBLE ESPRESSO',effect:'+1 MAX FOCUS',detail:'Restore 2 hearts right now',color:'#a4e6cd',icon:'♥'},
+ {id:'firewall',title:'FIREWALL 3000',effect:'BLOCK A HIT',detail:'Refresh a shield each round',color:'#c2dfff',icon:'◆'},
+ {id:'minutes',title:'FLEX HOURS',effect:'+8 SECONDS',detail:'More room for every disaster',color:'#f4d9a5',icon:'⏱'},
+ {id:'helpdesk',title:'VIP INBOX',effect:'MORE REAL HELP',detail:'Genuine popups show up more',color:'#b6e8e0',icon:'✉'},
+ {id:'precision',title:'FAT FINGER',effect:'BIGGER TARGETS',detail:'Clicks get a generous hit zone',color:'#ecc7ef',icon:'✦'},
+ {id:'slow',title:'CASUAL FRIDAY',effect:'SLOW HAZARDS',detail:'Flying office junk moves slower',color:'#c8d9ff',icon:'❄'},
+ {id:'combo',title:'BONUS INSURANCE',effect:'SAVE YOUR COMBO',detail:'Mistakes no longer zero the streak',color:'#f7e2a2',icon:'★'},
+ {id:'profit',title:'OVERTIME PAY',effect:'SCORE ×1.25',detail:'More points, slightly more spam',color:'#f8d5ad',icon:'$'},
+ {id:'crew',title:'UNION HOTLINE',effect:'TEAM BACKUP',detail:'Hearts now; help at the boss',color:'#a1e8c0',icon:'♥'},
+ {id:'kpi',title:'EXECUTIVE BONUS',effect:'BIG SCORE BOOST',detail:'Extra points. More distractions.',color:'#f6c58e',icon:'★'}
+];
+function readBest(){try{const p=JSON.parse(localStorage.getItem('quota-panic-best-v2')||'{}');state.best=Number(p.best)||0;state.runCount=Number(p.runs)||0}catch(e){}}
+function saveBest(){try{localStorage.setItem('quota-panic-best-v2',JSON.stringify({best:Math.max(state.best,state.score),runs:state.runCount}))}catch(e){}}
+readBest();
+let mouse={x:590,y:390,rawY:350,down:false,drag:null,startX:0,startY:0},last=performance.now(),keys=new Set(),audio=null,beatAt=0,musicBeat=-1;
+const btns=[];let screenFlash=0;let failBop=0;const pastel={sky:'#e1f8f4',cream:'#fff7e6',peach:'#ffc8bd',mint:'#b8f3d6',ink:'#243e56',violet:'#cfc7ff',coral:'#fa8295'};
+function audioStart(){if(!audio){try{audio=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(audio&&audio.state==='suspended')audio.resume()}
+function tone(freq=300,dur=.07,type='triangle',vol=.055,glide=0){if(state.muted||!audio)return;let t=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(glide)o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+glide),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(audio.destination);o.start(t);o.stop(t+dur+.01)}
+function sound(kind){
+ if(!audio||state.muted)return;
+ if(kind==='hit'){tone(175,.08,'square',.052,-72);tone(110,.13,'triangle',.035,-66)}
+ else if(kind==='good'){tone(540,.055,'sine',.055,110);tone(820,.14,'triangle',.035,75)}
+ else if(kind==='bad'){tone(225,.12,'sawtooth',.026,-125);tone(140,.18,'triangle',.036,-80)}
+ else if(kind==='boom'){tone(130,.24,'sawtooth',.05,-80);tone(81,.30,'triangle',.036,-45)}
+ else if(kind==='done'){[392,523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.11,'sine',.026),i*62))}
+ else if(kind==='click')tone(365,.045,'sine',.024,100);
+ else if(kind==='perk'){tone(415,.08,'triangle',.027,220);setTimeout(()=>tone(832,.15,'sine',.030),85)}
+ else if(kind==='notice'){tone(580,.045,'triangle',.023,60);setTimeout(()=>tone(756,.08,'sine',.022),68)}
+ else if(kind==='scam'){tone(130,.09,'square',.027,-80);setTimeout(()=>tone(93,.13,'sawtooth',.023),64)}
+ else if(kind==='stamp'){tone(112,.055,'square',.071,-48);tone(260,.03,'triangle',.029,-130);setTimeout(()=>tone(495,.065,'triangle',.016),40)}
+ else if(kind==='file'){tone(265,.04,'triangle',.034,170);tone(510,.09,'sine',.022)}
+}
+function light(){if(state.screen!=='play')return;if(state.phase<0)return;if(state.time-beatAt>0.47){beatAt=state.time;if(state.combo>2&&state.combo%5===0)tone(225+state.combo*2,.044,'sine',.009)}}
+function roundRect(x,y,w,h,r=12){r=Math.max(0,Math.min(r,w/2,h/2));c.beginPath();c.roundRect(x,y,w,h,r)}
+function panel(x,y,w,h,fill,stroke,rad=14,sw=2){c.fillStyle=fill;roundRect(x,y,w,h,rad);c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=sw;c.stroke()}}
+function text(s,x,y,size=19,color=INK,weight=900,align='left',font='Trebuchet MS,Arial,sans-serif'){c.font=`${weight} ${size}px ${font}`;c.fillStyle=color;c.textAlign=align;c.textBaseline='middle';c.fillText(String(s),x,y)}
+function label(s,x,y){text(s,x,y,12,'#61828d',900)}
+function button(x,y,w,h,content,action,opts={}){let hover=mouse.x>=x&&mouse.x<=x+w&&mouse.y>=y&&mouse.y<=y+h;panel(x,y+(hover?1:3),w,h,hover?(opts.hover||'#ffe3a5'):(opts.bg||GOLD),opts.stroke||INK,12,3);text(content,x+w/2,y+h/2+(hover?1:0),opts.size||21,opts.fg||INK,900,'center');btns.push({x,y,w,h,action});if(hover)canvas.style.cursor='pointer'}
+function addFloat(s,x,y,color=MINT,size=21){state.floats.push({s,x,y,life:1.0,color,size})}
+function burst(x,y,col,n=17){for(let i=0;i<n;i++){let a=rr(0,Math.PI*2),v=rr(45,235);state.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rr(.25,.85),max:.9,col,size:rr(3,9),rot:rr(0,6)})}state.shake=Math.min(13,state.shake+4);state.flash=.07}
+function announce(s){const t=document.getElementById('sr');t.textContent=s}
+function reset(){state.runCount++;seed=(76249+state.runCount*7919)>>>0;Object.assign(state,{screen:'title',phase:0,progress:0,target:0,clock:0,spawn:0,adTimer:0,score:0,combo:0,health:4,maxHealth:4,team:0,kpi:0,collect:0,choice:'',finalChoice:'',entities:[],ads:[],particles:[],floats:[],time:0,clickCool:0,shake:0,flash:0,misses:0,adSeen:0,adClosed:0,adOpened:0,adUsed:0,adMissed:0,realSeen:0,spamSeen:0,bonus:1,stamps:0,stats:[],strikes:0,bossCheckpoint:0,bossRetries:0,ward:0,wardMax:0,secondsBonus:0,helpChance:0,aim:0,slowSpeed:1,slowUntil:0,comboGuard:false,perks:[],draftOffer:[],draftOpen:false,runSeed:seed});mouse.drag=null;saveBest()}
+function start(){audioStart();state.screen='play';tone(420,.08,'square');begin(0);announce('Welcome to Quota Panic! Six short office disasters. Click, drag and dodge.')}
+function begin(i=0,retry=false){state.phase=i;if(!retry){state.roundStartScore=state.score;state.roundPeakCombo=0}const m=stages[i];if(i!==5||!retry){state.bossCheckpoint=0;state.bossRetries=0}state.screen='play';state.progress=i===5&&retry?state.bossCheckpoint:0;state.target=m.target;state.clock=m.seconds+state.secondsBonus+(i===5&&retry?Math.min(10,state.bossRetries*5):0);state.spawn=.2;state.adTimer=i===0?5.4:4;state.entities=[];state.ads=[];state.floats=[];state.particles=[];state.combo=0;state.ward=Math.min(3,state.wardMax+(i===5&&retry?1:0));state.clickCool=0;state.stageDone=false;state.shake=0;beatAt=0;mouse.drag=null;spawnStart(i);announce(m.objective+'. '+m.hint+(i===5&&retry?' Phase checkpoint saved. One emergency shield active.':''))}
+function spawnStart(i){if(i===1){for(let j=0;j<4;j++)spawnFile(j)}if(i===2||i===5){state.entities.push({kind:i===2?'printer':'boss',x:610,y:418,w:i===2?225:250,h:i===2?185:230,hp:state.target-state.progress,maxHp:state.target,t:0,cool:1.4})}if(i===3){for(let j=0;j<4;j++)spawnChart(j)}if(i===4){for(let j=0;j<4;j++)spawnWorker(j)}}
+function spawnPaper(){let good=random()<.74;state.entities.push({kind:'paper',x:1160+rr(0,120),y:rr(255,582),w:94,h:108,vx:-rr(130,205),vy:0,good,rot:rr(-.08,.08),t:rr(0,6.28)})}
+function spawnFile(j=0){let teal=random()<.5;state.entities.push({kind:'file',x:rr(470,900),y:rr(305,560),w:105,h:112,vx:rr(-23,23),vy:rr(-14,14),teal,t:rr(0,7),drag:false,sticker:Math.floor(rr(0,5))})}
+function spawnChart(j=0,forceReal=false){let real=forceReal||random()<.69;state.entities.push({kind:'chart',x:rr(280,930),y:rr(280,565),w:143,h:109,vx:rr(40,95)*(random()<.5?-1:1),vy:rr(-35,35),real,t:rr(0,5),age:0,charge:0})}
+function spawnWorker(j=0,forceGood=false){let good=forceGood||random()<.72;state.entities.push({kind:'worker',x:rr(250,970),y:rr(285,555),w:94,h:111,vx:rr(55,130)*(random()<.5?-1:1),vy:rr(36,90)*(random()<.5?-1:1),good,t:rr(0,7),age:0,name:good?['MIRA','RAY','FINN','JUNO'][Math.floor(rr(0,4))]:'HR BOT'})}
+function popAd(){if(state.screen!=='play'||state.ads.length>=1)return;let real=state.adSeen===0||random()<clamp(.48+state.helpChance+state.team*.013-state.kpi*.045,.22,.79);if(state.adSeen>=2&&state.spamSeen===0)real=false;else if(state.adSeen>=5&&state.realSeen<2)real=true;let pool=real?['coffee','shield','time','team','points','slow','clear','help']:['bonus','fakefix','bonus','survey','alarm'];if(real&&state.health===state.maxHealth)pool=pool.filter(x=>x!=='coffee');let type=pool[Math.floor(rr(0,pool.length))];const content={
+ coffee:['COFFEE DELIVERY','RESTORE 1 FOCUS','ASTER / BREAK ROOM'],shield:['IT HOTFIX','BLOCK THE NEXT HIT','ASTER / IT DESK'],time:['TIME EXTENSION','+6 SECONDS','ASTER / SCHEDULER'],team:['CREW BACKUP','+1 TEAM SUPPORT','ASTER / MIRA'],points:['REAL PAYDAY','+300 SCORE','ASTER / PAYROLL'],slow:['SLOW-MO PATCH','SLOW PAPER FOR 7s','ASTER / IT DESK'],clear:['DESK CLEANUP','REMOVE FLYING JUNK','ASTER / IT DESK'],help:['INTERN RESCUE','FREE BONUS HIT','ASTER / TEAM CHAT'],
+ bonus:['YOU WON BIG','CLAIM 5000 POINTS','OFFERS / EXTERNAL'],fakefix:['URGENT UPDATE','CLICK TO FIX EVERYTHING','SUPPORT / EXTERNAL'],survey:['COMPULSORY SURVEY','FREE PRIZE INSIDE','SURVEYS / EXTERNAL'],alarm:['SECURITY WARNING','VERIFY YOUR CURSOR','HELPDESK / EXTERNAL']
+ };
+ let x=rr(165,780),y=rr(265,440);state.ads.push({x,y,w:264,h:154,t:0,life:9,real,type,word:content[type][0],benefit:content[type][1],sender:content[type][2]});state.adSeen++;if(real)state.realSeen++;else state.spamSeen++;sound(real?'notice':'scam')}
+function hurt(x,y,msg='FOCUS -1'){if(state.clickCool>0)return;if(state.ward>0){state.ward--;state.clickCool=.55;addFloat('FIREWALL BLOCK!',x,y,MINT,22);burst(x,y,MINT,9);sound('good');return}state.health--;if(!state.comboGuard)state.combo=0;else state.combo=Math.floor(state.combo*.5);state.misses++;state.clickCool=.72;addFloat(msg,x,y,RED,24);burst(x,y,RED,12);sound('bad');if(state.health<=0){state.health=2;state.combo=0;state.score=Math.max(0,state.score-180);state.ads=[];state.strikes++;state.screen='recover';sound('boom');failBop=1;announce('Out of focus. Try the current disaster again. Your run continues.')}}
+function gain(x,y,p=110){state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((p+state.combo*8)*state.bonus);state.stamps++;addFloat(state.phase===0?'APPROVED':'+'+Math.round((p+state.combo*8)*state.bonus),x,y-12,state.phase===0?'#f0bb67':MINT,state.phase===0?26:19);burst(x,y,state.phase===0?'#ed553f':GOLD,15);sound(state.phase===0?'stamp':'good');if(state.combo%5===0){addFloat('COMBO ×'+state.combo,x,y-60,GOLD,28);state.score+=100}if(state.progress>=state.target)finish()}
+function finish(){if(state.stageDone)return;state.stageDone=true;state.stats.push({name:stages[state.phase].name,progress:state.progress,score:state.score,points:Math.max(0,state.score-(state.roundStartScore||0)),combo:state.roundPeakCombo||0});state.ads=[];state.entities=[];state.floats=[];state.combo=0;if(state.phase===5){state.screen='victory';state.best=Math.max(state.best,state.score);saveBest()}else{state.screen='draft';state.draftOffer=rollDraft();state.draftOpen=true}sound('done');announce(stages[state.phase].name+' cleared. Pick your next upgrade!')}
+function continueRun(){if(state.phase<stages.length-1)begin(state.phase+1);else state.screen='victory'}
+function selectPerk(id){const perk=perkPool.find(x=>x.id===id);if(!perk||state.screen!=='draft')return;state.perks.push(id);sound('perk');if(id==='coffee'){state.maxHealth=Math.min(8,state.maxHealth+1);state.health=Math.min(state.maxHealth,state.health+2)}
+ else if(id==='firewall'){state.wardMax=Math.min(3,state.wardMax+1)}
+ else if(id==='minutes')state.secondsBonus=Math.min(25,state.secondsBonus+8);
+ else if(id==='helpdesk')state.helpChance=Math.min(.33,state.helpChance+.16);
+ else if(id==='precision')state.aim=Math.min(34,state.aim+12);
+ else if(id==='slow')state.slowSpeed=Math.max(.60,state.slowSpeed-.16);
+ else if(id==='combo')state.comboGuard=true;
+ else if(id==='profit'){state.bonus=+(state.bonus+.25).toFixed(2);state.kpi+=.35}
+ else if(id==='crew'){state.team+=2;state.health=Math.min(state.maxHealth,state.health+1)}
+ else if(id==='kpi'){state.kpi+=2;state.bonus=+(state.bonus+.45).toFixed(2);state.score+=400}
+ sound('good');continueRun()}
+function rollDraft(){let eligible=perkPool.filter(p=>!['crew','kpi'].includes(p.id)||state.phase===2||state.phase===4);if(state.phase===2||state.phase===4){let third=eligible.filter(p=>!['crew','kpi'].includes(p.id));return[perkPool.find(p=>p.id==='crew'),perkPool.find(p=>p.id==='kpi'),third[Math.floor(rr(0,third.length))]]}
+ let pool=eligible.filter(p=>p.id!=='crew'&&p.id!=='kpi');let picks=[];while(picks.length<3){const ix=Math.floor(rr(0,pool.length));picks.push(pool.splice(ix,1)[0])}return picks}
+function getPointer(e){const b=canvas.getBoundingClientRect();const x=(e.clientX-b.left)*(W/b.width),rawY=(e.clientY-b.top)*(H/b.height);return{x,y:state.screen==='play'?logicPoint(rawY):rawY,rawY}}
+function hit(e,x,y){return e.x>=x.x&&e.x<=x.x+x.w&&e.y>=x.y&&e.y<=x.y+x.h}
+function clicked(e,px,py,pad=0){const bonus=state.screen==='play'&&e.kind?state.aim:0;return px>=e.x-pad-bonus&&px<=e.x+e.w+pad+bonus&&py>=e.y-pad-bonus&&py<=e.y+e.h+pad+bonus}
+function activate(px,py){audioStart();if(state.screen!=='play'){for(const b of btns.slice().reverse())if(px>=b.x&&px<=b.x+b.w&&py>=b.y&&py<=b.y+b.h){sound('click');b.action();return}return}
+ if(mouse.rawY<70&&px>=1072){state.screen='pause';return}
+ for(let i=state.ads.length-1;i>=0;i--){let ad=state.ads[i];if(clicked(ad,px,py)){state.ads.splice(i,1);const close=px>ad.x+ad.w-48&&py<ad.y+43;if(close){if(ad.real){state.adMissed++;addFloat('NOT NOW',px,py,'#f2d39a',17)}else{state.adClosed++;state.score+=45;addFloat('SPAM BLOCKED +45',px,py,MINT,18);burst(px,py,MINT,9);sound('good')}}else if(ad.real){state.adUsed++;applyNotice(ad,px,py)}else{state.adOpened++;state.kpi+=.12;state.score=Math.max(0,state.score-110);hurt(px,py,'CLICKBAIT!');addFloat('NICE TRY, SCAMMER',px,py+26,RED,16)}return}}
+ if(state.phase===3)return;
+ if(state.phase===4){for(let i=state.entities.length-1;i>=0;i--){const e=state.entities[i];if(e.kind==='worker'&&clicked(e,px,py,7)){mouse.drag=e;e.drag=true;mouse.startX=px-e.x;mouse.startY=py-e.y;return}}return}
+ if(state.phase===1){for(let i=state.entities.length-1;i>=0;i--){let e=state.entities[i];if(e.kind==='file'&&clicked(e,px,py,7)){mouse.drag=e;e.drag=true;mouse.startX=px-e.x;mouse.startY=py-e.y;return}}return}
+ if(state.clickCool>0)return;
+ for(let i=state.entities.length-1;i>=0;i--){const e=state.entities[i];if(!clicked(e,px,py,9))continue;
+ if(e.kind==='paper'){state.entities.splice(i,1);if(e.good){state.shake=Math.min(6,state.shake+2.2);gain(px,py)}else hurt(px,py,'NO SPAM!');return}
+ if(e.kind==='worker'){state.entities.splice(i,1);if(e.good){gain(px,py,150);state.team+=.12}else hurt(px,py,'HR BOT!');return}
+ if(e.kind==='printer'||e.kind==='boss'){
+ if(e.kind==='boss'&&state.time<(e.shieldUntil||0)){state.clickCool=.24;addFloat('QUOTA SHIELD!',px,py-30,RED,22);tone(180,.11,'sawtooth',.025);return}
+ e.hp--;state.progress++;state.shake=Math.min(9,state.shake+3.1);state.flash=.055;state.score+=Math.round((50+state.combo*2)*state.bonus);state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.clickCool=e.kind==='boss'?.24:.18;burst(px,py,GOLD,9);addFloat('STAMP!',px,py,RED,24);sound('stamp');
+ if(e.kind==='boss'&&(e.hp===12||e.hp===6)){state.bossCheckpoint=Math.max(state.bossCheckpoint,state.target-e.hp);e.shieldUntil=state.time+1.2;popAd();addFloat('CHECKPOINT!  PHASE '+(e.hp===12?'2':'3'),px,py-65,MINT,22)}
+ if(e.hp<=0)finish();return}
+ }
+}
+function applyNotice(ad,x,y){if(ad.type==='coffee')state.health=Math.min(state.maxHealth,state.health+1);
+ else if(ad.type==='shield')state.ward=Math.min(3,state.ward+1);
+ else if(ad.type==='time')state.clock+=6;
+ else if(ad.type==='team')state.team+=1;
+ else if(ad.type==='points')state.score+=300;
+ else if(ad.type==='slow')state.slowUntil=state.time+7;
+ else if(ad.type==='clear'){let n=state.entities.length;state.entities=state.entities.filter(e=>e.kind!=='hazard'&&!(e.kind==='paper'&&!e.good));state.score+=Math.max(0,n-state.entities.length)*20}
+ else if(ad.type==='help'){let target=state.entities.find(e=>e.kind==='printer'||e.kind==='boss');if(target){target.hp=Math.max(0,target.hp-1);state.progress++;state.score+=80;if(target.hp<=0)finish()}else{state.clock+=3;state.score+=80}}
+ addFloat(ad.benefit,x,y,MINT,20);burst(x,y,MINT,14);sound('good');announce('Useful popup: '+ad.benefit)}
+canvas.addEventListener('pointermove',e=>{const p=getPointer(e);mouse.x=p.x;mouse.y=p.y;mouse.rawY=p.rawY;canvas.style.cursor='crosshair';if(mouse.drag){mouse.drag.x=clamp(p.x-mouse.startX,105,1050);mouse.drag.y=clamp(p.y-mouse.startY,232,600)}});
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);const p=getPointer(e);mouse.x=p.x;mouse.y=p.y;mouse.rawY=p.rawY;mouse.down=true;mouse.startX=p.x;mouse.startY=p.y;activate(p.x,p.y)});
+canvas.addEventListener('pointerup',e=>{e.preventDefault();mouse.down=false;const p=getPointer(e);if(mouse.drag){const f=mouse.drag;f.drag=false;if(f.kind==='worker'){const exit=p.x<220&&p.y>360&&p.y<670;if(exit){if(state.entities.indexOf(f)>=0)state.entities.splice(state.entities.indexOf(f),1);if(f.good){gain(p.x,p.y,185);state.team+=.18;addFloat('EXTRACTED',p.x,p.y-30,MINT,23)}else{hurt(p.x,p.y,'HR INFILTRATOR!')}if(state.screen==='play')spawnWorker()}else{f.x=clamp(f.x,250,970);f.y=clamp(f.y,280,540)}mouse.drag=null;return}const correct=f.teal?p.x<326:p.x>882;if((p.x<326||p.x>882)&&correct){if(state.entities.indexOf(f)>=0)state.entities.splice(state.entities.indexOf(f),1);state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((150+state.combo*12)*state.bonus);addFloat('SLOTTED!',p.x,p.y,MINT,26);burst(p.x,p.y,MINT,18);sound('file');if(state.progress>=state.target)finish();else spawnFile()}else if(p.x<326||p.x>882){hurt(p.x,p.y,'WRONG DRAWER');f.x=rr(480,780);f.y=rr(325,525)}else{f.x=clamp(f.x,320,820);f.y=clamp(f.y,260,555)}mouse.drag=null}});
+canvas.addEventListener('pointercancel',()=>{mouse.drag=null;mouse.down=false});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.getElementById('help').classList.contains('show'))closeHelp();else if(state.screen==='play')state.screen='pause';else if(state.screen==='pause')state.screen='play'}if(e.key.toLowerCase()==='m')state.muted=!state.muted;if(e.key.toLowerCase()==='f'){if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{});}if(e.key==='Enter'||e.key===' '){if(state.screen==='title')start();else if(state.screen==='intro')begin(0);else if(state.screen==='draft'&&state.draftOffer.length)selectPerk(state.draftOffer[0].id);else if(state.screen==='recover')retryStage();e.preventDefault()}});
+function showHelp(type){let h=document.getElementById('help'),t=document.getElementById('help-title'),b=document.getElementById('help-body');state.helpFrom=state.screen;t.textContent=type==='play'?'HOW TO PLAY':'THE REAL RESEARCH';b.innerHTML=type==='play'?`<p><strong>JUST YOUR MOUSE.</strong> Click moving papers. Drag colourful files into matching drawers. Follow green charts with your cursor spotlight. Hold and sweep up coworkers. Close adverts with the X. During boss fights, stamp the enemy and dodge flying paper.</p><p>Six ridiculous disasters. Each clear gives you three upgrades: choose one to build your run. Some popups really heal, shield, help or slow danger; others are scams. Ignore them, accept them, or close them while the office attacks.</p><p><strong>Keyboard:</strong> Enter clocks in, Esc pauses, M toggles sound, F toggles true fullscreen.</p>`:`<p><strong>WHY THIS GAME, WHY NOW?</strong> Offices increasingly borrow game mechanics such as scores, feedback and rewards. Sometimes those make work more enjoyable. But when a corporation designs the rules, whose version of success is being rewarded? This arcade lets you feel the rush, then question the score.</p><p><strong>Evidence and influences:</strong></p><p>• <a target="_blank" rel="noopener" href="https://doi.org/10.1016/j.elerap.2020.100994">Work gamification and enjoyment/productivity (2020)</a></p><p>• <a target="_blank" rel="noopener" href="https://doi.org/10.1145/1357054.1357072">Mark, Gudith & Klocke (2008), interrupted work</a></p><p>• <a target="_blank" rel="noopener" href="https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/">Hunicke, LeBlanc & Zubek, MDA (2004)</a></p><p>• <a target="_blank" rel="noopener" href="https://mitpress.mit.edu/9780262026147/persuasive-games/">Bogost, Persuasive Games (2007)</a></p><p>• <a target="_blank" rel="noopener" href="https://link.springer.com/article/10.1007/s10551-023-05584-w">Butler & Spoelstra (2024), ethics of workplace gamification</a></p><p>The deliberately exaggerated office systems are satire, not empirical measurements of real workers. Original sounds and graphics were built for this game.</p>`;h.classList.add('show');if(state.screen==='play')state.screen='help'}
+function closeHelp(){document.getElementById('help').classList.remove('show');if(state.screen==='help')state.screen=state.helpFrom}
+document.getElementById('sources-link').onclick=e=>{e.preventDefault();showHelp('sources')};document.getElementById('how-link').onclick=e=>{e.preventDefault();showHelp('play')};document.getElementById('help-close').onclick=closeHelp;
+function update(dt){if(document.getElementById('help').classList.contains('show'))return;state.time+=dt;state.titleAnim+=dt;state.shake=Math.max(0,state.shake-dt*35);state.flash=Math.max(0,state.flash-dt);state.clickCool=Math.max(0,state.clickCool-dt);
+ for(let i=state.floats.length-1;i>=0;i--){const f=state.floats[i];f.life-=dt;f.y-=dt*50;if(f.life<=0)state.floats.splice(i,1)}for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=dt*230;if(p.life<=0)state.particles.splice(i,1)}
+ if(state.screen!=='play')return;
+ const beat=Math.floor(state.time/.325);if(beat!==musicBeat){musicBeat=beat;let n=[131,0,164,0,196,0,164,0][beat%8];if(n)tone(n,.105,'triangle',.012,-20);if(beat%2===1)tone(690,.016,'sine',.006)}
+ state.clock-=dt;state.spawn-=dt;state.adTimer-=dt;
+ if(state.adTimer<=0){popAd();state.adTimer=state.kpi>=2?rr(3.9,6.0):rr(6.2,9.4)}
+ if(state.clock<=0){state.score=Math.max(0,state.score-100);state.strikes++;state.screen='recover';state.ads=[];state.entities=[];sound('boom');failBop=1;announce('Time ran out. Pick up and retry this disaster.');return}
+ if(state.phase===0&&state.spawn<=0){spawnPaper();state.spawn=rr(.47,.86)}
+ if(state.phase===1&&state.spawn<=0){if(state.entities.length<5)spawnFile();state.spawn=1.5}
+ if(state.phase===3&&state.spawn<=0){state.entities=state.entities.filter(e=>e.kind!=='chart'||e.age<6.5);if(state.entities.length<5)spawnChart(0,!state.entities.some(e=>e.kind==='chart'&&e.real));state.spawn=.85}
+ if(state.phase===4&&state.spawn<=0){state.entities=state.entities.filter(e=>e.kind!=='worker'||e.age<6.2);if(state.entities.length<5)spawnWorker(0,!state.entities.some(e=>e.kind==='worker'&&e.good));state.spawn=.92}
+ const speed=state.slowSpeed*(state.slowUntil>state.time?.5:1);
+ for(let i=state.entities.length-1;i>=0;i--){let e=state.entities[i];if(!e.drag){e.t+=dt;e.age=(e.age||0)+dt;if(e.kind!=='hazard'||(e.arm||0)<=0){e.x+=(e.vx||0)*dt*speed;e.y+=(e.vy||0)*dt*speed}}if(e.kind==='paper'){e.y+=Math.sin(e.t*4)*.22;if(e.x<-110)state.entities.splice(i,1)}
+ if(e.kind==='file'){if(e.x<360||e.x>920)e.vx*=-1;if(e.y<268||e.y>582)e.vy*=-1}
+ if(e.kind==='chart'||e.kind==='worker'){if(e.x<215||e.x>1070-e.w)e.vx*=-1;if(e.y<285||e.y>610-e.h)e.vy*=-1}
+ if(e.kind==='chart'){const hovered=clicked(e,mouse.x,mouse.y,-5);e.charge=clamp((e.charge||0)+(hovered?dt:-dt*1.5),0,.42);if(e.charge>=.42){state.entities.splice(i,1);if(e.real)gain(e.x+e.w/2,e.y+e.h/2,130);else hurt(e.x+e.w/2,e.y+e.h/2,'FAKE KPI!');if(state.screen!=='play')return;continue}}
+ 
+ if(e.kind==='printer'||e.kind==='boss'){e.x=590+Math.sin(state.time*(e.kind==='printer'?1.1:1.6))*185;e.y=(e.kind==='printer'?375:365)+Math.cos(state.time*1.85)*23;e.cool-=dt*speed;if(e.cool<=0){e.cool=e.kind==='printer'?1.45:Math.max(.78,1.13-Math.min(5,state.kpi)*.08);const hx=e.x+e.w/2,hy=e.y+e.h*.7;let a=Math.atan2(mouse.y-hy,mouse.x-hx),v=e.kind==='printer'?240:315;state.entities.push({kind:'hazard',x:hx,y:hy,w:36,h:35,vx:Math.cos(a)*v,vy:Math.sin(a)*v,t:0,life:3.25,arm:e.kind==='boss'?.40:.24,aimX:mouse.x,aimY:mouse.y});if(e.kind==='boss'&&random()<.25+state.kpi*.02)popAd()}}
+ if(e.kind==='hazard'){e.life-=dt;if(e.arm>0){e.arm=Math.max(0,e.arm-dt);continue}if(e.life<=0||e.x<45||e.x>1145||e.y<188||e.y>663){state.entities.splice(i,1);continue}if(state.clickCool<=0&&Math.hypot(mouse.x-e.x,mouse.y-e.y)<28){state.entities.splice(i,1);hurt(mouse.x,mouse.y,'PAPER CUT!')}}}
+ for(let i=state.ads.length-1;i>=0;i--){const ad=state.ads[i];ad.t+=dt;ad.life-=dt;if(ad.life<=0){if(ad.real)state.adMissed++;state.ads.splice(i,1)}}
+ if(state.team>=2&&state.phase>=5){let boss=state.entities.find(x=>x.kind==='boss');if(boss&&Math.floor(state.time/2.4)!==Math.floor((state.time-dt)/2.4)){boss.hp--;state.progress++;addFloat('TEAM ASSIST!',boss.x+130,boss.y-23,MINT,18);burst(boss.x+90,boss.y+100,MINT,7);if(boss.hp<=0)finish()}}
+ light()}
+function retryStage(){state.health=Math.min(state.maxHealth,Math.max(state.phase===5?3:2,state.health));if(state.phase===5)state.bossRetries++;begin(state.phase,state.phase===5);state.clickCool=.7}
+const grain=document.createElement('canvas');grain.width=300;grain.height=190;const grainCtx=grain.getContext('2d');
+{let seed=3298;for(let i=0;i<1600;i++){seed=(seed*1664525+1013904223)>>>0;const x=seed%300;seed=(seed*1664525+1013904223)>>>0;const y=seed%190;grainCtx.fillStyle=i%3===0?'#ffffff':'#000000';grainCtx.globalAlpha=i%5===0?.15:.07;grainCtx.fillRect(x,y,1+(i%4===0?1:0),1)}}
+function screenprint(){c.save();c.globalAlpha=.21;c.drawImage(grain,0,0,W,H);c.restore()}
+function hatch(x,y,w,h,spacing=16,col='#ffffff20'){c.save();c.beginPath();c.rect(x,y,w,h);c.clip();c.strokeStyle=col;c.lineWidth=1;for(let t=-h;t<w+h;t+=spacing){c.beginPath();c.moveTo(x+t,y);c.lineTo(x+t+h,y+h);c.stroke()}c.restore()}
+function shadow(x,y,w=120){c.save();c.fillStyle='#0a1d2844';c.beginPath();c.ellipse(x,y,w,17,0,0,7);c.fill();c.restore()}
+function bg(){
+ let playing=state.screen==='play'||state.screen==='help';
+ c.fillStyle=playing?stageColors[state.phase]:DARK;c.fillRect(0,0,W,H);
+ if(playing){
+  // Architectural print layers, with no faux-browser furniture.
+  c.fillStyle='#f1e8d80d';c.fillRect(0,0,130,H);c.fillRect(1080,0,120,H);
+  c.fillStyle='#040f1475';c.fillRect(0,0,W,164);
+  hatch(0,0,W,H,21,'#ffffff06');
+  c.fillStyle='#ecb14512';c.beginPath();c.moveTo(0,500);c.lineTo(530,0);c.lineTo(700,0);c.lineTo(90,760);c.closePath();c.fill();
+  // Overprinted stage number and angular graphic identity, not content instructions.
+  c.save();c.globalAlpha=.11;c.font='900 330px Impact,Arial Black,sans-serif';c.textAlign='right';c.fillStyle=PAPER;c.fillText('0'+(state.phase+1),1205,745);c.restore();
+  c.fillStyle='#ffffff09';for(let x=12;x<1190;x+=110){c.fillRect(x,120,1,640)}
+  c.fillStyle='#a6b3a61b';c.fillRect(0,685,W,75);
+  c.fillStyle='#050b0a2b';for(let i=0;i<9;i++){c.fillRect(i*165,700,96,9)}
+ }else{
+  hatch(0,0,W,H,21,'#eee6d010');
+  c.fillStyle='#dd5d4220';c.beginPath();c.moveTo(720,0);c.lineTo(1200,0);c.lineTo(1200,760);c.lineTo(450,760);c.closePath();c.fill();
+ }
+ screenprint();
+}
+function officeDecor(){c.save();panel(53,184,1094,482,'#ebdcb9','#224251',14,3);for(let i=0;i<10;i++){c.strokeStyle='#836c4a0c';c.lineWidth=3;c.beginPath();c.moveTo(90,225+i*47);c.lineTo(1120,225+i*47);c.stroke()}for(let j=0;j<4;j++){let x=115+j*285;panel(x,273,146,89,'#a0c9ba','#2a5962',12);panel(x+12,285,96,51,'#2d5f69','#112c3e',6);panel(x+25,294,70,7,'#b2ded2');panel(x+25,309,53,5,'#9cd0bd');panel(x+13,354,140,12,'#bc9975','#916d54',4)}c.restore()}
+function drawPrinter(x,y,scale=1,enemy=true){
+ c.save();c.translate(x,y);c.scale(scale,scale);
+ const jitter=Math.sin(state.time*13+x)*2; c.translate(0,jitter);
+ // A stressed industrial machine, not a smiling nursery appliance.
+ shadow(115,202,113);
+ c.strokeStyle='#0b191d';c.lineWidth=7;
+ panel(32,-18,172,99,'#c4bb9d','#142529',6,6);
+ hatch(40,-12,153,82,7,'#222e304a');
+ panel(15,40,219,139,'#536767','#111e21',12,7);
+ panel(26,54,200,103,'#d6d0b8','#18292a',6,4);
+ panel(44,62,160,28,'#16292f',null,3);
+ text('PRINT / DISPUTE',124,77,15,'#c0ffab',900,'center');
+ panel(57,97,138,45,'#aebbb1','#1d3336',2,4);
+ // Misaligned sensor eyes and a threatening paper-teeth mouth.
+ c.fillStyle='#112c2c';c.fillRect(77,103,16,16);c.fillRect(157,103,16,16);
+ c.fillStyle=RED;c.fillRect(81,106,8,8);c.fillRect(161,106,8,8);
+ c.strokeStyle='#24393b';c.lineWidth=7;c.beginPath();c.moveTo(103,125);c.lineTo(147,125);c.stroke();
+ for(let i=0;i<8;i++){c.fillStyle=i%2?'#1b3034':'#e64b36';c.fillRect(105+i*5,122,4,9)}
+ panel(69,161,125,56,'#efe5d0','#172f32',2,4);text('ERROR 418',132,183,19,'#cb4434',900,'center');
+ c.fillStyle='#202f2e';c.fillRect(35,175,49,17);c.fillRect(166,175,49,17);
+ c.restore();
+}
+function bossArt(x,y,scale=1){
+ c.save();c.translate(x,y);c.scale(scale,scale);
+ const phase=state.progress>=12?3:state.progress>=6?2:1;
+ shadow(128,225,145);
+ c.translate(130,108);c.rotate(Math.sin(state.time*3)*.017);c.translate(-130,-108);
+ c.strokeStyle='#142629';c.lineWidth=14;c.lineCap='square';
+ c.beginPath();c.moveTo(38,95);c.lineTo(-3,132+Math.sin(state.time*5)*11);c.moveTo(230,99);c.lineTo(270,120-Math.sin(state.time*6)*11);c.stroke();
+ panel(2,2,257,188,phase===3?'#c34130':phase===2?'#9c7544':'#60746c','#0e1f25',6,8);
+ for(let i=0;i<9;i++){panel(13+i*27,12,16,5,'#16262c',null,1)}
+ panel(23,29,211,124,phase===3?'#2e1018':'#172b2c','#a1b2a2',3,5);
+ c.fillStyle=phase===3?'#f9b38f':'#c1f0b7';
+ c.fillRect(64,61,31,28);c.fillRect(163,61,31,28);
+ c.fillStyle='#10232a';c.fillRect(74,66,12,24);c.fillRect(174,66,12,24);
+ c.strokeStyle=phase===3?'#ff643c':'#dfddbb';c.lineWidth=8;c.beginPath();c.moveTo(91,116);c.lineTo(164,116+(phase-2)*8);c.stroke();
+ panel(45,160,169,34,'#181f25',null,2);text(phase===1?'QUOTA / 01':phase===2?'AUDIT / 02':'YOU ARE THE METRIC',130,177,14,phase===3?'#f5b68b':'#e9dcc5',900,'center');
+ c.restore();
+}
+function personArt(x,y,color='#c7b59a',scale=1,exec=false){
+ c.save();c.translate(x+44,y+58);c.scale(scale,scale);
+ const walk=Math.sin(state.time*10+x*.01)*6;
+ shadow(0,72,48);
+ c.strokeStyle='#172b2c';c.lineWidth=7;c.lineCap='round';
+ c.beginPath();c.moveTo(-15,35);c.lineTo(-22-walk,63);c.moveTo(14,35);c.lineTo(19+walk,63);c.stroke();
+ // Angular jacket makes them small exhausted adults rather than beans.
+ c.fillStyle=exec?'#a0493f':color;c.strokeStyle='#17272c';c.lineWidth=4;
+ c.beginPath();c.moveTo(-30,-7);c.lineTo(-44,31);c.lineTo(-13,46);c.lineTo(31,45);c.lineTo(42,28);c.lineTo(27,-11);c.closePath();c.fill();c.stroke();
+ c.strokeStyle='#172b2c';c.lineWidth=5;c.beginPath();c.moveTo(-32,2);c.lineTo(-48,20+walk*.2);c.moveTo(34,2);c.lineTo(47,16-walk*.2);c.stroke();
+ c.fillStyle='#e4c7a8';c.strokeStyle='#14262b';c.lineWidth=4;
+ c.beginPath();c.moveTo(-27,-57);c.lineTo(16,-60);c.lineTo(28,-38);c.lineTo(25,-9);c.lineTo(-18,-6);c.lineTo(-30,-23);c.closePath();c.fill();c.stroke();
+ c.fillStyle='#1f292d';c.beginPath();c.moveTo(-29,-55);c.lineTo(-1,-70);c.lineTo(26,-57);c.lineTo(22,-48);c.lineTo(-20,-48);c.closePath();c.fill();
+ c.fillStyle='#1b3336';c.fillRect(-14,-31,8,3);c.fillRect(11,-32,8,3);
+ c.strokeStyle='#513a35';c.lineWidth=2;c.beginPath();if(exec){c.moveTo(-18,-42);c.lineTo(-4,-37);c.moveTo(8,-38);c.lineTo(23,-42)}else{c.moveTo(-6,-13);c.lineTo(8,-15)}c.stroke();
+ c.fillStyle='#f3eee0';c.beginPath();c.moveTo(-7,-8);c.lineTo(6,23);c.lineTo(14,-8);c.fill();
+ c.fillStyle=exec?'#cf4b3c':'#d17e45';c.beginPath();c.moveTo(3,12);c.lineTo(-4,28);c.lineTo(6,34);c.lineTo(12,25);c.closePath();c.fill();
+ panel(-28,13,24,13,'#d6e2d2','#1e383a',2,1);text(exec?'HR':'ID',-16,19,10,INK,900,'center');
+ c.restore();
+}
+function paperArt(e){
+ c.save();c.translate(e.x+e.w/2,e.y+e.h/2);c.rotate(e.rot+Math.sin(state.time*9+e.t)*.05);
+ shadow(0,e.h*.6,e.w*.65);
+ panel(-e.w/2,-e.h/2,e.w,e.h,'#e9ddc6','#17292a',3,3);
+ panel(-e.w/2+8,-e.h/2+7,e.w-16,13,e.good?'#568d78':'#bd4639',null,1);
+ for(let i=0;i<4;i++)panel(-e.w/2+13,-e.h/2+30+i*13,(e.w-26)*(i%2?.61:.8),3,'#4e666370',null,1);
+ text(e.good?'APPROVE':'SPAM',0,8,15,e.good?'#386a56':'#b6382a',900,'center');
+ c.save();c.rotate(-.17);c.strokeStyle=e.good?'#2ca081':'#c34b3d';c.lineWidth=4;c.strokeRect(-e.w*.35,12,e.w*.7,24);c.restore();
+ c.restore();
+}
+function fileArt(e){
+ c.save();c.translate(e.x+e.w/2,e.y+e.h/2);c.rotate(Math.sin(state.time*7+e.t)*.06+(e.drag?.075:0));
+ shadow(0,66,58);const col=e.teal?'#3e8977':'#c3614b';
+ panel(-e.w/2,-e.h/2,e.w,e.h,col,'#152d2e',3,4);
+ panel(-e.w/2+8,-e.h/2-12,58,18,col,'#152d2e',2,3);
+ panel(-e.w/2+11,-e.h/2+21,e.w-22,59,'#e9e1cb',null,1);
+ text(e.teal?'◀':'▶',0,-3,27,e.teal?'#276c55':'#a34939',900,'center');
+ text(e.teal?'ARCHIVE':'DELETE',0,32,12,INK,900,'center');
+ c.restore();
+}
+function chartArt(e){
+ c.save();c.translate(e.x+e.w/2,e.y+e.h/2);c.rotate(Math.sin(state.time*4+e.t)*.04);
+ shadow(0,65,73);panel(-e.w/2,-e.h/2,e.w,e.h,'#e7dcc8','#183237',2,4);
+ panel(-e.w/2+9,-e.h/2+9,e.w-18,24,'#304d50',null,1);text('BOARD / REV. 04',0,-e.h/2+21,13,PAPER,900,'center');
+ for(let i=0;i<6;i++){c.fillStyle=i%3?'#bac1ab':'#839d8f';c.fillRect(-e.w/2+16+i*19,18-(i%3)*17,13,22+(i%3)*17)}
+ // Hidden truth is legible only while the cursor is investigating this chart.
+ if(Math.hypot(mouse.x-e.x-e.w/2,mouse.y-e.y-e.h/2)<110){
+  panel(-e.w/2+8,e.h/2-35,e.w-16,27,e.real?'#3d9879':'#b84d3d',null,1);
+  text(e.real?'VERIFIED':'MANIPULATED',0,e.h/2-22,14,PAPER,900,'center')
+ }else{ text('?',0,15,23,'#193337',900,'center') }
+ c.restore();
+}
+function workerArt(e){
+ c.save();const hop=Math.sin(state.time*11+e.t)*3;
+ personArt(e.x,e.y+hop,e.good?'#779a85':'#b66056',.92,!e.good);
+ if(!e.good){panel(e.x+21,e.y-4+hop,47,19,'#c14a3b',null,2);text('HR BOT',e.x+44,e.y+6+hop,11,PAPER,900,'center')}
+ c.restore();
+}
+function adArt(ad){
+ const y=ad.y+Math.sin(ad.t*3)*2,good=ad.real;
+ c.save();c.globalAlpha=clamp(ad.life/1.0,.18,1);
+ panel(ad.x+7,y+9,ad.w,ad.h,'#050909aa',null,2);
+ panel(ad.x,y,ad.w,ad.h,'#ebe6d9','#1e3334',3,4);
+ panel(ad.x,y,ad.w,39,'#263f40',null,2);
+ panel(ad.x,y,7,39,good?'#438e77':'#b36d4f',null,0);
+ text(ad.sender,ad.x+14,y+20,12,PAPER,900);
+ panel(ad.x+ad.w-36,y+6,27,27,'#202e2b',null,2);text('×',ad.x+ad.w-22,y+20,21,PAPER,900,'center');
+ text(ad.word,ad.x+13,y+69,19,INK,900);
+ text(ad.benefit,ad.x+13,y+93,13,good?'#28694e':'#ad4032',900);
+ panel(ad.x+12,y+113,ad.w-24,31,good?'#4b9478':'#bb4938',null,2);
+ text(good?'ACCEPT / APPLY':'CLAIM / INSTALL',ad.x+ad.w/2,y+129,15,PAPER,900,'center');c.restore();
+}
+function header(){
+ const life='♥'.repeat(Math.max(0,state.health))+'♡'.repeat(Math.max(0,state.maxHealth-state.health));
+ c.save();c.shadowColor='#0008';c.shadowBlur=12;c.shadowOffsetY=4;
+ panel(20,16,Math.max(116,28+state.maxHealth*24),47,'#f5f0e9','#2b3c3e',7,2);
+ panel(1072,16,106,47,state.clock<10?'#e54b3c':'#f5f0e9','#2b3c3e',7,2);c.restore();
+ text(life,32,39,state.maxHealth>6?17:23,'#e35140',900);
+ text(Math.ceil(state.clock)+'s',1125,39,27,state.clock<10?PAPER:INK,900,'center');
+}
+function playfield(){
+ c.save();c.beginPath();c.rect(0,0,W,H);c.clip();c.transform(1,0,0,PLAY_SCALE,0,-PLAY_OFFSET);
+ if(state.phase===0)drawStampStage();if(state.phase===1)drawFileStage();if(state.phase===2)drawPrinterStage();
+ if(state.phase===3)drawChartStage();if(state.phase===4)drawRecruitStage();if(state.phase===5)drawBossStage();
+ for(const ad of state.ads)adArt(ad);
+ for(const f of state.floats){c.save();c.globalAlpha=clamp(f.life,0,1);text(f.s,f.x,f.y,f.size,f.color,900,'center');c.restore()}
+ for(const p of state.particles){c.save();c.globalAlpha=clamp(p.life/.6,0,1);c.translate(p.x,p.y);c.rotate(p.rot);c.fillStyle=p.col;c.beginPath();c.ellipse(0,0,p.size,p.size*.7,0,0,7);c.fill();c.restore()}
+ c.restore();
+}
+function stageChip(head,sub,x,y){
+ const left=clamp((state.clock-stages[state.phase].seconds+4)/1.5,0,1);
+ if(left<=0)return;
+ c.save();c.globalAlpha=left;
+ panel(x-247,y-29,494,79,'#eae3d5e5','#1b3533',2,3);
+ text(head,x,y-1,28,'#183635',900,'center');text(sub.toUpperCase(),x,y+29,15,'#a34732',900,'center');c.restore();
+}
+function drawStampStage(){
+ stageChip('STAMP OR GET STAMPED','Authorize the legitimate forms.',600,220);
+ for(let j=0;j<3;j++){panel(72,299+j*119,1058,22,'#647772','#11272a',3,3);for(let i=0;i<34;i++)panel(81+i*31,305+j*119,17,6,'#24383a',null,1)}
+ for(const e of state.entities)if(e.kind==='paper')paperArt(e);
+}
+function drawFileStage(){
+ // Heavy mechanical chutes replace friendly pastel filing-cabinet buttons.
+ for(const [x,col,tag,sub] of [[56,'#3b7969','ARCHIVE','◀'],[864,'#a04f42','PURGE','▶']]){
+  panel(x,247,280,368,'#14282c','#8da69a',2,4);hatch(x+13,258,256,342,12,'#a2b0a222');
+  panel(x+24,345,230,184,col,'#c2b8a0',3,3);
+  panel(x+39,396,200,96,'#0c2025',null,2);text(sub,x+140,444,74,PAPER,900,'center');
+  text(tag,x+140,290,32,PAPER,900,'center');
+ }
+ text('DRAG • RELEASE • COMMIT',600,237,25,'#e2d6bb',900,'center');
+ for(const e of state.entities)if(e.kind==='file'&&e!==mouse.drag)fileArt(e);
+ if(mouse.drag)fileArt(mouse.drag)
+}
+function drawPrinterStage(){
+ stageChip('THE MACHINE HAS COMPLAINTS','Click to strike. Move to evade.',600,220);
+ for(let i=0;i<7;i++){panel(84+i*156,610,105,57,'#252f2e','#5a736b',2,3);text(['FAX','INK','LEAVE','TONER','OUT','PAPER','MORALE'][i],135+i*156,639,13,'#c5beaa',900,'center')}
+ for(const e of state.entities){if(e.kind==='printer'){drawPrinter(e.x,e.y,1,true);panel(e.x,e.y-30,e.w,12,'#b2a998',null,2);panel(e.x,e.y-30,e.w*(e.hp/e.maxHp),12,RED,null,2)}
+ if(e.kind==='hazard'){c.save();if(e.arm>0){c.strokeStyle='#e6533f';c.lineWidth=4;c.setLineDash([8,4]);c.beginPath();c.arc(e.aimX,e.aimY,24+e.arm*40,0,7);c.stroke();c.setLineDash([])}c.translate(e.x,e.y);c.rotate(e.t*4);panel(-18,-20,38,43,'#e8ddc7',INK,1,3);text('!',1,1,25,RED,900,'center');c.restore()}}
+}
+function drawChartStage(){
+ // Dark audience / boardroom; spotlight introduces risk of chasing the false metrics.
+ c.fillStyle='#101b1daf';c.fillRect(0,180,W,505);
+ stageChip('FOLLOW THE PAPER TRAIL','Keep the scanner on verified data.',600,216);
+ for(const e of state.entities)if(e.kind==='chart'){chartArt(e);if(e.charge>0){c.strokeStyle=e.real?'#3cc997':'#db6d4f';c.lineWidth=7;c.beginPath();c.arc(e.x+e.w/2,e.y+e.h/2,70,-Math.PI/2,-Math.PI/2+Math.PI*2*e.charge/.42);c.stroke()}}
+ c.save();c.strokeStyle='#e2d7b2';c.lineWidth=2;c.beginPath();c.arc(mouse.x,mouse.y,88,0,7);c.stroke();
+ c.strokeStyle='#f3dfa666';c.setLineDash([9,9]);c.beginPath();c.arc(mouse.x,mouse.y,55,0,7);c.stroke();c.restore();
+}
+function drawRecruitStage(){
+ stageChip('HOSTILE TAKEOVER','Drag your coworkers into the extraction lift.',600,218);
+ panel(38,351,182,303,'#13292d','#d4c4a8',2,4);hatch(41,355,175,292,17,'#ffffff13');
+ panel(50,387,157,163,'#367967','#d3bea3',2,4);
+ text('EVAC',129,437,40,PAPER,900,'center');text('◀',129,510,72,PAPER,900,'center');text('NO HR',129,593,18,'#d6dbc7',900,'center');
+ for(const e of state.entities)if(e.kind==='worker'&&e!==mouse.drag)workerArt(e);
+ if(mouse.drag)workerArt(mouse.drag);
+}
+function drawBossStage(){
+ stageChip('PERFORMANCE REVIEW','Your cursor is the problem.',600,216);
+ for(const e of state.entities){if(e.kind==='boss'){
+  bossArt(e.x,e.y,1);panel(297,602,606,18,'#c2bca8',INK,2,3);panel(302,606,596*(e.hp/e.maxHp),10,RED,null,1);
+  text('THE ALGORITHM HAS NOTICED YOU',600,653,18,'#e4d6ba',900,'center')
+ }if(e.kind==='hazard'){c.save();if(e.arm>0){const p=1-e.arm/.4;c.strokeStyle=RED;c.lineWidth=4;c.setLineDash([9,6]);c.beginPath();c.arc(e.aimX,e.aimY,26+22*(1-p),0,7);c.stroke();c.setLineDash([])}c.translate(e.x,e.y);c.rotate(e.t*3);panel(-19,-17,37,33,'#d65745',INK,2,3);text('%',0,0,23,PAPER,900,'center');c.restore()}}
+}
+function progress(){}
+function titleScreen(){
+ // A designed printed gig poster, not a children's game splash.
+ panel(0,0,696,H,'#f1ebdf',null,0);
+ hatch(0,0,696,H,25,'#1d30330b');
+ panel(696,0,504,H,'#b94b36',null,0);
+ hatch(700,0,500,H,18,'#24252628');
+ panel(0,0,W,16,'#17292b',null,0);
+ text('OFFICE HOURS / INTERACTIVE DAMAGE REPORT',53,81,18,'#3e6662',900);
+ text('QUOTA',39,261,134,INK,900);
+ text('PANIC',38,404,153,'#b94835',900);
+ panel(54,426,594,3,'#1b3935',null,0);
+ text('A BAD NIGHT FOR PRODUCTIVITY.',54,478,28,INK,900);
+ text('SIX DISASTERS. ONE CURSOR. NO OVERTIME PAY.',54,518,17,'#60716b',900);
+ button(54,568,407,83,'START NIGHT SHIFT  ▶',start,{bg:'#162d2f',hover:'#325750',fg:PAPER,size:27});
+ text('CLICK · DRAG · DODGE   /   M MUTE   /   ESC PAUSE',54,705,15,'#60716b',900);
+ // Industrial antagonist illustrated with human scale and zine-like silkscreen offset.
+ c.save();c.translate(755,130);c.rotate(-.11);drawPrinter(2,20,1.54,true);c.restore();
+ c.save();c.translate(865,391);c.rotate(.12);personArt(7,10,'#d9c39e',1.85,false);c.restore();
+ c.save();c.rotate(-.13);panel(760,598,366,62,'#171f22',null,1);text('YOUR METRICS ARE FINE.',943,629,25,PAPER,900,'center');c.restore();
+}
+function introScreen(){titleScreen()}
+function transitionScreen(kind){
+ const fail=kind==='recover';const title=['TERMINATED','MISFILED','OUT OF TONER','REDACTED','ESCORTED OUT','RESTRUCTURED'];
+ panel(125,96,950,566,'#e9deca','#111f20',4,6);
+ hatch(125,96,950,566,27,'#141c1e13');
+ panel(125,96,950,16,RED,null,0);
+ personArt(192,277,fail?'#b75749':'#8caa91',1.8,true);
+ text(fail?title[state.phase]:'SHIFT EXTENSION',696,241,56,INK,900,'center');
+ text(fail?'EMPLOYEE STILL ELIGIBLE FOR RETRY':'GOOD WORK. WE DID NOT NOTICE.',695,314,23,'#6c7269',900,'center');
+ if(fail){text(state.phase===5?'BOSS CHECKPOINT RETAINED':'ONLY THIS ROUND REPEATS',696,387,21,'#a24b38',900,'center');
+  button(484,453,400,77,'RETRY  ↻',retryStage,{bg:'#b9a87f',size:27})
+ }else button(484,453,400,77,'CONTINUE  ▶',continueRun,{bg:'#97a986',size:27});
+}
+function perkCard(x,y,w,h,perk){
+ const hover=mouse.x>=x&&mouse.x<=x+w&&mouse.y>=y&&mouse.y<=y+h;
+ panel(x,y+(hover?0:5),w,h,'#e7ddc9','#111d21',2,4);
+ panel(x+14,y+14,w-28,74,'#253c3b',null,2);
+ text(perk.icon,x+w/2,y+51,48,'#f0b35b',900,'center');
+ text(perk.title,x+w/2,y+128,25,INK,900,'center');
+ text(perk.effect,x+w/2,y+179,22,'#2b795e',900,'center');
+ text(perk.detail,x+w/2,y+220,16,'#58706d',800,'center');
+ panel(x+20,y+h-62,w-40,43,hover?'#d7a74d':'#172f32',null,2);
+ text('TAKE THE RISK  ▶',x+w/2,y+h-41,17,hover?INK:PAPER,900,'center');
+ btns.push({x,y,w,h,action:()=>selectPerk(perk.id)});if(hover)canvas.style.cursor='pointer'
+}
+function draftScreen(){
+ panel(0,0,W,H,'#242f2e',null,0);hatch(0,0,W,H,20,'#e9d8b015');
+ panel(0,0,W,14,'#e14f39',null,0);
+ text('BREAK ROOM / EQUIPMENT REQUEST',600,78,21,'#c8ba9e',900,'center');
+ text('YOU SURVIVED.',600,151,68,PAPER,900,'center');
+ text('ONE ITEM. NO REFUNDS.',600,203,20,'#d4b47c',900,'center');
+ for(let i=0;i<state.draftOffer.length;i++)perkCard(91+i*347,235,319,320,state.draftOffer[i]);
+ const round=state.stats[state.stats.length-1]||{points:0,combo:0};
+ panel(210,588,780,122,'#eee5d4',null,3);
+ text('ROUND '+(state.phase+1)+'/6    +'+round.points.toLocaleString()+' PTS    BEST STREAK '+round.combo,600,614,20,INK,900,'center');
+ text('TOTAL '+state.score.toLocaleString()+'   /   TEAM '+state.team.toFixed(1)+'   /   KPI '+state.kpi.toFixed(1),600,657,20,'#b14f34',900,'center');
+ text('M MUTE  ·  F FULLSCREEN  ·  ESC PAUSE',600,691,14,'#52695e',900,'center');
+}
+function victoryScreen(){
+ panel(0,0,W,H,'#182729',null,0);hatch(0,0,W,H,25,'#fff5df0a');
+ panel(0,0,W,13,RED,null,0);
+ text('SHIFT COMPLETE.',600,104,72,PAPER,900,'center');
+ text('SAME LABOUR. DIFFERENT RATING.',600,157,22,'#d6a874',900,'center');
+ bossArt(72,289,.94);
+ panel(435,222,669,348,'#e6dbc6','#a76e50',2,4);
+ text('WHO CONTROLS THE METRIC?',771,266,25,INK,900,'center');
+ let score=state.finalChoice==='humans'?Math.round(state.score*.72+state.team*620+state.adClosed*70+state.adUsed*90):Math.round(state.score*1.55+state.kpi*470+state.adOpened*230);
+ text(score.toLocaleString(),773,358,79,state.finalChoice==='humans'?'#2c8165':'#b84c34',900,'center');
+ text(state.finalChoice==='humans'?'PEOPLE':'CORPORATE KPI',778,420,22,INK,900,'center');
+ text('HELP USED '+state.adUsed+'  /  SCAMS BLOCKED '+state.adClosed,774,488,18,'#4e6b65',900,'center');
+ button(442,586,319,63,'PEOPLE  ♥',()=>{state.finalChoice='humans';sound('good')},{bg:'#588a76',size:22});
+ button(777,586,319,63,'KPI  ★',()=>{state.finalChoice='kpi';sound('hit')},{bg:'#c28747',size:22});
+ button(442,668,319,57,'NEW SHIFT  ↻',reset,{bg:'#e5d3a9',size:18});
+ button(777,668,319,57,'WHY THIS GAME? ↗',()=>showHelp('sources'),{bg:'#abc0a1',size:18});
+}
+function hud(){playfield();header();progress()}
+function pauseScreen(){
+ panel(215,116,770,548,'#e8dfcd','#253c3b',2,5);
+ panel(215,116,770,14,RED,null,0);
+ text('UNPAID BREAK',600,197,61,INK,900,'center');
+ text('ROUND '+(state.phase+1)+'/6  ·  SCORE '+state.score.toLocaleString()+'  ·  STREAK '+state.combo,600,246,19,'#48645e',900,'center');
+ text('TEAM '+state.team.toFixed(1)+'   /   KPI '+state.kpi.toFixed(1)+'  /  PERKS '+state.perks.length,600,280,17,'#48645e',900,'center');
+ button(385,331,430,64,'RESUME SHIFT  ▶',()=>state.screen='play',{bg:'#6f9780',size:24});
+ button(385,414,430,55,'RESEARCH / DESIGN NOTES ↗',()=>showHelp('sources'),{bg:'#c5ad75',size:19});
+ button(385,485,430,55,'ABANDON RUN  ↻',reset,{bg:'#b45a49',size:19});
+ text('ESC RESUME   ·   M MUTE   ·   F FULLSCREEN',600,618,17,'#476059',900,'center')
+}
+function render(){
+ btns.length=0;canvas.style.cursor='crosshair';const links=document.getElementById('links');
+ const show=state.screen==='title'||state.screen==='intro';if(links.style.display!==(show?'flex':'none'))links.style.display=show?'flex':'none';
+ bg();if(state.shake>0){c.save();c.translate(rr(-state.shake,state.shake),rr(-state.shake,state.shake))}
+ if(state.screen==='title'||state.screen==='intro')titleScreen();
+ else if(state.screen==='play'||state.screen==='help')hud();
+ else if(state.screen==='draft')draftScreen();
+ else if(state.screen==='clear'||state.screen==='recover'||state.screen==='decision')transitionScreen(state.screen);
+ else if(state.screen==='victory')victoryScreen();else if(state.screen==='pause')pauseScreen();
+ if(state.shake>0)c.restore();
+ if(state.flash>0){c.fillStyle=`rgba(255,253,240,${Math.min(.26,state.flash*3)})`;c.fillRect(0,0,W,H)}
+ if(state.screen==='play'){
+  c.save();c.globalAlpha=.72;c.strokeStyle='#34566a';c.lineWidth=2.5;
+  const cursorY=stagePoint(mouse.y);c.beginPath();c.arc(mouse.x,cursorY,10,0,7);
+  c.moveTo(mouse.x-18,cursorY);c.lineTo(mouse.x+18,cursorY);c.moveTo(mouse.x,cursorY-18);c.lineTo(mouse.x,cursorY+18);c.stroke();c.restore()
+ }
+}
+function loop(now){let dt=clamp((now-last)/1000,0,.04);last=now;update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+// Diagnostic surface is deliberately read-only; tests must interact through the real pointer interface.
+Object.defineProperty(window,'__officeArcade',{value:Object.freeze({snapshot:()=>({screen:state.screen,phase:state.phase,progress:state.progress,target:state.target,clock:Math.round(state.clock*10)/10,score:state.score,health:state.health,team:state.team,kpi:state.kpi,choice:state.choice,ads:state.ads.map(a=>({...a})),entities:state.entities.map(a=>({...a})),stageDone:state.stageDone,stats:state.stats.slice(),finalChoice:state.finalChoice,perks:state.perks.slice(),offers:state.draftOffer.map(p=>p.id),ward:state.ward,adUsed:state.adUsed,adOpened:state.adOpened,adClosed:state.adClosed,adMissed:state.adMissed,realSeen:state.realSeen,spamSeen:state.spamSeen,runCount:state.runCount,strikes:state.strikes,bossCheckpoint:state.bossCheckpoint,bossRetries:state.bossRetries,layout:'fullbleed',art:'nightshift-screenprint-r1'}),version:'2026-11-07.nightshift-r1'})});
+})();
+</script></body></html>
