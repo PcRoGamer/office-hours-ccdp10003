@@ -19,7 +19,14 @@ const v=(x,y)=>[x*1.2,(y*1.45-215)*900/760];
    const click=(x,y)=>p.mouse.click(...v(x,y),{delay:10});
    const box=await p.locator('canvas').boundingBox();assert.equal(box.width,w);assert.equal(box.height,h);
    await p.screenshot({path:'qa-artifacts/fullbleed-play.png',animations:'disabled'});
-   await p.keyboard.press('Escape');assert.equal((await snap()).screen,'pause');
+   const source=await p.locator('script').last().textContent();
+   const hud=source.slice(source.indexOf('function header(){'),source.indexOf('function playfield(){'));
+   assert.equal((hud.match(/text\(/g)||[]).length,2,'Gameplay HUD must draw only hearts and time');
+   assert.equal((hud.match(/panel\(/g)||[]).length,2,'Gameplay HUD must have only two compact panels');
+   assert(!/state\.(score|combo|progress|phase|ward|perks|team|kpi)/.test(hud),'Run metrics must not appear in gameplay HUD');
+   await p.mouse.click(1132*1.2,38*900/760);
+   assert.equal((await snap()).screen,'pause','Clicking the clock should pause without adding a HUD button');
+   await p.screenshot({path:'qa-artifacts/paused-with-run-stats.png',animations:'disabled'});
    const t=(await snap()).clock;await p.waitForTimeout(200);assert.equal((await snap()).clock,t);
    await p.keyboard.press('Escape');
    await p.waitForFunction(()=>window.__officeArcade.snapshot().ads.length>0,{timeout:18000});
@@ -34,6 +41,13 @@ const v=(x,y)=>[x*1.2,(y*1.45-215)*900/760];
      if(e)await click(e.x+47,e.y+53);else await p.waitForTimeout(45)}
    }
    assert(clear,'Stamp Rush did not reach upgrade draft');assert.equal((await snap()).offers.length,3);
+   const summary=(await snap()).stats[0];
+   assert(summary.points>0,'Round score should be retained for intermission');
+   assert(summary.combo>0,'Peak combo should be retained for intermission');
+   const draftCode=source.slice(source.indexOf('function draftScreen(){'),source.indexOf('function victoryScreen(){'));
+   for(const token of ['round.points','round.combo','state.score.toLocaleString()','state.team.toFixed(1)','state.kpi.toFixed(1)','state.perks.length']){
+     assert(draftCode.includes(token),'Intermission is missing '+token);
+   }
    await p.screenshot({path:'qa-artifacts/draft.png',animations:'disabled'});
    await p.mouse.click(300,520);assert.equal((await snap()).phase,1);
    let dragged=false;for(let i=0;i<40;i++){
