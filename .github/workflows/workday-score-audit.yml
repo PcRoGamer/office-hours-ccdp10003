@@ -1,0 +1,64 @@
+name: Workday scoring audit and campaign regression
+on:
+  push:
+    branches: [feat/workday-evaluation-lab, main]
+    paths:
+      - 'assets/workday-score-audit.*'
+      - 'assets/workday-final.js'
+      - 'workday-final.html'
+      - 'qa/workday-score-*'
+      - 'qa/workday-final.test.cjs'
+      - '.github/workflows/workday-score-audit.yml'
+  pull_request:
+    paths:
+      - 'assets/workday-score-audit.*'
+      - 'assets/workday-final.js'
+      - 'workday-final.html'
+      - 'qa/workday-score-*'
+  workflow_dispatch:
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test browser
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Static and semantic checks
+        run: |
+          node --check assets/workday-final.js
+          node --check assets/workday-score-audit.js
+          node --check qa/workday-score-audit.test.cjs
+          node qa/workday-score-model.test.cjs
+      - name: Serve the exact branch release
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/workday-qa-http.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/workday-final.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/workday-qa-http.log
+          exit 1
+      - name: Baseline workday path stays playable
+        run: node qa/workday-final.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/workday-final.html
+      - name: Audit works and game saves never change
+        run: node qa/workday-score-audit.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/workday-final.html
+      - name: Existing complete 2D campaign remains playable
+        run: node qa/full-2d.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workday-score-audit-visual-qa
+          path: |
+            qa-score-audit-artifacts/
+            qa-final-artifacts/
+            qa-2d-screens/
+          if-no-files-found: ignore
