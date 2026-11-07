@@ -141,12 +141,36 @@ function viewSlides(){const s=getState(4),k=Math.max(0,Math.min(2,Number(s.activ
  ],'What you leave out of a chart can become the company’s next target.');
  const main=`<main class="ow-main"><div class="ow-slide-shell"><div><div class="ow-slide" aria-label="Slide preview ${k+1}"><span class="ow-overline" style="color:#c0d1d5">ASTER QUARTERLY UPDATE</span><h3>${escapeHTML(selected?slide.options.find(o=>o.id===selected).label:'[CHOOSE THE HEADLINE]')}</h3><p>${escapeHTML(selected?slide.options.find(o=>o.id===selected).detail:'Use this slide to express one specific finding. What belongs on the page, and what must not be disguised?')}</p>${slideGraph(k,selected)}<div class="ow-slide-number">${k+1} / 03</div></div><p class="ow-overline" style="margin-top:12px">${escapeHTML(slide.question)}</p><div class="ow-deck-choices">${slide.options.map(o=>`<button data-ow="slide-answer" data-field="${slide.id}" data-value="${o.id}" class="${selected===o.id?'selected':''}" aria-pressed="${selected===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div></div><nav class="ow-slide-nav" aria-label="Slides">${slideChoices.map((v,i)=>`<button class="${k===i?'selected':''}" data-ow="slide" data-index="${i}" aria-current="${k===i?'true':'false'}"><b>0${i+1} · ${escapeHTML(v.title.split(' · ')[1])}</b><small>${s[v.id]?'✓ Prepared':'○ Needs content'}</small></button>`).join('')}</nav></div><p class="ow-overline" style="margin-top:12px">BOARD RECOMMENDATION</p><div class="ow-choice-grid" style="margin-top:7px"><button class="ow-option ${s.policy==='disclose'?'selected':''}" data-ow="choose" data-field="policy" data-value="disclose"><b>Flag manipulative engagement</b><small>Lower headline score; stronger employee trust.</small></button><button class="ow-option ${s.policy==='ship'?'selected':''}" data-ow="choose" data-field="policy" data-value="ship"><b>Count all engagement</b><small>Higher corporate bonuses; stronger pressure loop.</small></button></div>${sourceBadge(4)}</main>`;
  return frame('Slides','Quarterly engagement deck',`${complete}/3 slides prepared`,body+main,footer('PRESENT TO BOARD',complete!==3||!s.policy,`${complete}/3 slides · ${s.policy?'recommendation selected':'recommendation required'}`))}
-function viewArchive(){const s=getState(5),selected=s.evidence||[],good=['finance','staff','campaign'].filter(x=>selected.includes(x)&&archiveRecord(assets.find(a=>a.id===x)).type==='VERIFIED').length;
- const body=side('EXECUTIVE RECORDS','What goes on the record?','The director has room for only three attachments. Decide whether the board sees the reconciled evidence or a perfect-looking performance chart.',[
- {text:'Select three attachments',done:selected.length===3},{text:'Confirm the evidence trail',done:good===3},{text:'Prepare the final board pack',done:false}
- ],'A file can be accurate while its presentation is misleading. The missing evidence is a decision too.');
- const packet=`<main class="ow-main"><p class="ow-overline">CONFIDENTIAL / ATTACHMENT SELECTION</p><div class="ow-package">${assets.map(a=>{const record=archiveRecord(a);return `<button type="button" class="${selected.includes(a.id)?'selected':''}" data-ow="attachment" data-id="${a.id}" aria-pressed="${selected.includes(a.id)}"><span class="ow-overline" style="font-size:9px">${record.type}</span><b>${escapeHTML(a.name)}</b><small>${escapeHTML(record.detail)}</small></button>`}).join('')}</div><div class="ow-review ${selected.length===3&&good===3?'good':''}"><b>DOCUMENT PACK · ${selected.length}/3 ATTACHMENTS</b><div>${selected.length===3?(good===3?'All three attachments are verifiable. The board can challenge the conclusions.':'Some evidence was omitted or weakened by earlier choices. The board receives an incomplete picture.'): 'Select three attachments. A fourth must stay behind.'}</div></div><div class="ow-minimessage"><span><b>MIRA:</b> “If the system can decide what to reward, then you can decide what deserves a record.”</span></div><p class="ow-overline" style="margin-top:15px">REFERENCES INSIDE THE GAME</p><p>There are reasons why rewards motivate, and reasons why incentives mislead. The final boss will judge the organisation you have helped shape.</p>${sourceBadge(5)}</main>`;
- return frame('Case Files','Executive board pack',`${selected.length}/3 attachments`,body+packet,footer('SEAL THE DOSSIER',selected.length!==3,`Selection saved · ${selected.length}/3 documents`))}
+// Scarcity is the mechanic: all four sources are useful, none explains the entire shift.
+const evidenceBlindspots=Object.freeze({
+ finance:'Spending and refunds cannot be independently reconciled. Saving money is now easier to claim than to prove.',
+ staff:'Staffing and access gaps disappear from the formal record. Financial savings may look cost-free.',
+ campaign:'Engagement figures lack an outcomes comparison. More clicks may be mistaken for more value.',
+ testimony:'No first-hand perspective reaches the board. Accurate numbers cannot show how the policy felt to employees.'
+});
+function selectedEvidence(record){
+ const options=Array.isArray(record&&record.evidence)?record.evidence:[];
+ return [...new Set(options.filter(id=>assets.some(a=>a.id===id)))].slice(0,3);
+}
+function missingEvidence(record){
+ const chosen=selectedEvidence(record);
+ return chosen.length===3?assets.find(a=>!chosen.includes(a.id)):null;
+}
+function evidenceFeedback(record){
+ const chosen=selectedEvidence(record),missing=missingEvidence(record);
+ const unsettled=chosen.filter(id=>{const a=assets.find(x=>x.id===id);return a&&['REVIEW','CONTESTED'].includes(archiveRecord(a).type)}).length;
+ const note=missing?
+  'Left out: '+missing.name+'. '+evidenceBlindspots[missing.id]+(unsettled?' Some included evidence is contested; its limits remain visible.':' All included sources also have limits.') :
+  'Choose three of four useful records. Every packet leaves a perspective out. You can deselect a record to change your mind.';
+ return '<div class="ow-review '+(missing?'good':'')+'"><b>BOARD PACK · '+chosen.length+'/3 RECORDS'+(missing?' · ONE VOICE OMITTED':'')+'</b><div>'+escapeHTML(note)+'</div></div>';
+}
+function viewArchive(){const s=getState(5),selected=selectedEvidence(s),missing=missingEvidence(s);
+ if(JSON.stringify(s.evidence||[])!==JSON.stringify(selected)){s.evidence=selected;persist()}
+ const body=side('EXECUTIVE RECORDS','What goes on the record?','The director has room for three attachments, but four defensible sources exist. Whose perspective can the board afford to exclude?',[
+ {text:'Select three credible sources',done:selected.length===3},{text:'Inspect the missing perspective',done:!!missing},{text:'Prepare the incomplete board pack',done:false}
+ ],'Evidence has limits. An interview sample cannot represent everyone; a financial ledger cannot speak for workers. No packet is complete.');
+ const packet=`<main class="ow-main"><p class="ow-overline">CONFIDENTIAL / ATTACHMENT SELECTION</p><div class="ow-package">${assets.map(a=>{const record=archiveRecord(a);return `<button type="button" class="${selected.includes(a.id)?'selected':''}" data-ow="attachment" data-id="${a.id}" aria-pressed="${selected.includes(a.id)}"><span class="ow-overline" style="font-size:9px">${record.type}</span><b>${escapeHTML(a.name)}</b><small>${escapeHTML(record.detail)}</small></button>`}).join('')}</div>${evidenceFeedback(s)}<div class="ow-minimessage"><span><b>MIRA:</b> “If the system can decide what to reward, then you can decide what deserves a record.”</span></div><p class="ow-overline" style="margin-top:15px">REFERENCES INSIDE THE GAME</p><p>There are reasons why rewards motivate, and reasons why incentives mislead. The final boss will judge the organisation you have helped shape.</p>${sourceBadge(5)}</main>`;
+ return frame('Case Files','Executive board pack',`${selected.length}/3 attachments`,body+packet,footer('SEAL THE DOSSIER',selected.length!==3,`Selection saved · ${selected.length}/3 · one source left out`))}
 function viewWork(){const t=currentTask(),s=getState(quest),g=game();const body=side('WORK ORDERS',`Shift ${quest+1} of 6`,'Aster no longer runs its night shift through a mailbox. Assignments arrive as desktop alerts. The work happens in the application best suited to each job.',tasks.map((a,i)=>({text:`${i+1}. ${a.title}`,done:i<quest||!!save.complete[i]})),'Marketing metrics are not the same as meaningful work. Neither are report counts.');
  const main=`<main class="ow-main"><p class="ow-overline">CURRENT ASSIGNMENT / ${escapeHTML(t.dept)}</p><h2>${escapeHTML(t.title)}</h2><p style="font-size:13px;max-width:480px">${escapeHTML(t.blurb)}</p><div class="ow-minimessage"><span><b>${escapeHTML(t.sender)}:</b> Complete the work here. The corporation will record your decision and issue the usual reward.</span></div><p class="ow-overline" style="margin-top:15px">NOTIFICATION FEED</p><ul class="ow-history-list">${save.notices.slice(0,6).map(n=>`<li><strong>${escapeHTML(n.title)}</strong>${escapeHTML(n.text)}</li>`).join('')}</ul>${quest===0?`<section class="ow-premise"><b>WHY THIS GAME? WHY NOW?</b><p>Game-style rewards can make ordinary work engaging. But the rules decide what counts, and constant interruptions carry a cost. Tonight you are the employee and the person writing the record. Do the rewards help the work, or hide what it costs?</p><div>${openingResearch.map(([label,url])=>`<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHTML(label)} ↗</a>`).join('')}</div></section>`:''}${sourceBadge(quest)}</main>`;
  return frame('Work Queue','Shift tasks',`${g.quest||0}/6 completed`,body+main,footer('OPEN '+t.app.toUpperCase(),false,'Tasks are delivered through system notifications.'))}
@@ -164,7 +188,7 @@ function click(ev){const e=ev.target.closest('[data-ow]');if(!e||!root.contains(
  if(action==='candidate'){getState(2).applicant=e.dataset.id;persist();render();return}
  if(action==='slide'){getState(4).activeSlide=Number(e.dataset.index);persist();render();return}
  if(action==='slide-answer'){const s=getState(4);s[e.dataset.field]=e.dataset.value;if(Number(s.activeSlide||0)<2)s.activeSlide=Number(s.activeSlide||0)+1;else s.activeSlide=3;persist();render();return}
- if(action==='attachment'){const s=getState(5);s.evidence=s.evidence||[];const i=s.evidence.indexOf(e.dataset.id);if(i>=0)s.evidence.splice(i,1);else if(s.evidence.length<3)s.evidence.push(e.dataset.id);persist();render();return}
+ if(action==='attachment'){const s=getState(5);s.evidence=selectedEvidence(s);const i=s.evidence.indexOf(e.dataset.id);if(i>=0)s.evidence.splice(i,1);else if(s.evidence.length<3)s.evidence.push(e.dataset.id);persist();render();return}
  if(action==='submit'){if(mode==='work'){open(appFor(quest));return}void submit();return}
 }
 function change(ev){}
@@ -175,7 +199,7 @@ async function submit(){if(busy||quest<1||quest>5)return;const s=getState(quest)
  if(app==='word')ok=documents[quest].prompts.every(p=>!!s[p.key]);
  if(app==='people')ok=!!s.applicant&&!!s.privacy;
  if(app==='slides')ok=slideChoices.every(p=>!!s[p.id])&&!!s.policy;
- if(app==='archive')ok=(s.evidence||[]).length===3;
+ if(app==='archive')ok=selectedEvidence(s).length===3;
  if(!ok){notice('COMPLETE THE WORK','The assignment still has an unanswered decision.');return}
  busy=true;mode=null;toast=null;render();
  const old=quest;
@@ -228,7 +252,7 @@ function annotateConsequences(){
   const x=impactSummary();const line=document.createElement('div');line.className='ow-portfolio-line';
   line.style.cssText='margin:12px 0;padding:11px 13px;border-left:3px solid #319777;background:#e6f1e6;color:#294f50;font:600 12px/1.5 Outfit,Arial,sans-serif;text-align:left';
   const assessment=auditConsequences();const label=document.createElement('strong');label.textContent=`SHIFT FILE · ${save.reports.length} WORK ASSIGNMENTS · ${assessment.integrity} EVIDENCE / ${assessment.heat} PRESSURE`;label.style.cssText='display:block;margin-bottom:5px';line.appendChild(label);
-  const outcome=document.createElement('span');outcome.textContent=`Your record: ${x.good.length} documented protections, ${x.cost.length} decisions prioritising presentation or convenience. ${[...x.good,...x.cost].slice(0,3).join('; ')}.`;line.appendChild(outcome);const restart=[...end.querySelectorAll('button')].find(b=>/START ANOTHER SHIFT/i.test(b.textContent||''));if(restart&&restart.parentNode)restart.parentNode.insertBefore(line,restart);else end.appendChild(line)
+  const outcome=document.createElement('span');const absent=missingEvidence(save.decisions?.[5]);outcome.textContent=`Your shift: ${x.good.length} documented safeguards; ${x.cost.length} target-first choices. ${[...x.good,...x.cost].slice(0,2).join('; ')}. ${absent?'Board blind spot: '+absent.name+' was omitted. '+evidenceBlindspots[absent.id]:''}`;line.appendChild(outcome);const restart=[...end.querySelectorAll('button')].find(b=>/START ANOTHER SHIFT/i.test(b.textContent||''));if(restart&&restart.parentNode)restart.parentNode.insertBefore(line,restart);else end.appendChild(line)
  }
  const reward=document.querySelector('.reward-backdrop');
  if(reward&&!reward.querySelector('.ow-receipt')&&save.reports.length){
