@@ -296,7 +296,7 @@ function playfield(){
 }
 function stageChip(head,sub,x,y){
  const alpha=clamp((state.clock-stages[state.phase].seconds+8)/3,0,1);
- c.save();c.globalAlpha=clamp(alpha,.18,1);
+ if(alpha<=0)return;c.save();c.globalAlpha=alpha;
  panel(x-235,y-16,470,62,'#fffaf0dd','#ffffffcf',28,2);
  text(head,x,y+5,22,'#355768',900,'center');text(sub,x,y+31,14,'#587986',800,'center');c.restore()
 }
