@@ -62,7 +62,7 @@ function hurt(x,y,msg='FOCUS -1'){if(state.clickCool>0)return;state.health--;sta
 function gain(x,y,p=110){state.progress++;state.combo++;state.score+=Math.round((p+state.combo*8)*state.bonus);state.stamps++;addFloat('+'+Math.round((p+state.combo*8)*state.bonus),x,y,MINT);burst(x,y,GOLD,13);sound('good');if(state.combo%5===0){addFloat('COMBO ×'+state.combo,x,y-60,GOLD,28);state.score+=100}if(state.progress>=state.target)finish()}
 function finish(){if(state.stageDone)return;state.stageDone=true;state.stats.push({name:stages[state.phase].name,progress:state.progress,score:state.score});if(state.phase===2||state.phase===4)state.screen='decision';else if(state.phase===5)state.screen='victory';else state.screen='clear';state.ads=[];state.entities=[];state.floats=[];sound('done');announce(stages[state.phase].name+' cleared!')}
 function continueRun(){if(state.phase<stages.length-1)begin(state.phase+1);else state.screen='victory'}
-function selectPerk(p){if(state.phase===2){state.choice=p;if(p==='team'){state.team+=2;state.maxHealth=5;state.health=Math.min(state.maxHealth,state.health+2)}else{state.kpi+=2;state.bonus=1.5;state.score+=500}}else{if(p==='team'){state.team+=2;state.health=Math.min(state.maxHealth,state.health+1)}else{state.kpi+=2;state.score+=700}}state.screen='clear';sound('good')}
+function selectPerk(p){if(state.phase===2){state.choice=p;if(p==='team'){state.team+=2;state.maxHealth=5;state.health=Math.min(state.maxHealth,state.health+2)}else{state.kpi+=2;state.bonus=1.5;state.adTimer=Math.min(state.adTimer,2.2);state.score+=500}}else{if(p==='team'){state.team+=2;state.health=Math.min(state.maxHealth,state.health+1)}else{state.kpi+=2;state.adTimer=Math.min(state.adTimer,2.2);state.score+=700}}state.screen='clear';sound('good')}
 function getPointer(e){const b=canvas.getBoundingClientRect();return{x:(e.clientX-b.left)*(W/b.width),y:(e.clientY-b.top)*(H/b.height)}}
 function hit(e,x,y){return e.x>=x.x&&e.x<=x.x+x.w&&e.y>=x.y&&e.y<=x.y+x.h}
 function clicked(e,px,py,pad=0){return px>=e.x-pad&&px<=e.x+e.w+pad&&py>=e.y-pad&&py<=e.y+e.h+pad}
@@ -76,7 +76,12 @@ function activate(px,py){audioStart();if(state.screen!=='play'){for(const b of b
  if(e.kind==='paper'){state.entities.splice(i,1);if(e.good)gain(px,py);else hurt(px,py,'NO SPAM!');return}
  if(e.kind==='chart'){state.entities.splice(i,1);if(e.real)gain(px,py,130);else hurt(px,py,'INFLATED!');return}
  if(e.kind==='worker'){state.entities.splice(i,1);if(e.good){gain(px,py,150);state.team+=.12}else hurt(px,py,'HR BOT!');return}
- if(e.kind==='printer'||e.kind==='boss'){if(state.clickCool>0)return;e.hp--;state.progress++;state.score+=Math.round((50+state.combo*2)*state.bonus);state.combo++;state.clickCool=.18;burst(px,py,GOLD,9);addFloat('STAMP!',px,py,RED,24);tone(260+Math.min(350,state.combo*23),.05,'square',.04,-80);if(e.hp<=0)finish();return}
+ if(e.kind==='printer'||e.kind==='boss'){
+ if(state.clickCool>0)return;
+ if(e.kind==='boss'&&state.time<(e.shieldUntil||0)){state.clickCool=.24;addFloat('QUOTA SHIELD!',px,py-30,RED,22);tone(180,.11,'sawtooth',.025);return}
+ e.hp--;state.progress++;state.score+=Math.round((50+state.combo*2)*state.bonus);state.combo++;state.clickCool=e.kind==='boss'?.25:.18;burst(px,py,GOLD,9);addFloat('STAMP!',px,py,RED,24);tone(260+Math.min(350,state.combo*23),.05,'square',.04,-80);
+ if(e.kind==='boss'&&(e.hp===12||e.hp===6)){e.shieldUntil=state.time+1.2;popAd();addFloat('ALGORITHM PHASE '+(e.hp===12?'2':'3'),px,py-65,RED,22)}
+ if(e.hp<=0)finish();return}
  }
  // Clicking empty space never costs health.
 }
@@ -92,7 +97,7 @@ function update(dt){if(document.getElementById('help').classList.contains('show'
  for(let i=state.floats.length-1;i>=0;i--){const f=state.floats[i];f.life-=dt;f.y-=dt*50;if(f.life<=0)state.floats.splice(i,1)}for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=dt*230;if(p.life<=0)state.particles.splice(i,1)}
  if(state.screen!=='play')return;
  const beat=Math.floor(state.time/.325);if(beat!==musicBeat){musicBeat=beat;let n=[131,0,164,0,196,0,164,0][beat%8];if(n)tone(n,.105,'triangle',.012,-20);if(beat%2===1)tone(690,.016,'sine',.006)}
- state.clock-=dt;state.spawn-=dt;state.adTimer-=dt;if(state.adTimer<=0){if(state.phase>0||state.clock<25)popAd();state.adTimer=rr(8.0,11.5)}if(state.clock<=0){finish();return}if(state.phase===0&&state.spawn<=0){spawnPaper();state.spawn=rr(.47,.86)}if(state.phase===1&&state.spawn<=0){if(state.entities.length<5)spawnFile();state.spawn=1.5}if(state.phase===3&&state.spawn<=0){state.entities=state.entities.filter(e=>e.kind!=='chart'||e.age<6.5);if(state.entities.length<5)spawnChart(0,!state.entities.some(e=>e.kind==='chart'&&e.real));state.spawn=.85}if(state.phase===4&&state.spawn<=0){state.entities=state.entities.filter(e=>e.kind!=='worker'||e.age<6.2);if(state.entities.length<5)spawnWorker(0,!state.entities.some(e=>e.kind==='worker'&&e.good));state.spawn=.92}
+ state.clock-=dt;state.spawn-=dt;state.adTimer-=dt;if(state.adTimer<=0){if(state.phase>0||state.clock<25)popAd();state.adTimer=state.kpi>=2?rr(4.5,7.0):rr(8.0,11.5)}if(state.clock<=0){finish();return}if(state.phase===0&&state.spawn<=0){spawnPaper();state.spawn=rr(.47,.86)}if(state.phase===1&&state.spawn<=0){if(state.entities.length<5)spawnFile();state.spawn=1.5}if(state.phase===3&&state.spawn<=0){state.entities=state.entities.filter(e=>e.kind!=='chart'||e.age<6.5);if(state.entities.length<5)spawnChart(0,!state.entities.some(e=>e.kind==='chart'&&e.real));state.spawn=.85}if(state.phase===4&&state.spawn<=0){state.entities=state.entities.filter(e=>e.kind!=='worker'||e.age<6.2);if(state.entities.length<5)spawnWorker(0,!state.entities.some(e=>e.kind==='worker'&&e.good));state.spawn=.92}
  
  for(let i=state.entities.length-1;i>=0;i--){let e=state.entities[i];if(!e.drag){e.t+=dt;e.age=(e.age||0)+dt;e.x+=(e.vx||0)*dt;e.y+=(e.vy||0)*dt}if(e.kind==='paper'){e.y+=Math.sin(e.t*4)*.22;if(e.x<-110)state.entities.splice(i,1)}
  if(e.kind==='file'){if(e.x<360||e.x>920)e.vx*=-1;if(e.y<268||e.y>582)e.vy*=-1}
