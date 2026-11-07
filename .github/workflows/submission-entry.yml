@@ -1,0 +1,70 @@
+name: Canonical Workday submission release
+on:
+  push:
+    branches: [feat/workday-submission-entry]
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'README.md'
+      - 'gallery.html'
+      - 'assets/workday-final.js'
+      - 'qa/2d-root.test.cjs'
+      - 'qa/workday-evidence.test.cjs'
+  workflow_dispatch:
+jobs:
+  submission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Browser for headless end-to-end
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Static verification and release document consistency
+        run: |
+          node --check assets/workday-final.js
+          node --check qa/2d-root.test.cjs
+          node --check qa/workday-evidence.test.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          index=Path('index.html').read_text()
+          readme=Path('README.md').read_text()
+          gallery=Path('gallery.html').read_text()
+          assert 'url=./workday-final.html' in index
+          assert 'location.replace(new URL("./workday-final.html"' in index
+          assert 'six' in readme.lower() and 'Case Files' in readme
+          assert 'Historical' in gallery and 'Earlier 3D edition' in gallery
+          for f in ['workday-final.html','2d.html','legacy-3d.html','assets/workday-final.js','assets/workday-final.css']:
+              assert Path(f).exists(),f
+          print('SUBMISSION_RELEASE_DOCUMENTATION_COHERENT_PASS')
+          PY
+      - name: Launch static release
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/release-test.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/release-test.log
+          exit 1
+      - name: Root page opens intended Workday, legacy links survive
+        run: node qa/2d-root.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/'}
+      - name: Workday first three assignments
+        run: node qa/workday-final.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/workday-final.html'}
+      - name: All four omissions and end-of-shift consequence
+        run: node qa/workday-evidence.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/workday-final.html'}
+      - name: Preserve full original 2D campaign
+        run: node qa/full-2d.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: office-hours-release-candidate
+          path: |
+            qa-evidence-artifacts/
+            qa-final-artifacts/
+            qa-2d-screens/
+          if-no-files-found: ignore
