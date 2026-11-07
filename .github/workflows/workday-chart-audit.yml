@@ -1,0 +1,58 @@
+name: Workday chart-scale audit regression
+on:
+  push:
+    branches: [feat/workday-chart-audit]
+  pull_request:
+    paths:
+      - 'assets/workday-final.js'
+      - 'assets/workday-final.css'
+      - 'qa/workday-chart-audit.test.cjs'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Prepare Chromium
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Static check
+        run: |
+          node --check assets/workday-final.js
+          node --check qa/workday-chart-audit.test.cjs
+          node --check qa/workday-evidence.test.cjs
+      - name: Serve branch
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/workday-chart.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/workday-final.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/workday-chart.log
+          exit 1
+      - name: Verify scale audit and screenshot at two widths
+        run: node qa/workday-chart-audit.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/workday-final.html'}
+      - name: Workday opening still works
+        run: node qa/workday-final.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/workday-final.html'}
+      - name: All contested evidence choices and final ending
+        run: node qa/workday-evidence.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/workday-final.html'}
+      - name: Original 2D six-report regression
+        run: node qa/full-2d.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/'}
+      - name: Canonical entry and fallback versions
+        run: node qa/2d-root.test.cjs
+        env: {TEST_BASE_URL: 'http://127.0.0.1:4173/'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workday-chart-audit-qa
+          path: |
+            qa-chart-artifacts/
+            qa-evidence-artifacts/
+            qa-final-artifacts/
+            qa-2d-screens/
+          if-no-files-found: ignore
