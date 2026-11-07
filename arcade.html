@@ -79,7 +79,7 @@ function burst(x,y,col,n=17){for(let i=0;i<n;i++){let a=rr(0,Math.PI*2),v=rr(45,
 function announce(s){const t=document.getElementById('sr');t.textContent=s}
 function reset(){state.runCount++;seed=(76249+state.runCount*7919)>>>0;Object.assign(state,{screen:'title',phase:0,progress:0,target:0,clock:0,spawn:0,adTimer:0,score:0,combo:0,health:4,maxHealth:4,team:0,kpi:0,collect:0,choice:'',finalChoice:'',entities:[],ads:[],particles:[],floats:[],time:0,clickCool:0,shake:0,flash:0,misses:0,adSeen:0,adClosed:0,adOpened:0,adUsed:0,adMissed:0,realSeen:0,spamSeen:0,bonus:1,stamps:0,stats:[],strikes:0,bossCheckpoint:0,bossRetries:0,ward:0,wardMax:0,secondsBonus:0,helpChance:0,aim:0,slowSpeed:1,slowUntil:0,comboGuard:false,perks:[],draftOffer:[],draftOpen:false,runSeed:seed});mouse.drag=null;saveBest()}
 function start(){audioStart();state.screen='play';tone(420,.08,'square');begin(0);announce('Welcome to Quota Panic! Six short office disasters. Click, drag and dodge.')}
-function begin(i=0,retry=false){state.phase=i;const m=stages[i];if(i!==5||!retry){state.bossCheckpoint=0;state.bossRetries=0}state.screen='play';state.progress=i===5&&retry?state.bossCheckpoint:0;state.target=m.target;state.clock=m.seconds+state.secondsBonus+(i===5&&retry?Math.min(10,state.bossRetries*5):0);state.spawn=.2;state.adTimer=i===0?5.4:4;state.entities=[];state.ads=[];state.floats=[];state.particles=[];state.combo=0;state.ward=Math.min(3,state.wardMax+(i===5&&retry?1:0));state.clickCool=0;state.stageDone=false;state.shake=0;beatAt=0;mouse.drag=null;spawnStart(i);announce(m.objective+'. '+m.hint+(i===5&&retry?' Phase checkpoint saved. One emergency shield active.':''))}
+function begin(i=0,retry=false){state.phase=i;if(!retry){state.roundStartScore=state.score;state.roundPeakCombo=0}const m=stages[i];if(i!==5||!retry){state.bossCheckpoint=0;state.bossRetries=0}state.screen='play';state.progress=i===5&&retry?state.bossCheckpoint:0;state.target=m.target;state.clock=m.seconds+state.secondsBonus+(i===5&&retry?Math.min(10,state.bossRetries*5):0);state.spawn=.2;state.adTimer=i===0?5.4:4;state.entities=[];state.ads=[];state.floats=[];state.particles=[];state.combo=0;state.ward=Math.min(3,state.wardMax+(i===5&&retry?1:0));state.clickCool=0;state.stageDone=false;state.shake=0;beatAt=0;mouse.drag=null;spawnStart(i);announce(m.objective+'. '+m.hint+(i===5&&retry?' Phase checkpoint saved. One emergency shield active.':''))}
 function spawnStart(i){if(i===1){for(let j=0;j<4;j++)spawnFile(j)}if(i===2||i===5){state.entities.push({kind:i===2?'printer':'boss',x:610,y:418,w:i===2?225:250,h:i===2?185:230,hp:state.target-state.progress,maxHp:state.target,t:0,cool:1.4})}if(i===3){for(let j=0;j<4;j++)spawnChart(j)}if(i===4){for(let j=0;j<4;j++)spawnWorker(j)}}
 function spawnPaper(){let good=random()<.74;state.entities.push({kind:'paper',x:1160+rr(0,120),y:rr(255,582),w:94,h:108,vx:-rr(130,205),vy:0,good,rot:rr(-.08,.08),t:rr(0,6.28)})}
 function spawnFile(j=0){let teal=random()<.5;state.entities.push({kind:'file',x:rr(470,900),y:rr(305,560),w:105,h:112,vx:rr(-23,23),vy:rr(-14,14),teal,t:rr(0,7),drag:false,sticker:Math.floor(rr(0,5))})}
@@ -91,8 +91,8 @@ function popAd(){if(state.screen!=='play'||state.ads.length>=1)return;let real=s
  };
  let x=rr(165,780),y=rr(265,440);state.ads.push({x,y,w:264,h:154,t:0,life:9,real,type,word:content[type][0],benefit:content[type][1],sender:content[type][2]});state.adSeen++;if(real)state.realSeen++;else state.spamSeen++;sound(real?'notice':'scam')}
 function hurt(x,y,msg='FOCUS -1'){if(state.clickCool>0)return;if(state.ward>0){state.ward--;state.clickCool=.55;addFloat('FIREWALL BLOCK!',x,y,MINT,22);burst(x,y,MINT,9);sound('good');return}state.health--;if(!state.comboGuard)state.combo=0;else state.combo=Math.floor(state.combo*.5);state.misses++;state.clickCool=.72;addFloat(msg,x,y,RED,24);burst(x,y,RED,12);sound('bad');if(state.health<=0){state.health=2;state.combo=0;state.score=Math.max(0,state.score-180);state.ads=[];state.strikes++;state.screen='recover';sound('boom');failBop=1;announce('Out of focus. Try the current disaster again. Your run continues.')}}
-function gain(x,y,p=110){state.progress++;state.combo++;state.score+=Math.round((p+state.combo*8)*state.bonus);state.stamps++;addFloat('+'+Math.round((p+state.combo*8)*state.bonus),x,y,MINT);burst(x,y,GOLD,13);sound('good');if(state.combo%5===0){addFloat('COMBO ×'+state.combo,x,y-60,GOLD,28);state.score+=100}if(state.progress>=state.target)finish()}
-function finish(){if(state.stageDone)return;state.stageDone=true;state.stats.push({name:stages[state.phase].name,progress:state.progress,score:state.score});state.ads=[];state.entities=[];state.floats=[];state.combo=0;if(state.phase===5){state.screen='victory';state.best=Math.max(state.best,state.score);saveBest()}else{state.screen='draft';state.draftOffer=rollDraft();state.draftOpen=true}sound('done');announce(stages[state.phase].name+' cleared. Pick your next upgrade!')}
+function gain(x,y,p=110){state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((p+state.combo*8)*state.bonus);state.stamps++;addFloat('+'+Math.round((p+state.combo*8)*state.bonus),x,y,MINT);burst(x,y,GOLD,13);sound('good');if(state.combo%5===0){addFloat('COMBO ×'+state.combo,x,y-60,GOLD,28);state.score+=100}if(state.progress>=state.target)finish()}
+function finish(){if(state.stageDone)return;state.stageDone=true;state.stats.push({name:stages[state.phase].name,progress:state.progress,score:state.score,points:Math.max(0,state.score-(state.roundStartScore||0)),combo:state.roundPeakCombo||0});state.ads=[];state.entities=[];state.floats=[];state.combo=0;if(state.phase===5){state.screen='victory';state.best=Math.max(state.best,state.score);saveBest()}else{state.screen='draft';state.draftOffer=rollDraft();state.draftOpen=true}sound('done');announce(stages[state.phase].name+' cleared. Pick your next upgrade!')}
 function continueRun(){if(state.phase<stages.length-1)begin(state.phase+1);else state.screen='victory'}
 function selectPerk(id){const perk=perkPool.find(x=>x.id===id);if(!perk||state.screen!=='draft')return;state.perks.push(id);sound('perk');if(id==='coffee'){state.maxHealth=Math.min(8,state.maxHealth+1);state.health=Math.min(state.maxHealth,state.health+2)}
  else if(id==='firewall'){state.wardMax=Math.min(3,state.wardMax+1)}
@@ -111,7 +111,7 @@ function getPointer(e){const b=canvas.getBoundingClientRect();const x=(e.clientX
 function hit(e,x,y){return e.x>=x.x&&e.x<=x.x+x.w&&e.y>=x.y&&e.y<=x.y+x.h}
 function clicked(e,px,py,pad=0){const bonus=state.screen==='play'&&e.kind?state.aim:0;return px>=e.x-pad-bonus&&px<=e.x+e.w+pad+bonus&&py>=e.y-pad-bonus&&py<=e.y+e.h+pad+bonus}
 function activate(px,py){audioStart();if(state.screen!=='play'){for(const b of btns.slice().reverse())if(px>=b.x&&px<=b.x+b.w&&py>=b.y&&py<=b.y+b.h){sound('click');b.action();return}return}
- if(mouse.rawY<76&&px>=1048){if(px<1098){state.muted=!state.muted;addFloat(state.muted?'SOUND OFF':'SOUND ON',920,235,MINT,18)}else if(px<1148){if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{});}else{state.screen='pause'}return}
+ if(mouse.rawY<66&&px>=1076){state.screen='pause';return}
  for(let i=state.ads.length-1;i>=0;i--){let ad=state.ads[i];if(clicked(ad,px,py)){state.ads.splice(i,1);const close=px>ad.x+ad.w-48&&py<ad.y+43;if(close){if(ad.real){state.adMissed++;addFloat('NOT NOW',px,py,'#f2d39a',17)}else{state.adClosed++;state.score+=45;addFloat('SPAM BLOCKED +45',px,py,MINT,18);burst(px,py,MINT,9);sound('good')}}else if(ad.real){state.adUsed++;applyNotice(ad,px,py)}else{state.adOpened++;state.kpi+=.12;state.score=Math.max(0,state.score-110);hurt(px,py,'CLICKBAIT!');addFloat('NICE TRY, SCAMMER',px,py+26,RED,16)}return}}
  if(state.phase===4||state.phase===3)return;
  if(state.phase===1){for(let i=state.entities.length-1;i>=0;i--){let e=state.entities[i];if(e.kind==='file'&&clicked(e,px,py,7)){mouse.drag=e;e.drag=true;mouse.startX=px-e.x;mouse.startY=py-e.y;return}}return}
@@ -121,7 +121,7 @@ function activate(px,py){audioStart();if(state.screen!=='play'){for(const b of b
  if(e.kind==='worker'){state.entities.splice(i,1);if(e.good){gain(px,py,150);state.team+=.12}else hurt(px,py,'HR BOT!');return}
  if(e.kind==='printer'||e.kind==='boss'){
  if(e.kind==='boss'&&state.time<(e.shieldUntil||0)){state.clickCool=.24;addFloat('QUOTA SHIELD!',px,py-30,RED,22);tone(180,.11,'sawtooth',.025);return}
- e.hp--;state.progress++;state.score+=Math.round((50+state.combo*2)*state.bonus);state.combo++;state.clickCool=e.kind==='boss'?.24:.18;burst(px,py,GOLD,9);addFloat('STAMP!',px,py,RED,24);sound('stamp');
+ e.hp--;state.progress++;state.score+=Math.round((50+state.combo*2)*state.bonus);state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.clickCool=e.kind==='boss'?.24:.18;burst(px,py,GOLD,9);addFloat('STAMP!',px,py,RED,24);sound('stamp');
  if(e.kind==='boss'&&(e.hp===12||e.hp===6)){state.bossCheckpoint=Math.max(state.bossCheckpoint,state.target-e.hp);e.shieldUntil=state.time+1.2;popAd();addFloat('CHECKPOINT!  PHASE '+(e.hp===12?'2':'3'),px,py-65,MINT,22)}
  if(e.hp<=0)finish();return}
  }
@@ -137,7 +137,7 @@ function applyNotice(ad,x,y){if(ad.type==='coffee')state.health=Math.min(state.m
  addFloat(ad.benefit,x,y,MINT,20);burst(x,y,MINT,14);sound('good');announce('Useful popup: '+ad.benefit)}
 canvas.addEventListener('pointermove',e=>{const p=getPointer(e);mouse.x=p.x;mouse.y=p.y;mouse.rawY=p.rawY;canvas.style.cursor='crosshair';if(mouse.drag){mouse.drag.x=clamp(p.x-mouse.startX,105,1050);mouse.drag.y=clamp(p.y-mouse.startY,232,600)}});
 canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);const p=getPointer(e);mouse.x=p.x;mouse.y=p.y;mouse.rawY=p.rawY;mouse.down=true;mouse.startX=p.x;mouse.startY=p.y;activate(p.x,p.y)});
-canvas.addEventListener('pointerup',e=>{e.preventDefault();mouse.down=false;const p=getPointer(e);if(mouse.drag){const f=mouse.drag;f.drag=false;const correct=f.teal?p.x<326:p.x>882;if((p.x<326||p.x>882)&&correct){if(state.entities.indexOf(f)>=0)state.entities.splice(state.entities.indexOf(f),1);state.progress++;state.combo++;state.score+=Math.round((150+state.combo*12)*state.bonus);addFloat('SLOTTED!',p.x,p.y,MINT,26);burst(p.x,p.y,MINT,18);sound('file');if(state.progress>=state.target)finish();else spawnFile()}else if(p.x<326||p.x>882){hurt(p.x,p.y,'WRONG DRAWER');f.x=rr(480,780);f.y=rr(325,525)}else{f.x=clamp(f.x,320,820);f.y=clamp(f.y,260,555)}mouse.drag=null}});
+canvas.addEventListener('pointerup',e=>{e.preventDefault();mouse.down=false;const p=getPointer(e);if(mouse.drag){const f=mouse.drag;f.drag=false;const correct=f.teal?p.x<326:p.x>882;if((p.x<326||p.x>882)&&correct){if(state.entities.indexOf(f)>=0)state.entities.splice(state.entities.indexOf(f),1);state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((150+state.combo*12)*state.bonus);addFloat('SLOTTED!',p.x,p.y,MINT,26);burst(p.x,p.y,MINT,18);sound('file');if(state.progress>=state.target)finish();else spawnFile()}else if(p.x<326||p.x>882){hurt(p.x,p.y,'WRONG DRAWER');f.x=rr(480,780);f.y=rr(325,525)}else{f.x=clamp(f.x,320,820);f.y=clamp(f.y,260,555)}mouse.drag=null}});
 canvas.addEventListener('pointercancel',()=>{mouse.drag=null;mouse.down=false});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.getElementById('help').classList.contains('show'))closeHelp();else if(state.screen==='play')state.screen='pause';else if(state.screen==='pause')state.screen='play'}if(e.key.toLowerCase()==='m')state.muted=!state.muted;if(e.key.toLowerCase()==='f'){if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{});}if(e.key==='Enter'||e.key===' '){if(state.screen==='title')start();else if(state.screen==='intro')begin(0);else if(state.screen==='draft'&&state.draftOffer.length)selectPerk(state.draftOffer[0].id);else if(state.screen==='recover')retryStage();e.preventDefault()}});
 function showHelp(type){let h=document.getElementById('help'),t=document.getElementById('help-title'),b=document.getElementById('help-body');state.helpFrom=state.screen;t.textContent=type==='play'?'HOW TO PLAY':'THE REAL RESEARCH';b.innerHTML=type==='play'?`<p><strong>JUST YOUR MOUSE.</strong> Click moving papers. Drag colourful files into matching drawers. Follow green charts with your cursor spotlight. Hold and sweep up coworkers. Close adverts with the X. During boss fights, stamp the enemy and dodge flying paper.</p><p>Six ridiculous disasters. Each clear gives you three upgrades: choose one to build your run. Some popups really heal, shield, help or slow danger; others are scams. Ignore them, accept them, or close them while the office attacks.</p><p><strong>Keyboard:</strong> Enter clocks in, Esc pauses, M toggles sound, F toggles true fullscreen.</p>`:`<p><strong>WHY THIS GAME, WHY NOW?</strong> Offices increasingly borrow game mechanics such as scores, feedback and rewards. Sometimes those make work more enjoyable. But when a corporation designs the rules, whose version of success is being rewarded? This arcade lets you feel the rush, then question the score.</p><p><strong>Evidence and influences:</strong></p><p>• <a target="_blank" rel="noopener" href="https://doi.org/10.1016/j.elerap.2020.100994">Work gamification and enjoyment/productivity (2020)</a></p><p>• <a target="_blank" rel="noopener" href="https://doi.org/10.1145/1357054.1357072">Mark, Gudith & Klocke (2008), interrupted work</a></p><p>• <a target="_blank" rel="noopener" href="https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/">Hunicke, LeBlanc & Zubek, MDA (2004)</a></p><p>• <a target="_blank" rel="noopener" href="https://mitpress.mit.edu/9780262026147/persuasive-games/">Bogost, Persuasive Games (2007)</a></p><p>• <a target="_blank" rel="noopener" href="https://link.springer.com/article/10.1007/s10551-023-05584-w">Butler & Spoelstra (2024), ethics of workplace gamification</a></p><p>The deliberately exaggerated office systems are satire, not empirical measurements of real workers. Original sounds and graphics were built for this game.</p>`;h.classList.add('show');if(state.screen==='play')state.screen='help'}
@@ -275,25 +275,15 @@ function adArt(ad){
  text(good?'ACCEPT HELP':'CLAIM OFFER?',ad.x+ad.w/2,y+129,13,INK,900,'center');c.restore();
 }
 function header(){
- const pills=[[12,176],[200,154],[368,127],[509,128],[649,126],[788,232]];
- c.save();c.shadowColor='#254b5d21';c.shadowBlur=9;c.shadowOffsetY=3;
- for(const [x,w] of pills)panel(x,13,w,48,'#fffaf0e9','#ffffffb9',20,1.4);
- c.restore();
  const hearts='♥'.repeat(Math.max(0,state.health))+'♡'.repeat(Math.max(0,state.maxHealth-state.health));
- text(hearts,25,38,state.maxHealth>6?16:21,'#e87593',900);
- text(state.score.toLocaleString(),214,38,23,'#395d71',900);
- text(Math.ceil(state.clock)+'s',384,38,23,state.clock<10?'#df7485':'#385d70',900);
- text((state.phase+1)+'/6',525,38,22,'#426f7c',900);
- text('✦'+state.combo,662,38,20,'#dc9955',900);
- if(state.ward)text('◆'+state.ward,721,36,15,'#4c98be',900);
- panel(803,27,202,12,'#d9e7e1',null,8);
- panel(803,27,202*clamp(state.progress/state.target,0,1),12,'#6ed1a7',null,8);
- text(state.progress+'/'+state.target,898,52,12,'#46727c',900,'center');
- for(const [x,glyph] of [[1048,state.muted?'✕':'♪'],[1098,'⛶'],[1148,'Ⅱ']]){
-  const hot=mouse.x>=x&&mouse.x<=x+42&&mouse.rawY<75;
-  panel(x,15,43,45,hot?'#ffdfa9':'#fff9edea','#90afb6',15,1.5);
-  text(glyph,x+21,37,23,'#436e7a',900,'center');
- }
+ const hSize=state.maxHealth>6?16:22,heartWidth=Math.max(110,33+state.maxHealth*(state.maxHealth>6?17:24));
+ const timeHover=mouse.x>=1076&&mouse.x<=1188&&mouse.rawY<66;
+ c.save();c.shadowColor='#254b5d21';c.shadowBlur=9;c.shadowOffsetY=3;
+ panel(12,13,heartWidth,49,'#fffaf0eb','#ffffffc7',20,1.4);
+ panel(1076,13,112,49,timeHover?'#ffefc9':'#fffaf0eb','#ffffffc7',20,1.4);
+ c.restore();
+ text(hearts,26,38,hSize,'#e87593',900);
+ text(Math.ceil(state.clock)+'s',1132,38,25,state.clock<10?'#df7485':'#385d70',900,'center');
 }
 function playfield(){
  c.save();c.beginPath();c.rect(0,0,W,H);c.clip();c.transform(1,0,0,PLAY_SCALE,0,-PLAY_OFFSET);
@@ -362,13 +352,26 @@ function draftScreen(){
  text('YOU SURVIVED!',600,111,57,'#2b6470',900,'center');
  text('PICK ONE ABSURD ADVANTAGE',600,170,23,'#628e89',900,'center');
  for(let i=0;i<state.draftOffer.length;i++)perkCard(91+i*347,222,319,342,state.draftOffer[i]);
- panel(285,596,635,59,'#fff8eccc',null,24);
- text('SCORE '+state.score.toLocaleString()+'   ♥ '+state.health+'   ·   '+(state.phase+1)+'/6 DONE',602,623,20,'#3f7180',900,'center');
- text('One pick. Back to the chaos.',600,686,16,'#6a9996',800,'center');
+ const round=state.stats[state.stats.length-1]||{points:0,combo:0};
+ panel(235,584,730,130,'#fff8eccc',null,24);
+ text('ROUND '+(state.phase+1)+'/6 CLEAR  ·  +'+round.points.toLocaleString()+' POINTS  ·  BEST COMBO ×'+round.combo,600,614,18,'#3f7180',900,'center');
+ text('SHIFT SCORE '+state.score.toLocaleString()+'   ·   TEAM '+state.team.toFixed(1)+'   ·   KPI '+state.kpi.toFixed(1),600,650,17,'#426e73',900,'center');
+ text('PERKS '+state.perks.length+'   ·   SHIELDS '+state.wardMax+'   ·   ESC PAUSE  ·  M MUTE  ·  F FULLSCREEN',600,683,14,'#6a9996',800,'center');
 }
 function victoryScreen(){panel(0,0,W,H,'#143544',null,0);text('YOU SURVIVED THE SHIFT!',600,105,52,PAPER,900,'center');text('SAME WORK. DIFFERENT SCOREBOARD.',600,164,22,GOLD,900,'center');bossArt(70,260,1.1);panel(443,228,655,319,'#244955','#3e7180',18,4);text('WHO GETS TO KEEP SCORE?',767,269,23,GOLD,900,'center');let score=state.finalChoice==='humans'?Math.round(state.score*.72+state.team*620+state.adClosed*70+state.adUsed*90):Math.round(state.score*1.55+state.kpi*470+state.adOpened*230);text(score.toLocaleString(),775,361,77,state.finalChoice==='humans'?MINT:GOLD,900,'center');text(state.finalChoice==='humans'?'THE CREW':'CORPORATE KPI',779,418,19,PAPER,900,'center');text('REAL HELP '+state.adUsed+'  •  SPAM BLOCKED '+state.adClosed,776,488,16,'#b5d8d1',900,'center');button(448,574,303,66,'PEOPLE  ♥',()=>{state.finalChoice='humans';sound('good')},{bg:MINT,size:22});button(765,574,303,66,'KPI  ★',()=>{state.finalChoice='kpi';sound('hit')},{bg:GOLD,size:22});button(448,662,303,60,'PLAY ANOTHER RUN ↻',reset,{bg:'#e8cf9d',size:18});button(765,662,303,60,'WHY THIS GAME? ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});text('YOUR BEST '+state.best.toLocaleString(),186,558,18,'#c4e1d9',900,'center')}
 function hud(){playfield();header();progress()}
-function pauseScreen(){panel(241,164,718,448,'#f8eac7',INK,19,6);text('UNPAID BREAK',600,233,45,INK,900,'center');text('EVERYTHING STOPS. EVEN THE POPUPS.',600,297,18,'#718785',900,'center');button(400,351,403,65,'BACK TO CHAOS ▶',()=>state.screen='play',{bg:MINT,size:25});button(400,434,403,60,'THE REAL RESEARCH ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:19});button(400,511,403,55,'ABANDON RUN ↻',reset,{bg:GOLD,size:20});text('M MUTE   •   F TRUE FULLSCREEN   •   ESC RESUME',600,603,13,'#d2e9df',800,'center')}
+function pauseScreen(){
+ panel(240,132,720,536,'#f8eac7',INK,23,6);
+ text('UNPAID BREAK',600,205,43,INK,900,'center');
+ text('ROUND '+(state.phase+1)+'/6   ·   '+state.progress+'/'+state.target+' TARGETS   ·   SCORE '+state.score.toLocaleString(),600,258,18,'#4f7175',900,'center');
+ text('COMBO ×'+state.combo+'   ·   TEAM '+state.team.toFixed(1)+'   ·   KPI '+state.kpi.toFixed(1)+'   ·   PERKS '+state.perks.length,600,291,16,'#718785',800,'center');
+ button(400,327,403,60,'BACK TO CHAOS ▶',()=>state.screen='play',{bg:MINT,size:24});
+ button(400,399,403,54,'THE REAL RESEARCH ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});
+ button(400,466,403,51,'ABANDON RUN ↻',reset,{bg:GOLD,size:19});
+ button(364,533,225,50,state.muted?'UNMUTE  ♪':'MUTE  ♪',()=>state.muted=!state.muted,{bg:'#d6e9e5',size:18});
+ button(610,533,225,50,'FULLSCREEN  ⛶',()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{})},{bg:'#d6e9e5',size:18});
+ text('CLICK THE TIMER TO PAUSE  ·  ESC RESUME  ·  M MUTE  ·  F FULLSCREEN',600,625,13,'#688e8c',800,'center')
+}
 function render(){
  btns.length=0;canvas.style.cursor='crosshair';const links=document.getElementById('links');
  const show=state.screen==='title'||state.screen==='intro';if(links.style.display!==(show?'flex':'none'))links.style.display=show?'flex':'none';
