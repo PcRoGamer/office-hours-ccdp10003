@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head>
+<link rel="icon" href="./favicon.ico" type="image/x-icon"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QUOTA PANIC · Cartoon Catastrophe</title><meta name="description" content="Six fast, ridiculous office microgames. Cute coworkers, helpful hotfixes, dangerous scams, and a very angry printer.">
 <style>
 :root{color-scheme:dark;--ink:#0d2736;--cream:#fff3d3;--gold:#f4bf65;--mint:#78dac7;--red:#ff7581}
@@ -364,9 +365,34 @@ function draftScreen(){
  for(let i=0;i<state.draftOffer.length;i++)perkCard(91+i*347,222,319,342,state.draftOffer[i]);
  panel(285,596,635,59,'#fff8eccc',null,24);
  text('SCORE '+state.score.toLocaleString()+'   ♥ '+state.health+'   ·   '+(state.phase+1)+'/6 DONE',602,623,20,'#3f7180',900,'center');
- text('One pick. Back to the chaos.',600,686,16,'#6a9996',800,'center');
+ text('ONE PICK · '+stages[state.phase].source,600,680,14,'#478c81',900,'center');
+ text(stages[state.phase].take,600,715,16,'#516f7c',700,'center');
 }
-function victoryScreen(){panel(0,0,W,H,'#143544',null,0);text('YOU SURVIVED THE SHIFT!',600,105,52,PAPER,900,'center');text('SAME WORK. DIFFERENT SCOREBOARD.',600,164,22,GOLD,900,'center');bossArt(70,260,1.1);panel(443,228,655,319,'#244955','#3e7180',18,4);text('WHO GETS TO KEEP SCORE?',767,269,23,GOLD,900,'center');let score=state.finalChoice==='humans'?Math.round(state.score*.72+state.team*620+state.adClosed*70+state.adUsed*90):Math.round(state.score*1.55+state.kpi*470+state.adOpened*230);text(score.toLocaleString(),775,361,77,state.finalChoice==='humans'?MINT:GOLD,900,'center');text(state.finalChoice==='humans'?'THE CREW':'CORPORATE KPI',779,418,19,PAPER,900,'center');text('REAL HELP '+state.adUsed+'  •  SPAM BLOCKED '+state.adClosed,776,488,16,'#b5d8d1',900,'center');button(448,574,303,66,'PEOPLE  ♥',()=>{state.finalChoice='humans';sound('good')},{bg:MINT,size:22});button(765,574,303,66,'KPI  ★',()=>{state.finalChoice='kpi';sound('hit')},{bg:GOLD,size:22});button(448,662,303,60,'PLAY ANOTHER RUN ↻',reset,{bg:'#e8cf9d',size:18});button(765,662,303,60,'WHY THIS GAME? ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});text('YOUR BEST '+state.best.toLocaleString(),186,558,18,'#c4e1d9',900,'center')}
+function victoryScreen(){
+ panel(0,0,W,H,'#143544',null,0);
+ text('YOU SURVIVED THE SHIFT!',600,105,52,PAPER,900,'center');
+ text('SAME WORK. DIFFERENT SCOREBOARD.',600,164,22,GOLD,900,'center');
+ bossArt(70,260,1.1);
+ panel(443,228,655,319,'#244955','#3e7180',18,4);
+ text('WHO GETS TO KEEP SCORE?',767,269,23,GOLD,900,'center');
+ // The game must not silently pick a corporate scoring policy for the player.
+ const crew=Math.round(state.score*.72+state.team*620+state.adClosed*70+state.adUsed*90);
+ const corporate=Math.round(state.score*1.55+state.kpi*470+state.adOpened*230);
+ const chosen=state.finalChoice;
+ const score=chosen==='humans'?crew:chosen==='kpi'?corporate:null;
+ text(score===null?'?':score.toLocaleString(),775,357,77,chosen==='humans'?MINT:chosen==='kpi'?GOLD:PAPER,900,'center');
+ text(chosen==='humans'?'THE CREW':chosen==='kpi'?'CORPORATE KPI':'PICK A SCORING POLICY',779,416,19,PAPER,900,'center');
+ text(chosen==='humans'?'Support, attention and useful help count.':
+      chosen==='kpi'?'Output, bonuses and commercial clicks count.':
+      'The same shift can be counted two different ways.',779,459,15,'#d8e5de',700,'center');
+ text('REAL HELP '+state.adUsed+'  ·  SPAM BLOCKED '+state.adClosed,776,492,16,'#b5d8d1',900,'center');
+ text('FICTIONAL RULES, NOT OBJECTIVE PERFORMANCE MEASURES.',779,526,12,'#b7d2c8',700,'center');
+ button(448,574,303,66,chosen==='humans'?'✓ PEOPLE':'PEOPLE  ♥',()=>{state.finalChoice='humans';sound('good')},{bg:MINT,size:22});
+ button(765,574,303,66,chosen==='kpi'?'✓ KPI':'KPI  ★',()=>{state.finalChoice='kpi';sound('hit')},{bg:GOLD,size:22});
+ button(448,662,303,60,'PLAY ANOTHER RUN ↻',reset,{bg:'#e8cf9d',size:18});
+ button(765,662,303,60,'WHY THIS GAME? ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});
+ text('BEST BASE SCORE '+state.best.toLocaleString(),186,558,18,'#c4e1d9',900,'center')
+}
 function hud(){playfield();header();progress()}
 function pauseScreen(){panel(241,164,718,448,'#f8eac7',INK,19,6);text('UNPAID BREAK',600,233,45,INK,900,'center');text('EVERYTHING STOPS. EVEN THE POPUPS.',600,297,18,'#718785',900,'center');button(400,351,403,65,'BACK TO CHAOS ▶',()=>state.screen='play',{bg:MINT,size:25});button(400,434,403,60,'THE REAL RESEARCH ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:19});button(400,511,403,55,'ABANDON RUN ↻',reset,{bg:GOLD,size:20});text('M MUTE   •   F TRUE FULLSCREEN   •   ESC RESUME',600,603,13,'#d2e9df',800,'center')}
 function render(){

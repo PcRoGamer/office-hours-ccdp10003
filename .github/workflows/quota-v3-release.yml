@@ -1,0 +1,79 @@
+name: Quota Panic V3 full-campaign and submission regression
+on:
+  push:
+    branches: [main, feat/quota-panic-v3-h1]
+    paths:
+      - 'arcade.html'
+      - 'arcade-v3.html'
+      - 'index.html'
+      - 'README.md'
+      - 'gallery.html'
+      - 'qa/quota-v3-full-campaign.test.cjs'
+      - 'qa/2d-root.test.cjs'
+      - '.github/workflows/quota-v3-release.yml'
+  pull_request:
+    paths:
+      - 'arcade.html'
+      - 'arcade-v3.html'
+      - 'index.html'
+      - 'qa/quota-v3-full-campaign.test.cjs'
+      - 'qa/2d-root.test.cjs'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Source identity and JS syntax
+        run: |
+          node --check qa/quota-v3-full-campaign.test.cjs
+          node --check qa/2d-root.test.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          assert Path('arcade-v3.html').read_bytes()==Path('arcade.html').read_bytes()
+          text=Path('index.html').read_text()
+          assert 'url=./arcade.html' in text
+          assert "location.replace(new URL('./arcade.html'" in text
+          for f in ['arcade-v2.html','arcade-classic.html','2d.html','legacy-3d.html']:
+              assert Path(f).is_file(),f
+          print('CURRENT_RELEASE_IDENTITY_PASS')
+          PY
+      - name: Serve the exact proposed release
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/arcade3.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/arcade.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/arcade3.log
+          exit 1
+      - name: Canonical URL launches V3; older editions preserved
+        run: node qa/2d-root.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - name: Complete all six arcade stages with worker-support upgrades
+        run: node qa/quota-v3-full-campaign.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/arcade.html
+          QUOTA_POLICY: crew
+      - name: Complete all six stages with high-pressure KPI upgrades
+        run: node qa/quota-v3-full-campaign.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/arcade.html
+          QUOTA_POLICY: kpi
+      - name: Legacy 2D Shift File still completes its six reports
+        run: node qa/full-2d.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quota-v3-complete-campaign-screens
+          path:
+            qa-artifacts/
+          if-no-files-found: ignore

@@ -1,4 +1,4 @@
-name: Full 2D edition regression
+name: Preserved Shift File 2D and current arcade entry
 on:
   push:
     branches: [main, work/full-2d-20261106, work/promote-full-2d-20261106]
@@ -25,7 +25,7 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/office2d.log 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/2d.html >/dev/null && exit 0; sleep 1; done
           exit 1
-      - name: Canonical 2D entry and preserved legacy route
+      - name: Current Quota Panic entry and preserved older editions
         run: node qa/2d-root.test.cjs
         env:
           TEST_BASE_URL: http://127.0.0.1:4173/
