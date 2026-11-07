@@ -12,7 +12,7 @@ const tasks=[
  {kind:'people',app:'Applicants',title:'Review applications',dept:'HUMAN RESOURCES',sender:'RECRUITMENT DESK',blurb:'Three candidates, one records-coordinator position. Evaluate evidence, not prestige.',tag:'HIRING ROUND'},
  {kind:'word',app:'Writer',title:'Licence allocation memo',dept:'INFORMATION SYSTEMS',sender:'IT HELPDESK',blurb:'Accurate totals do not tell the board who loses access. Write the recommendation.',tag:'LICENCE POLICY'},
  {kind:'slides',app:'Slides',title:'Build the engagement deck',dept:'MARKETING',sender:'CAMPAIGN TEAM',blurb:'What gets shown changes what gets rewarded. Present evidence, not just applause.',tag:'BOARD PRESENTATION'},
- {kind:'archive',app:'Case Files',title:'Assemble the executive dossier',dept:'EXECUTIVE OFFICE',sender:'MIRA / PERSONNEL',blurb:'Bring three records to the final review. There is room for evidence, or a flattering leaderboard.',tag:'FINAL BOARD PACK'}
+ {kind:'archive',app:'Case Files',title:'Assemble the executive dossier',dept:'EXECUTIVE OFFICE',sender:'MIRA / PERSONNEL',blurb:'Bring only three records to final review. Four legitimate perspectives are available; one must be left out.',tag:'FINAL BOARD PACK'}
 ];
 const documents={
  1:{title:'Night Shift Participation',by:'People Operations / internal notice',prompts:[
@@ -38,7 +38,7 @@ const assets=[
  {id:'finance',name:'Finance reconciliation',detail:'Verified reimbursement and supplier totals.',type:'VERIFIED'},
  {id:'staff',name:'Workforce & access record',detail:'Headcount and the licensing trade-off.',type:'VERIFIED'},
  {id:'campaign',name:'Campaign evidence',detail:'Engagement claims and what they omit.',type:'VERIFIED'},
- {id:'leaderboard',name:'Executive leaderboard',detail:'A perfect score with no documented methodology.',type:'UNVERIFIED'}
+ {id:'testimony',name:'Worker testimony',detail:'Fourteen anonymous accounts, dated and corroborated. A voluntary sample cannot represent everyone.',type:'ATTESTED'}
 ];
 const sources={
  0:['Game rewards and motivation','https://doi.org/10.1108/JWL-09-2024-0193'],
@@ -67,7 +67,7 @@ function auditConsequences(){
  assess(it.licences,it.licences==='protect');assess(it.risk,it.risk==='truth');
  for(const k of ['claim','proof','conclusion'])assess(sl[k],sl[k]==='truth');
  assess(sl.policy,sl.policy==='disclose');
- if(Array.isArray(pack.evidence)&&pack.evidence.length===3)assess(pack.evidence.join(','),!pack.evidence.includes('leaderboard'));
+ if(selectedEvidence(pack).length===3)assess(selectedEvidence(pack).join(','),true);
  return {integrity,heat,checks};
 }
 function consequenceRibbon(){const x=auditConsequences();
@@ -210,8 +210,7 @@ function impactSummary(){
  else if(it.risk)cost.push('the licence memo omitted a service risk');
  if(sl.claim==='truth'&&sl.proof==='truth'&&sl.conclusion==='truth')good.push('the board deck displayed costs alongside engagement');
  else if(sl.claim||sl.proof||sl.conclusion)cost.push('the board deck selectively presented engagement metrics');
- if((pack.evidence||[]).includes('leaderboard'))cost.push('a methodology-free leaderboard displaced part of the evidence');
- else if((pack.evidence||[]).length===3)good.push('the dossier preserved the complete evidence trail');
+ if(selectedEvidence(pack).length===3)good.push('the board received three documented sources under an explicit capacity limit');
  return {good,cost};
 }
 function annotateConsequences(){
@@ -238,7 +237,7 @@ function annotateConsequences(){
    entry.quest===2?(s.applicant==='B'?'Your chosen applicant has demonstrated audit evidence.':'Your chosen applicant has weaker documented reconciliation evidence.'):
    entry.quest===3?(s.risk==='truth'?'The licence memo records the operational cost of the budget decision.':'The budget number is filed without a full statement of operational cost.'):
    entry.quest===4?(s.claim==='truth'&&s.proof==='truth'&&s.conclusion==='truth'?'The board deck includes limitations and a recommendation to examine incentives.':'The presentation amplifies the performance score while leaving out context.'):
-   entry.quest===5?((s.evidence||[]).includes('leaderboard')?'An unverified leaderboard displaced evidence in the final dossier.':'The final dossier preserves the verification trail.'):'The report has been filed.';
+   entry.quest===5?(missingEvidence(s)?'The board pack is incomplete by design. Excluded: '+missingEvidence(s).name+'. '+evidenceBlindspots[missingEvidence(s).id]:'The board pack is awaiting three selected records.'):'The report has been filed.';
   const receipt=document.createElement('div');receipt.className='ow-receipt';receipt.style.cssText='background:#e3f2e9;border-left:3px solid #2a9075;padding:9px 12px;margin:10px auto;color:#2b574b;font:600 11px/1.45 Outfit,Arial,sans-serif;max-width:570px';receipt.textContent='WORKDAY RECORD · '+outcome;
   const target=reward.querySelector('div');if(target)target.appendChild(receipt)
  }
