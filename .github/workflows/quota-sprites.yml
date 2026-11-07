@@ -1,0 +1,83 @@
+name: Quota Panic generated sprites and gameplay
+on:
+  push:
+    branches: [feat/quota-panic-genai-sprite-atlas]
+    paths:
+      - 'arcade.html'
+      - 'arcade-v3.html'
+      - 'assets/quota-characters.svg'
+      - 'qa/quota-sprite-*'
+      - '.github/workflows/quota-sprites.yml'
+  pull_request:
+    paths:
+      - 'arcade.html'
+      - 'arcade-v3.html'
+      - 'assets/quota-characters.svg'
+      - 'qa/quota-sprite-*'
+  workflow_dispatch:
+jobs:
+  visual-and-gameplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install headless browser
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Audit sprite atlas and inline scripts
+        run: |
+          node --check qa/quota-sprite-visual.test.cjs
+          node --check qa/quota-sprite-full-campaign.test.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree as E
+          a=Path('assets/quota-characters.svg')
+          assert 10000<a.stat().st_size<150000
+          svg=E.parse(a).getroot()
+          assert svg.get('viewBox')=='0 0 768 1024'
+          assert len(list(svg))>5
+          for f in ('arcade.html','arcade-v3.html'):
+              t=Path(f).read_text()
+              assert "characterAtlas.src='./assets/quota-characters.svg'" in t
+              assert 'function atlasPose(' in t
+              assert 'characterAtlasReady' in t
+          assert Path('arcade.html').read_bytes()==Path('arcade-v3.html').read_bytes()
+          assert not any(bad in a.read_text() for bad in ('<script','<foreignObject','http://','https://'))
+          print('GENERATED_SPRITE_ATLAS_STRUCTURE_PASS')
+          PY
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('arcade.html').read_text()
+          x=re.search(r'(?s)<script>(.*?)</script>',s)
+          assert x and len(x[1])>30000
+          Path('/tmp/quota-art-inline.js').write_text(x[1])
+          PY
+          node --check /tmp/quota-art-inline.js
+      - name: Serve isolated candidate
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/quota-sprites-http.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/arcade.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/quota-sprites-http.log
+          exit 1
+      - name: Sprite loading, visible rendering, and responsive title
+        run: node qa/quota-sprite-visual.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/arcade.html
+      - name: Crew-leaning full campaign
+        run: node qa/quota-sprite-full-campaign.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/arcade.html
+          QUOTA_POLICY: crew
+          QUOTA_MAX_MS: '175000'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quota-generated-sprite-visuals
+          path: |
+            qa-artifacts/sprite-comparison/
+            qa-artifacts/quota-v3-crew/
+          if-no-files-found: ignore
