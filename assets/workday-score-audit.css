@@ -1,0 +1,37 @@
+/* Optional, postgame scoring audit. Kept separate from the six-task campaign layout. */
+.ow-audit-launch{float:right;display:inline-flex;align-items:center;justify-content:center;min-height:29px;margin:0 0 0 12px;padding:5px 10px;border:1px solid #2c775d;background:#1d725b;color:#fff;border-radius:4px;font:800 10px/1.2 'Outfit',system-ui,sans-serif;letter-spacing:.035em;cursor:pointer;white-space:nowrap}
+.ow-audit-launch:hover,.ow-audit-launch:focus-visible{background:#124d43;outline:2px solid #efd28f;outline-offset:2px}
+.ow-audit-shade{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:14px;background:rgba(8,27,38,.86);font-family:'Outfit',system-ui,sans-serif;color:#193c49;pointer-events:auto}
+.ow-audit-dialog{width:min(775px,100%);max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;background:#f5f0e6;border:3px solid #f3c18a;box-shadow:0 21px 80px #000b,0 0 0 6px #113b4a;scrollbar-width:thin}
+.ow-audit-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:19px 24px 15px;background:#183745;color:#fff1d1;border-bottom:4px solid #dea36b}
+.ow-audit-head small{font:800 10px/1.3 'DM Mono',monospace;letter-spacing:.12em;color:#f0c28a}
+.ow-audit-head h2{margin:5px 0 3px;color:#fff3de;font:900 clamp(28px,4vw,41px)/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.005em}
+.ow-audit-head p{margin:5px 0 0;color:#d0dfe0;font:550 12px/1.4 'Outfit',system-ui,sans-serif}
+.ow-audit-close{min-width:35px;min-height:35px;padding:0;border:1px solid #92b7b4;background:#315763;color:white;border-radius:3px;cursor:pointer;font:700 23px/1 Arial,sans-serif}
+.ow-audit-close:hover,.ow-audit-close:focus-visible{background:#537888;outline:2px solid #f1cb8a;outline-offset:2px}
+.ow-audit-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-bottom:1px solid #98aca5;background:#d5dfd6}
+.ow-audit-tabs button{min-height:46px;padding:10px 7px;border:0;border-right:1px solid #b5c4b9;border-bottom:3px solid transparent;background:transparent;color:#425c5c;font:800 11px/1.25 'Outfit',system-ui,sans-serif;cursor:pointer;letter-spacing:.02em}
+.ow-audit-tabs button[aria-selected=true]{background:#fff9ed;border-bottom-color:#d07f3c;color:#224d4c}
+.ow-audit-tabs button:focus-visible{outline:2px solid #176c5d;outline-offset:-3px}
+.ow-audit-workspace{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.15fr);gap:17px;padding:19px 22px 12px}
+.ow-audit-grading{background:#174455;color:#fff4dd;padding:17px 16px;border:1px solid #3b7783}
+.ow-audit-overline{display:block;color:#d2dbcf;font:800 9px 'DM Mono',monospace;letter-spacing:.09em}
+.ow-audit-score{margin:5px 0 8px;font:900 54px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.02em;color:#f4d099;font-variant-numeric:tabular-nums}
+.ow-audit-track{height:9px;overflow:hidden;background:#3b6471;border-radius:2px}
+.ow-audit-track i{display:block;height:100%;background:linear-gradient(90deg,#7ab5a1,#f0c47a);transition:width .22s ease}
+.ow-audit-model-name{margin:11px 0 0;color:#e8f0e7;font:700 12px/1.4 'Outfit',system-ui,sans-serif}
+.ow-audit-interpretation{display:grid;grid-template-columns:1fr;align-content:center;gap:4px;padding:2px 0}
+.ow-audit-caption{color:#94643d;font:900 10px/1.2 'DM Mono',monospace;letter-spacing:.08em}
+.ow-audit-interpretation p{margin:0 0 10px;color:#355159;font:550 12px/1.5 'Outfit',system-ui,sans-serif}
+.ow-audit-record{display:flex;gap:11px;align-items:flex-start;margin:2px 22px 9px;padding:10px 12px;border-left:4px solid #287d67;background:#e5eee4;color:#3d5754}
+.ow-audit-record b{flex:none;color:#235d53;font:900 10px/1.4 'DM Mono',monospace}
+.ow-audit-record span{font:600 11px/1.45 'Outfit',system-ui,sans-serif}
+.ow-audit-method{margin:0 22px 12px;padding:8px 11px;border:1px solid #d7d5c3;background:#fffdf7;color:#53625a;font:550 11px/1.5 'Outfit',system-ui,sans-serif}
+.ow-audit-method summary{cursor:pointer;font:800 11px 'Outfit',system-ui,sans-serif;color:#2e6b5b}
+.ow-audit-method p{margin:7px 0}
+.ow-audit-footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 22px 15px;border-top:1px solid #d9d9cd;color:#5a6a66;font:600 11px/1.4 'Outfit',system-ui,sans-serif}
+.ow-audit-footer span{flex:1;min-width:175px}
+.ow-audit-footer a{color:#216d5c;font:800 10px 'Outfit',system-ui,sans-serif;text-underline-offset:3px}
+@media(max-width:680px){.ow-audit-shade{padding:7px}.ow-audit-dialog{max-height:calc(100vh - 14px)}.ow-audit-head{padding:12px 14px}.ow-audit-workspace{grid-template-columns:1fr;padding:12px 14px;gap:10px}.ow-audit-grading{padding:10px 13px}.ow-audit-score{font-size:38px}.ow-audit-record{margin:2px 14px 8px;display:block}.ow-audit-record b{display:block;margin-bottom:3px}.ow-audit-method{margin:0 14px 9px}.ow-audit-footer{padding:10px 14px}.ow-audit-tabs button{font-size:9px;min-height:42px}}
+@media(max-height:650px){.ow-audit-head{padding-top:10px;padding-bottom:9px}.ow-audit-head h2{font-size:28px}.ow-audit-workspace{padding-top:10px;padding-bottom:7px}.ow-audit-score{font-size:42px}.ow-audit-grading{padding:11px}.ow-audit-interpretation p{font-size:11px;margin-bottom:6px}.ow-audit-tabs button{min-height:38px}.ow-audit-footer{padding-top:8px;padding-bottom:8px}}
+@media(prefers-reduced-motion:reduce){.ow-audit-track i{transition:none}}
