@@ -1,6 +1,7 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QUOTA PANIC · Cartoon Catastrophe</title><meta name="description" content="Six fast, ridiculous office microgames. Cute coworkers, helpful hotfixes, dangerous scams, and a very angry printer.">
+<html lang="en"><head>
+<link rel="preload" href="./assets/quota-characters.svg" as="image" type="image/svg+xml"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QUOTA PANIC ┬╖ Cartoon Catastrophe</title><meta name="description" content="Six fast, ridiculous office microgames. Cute coworkers, helpful hotfixes, dangerous scams, and a very angry printer.">
 <style>
 :root{color-scheme:dark;--ink:#0d2736;--cream:#fff3d3;--gold:#f4bf65;--mint:#78dac7;--red:#ff7581}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#102838;font-family:'Trebuchet MS',Verdana,Arial,sans-serif;touch-action:none}
@@ -23,29 +24,48 @@ canvas{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;o
 <script>
 (()=>{'use strict';
 const canvas=document.getElementById('game'),c=canvas.getContext('2d'),W=1200,H=760;
+
+// Generated, original office-character art: row 0 Folder, 1 Printer,
+// 2 Clipboard/HR, 3 KPI bar-graph. 3 emotions in each 256px cell.
+// Use a cached SVG atlas as a CanvasImageSource. No per-frame image allocation.
+const characterAtlas=new Image();
+let characterAtlasReady=false;
+characterAtlas.decoding='async';
+characterAtlas.onload=()=>{characterAtlasReady=characterAtlas.naturalWidth===768&&characterAtlas.naturalHeight===1024};
+characterAtlas.onerror=()=>{characterAtlasReady=false};
+characterAtlas.src='./assets/quota-characters.svg';
+function atlasPose(row,pose,x,y,w,h,rot=0,sx=1,sy=1){
+ if(!characterAtlasReady)return false; // Original vector primitives remain a fallback.
+ const col=Math.max(0,Math.min(2,pose|0));
+ const rr=Math.max(0,Math.min(3,row|0));
+ c.save();c.translate(x+w*.5,y+h*.5);c.rotate(rot);c.scale(sx,sy);
+ c.drawImage(characterAtlas,col*256,rr*256,256,256,-w*.5,-h*.5,w,h);
+ c.restore();return true;
+}
+
 const INK='#123043',DARK='#0e2532',MINT='#82d9c3',GOLD='#f2c16e',RED='#f77c81',PAPER='#fff2d6',BLUE='#5683a2';const stageColors=['#ffe3d9','#e2f7e5','#e9e4fc','#e5e7ff','#fff0dc','#d9edff'];
 const arena={x:0,y:0,w:1200,h:760};const PLAY_SCALE=1.45,PLAY_OFFSET=215;const stagePoint=y=>y*PLAY_SCALE-PLAY_OFFSET,logicPoint=y=>(y+PLAY_OFFSET)/PLAY_SCALE;
 const stages=[
- {name:'STAMP RUSH',tag:'PAPERWORK, BUT VIOLENT',icon:'✦',objective:'STAMP THE GOOD STUFF',hint:'CLICK THE GREEN FORMS · LEAVE THE RED SPAM',target:8,seconds:34,source:'WORK GAMIFICATION',url:'https://doi.org/10.1016/j.elerap.2020.100994',take:'Points make the dull stuff exciting. That is the hook.'},
- {name:'FILE FRENZY',tag:'DRAG & DROP DISASTER',icon:'↗',objective:'FLING THE FILES HOME',hint:'DRAG TEAL FILES LEFT · CORAL FILES RIGHT',target:6,seconds:38,source:'MDA · HUNICKE ET AL.',url:'https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/',take:'A tiny rule turns ordinary movement into a challenge.'},
- {name:'PRINTER REVENGE',tag:'THE PAPER FIGHTS BACK',icon:'▣',objective:'DEFEAT THE JAM-O-TRON',hint:'CLICK THE PRINTER TO STAMP · DODGE FLYING PAPER',target:12,seconds:44,source:'INTERRUPTIONS · MARK ET AL.',url:'https://doi.org/10.1145/1357054.1357072',take:'Interruptions may speed us up, but they raise the pressure.'},
- {name:'SLIDE SHOWDOWN',tag:'HIDE NOTHING. HIDE EVERYTHING.',icon:'◫',objective:'PUNCH HOLES IN THE HYPE',hint:'TRACK THE GREEN EVIDENCE WITH YOUR SPOTLIGHT · AVOID RED' ,target:8,seconds:38,source:'PERSUASIVE GAMES · BOGOST',url:'https://mitpress.mit.edu/9780262026147/persuasive-games/',take:'The rules decide which numbers look like success.'},
- {name:'RECRUITMENT RUMBLE',tag:'THE RESUMES ARE ALIVE',icon:'★',objective:'RESCUE YOUR COWORKERS',hint:'HOLD MOUSE & SWEEP UP STAFF · AVOID HR BOTS',target:6,seconds:37,source:'WORKPLACE PLAY · BUTLER & SPOELSTRA',url:'https://link.springer.com/article/10.1007/s10551-023-05584-w',take:'Real play can be shared. A scoreboard belongs to someone.'},
- {name:'THE KPI MONSTER',tag:'YOUR BOSS IS A SPREADSHEET',icon:'!',objective:'REWRITE THE RULES',hint:'STAMP THE BOSS · DODGE THE DATA · CLOSE POP-UPS',target:18,seconds:63,source:'GAME ECONOMIES · CCDP10003',url:'https://canvas.lms.unimelb.edu.au/courses/239834/modules',take:'Who gets to say what counts as a win?'}
+ {name:'STAMP RUSH',tag:'PAPERWORK, BUT VIOLENT',icon:'Γ£ª',objective:'STAMP THE GOOD STUFF',hint:'CLICK THE GREEN FORMS ┬╖ LEAVE THE RED SPAM',target:8,seconds:34,source:'WORK GAMIFICATION',url:'https://doi.org/10.1016/j.elerap.2020.100994',take:'Points make the dull stuff exciting. That is the hook.'},
+ {name:'FILE FRENZY',tag:'DRAG & DROP DISASTER',icon:'Γåù',objective:'FLING THE FILES HOME',hint:'DRAG TEAL FILES LEFT ┬╖ CORAL FILES RIGHT',target:6,seconds:38,source:'MDA ┬╖ HUNICKE ET AL.',url:'https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/',take:'A tiny rule turns ordinary movement into a challenge.'},
+ {name:'PRINTER REVENGE',tag:'THE PAPER FIGHTS BACK',icon:'Γûú',objective:'DEFEAT THE JAM-O-TRON',hint:'CLICK THE PRINTER TO STAMP ┬╖ DODGE FLYING PAPER',target:12,seconds:44,source:'INTERRUPTIONS ┬╖ MARK ET AL.',url:'https://doi.org/10.1145/1357054.1357072',take:'Interruptions may speed us up, but they raise the pressure.'},
+ {name:'SLIDE SHOWDOWN',tag:'HIDE NOTHING. HIDE EVERYTHING.',icon:'Γù½',objective:'PUNCH HOLES IN THE HYPE',hint:'TRACK THE GREEN EVIDENCE WITH YOUR SPOTLIGHT ┬╖ AVOID RED' ,target:8,seconds:38,source:'PERSUASIVE GAMES ┬╖ BOGOST',url:'https://mitpress.mit.edu/9780262026147/persuasive-games/',take:'The rules decide which numbers look like success.'},
+ {name:'RECRUITMENT RUMBLE',tag:'THE RESUMES ARE ALIVE',icon:'Γÿà',objective:'RESCUE YOUR COWORKERS',hint:'HOLD MOUSE & SWEEP UP STAFF ┬╖ AVOID HR BOTS',target:6,seconds:37,source:'WORKPLACE PLAY ┬╖ BUTLER & SPOELSTRA',url:'https://link.springer.com/article/10.1007/s10551-023-05584-w',take:'Real play can be shared. A scoreboard belongs to someone.'},
+ {name:'THE KPI MONSTER',tag:'YOUR BOSS IS A SPREADSHEET',icon:'!',objective:'REWRITE THE RULES',hint:'STAMP THE BOSS ┬╖ DODGE THE DATA ┬╖ CLOSE POP-UPS',target:18,seconds:63,source:'GAME ECONOMIES ┬╖ CCDP10003',url:'https://canvas.lms.unimelb.edu.au/courses/239834/modules',take:'Who gets to say what counts as a win?'}
 ];
 let seed=76249;function random(){seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};function rr(a,b){return a+random()*(b-a)};function clamp(a,l,h){return Math.max(l,Math.min(h,a))};
 const state={screen:'title',phase:0,progress:0,target:0,clock:0,spawn:0,adTimer:0,score:0,combo:0,best:0,health:4,maxHealth:4,team:0,kpi:0,collect:0,choice:'',finalChoice:'',entities:[],ads:[],particles:[],floats:[],time:0,touch:false,muted:false,clickCool:0,shake:0,flash:0,stageDone:false,helpFrom:'title',bossPattern:0,misses:0,adSeen:0,adClosed:0,adOpened:0,adUsed:0,adMissed:0,realSeen:0,spamSeen:0,bonus:1,stamps:0,stats:[],titleAnim:0,runCount:0,strikes:0,bossCheckpoint:0,bossRetries:0,ward:0,wardMax:0,secondsBonus:0,helpChance:0,aim:0,slowed:false,slowUntil:0,slowSpeed:1,comboGuard:false,perks:[],draftOffer:[],draftOpen:false,runSeed:76249};
 const perkPool=[
- {id:'coffee',title:'DOUBLE ESPRESSO',effect:'+1 MAX FOCUS',detail:'Restore 2 hearts right now',color:'#a4e6cd',icon:'♥'},
- {id:'firewall',title:'FIREWALL 3000',effect:'BLOCK A HIT',detail:'Refresh a shield each round',color:'#c2dfff',icon:'◆'},
- {id:'minutes',title:'FLEX HOURS',effect:'+8 SECONDS',detail:'More room for every disaster',color:'#f4d9a5',icon:'⏱'},
- {id:'helpdesk',title:'VIP INBOX',effect:'MORE REAL HELP',detail:'Genuine popups show up more',color:'#b6e8e0',icon:'✉'},
- {id:'precision',title:'FAT FINGER',effect:'BIGGER TARGETS',detail:'Clicks get a generous hit zone',color:'#ecc7ef',icon:'✦'},
- {id:'slow',title:'CASUAL FRIDAY',effect:'SLOW HAZARDS',detail:'Flying office junk moves slower',color:'#c8d9ff',icon:'❄'},
- {id:'combo',title:'BONUS INSURANCE',effect:'SAVE YOUR COMBO',detail:'Mistakes no longer zero the streak',color:'#f7e2a2',icon:'★'},
- {id:'profit',title:'OVERTIME PAY',effect:'SCORE ×1.25',detail:'More points, slightly more spam',color:'#f8d5ad',icon:'$'},
- {id:'crew',title:'UNION HOTLINE',effect:'TEAM BACKUP',detail:'Hearts now; help at the boss',color:'#a1e8c0',icon:'♥'},
- {id:'kpi',title:'EXECUTIVE BONUS',effect:'BIG SCORE BOOST',detail:'Extra points. More distractions.',color:'#f6c58e',icon:'★'}
+ {id:'coffee',title:'DOUBLE ESPRESSO',effect:'+1 MAX FOCUS',detail:'Restore 2 hearts right now',color:'#a4e6cd',icon:'ΓÖÑ'},
+ {id:'firewall',title:'FIREWALL 3000',effect:'BLOCK A HIT',detail:'Refresh a shield each round',color:'#c2dfff',icon:'Γùå'},
+ {id:'minutes',title:'FLEX HOURS',effect:'+8 SECONDS',detail:'More room for every disaster',color:'#f4d9a5',icon:'ΓÅ▒'},
+ {id:'helpdesk',title:'VIP INBOX',effect:'MORE REAL HELP',detail:'Genuine popups show up more',color:'#b6e8e0',icon:'Γ£ë'},
+ {id:'precision',title:'FAT FINGER',effect:'BIGGER TARGETS',detail:'Clicks get a generous hit zone',color:'#ecc7ef',icon:'Γ£ª'},
+ {id:'slow',title:'CASUAL FRIDAY',effect:'SLOW HAZARDS',detail:'Flying office junk moves slower',color:'#c8d9ff',icon:'Γ¥ä'},
+ {id:'combo',title:'BONUS INSURANCE',effect:'SAVE YOUR COMBO',detail:'Mistakes no longer zero the streak',color:'#f7e2a2',icon:'Γÿà'},
+ {id:'profit',title:'OVERTIME PAY',effect:'SCORE ├ù1.25',detail:'More points, slightly more spam',color:'#f8d5ad',icon:'$'},
+ {id:'crew',title:'UNION HOTLINE',effect:'TEAM BACKUP',detail:'Hearts now; help at the boss',color:'#a1e8c0',icon:'ΓÖÑ'},
+ {id:'kpi',title:'EXECUTIVE BONUS',effect:'BIG SCORE BOOST',detail:'Extra points. More distractions.',color:'#f6c58e',icon:'Γÿà'}
 ];
 function readBest(){try{const p=JSON.parse(localStorage.getItem('quota-panic-best-v2')||'{}');state.best=Number(p.best)||0;state.runCount=Number(p.runs)||0}catch(e){}}
 function saveBest(){try{localStorage.setItem('quota-panic-best-v2',JSON.stringify({best:Math.max(state.best,state.score),runs:state.runCount}))}catch(e){}}
@@ -91,7 +111,7 @@ function popAd(){if(state.screen!=='play'||state.ads.length>=1)return;let real=s
  };
  let x=rr(165,780),y=rr(265,440);state.ads.push({x,y,w:264,h:154,t:0,life:9,real,type,word:content[type][0],benefit:content[type][1],sender:content[type][2]});state.adSeen++;if(real)state.realSeen++;else state.spamSeen++;sound(real?'notice':'scam')}
 function hurt(x,y,msg='FOCUS -1'){if(state.clickCool>0)return;if(state.ward>0){state.ward--;state.clickCool=.55;addFloat('FIREWALL BLOCK!',x,y,MINT,22);burst(x,y,MINT,9);sound('good');return}state.health--;if(!state.comboGuard)state.combo=0;else state.combo=Math.floor(state.combo*.5);state.misses++;state.clickCool=.72;addFloat(msg,x,y,RED,24);burst(x,y,RED,12);sound('bad');if(state.health<=0){state.health=2;state.combo=0;state.score=Math.max(0,state.score-180);state.ads=[];state.strikes++;state.screen='recover';sound('boom');failBop=1;announce('Out of focus. Try the current disaster again. Your run continues.')}}
-function gain(x,y,p=110){state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((p+state.combo*8)*state.bonus);state.stamps++;addFloat('+'+Math.round((p+state.combo*8)*state.bonus),x,y,MINT);burst(x,y,GOLD,13);sound('good');if(state.combo%5===0){addFloat('COMBO ×'+state.combo,x,y-60,GOLD,28);state.score+=100}if(state.progress>=state.target)finish()}
+function gain(x,y,p=110){state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((p+state.combo*8)*state.bonus);state.stamps++;addFloat('+'+Math.round((p+state.combo*8)*state.bonus),x,y,MINT);burst(x,y,GOLD,13);sound('good');if(state.combo%5===0){addFloat('COMBO ├ù'+state.combo,x,y-60,GOLD,28);state.score+=100}if(state.progress>=state.target)finish()}
 function finish(){if(state.stageDone)return;state.stageDone=true;state.stats.push({name:stages[state.phase].name,progress:state.progress,score:state.score,points:Math.max(0,state.score-(state.roundStartScore||0)),combo:state.roundPeakCombo||0});state.ads=[];state.entities=[];state.floats=[];state.combo=0;if(state.phase===5){state.screen='victory';state.best=Math.max(state.best,state.score);saveBest()}else{state.screen='draft';state.draftOffer=rollDraft();state.draftOpen=true}sound('done');announce(stages[state.phase].name+' cleared. Pick your next upgrade!')}
 function continueRun(){if(state.phase<stages.length-1)begin(state.phase+1);else state.screen='victory'}
 function selectPerk(id){const perk=perkPool.find(x=>x.id===id);if(!perk||state.screen!=='draft')return;state.perks.push(id);sound('perk');if(id==='coffee'){state.maxHealth=Math.min(8,state.maxHealth+1);state.health=Math.min(state.maxHealth,state.health+2)}
@@ -140,7 +160,7 @@ canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCa
 canvas.addEventListener('pointerup',e=>{e.preventDefault();mouse.down=false;const p=getPointer(e);if(mouse.drag){const f=mouse.drag;f.drag=false;const correct=f.teal?p.x<326:p.x>882;if((p.x<326||p.x>882)&&correct){if(state.entities.indexOf(f)>=0)state.entities.splice(state.entities.indexOf(f),1);state.progress++;state.combo++;state.roundPeakCombo=Math.max(state.roundPeakCombo||0,state.combo);state.score+=Math.round((150+state.combo*12)*state.bonus);addFloat('SLOTTED!',p.x,p.y,MINT,26);burst(p.x,p.y,MINT,18);sound('file');if(state.progress>=state.target)finish();else spawnFile()}else if(p.x<326||p.x>882){hurt(p.x,p.y,'WRONG DRAWER');f.x=rr(480,780);f.y=rr(325,525)}else{f.x=clamp(f.x,320,820);f.y=clamp(f.y,260,555)}mouse.drag=null}});
 canvas.addEventListener('pointercancel',()=>{mouse.drag=null;mouse.down=false});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.getElementById('help').classList.contains('show'))closeHelp();else if(state.screen==='play')state.screen='pause';else if(state.screen==='pause')state.screen='play'}if(e.key.toLowerCase()==='m')state.muted=!state.muted;if(e.key.toLowerCase()==='f'){if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{});}if(e.key==='Enter'||e.key===' '){if(state.screen==='title')start();else if(state.screen==='intro')begin(0);else if(state.screen==='draft'&&state.draftOffer.length)selectPerk(state.draftOffer[0].id);else if(state.screen==='recover')retryStage();e.preventDefault()}});
-function showHelp(type){let h=document.getElementById('help'),t=document.getElementById('help-title'),b=document.getElementById('help-body');state.helpFrom=state.screen;t.textContent=type==='play'?'HOW TO PLAY':'THE REAL RESEARCH';b.innerHTML=type==='play'?`<p><strong>JUST YOUR MOUSE.</strong> Click moving papers. Drag colourful files into matching drawers. Follow green charts with your cursor spotlight. Hold and sweep up coworkers. Close adverts with the X. During boss fights, stamp the enemy and dodge flying paper.</p><p>Six ridiculous disasters. Each clear gives you three upgrades: choose one to build your run. Some popups really heal, shield, help or slow danger; others are scams. Ignore them, accept them, or close them while the office attacks.</p><p><strong>Keyboard:</strong> Enter clocks in, Esc pauses, M toggles sound, F toggles true fullscreen.</p>`:`<p><strong>WHY THIS GAME, WHY NOW?</strong> Offices increasingly borrow game mechanics such as scores, feedback and rewards. Sometimes those make work more enjoyable. But when a corporation designs the rules, whose version of success is being rewarded? This arcade lets you feel the rush, then question the score.</p><p><strong>Evidence and influences:</strong></p><p>• <a target="_blank" rel="noopener" href="https://doi.org/10.1016/j.elerap.2020.100994">Work gamification and enjoyment/productivity (2020)</a></p><p>• <a target="_blank" rel="noopener" href="https://doi.org/10.1145/1357054.1357072">Mark, Gudith & Klocke (2008), interrupted work</a></p><p>• <a target="_blank" rel="noopener" href="https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/">Hunicke, LeBlanc & Zubek, MDA (2004)</a></p><p>• <a target="_blank" rel="noopener" href="https://mitpress.mit.edu/9780262026147/persuasive-games/">Bogost, Persuasive Games (2007)</a></p><p>• <a target="_blank" rel="noopener" href="https://link.springer.com/article/10.1007/s10551-023-05584-w">Butler & Spoelstra (2024), ethics of workplace gamification</a></p><p>The deliberately exaggerated office systems are satire, not empirical measurements of real workers. Original sounds and graphics were built for this game.</p>`;h.classList.add('show');if(state.screen==='play')state.screen='help'}
+function showHelp(type){let h=document.getElementById('help'),t=document.getElementById('help-title'),b=document.getElementById('help-body');state.helpFrom=state.screen;t.textContent=type==='play'?'HOW TO PLAY':'THE REAL RESEARCH';b.innerHTML=type==='play'?`<p><strong>JUST YOUR MOUSE.</strong> Click moving papers. Drag colourful files into matching drawers. Follow green charts with your cursor spotlight. Hold and sweep up coworkers. Close adverts with the X. During boss fights, stamp the enemy and dodge flying paper.</p><p>Six ridiculous disasters. Each clear gives you three upgrades: choose one to build your run. Some popups really heal, shield, help or slow danger; others are scams. Ignore them, accept them, or close them while the office attacks.</p><p><strong>Keyboard:</strong> Enter clocks in, Esc pauses, M toggles sound, F toggles true fullscreen.</p>`:`<p><strong>WHY THIS GAME, WHY NOW?</strong> Offices increasingly borrow game mechanics such as scores, feedback and rewards. Sometimes those make work more enjoyable. But when a corporation designs the rules, whose version of success is being rewarded? This arcade lets you feel the rush, then question the score.</p><p><strong>Evidence and influences:</strong></p><p>ΓÇó <a target="_blank" rel="noopener" href="https://doi.org/10.1016/j.elerap.2020.100994">Work gamification and enjoyment/productivity (2020)</a></p><p>ΓÇó <a target="_blank" rel="noopener" href="https://doi.org/10.1145/1357054.1357072">Mark, Gudith & Klocke (2008), interrupted work</a></p><p>ΓÇó <a target="_blank" rel="noopener" href="https://aaai.org/papers/ws04-04-001-mda-a-formal-approach-to-game-design-and-game-research/">Hunicke, LeBlanc & Zubek, MDA (2004)</a></p><p>ΓÇó <a target="_blank" rel="noopener" href="https://mitpress.mit.edu/9780262026147/persuasive-games/">Bogost, Persuasive Games (2007)</a></p><p>ΓÇó <a target="_blank" rel="noopener" href="https://link.springer.com/article/10.1007/s10551-023-05584-w">Butler & Spoelstra (2024), ethics of workplace gamification</a></p><p>The deliberately exaggerated office systems are satire, not empirical measurements of real workers. Original sounds and graphics were built for this game.</p>`;h.classList.add('show');if(state.screen==='play')state.screen='help'}
 function closeHelp(){document.getElementById('help').classList.remove('show');if(state.screen==='help')state.screen=state.helpFrom}
 document.getElementById('sources-link').onclick=e=>{e.preventDefault();showHelp('sources')};document.getElementById('how-link').onclick=e=>{e.preventDefault();showHelp('play')};document.getElementById('help-close').onclick=closeHelp;
 function update(dt){if(document.getElementById('help').classList.contains('show'))return;state.time+=dt;state.titleAnim+=dt;state.shake=Math.max(0,state.shake-dt*35);state.flash=Math.max(0,state.flash-dt);state.clickCool=Math.max(0,state.clickCool-dt);
@@ -183,6 +203,15 @@ function bg(){
 }
 function officeDecor(){c.save();panel(53,184,1094,482,'#ebdcb9','#224251',14,3);for(let i=0;i<10;i++){c.strokeStyle='#836c4a0c';c.lineWidth=3;c.beginPath();c.moveTo(90,225+i*47);c.lineTo(1120,225+i*47);c.stroke()}for(let j=0;j<4;j++){let x=115+j*285;panel(x,273,146,89,'#a0c9ba','#2a5962',12);panel(x+12,285,96,51,'#2d5f69','#112c3e',6);panel(x+25,294,70,7,'#b2ded2');panel(x+25,309,53,5,'#9cd0bd');panel(x+13,354,140,12,'#bc9975','#916d54',4)}c.restore()}
 function drawPrinter(x,y,scale=1,enemy=true){
+ const mob=state.entities.find(e=>e.kind==='printer');
+ const furious=state.screen==='play'&&state.phase===2;
+ const hurt=furious&&mob&&mob.hp<mob.maxHp*.38;
+ const pose=hurt?2:furious?(Math.sin(state.time*9)>-.18?1:0):0;
+ const spriteBob=Math.sin(state.time*6+x*.001)*3;
+ const punch=furious&&pose===1?1.035:1;
+ if(atlasPose(1,pose,x-18*scale,y-45*scale+spriteBob,262*scale,270*scale,
+   furious?Math.sin(state.time*13)*.032:0,punch,1/punch))return;
+
  c.save();c.translate(x,y);c.scale(scale,scale);const bob=Math.sin(state.time*7+x*.001)*3;
  shadow(110,177,117);c.translate(0,bob);
  // Cartoon shoes and a paper tongue instead of office-realistic equipment.
@@ -200,6 +229,12 @@ function drawPrinter(x,y,scale=1,enemy=true){
  c.restore();
 }
 function bossArt(x,y,scale=1){
+ const spritePhase=state.progress>=12?3:state.progress>=6?2:1;
+ const pose=state.screen==='victory'?2:spritePhase===1?0:1;
+ const spritePulse=1+Math.sin(state.time*6.5)*.032;
+ if(atlasPose(3,pose,x-8*scale,y-26*scale,275*scale,269*scale,
+   spritePhase>1?Math.sin(state.time*13)*.035:0,spritePulse,1/spritePulse))return;
+
  c.save();c.translate(x,y);c.scale(scale,scale);
  const pulse=1+Math.sin(state.time*7)*.025;const phase=state.progress>=12?3:state.progress>=6?2:1;
  shadow(132,204,126);c.translate(130,89);c.scale(pulse,pulse);c.translate(-130,-89);
@@ -216,6 +251,15 @@ function bossArt(x,y,scale=1){
  c.restore();
 }
 function personArt(x,y,color='#88d9c2',scale=1,exec=false){
+ const transition=state.screen==='recover'||state.screen==='draft';
+ const row=transition?0:(exec?2:0);
+ const pose=state.screen==='recover'?1:state.screen==='draft'?2:exec?(
+   Math.sin(state.time*7+x*.013)>0.75?1:0):0;
+ const spriteWob=Math.sin(state.time*5+(x+y)*.01)*.055;
+ if(atlasPose(row,pose,x-17*scale,y-29*scale,132*scale,148*scale,spriteWob,
+    1+Math.sin(state.time*7+x*.017)*.018,
+    1-Math.sin(state.time*7+x*.017)*.018))return;
+
  c.save();c.translate(x+44,y+60);const wob=Math.sin(state.time*5+(x+y)*.01)*.052;
  c.rotate(wob);c.scale(scale,scale);const hue=exec?'#f99aa6':color;
  const fl=Math.sin(state.time*6+(x%17))*.6;
@@ -241,13 +285,13 @@ function paperArt(e){
  panel(-e.w/2+12,-e.h/2+13,e.w-24,21,e.good?'#a8e9bc':'#ff9c9f',null,9);
  c.fillStyle='#344b59';c.beginPath();c.arc(-16,-2,4.5,0,7);c.arc(16,-2,4.5,0,7);c.fill();
  c.strokeStyle='#40586b';c.lineWidth=3;c.beginPath();if(e.good){c.arc(0,12,10,.08,Math.PI-.08)}else {c.arc(0,21,10,Math.PI+.1,Math.PI*2-.1)}c.stroke();
- text(e.good?'✓':'×',0,-29,27,e.good?'#2e876b':'#d94e68',900,'center');c.restore();
+ text(e.good?'Γ£ô':'├ù',0,-29,27,e.good?'#2e876b':'#d94e68',900,'center');c.restore();
 }
 function fileArt(e){
  c.save();c.translate(e.x+e.w/2,e.y+e.h/2);c.rotate(Math.sin(state.time*6+e.t)*.055+(e.drag?.055:0));const color=e.teal?'#9beed4':'#ffb2b2';
  shadow(0,67,55);panel(-e.w/2,-e.h/2,e.w,e.h,color,'#4e657b',19,4);panel(-e.w/2+10,-e.h/2-11,57,24,color,'#4e657b',11,3);
  c.fillStyle='#2e4c61';c.beginPath();c.arc(-17,-3,4,0,7);c.arc(15,-3,4,0,7);c.fill();c.strokeStyle='#3c5262';c.lineWidth=3;c.beginPath();c.arc(0,12,10,0,Math.PI);c.stroke();
- text(e.teal?'←':'→',0,-31,30,e.teal?'#217f75':'#b84d67',900,'center');c.restore();
+ text(e.teal?'ΓåÉ':'ΓåÆ',0,-31,30,e.teal?'#217f75':'#b84d67',900,'center');c.restore();
 }
 function chartArt(e){
  c.save();c.translate(e.x+e.w/2,e.y+e.h/2);c.rotate(Math.sin(state.time*4+e.t)*.06);
@@ -267,15 +311,15 @@ function adArt(ad){
  c.save();c.globalAlpha=opacity;panel(ad.x+7,y+9,ad.w,ad.h,'#21405525',null,20);
  panel(ad.x,y,ad.w,ad.h,'#fff9e9','#496174',19,3);
  panel(ad.x+1,y+1,ad.w-2,39,good?'#88dabb':'#ffa3ac',null,18);
- text(good?'♥  OFFICE HELP':'⚠  EXTERNAL OFFER',ad.x+13,y+20,13,'#234b55',900);
- panel(ad.x+ad.w-37,y+5,30,29,'#fff8e7','#507184',13,2);text('×',ad.x+ad.w-22,y+20,23,'#b64d6c',900,'center');
+ text(good?'ΓÖÑ  OFFICE HELP':'ΓÜá  EXTERNAL OFFER',ad.x+13,y+20,13,'#234b55',900);
+ panel(ad.x+ad.w-37,y+5,30,29,'#fff8e7','#507184',13,2);text('├ù',ad.x+ad.w-22,y+20,23,'#b64d6c',900,'center');
  text(ad.word,ad.x+14,y+66,17,INK,900);
  text(ad.benefit,ad.x+14,y+94,13,good?'#25826c':'#b45564',800);
  panel(ad.x+13,y+114,ad.w-26,29,good?'#bbf0d4':'#ffe0be',null,11);
  text(good?'ACCEPT HELP':'CLAIM OFFER?',ad.x+ad.w/2,y+129,13,INK,900,'center');c.restore();
 }
 function header(){
- const hearts='♥'.repeat(Math.max(0,state.health))+'♡'.repeat(Math.max(0,state.maxHealth-state.health));
+ const hearts='ΓÖÑ'.repeat(Math.max(0,state.health))+'ΓÖí'.repeat(Math.max(0,state.maxHealth-state.health));
  const hSize=state.maxHealth>6?16:22,heartWidth=Math.max(110,33+state.maxHealth*(state.maxHealth>6?17:24));
  const timeHover=mouse.x>=1076&&mouse.x<=1188&&mouse.rawY<66;
  c.save();c.shadowColor='#254b5d21';c.shadowBlur=9;c.shadowOffsetY=3;
@@ -300,8 +344,8 @@ function stageChip(head,sub,x,y){
  panel(x-235,y-16,470,62,'#fffaf0dd','#ffffffcf',28,2);
  text(head,x,y+5,22,'#355768',900,'center');text(sub,x,y+31,14,'#587986',800,'center');c.restore()
 }
-function drawStampStage(){stageChip('STAMP THE GOOD PAPERS','Click ✓. Skip ×.',600,219);for(let j=0;j<3;j++){panel(92,315+j*119,1003,15,'#83aca4',INK,5,2);for(let i=0;i<30;i++)panel(102+i*34,318+j*119,16,7,'#416e78',null,2)}for(const e of state.entities)if(e.kind==='paper')paperArt(e);}
-function drawFileStage(){panel(91,244,255,366,'#a0d8c7',INK,15,4);text('←  TEAL',219,283,29,INK,900,'center');text('SLAM FILES HERE',219,320,13,'#376f65',900,'center');panel(853,244,255,366,'#f1adb0',INK,15,4);text('CORAL  →',979,283,29,INK,900,'center');text('SLAM FILES HERE',979,320,13,'#965661',900,'center');text('DRAG & FLING!',600,255,27,'#478e86',900,'center');for(const e of state.entities)if(e.kind==='file'&&e!==mouse.drag)fileArt(e);if(mouse.drag)fileArt(mouse.drag)}
+function drawStampStage(){stageChip('STAMP THE GOOD PAPERS','Click Γ£ô. Skip ├ù.',600,219);for(let j=0;j<3;j++){panel(92,315+j*119,1003,15,'#83aca4',INK,5,2);for(let i=0;i<30;i++)panel(102+i*34,318+j*119,16,7,'#416e78',null,2)}for(const e of state.entities)if(e.kind==='paper')paperArt(e);}
+function drawFileStage(){panel(91,244,255,366,'#a0d8c7',INK,15,4);text('ΓåÉ  TEAL',219,283,29,INK,900,'center');text('SLAM FILES HERE',219,320,13,'#376f65',900,'center');panel(853,244,255,366,'#f1adb0',INK,15,4);text('CORAL  ΓåÆ',979,283,29,INK,900,'center');text('SLAM FILES HERE',979,320,13,'#965661',900,'center');text('DRAG & FLING!',600,255,27,'#478e86',900,'center');for(const e of state.entities)if(e.kind==='file'&&e!==mouse.drag)fileArt(e);if(mouse.drag)fileArt(mouse.drag)}
 function drawPrinterStage(){stageChip('PRINTER REVENGE','Stamp the printer. Dodge paper.',600,218);for(let i=0;i<5;i++){panel(136+i*192,562,99,53,'#dbbea0','#8a775e',7,2);text(['FAX','INK','TONER','PAPER','MORALE'][i],185+i*192,589,14,INK,900,'center')}for(const e of state.entities){if(e.kind==='printer'){drawPrinter(e.x,e.y,1,true);panel(e.x,e.y-27,e.w*(e.hp/e.maxHp),11,RED,null,4)}if(e.kind==='hazard'){c.save();c.translate(e.x,e.y);c.rotate(e.t*4);panel(-16,-18,36,40,PAPER,INK,4,2);text('!',2,2,21,RED,900,'center');c.restore()}}}
 function drawChartStage(){stageChip('TRUTH SPOTLIGHT','Hold over green evidence.',600,215);for(const e of state.entities)if(e.kind==='chart'){
   chartArt(e);
@@ -310,8 +354,8 @@ function drawChartStage(){stageChip('TRUTH SPOTLIGHT','Hold over green evidence.
  c.save();c.strokeStyle='#ffedb880';c.lineWidth=2;c.beginPath();c.arc(mouse.x,mouse.y,44,0,7);c.stroke();c.beginPath();c.arc(mouse.x,mouse.y,27,0,7);c.stroke();c.restore();
  text('FOLLOW THE GREEN ONES',602,625,16,'#496f6d',900,'center')}
 function drawRecruitStage(){stageChip('SAVE THE CREW','Hold and sweep. Avoid HR.',600,215);for(const e of state.entities)if(e.kind==='worker')workerArt(e);
- if(mouse.down){c.save();c.translate(mouse.x,mouse.y);panel(-21,-18,43,39,'#f9eac8',INK,6,3);c.strokeStyle='#425e6c';c.lineWidth=5;c.beginPath();c.arc(24,-2,12,-Math.PI/2,Math.PI/2);c.stroke();text('☕',0,3,20,INK,900,'center');c.restore()}
- text('FRIENDS ♥     HR BOTS ✕',600,626,17,INK,900,'center')}
+ if(mouse.down){c.save();c.translate(mouse.x,mouse.y);panel(-21,-18,43,39,'#f9eac8',INK,6,3);c.strokeStyle='#425e6c';c.lineWidth=5;c.beginPath();c.arc(24,-2,12,-Math.PI/2,Math.PI/2);c.stroke();text('Γÿò',0,3,20,INK,900,'center');c.restore()}
+ text('FRIENDS ΓÖÑ     HR BOTS Γ£ò',600,626,17,INK,900,'center')}
 function drawBossStage(){stageChip('DEFEAT THE KPI MONSTER','Stamp it. Dodge the red reticles.',600,216);for(const e of state.entities){if(e.kind==='boss'){bossArt(e.x,e.y,1);panel(303,580,598,25,'#334957',INK,8,3);panel(307,584,590*(e.hp/e.maxHp),17,RED,null,6);text('PERFORMANCE ALGORITHM',600,621,16,INK,900,'center')}if(e.kind==='hazard'){c.save();if(e.arm>0){const p=1-e.arm/.40;c.strokeStyle=RED;c.lineWidth=4;c.setLineDash([7,5]);c.beginPath();c.arc(e.aimX,e.aimY,23+20*(1-p),0,Math.PI*2);c.stroke();c.setLineDash([]);text('!',e.aimX,e.aimY,19,RED,900,'center');c.globalAlpha=.72}c.translate(e.x,e.y);c.rotate(e.t*3);panel(-19,-17,37,33,'#ffc8c3',INK,5,2);text('%',0,0,23,RED,900,'center');c.restore()}}}
 function progress(){}
 function titleScreen(){
@@ -323,9 +367,9 @@ function titleScreen(){
  text('QUOTA',602,322,86,'#2f6275',900,'center');
  text('PANIC!',602,414,101,'#f18b88',900,'center');
  text('SIX TINY DISASTERS. ONE VERY BAD SHIFT.',600,485,16,'#4e7380',900,'center');
- button(408,555,385,80,'CLOCK IN  ▶',start,{bg:'#a9edd1',hover:'#d1fbe3',size:28});
- text('CLICK  ·  DRAG  ·  DODGE  ·  SURVIVE',600,673,18,'#477a80',900,'center');
- text('BEST '+state.best.toLocaleString()+'   •   M MUTE  ·  F FULLSCREEN',600,713,13,'#608a91',800,'center');
+ button(408,555,385,80,'CLOCK IN  Γû╢',start,{bg:'#a9edd1',hover:'#d1fbe3',size:28});
+ text('CLICK  ┬╖  DRAG  ┬╖  DODGE  ┬╖  SURVIVE',600,673,18,'#477a80',900,'center');
+ text('BEST '+state.best.toLocaleString()+'   ΓÇó   M MUTE  ┬╖  F FULLSCREEN',600,713,13,'#608a91',800,'center');
 }
 function introScreen(){titleScreen()}
 function transitionScreen(kind){
@@ -342,10 +386,10 @@ function transitionScreen(kind){
  }
  text(fail?failTitles[state.phase]:'COFFEE BREAK!',670,222,43,'#324d60',900,'center');
  text(fail?failLines[state.phase]:'A disaster cleared. Take your victory lap.',672,292,20,'#69817f',800,'center');
- if(fail){text(state.phase===5?'BOSS PHASE SAVED · NO BACKTRACKING':'YOU KEEP YOUR RUN · TRY THIS ROUND AGAIN',672,365,17,'#b85a6e',900,'center');button(489,451,365,72,'DO OVER  ↻',retryStage,{bg:'#9be8cb',size:27})}
- else button(493,455,365,72,'NEXT DISASTER  ▶',continueRun,{bg:'#9be8cb',size:25});
+ if(fail){text(state.phase===5?'BOSS PHASE SAVED ┬╖ NO BACKTRACKING':'YOU KEEP YOUR RUN ┬╖ TRY THIS ROUND AGAIN',672,365,17,'#b85a6e',900,'center');button(489,451,365,72,'DO OVER  Γå╗',retryStage,{bg:'#9be8cb',size:27})}
+ else button(493,455,365,72,'NEXT DISASTER  Γû╢',continueRun,{bg:'#9be8cb',size:25});
 }
-function perkCard(x,y,w,h,perk){const hover=mouse.x>=x&&mouse.x<=x+w&&mouse.y>=y&&mouse.y<=y+h;panel(x,y+(hover?0:5),w,h,perk.color,INK,19,4);panel(x+17,y+20,54,54,'#173e4b',null,13);text(perk.icon,x+45,y+47,31,GOLD,900,'center');text(perk.title,x+w/2,y+121,23,INK,900,'center');text(perk.effect,x+w/2,y+177,23,'#287869',900,'center');text(perk.detail,x+w/2,y+214,15,'#42666b',700,'center');panel(x+26,y+h-65,w-52,44,hover?'#f6c87b':'#244a57',null,9);text('TAKE IT  ▶',x+w/2,y+h-43,18,hover?INK:PAPER,900,'center');btns.push({x,y,w,h,action:()=>selectPerk(perk.id)});if(hover)canvas.style.cursor='pointer'}
+function perkCard(x,y,w,h,perk){const hover=mouse.x>=x&&mouse.x<=x+w&&mouse.y>=y&&mouse.y<=y+h;panel(x,y+(hover?0:5),w,h,perk.color,INK,19,4);panel(x+17,y+20,54,54,'#173e4b',null,13);text(perk.icon,x+45,y+47,31,GOLD,900,'center');text(perk.title,x+w/2,y+121,23,INK,900,'center');text(perk.effect,x+w/2,y+177,23,'#287869',900,'center');text(perk.detail,x+w/2,y+214,15,'#42666b',700,'center');panel(x+26,y+h-65,w-52,44,hover?'#f6c87b':'#244a57',null,9);text('TAKE IT  Γû╢',x+w/2,y+h-43,18,hover?INK:PAPER,900,'center');btns.push({x,y,w,h,action:()=>selectPerk(perk.id)});if(hover)canvas.style.cursor='pointer'}
 function draftScreen(){
  panel(0,0,W,H,'#e4f6ed',null,0);
  for(let i=0;i<13;i++){c.save();c.translate((i*139+31)%1200,((i*191+55)%760));c.rotate(i*.48+Math.sin(state.titleAnim+i)*.08);panel(-12,-16,25,32,i%2?'#ffc4af':'#afdfd0',null,8);c.restore()}
@@ -354,23 +398,23 @@ function draftScreen(){
  for(let i=0;i<state.draftOffer.length;i++)perkCard(91+i*347,222,319,342,state.draftOffer[i]);
  const round=state.stats[state.stats.length-1]||{points:0,combo:0};
  panel(235,584,730,130,'#fff8eccc',null,24);
- text('ROUND '+(state.phase+1)+'/6 CLEAR  ·  +'+round.points.toLocaleString()+' POINTS  ·  BEST COMBO ×'+round.combo,600,614,18,'#3f7180',900,'center');
- text('SHIFT SCORE '+state.score.toLocaleString()+'   ·   TEAM '+state.team.toFixed(1)+'   ·   KPI '+state.kpi.toFixed(1),600,650,17,'#426e73',900,'center');
- text('PERKS '+state.perks.length+'   ·   SHIELDS '+state.wardMax+'   ·   ESC PAUSE  ·  M MUTE  ·  F FULLSCREEN',600,683,14,'#6a9996',800,'center');
+ text('ROUND '+(state.phase+1)+'/6 CLEAR  ┬╖  +'+round.points.toLocaleString()+' POINTS  ┬╖  BEST COMBO ├ù'+round.combo,600,614,18,'#3f7180',900,'center');
+ text('SHIFT SCORE '+state.score.toLocaleString()+'   ┬╖   TEAM '+state.team.toFixed(1)+'   ┬╖   KPI '+state.kpi.toFixed(1),600,650,17,'#426e73',900,'center');
+ text('PERKS '+state.perks.length+'   ┬╖   SHIELDS '+state.wardMax+'   ┬╖   ESC PAUSE  ┬╖  M MUTE  ┬╖  F FULLSCREEN',600,683,14,'#6a9996',800,'center');
 }
-function victoryScreen(){panel(0,0,W,H,'#143544',null,0);text('YOU SURVIVED THE SHIFT!',600,105,52,PAPER,900,'center');text('SAME WORK. DIFFERENT SCOREBOARD.',600,164,22,GOLD,900,'center');bossArt(70,260,1.1);panel(443,228,655,319,'#244955','#3e7180',18,4);text('WHO GETS TO KEEP SCORE?',767,269,23,GOLD,900,'center');let score=state.finalChoice==='humans'?Math.round(state.score*.72+state.team*620+state.adClosed*70+state.adUsed*90):Math.round(state.score*1.55+state.kpi*470+state.adOpened*230);text(score.toLocaleString(),775,361,77,state.finalChoice==='humans'?MINT:GOLD,900,'center');text(state.finalChoice==='humans'?'THE CREW':'CORPORATE KPI',779,418,19,PAPER,900,'center');text('REAL HELP '+state.adUsed+'  •  SPAM BLOCKED '+state.adClosed,776,488,16,'#b5d8d1',900,'center');button(448,574,303,66,'PEOPLE  ♥',()=>{state.finalChoice='humans';sound('good')},{bg:MINT,size:22});button(765,574,303,66,'KPI  ★',()=>{state.finalChoice='kpi';sound('hit')},{bg:GOLD,size:22});button(448,662,303,60,'PLAY ANOTHER RUN ↻',reset,{bg:'#e8cf9d',size:18});button(765,662,303,60,'WHY THIS GAME? ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});text('YOUR BEST '+state.best.toLocaleString(),186,558,18,'#c4e1d9',900,'center')}
+function victoryScreen(){panel(0,0,W,H,'#143544',null,0);text('YOU SURVIVED THE SHIFT!',600,105,52,PAPER,900,'center');text('SAME WORK. DIFFERENT SCOREBOARD.',600,164,22,GOLD,900,'center');bossArt(70,260,1.1);panel(443,228,655,319,'#244955','#3e7180',18,4);text('WHO GETS TO KEEP SCORE?',767,269,23,GOLD,900,'center');let score=state.finalChoice==='humans'?Math.round(state.score*.72+state.team*620+state.adClosed*70+state.adUsed*90):Math.round(state.score*1.55+state.kpi*470+state.adOpened*230);text(score.toLocaleString(),775,361,77,state.finalChoice==='humans'?MINT:GOLD,900,'center');text(state.finalChoice==='humans'?'THE CREW':'CORPORATE KPI',779,418,19,PAPER,900,'center');text('REAL HELP '+state.adUsed+'  ΓÇó  SPAM BLOCKED '+state.adClosed,776,488,16,'#b5d8d1',900,'center');button(448,574,303,66,'PEOPLE  ΓÖÑ',()=>{state.finalChoice='humans';sound('good')},{bg:MINT,size:22});button(765,574,303,66,'KPI  Γÿà',()=>{state.finalChoice='kpi';sound('hit')},{bg:GOLD,size:22});button(448,662,303,60,'PLAY ANOTHER RUN Γå╗',reset,{bg:'#e8cf9d',size:18});button(765,662,303,60,'WHY THIS GAME? Γåù',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});text('YOUR BEST '+state.best.toLocaleString(),186,558,18,'#c4e1d9',900,'center')}
 function hud(){playfield();header();progress()}
 function pauseScreen(){
  panel(240,132,720,536,'#f8eac7',INK,23,6);
  text('UNPAID BREAK',600,205,43,INK,900,'center');
- text('ROUND '+(state.phase+1)+'/6   ·   '+state.progress+'/'+state.target+' TARGETS   ·   SCORE '+state.score.toLocaleString(),600,258,18,'#4f7175',900,'center');
- text('COMBO ×'+state.combo+'   ·   TEAM '+state.team.toFixed(1)+'   ·   KPI '+state.kpi.toFixed(1)+'   ·   PERKS '+state.perks.length,600,291,16,'#718785',800,'center');
- button(400,327,403,60,'BACK TO CHAOS ▶',()=>state.screen='play',{bg:MINT,size:24});
- button(400,399,403,54,'THE REAL RESEARCH ↗',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});
- button(400,466,403,51,'ABANDON RUN ↻',reset,{bg:GOLD,size:19});
- button(364,533,225,50,state.muted?'UNMUTE  ♪':'MUTE  ♪',()=>state.muted=!state.muted,{bg:'#d6e9e5',size:18});
- button(610,533,225,50,'FULLSCREEN  ⛶',()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{})},{bg:'#d6e9e5',size:18});
- text('CLICK THE TIMER TO PAUSE  ·  ESC RESUME  ·  M MUTE  ·  F FULLSCREEN',600,625,13,'#688e8c',800,'center')
+ text('ROUND '+(state.phase+1)+'/6   ┬╖   '+state.progress+'/'+state.target+' TARGETS   ┬╖   SCORE '+state.score.toLocaleString(),600,258,18,'#4f7175',900,'center');
+ text('COMBO ├ù'+state.combo+'   ┬╖   TEAM '+state.team.toFixed(1)+'   ┬╖   KPI '+state.kpi.toFixed(1)+'   ┬╖   PERKS '+state.perks.length,600,291,16,'#718785',800,'center');
+ button(400,327,403,60,'BACK TO CHAOS Γû╢',()=>state.screen='play',{bg:MINT,size:24});
+ button(400,399,403,54,'THE REAL RESEARCH Γåù',()=>showHelp('sources'),{bg:'#c6e1d1',size:18});
+ button(400,466,403,51,'ABANDON RUN Γå╗',reset,{bg:GOLD,size:19});
+ button(364,533,225,50,state.muted?'UNMUTE  ΓÖ¬':'MUTE  ΓÖ¬',()=>state.muted=!state.muted,{bg:'#d6e9e5',size:18});
+ button(610,533,225,50,'FULLSCREEN  Γ¢╢',()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.getElementById('wrap').requestFullscreen?.().catch(()=>{})},{bg:'#d6e9e5',size:18});
+ text('CLICK THE TIMER TO PAUSE  ┬╖  ESC RESUME  ┬╖  M MUTE  ┬╖  F FULLSCREEN',600,625,13,'#688e8c',800,'center')
 }
 function render(){
  btns.length=0;canvas.style.cursor='crosshair';const links=document.getElementById('links');
@@ -391,6 +435,6 @@ function render(){
 }
 function loop(now){let dt=clamp((now-last)/1000,0,.04);last=now;update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 // Diagnostic surface is deliberately read-only; tests must interact through the real pointer interface.
-Object.defineProperty(window,'__officeArcade',{value:Object.freeze({snapshot:()=>({screen:state.screen,phase:state.phase,progress:state.progress,target:state.target,clock:Math.round(state.clock*10)/10,score:state.score,health:state.health,team:state.team,kpi:state.kpi,choice:state.choice,ads:state.ads.map(a=>({...a})),entities:state.entities.map(a=>({...a})),stageDone:state.stageDone,stats:state.stats.slice(),finalChoice:state.finalChoice,perks:state.perks.slice(),offers:state.draftOffer.map(p=>p.id),ward:state.ward,adUsed:state.adUsed,adOpened:state.adOpened,adClosed:state.adClosed,adMissed:state.adMissed,realSeen:state.realSeen,spamSeen:state.spamSeen,runCount:state.runCount,strikes:state.strikes,bossCheckpoint:state.bossCheckpoint,bossRetries:state.bossRetries,layout:'fullbleed',art:'bean-toy-v3'}),version:'2026-11-07.arcade-v3-abcd'})});
+Object.defineProperty(window,'__officeArcade',{value:Object.freeze({snapshot:()=>({screen:state.screen,phase:state.phase,progress:state.progress,target:state.target,clock:Math.round(state.clock*10)/10,score:state.score,health:state.health,team:state.team,kpi:state.kpi,choice:state.choice,ads:state.ads.map(a=>({...a})),entities:state.entities.map(a=>({...a})),stageDone:state.stageDone,stats:state.stats.slice(),finalChoice:state.finalChoice,perks:state.perks.slice(),offers:state.draftOffer.map(p=>p.id),ward:state.ward,adUsed:state.adUsed,adOpened:state.adOpened,adClosed:state.adClosed,adMissed:state.adMissed,realSeen:state.realSeen,spamSeen:state.spamSeen,runCount:state.runCount,strikes:state.strikes,bossCheckpoint:state.bossCheckpoint,bossRetries:state.bossRetries,layout:'fullbleed',art:'bean-toy-v3',characterAtlasReady}),version:'2026-11-07.arcade-v3-abcd'})});
 })();
 </script></body></html>
