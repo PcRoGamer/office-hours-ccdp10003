@@ -42,6 +42,9 @@ async function audit(width,height){
   assert.match(await chart.innerText(),/TRUNCATED SCALE/);
   assert.match(await chart.innerText(),/3\.2%/);
   const btn=game.locator('[data-ow="chart-audit"]');
+  const buttonBounds=await btn.boundingBox(),bodyBounds=await game.locator('.ow-body').boundingBox();
+  assert.ok(buttonBounds&&bodyBounds,'Audit button or slide content missing');
+  assert.ok(buttonBounds.y>=bodyBounds.y&&buttonBounds.y+buttonBounds.height<=bodyBounds.y+bodyBounds.height-3,'Audit control must be fully visible without scrolling');
   assert.equal(await btn.getAttribute('aria-pressed'),'false');
   const before=await game.locator('body').evaluate(()=>JSON.parse(localStorage.getItem('office-hours-workday-v1')).decisions[4]);
   await btn.click();
