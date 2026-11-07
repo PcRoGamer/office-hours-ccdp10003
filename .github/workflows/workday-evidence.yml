@@ -1,0 +1,53 @@
+name: Workday contested evidence evaluation
+on:
+  push:
+    branches: [feat/workday-contested-evidence]
+  pull_request:
+    paths:
+      - 'assets/workday-final.js'
+      - 'qa/workday-evidence.test.cjs'
+  workflow_dispatch:
+jobs:
+  playtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Static code checks
+        run: |
+          node --check assets/workday-final.js
+          node --check qa/workday-evidence.test.cjs
+      - name: Serve exact branch artifact
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/officeqa.log 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4173/workday-final.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/officeqa.log
+          exit 1
+      - name: Workday early game must survive
+        run: node qa/workday-final.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/workday-final.html
+      - name: Four omission paths and final consequence
+        run: node qa/workday-evidence.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/workday-final.html
+      - name: Full base 2D game regression
+        run: node qa/full-2d.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contested-evidence-qa
+          path: |
+            qa-evidence-artifacts/
+            qa-final-artifacts/
+            qa-2d-screens/
+          if-no-files-found: ignore
