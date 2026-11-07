@@ -231,6 +231,8 @@ function annotateConsequences(){
   const assessment=auditConsequences();const label=document.createElement('strong');label.textContent=`SHIFT FILE · ${save.reports.length} WORK ASSIGNMENTS · ${assessment.integrity} EVIDENCE / ${assessment.heat} PRESSURE`;label.style.cssText='display:block;margin-bottom:5px';line.appendChild(label);
   const outcome=document.createElement('span');outcome.textContent=`Your record: ${x.good.length} documented protections, ${x.cost.length} decisions prioritising presentation or convenience. ${[...x.good,...x.cost].slice(0,3).join('; ')}.`;line.appendChild(outcome);const restart=[...end.querySelectorAll('button')].find(b=>/START ANOTHER SHIFT/i.test(b.textContent||''));if(restart&&restart.parentNode)restart.parentNode.insertBefore(line,restart);else end.appendChild(line)
  }
+ // Optional scoring audit uses the completed game's data; never changes reward or progress.
+ if(end&&window.WorkdayScoreAudit)window.WorkdayScoreAudit.mount(end,save,game(),auditConsequences());
  const reward=document.querySelector('.reward-backdrop');
  if(reward&&!reward.querySelector('.ow-receipt')&&save.reports.length){
   const entry=save.reports[save.reports.length-1],s=entry.decisions||{};
