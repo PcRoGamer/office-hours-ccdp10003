@@ -80,7 +80,7 @@ async function run(){
           return {cx:p.worldWidth/2,worldWidth:p.worldWidth,worldHeight:p.worldHeight,width:lw};
         });
         check('WORLD_VIEWPORT_ADAPTED',
-          geo.worldHeight===760&&Math.abs(geo.worldWidth-h&&geo.worldWidth-(w*760/h))<1,
+          geo.worldHeight===760&&Math.abs(geo.worldWidth-(w*760/h))<1,
           geo);
         const axisStart=await screen(geo.cx,525);
         const axisEnd=await screen(geo.cx,735);
