@@ -13,10 +13,11 @@ async def run():
     html=html.replace('<link rel="stylesheet" href="../night-shift-v3/story/story.css">','<style>'+css+'</style>')
     narrative=re.sub(r'^export ', '',(ROOT/'night-shift-v3/story/narrative.js').read_text(),flags=re.MULTILINE)
     presentation=re.sub(r'^export ', '',(ROOT/'night-shift-v3/story/presentation.js').read_text(),flags=re.MULTILINE)
+    actors=re.sub(r'^export ', '',(ROOT/'night-shift-v3/story/actors.js').read_text(),flags=re.MULTILINE)
     presentation=re.sub(r'^import .*\n','',presentation,flags=re.MULTILINE)
     script=re.search(r'<script type="module">(.*?)</script>',html,flags=re.DOTALL).group(1)
     script=re.sub(r'^import .*\n','',script,flags=re.MULTILINE)
-    html=re.sub(r'<script type="module">.*?</script>','<script>'+narrative+'\n'+presentation+'\n'+script+'</script>',html,flags=re.DOTALL)
+    html=re.sub(r'<script type="module">.*?</script>','<script>'+narrative+'\n'+actors+'\n'+presentation+'\n'+script+'</script>',html,flags=re.DOTALL)
     async with async_playwright() as p:
         browser=await p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-dev-shm-usage','--allow-file-access-from-files','--disable-web-security'])
         report={'url':URL,'viewports':[],'interaction':{},'errors':[]}
