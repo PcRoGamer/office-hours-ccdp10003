@@ -58,3 +58,22 @@ test('invalid/negative time steps never advance or poison scene clock',()=>{
   x.scene.update(.06);assert.equal(x.scene.snapshot().time,.06);assert.ok(Number.isFinite(x.scene.snapshot().flash));
  }
 });
+
+test('P4 moving-goalposts directive physically swaps exits, visuals and hitboxes together',()=>{
+ const x=setup('P4',{directive:'moving-goalposts',events:[]});
+ for(let i=0;i<32;i++)x.scene.update(.1);
+ const state=x.scene.snapshot();assert.equal(state.goalposts,true);assert.equal(state.routeShift,1);
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(390,565),viewport);x.scene.pointerUp(p(390,565),viewport);
+ assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'context');
+ assert.equal(x.done()[0].evidence.effect.type,'quota-warning-card');
+ assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
+});
+test('P4 moving-goalposts rail freezes while carrying a report',()=>{
+ const x=setup('P4',{directive:'moving-goalposts'});x.scene.update(.1);
+ x.scene.pointerDown(p(600,402),viewport);
+ for(let i=0;i<35;i++)x.scene.update(.1);
+ assert.equal(x.scene.snapshot().routeShift,0);
+ x.scene.pointerUp(p(600,402),viewport);
+ for(let i=0;i<15;i++)x.scene.update(.1);
+ assert.equal(x.scene.snapshot().routeShift,1);
+});
