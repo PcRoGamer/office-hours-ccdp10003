@@ -127,7 +127,18 @@ try:
             print('PASS',json.dumps(result));all_results.append(result)
             page.close()
             browser.close()
-    (OUT/'browser-results.json').write_text(json.dumps(all_results,indent=2),encoding='utf-8')
+    result_file=OUT/'browser-results.json'
+    if len(sys.argv)>1 and result_file.exists():
+        try:
+            old=json.loads(result_file.read_text(encoding='utf-8'))
+            by_case={(row['viewport'],row.get('dpr',1)):row for row in old}
+            for row in all_results: by_case[(row['viewport'],row.get('dpr',1))]=row
+            all_saved=list(by_case.values())
+        except (ValueError,KeyError,TypeError):
+            all_saved=all_results
+    else:
+        all_saved=all_results
+    result_file.write_text(json.dumps(all_saved,indent=2),encoding='utf-8')
     print('PASS REAL CHROMIUM',len(all_results),'viewports')
 finally:
     web.terminate();web.wait(timeout=5)
