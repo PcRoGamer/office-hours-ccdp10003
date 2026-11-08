@@ -12,7 +12,7 @@ const cx=()=>W/2;
 function resize(){const box=canvas.getBoundingClientRect();cssW=box.width;cssH=box.height;
   dpr=Math.max(1,Math.min(devicePixelRatio||1,2));canvas.width=Math.round(cssW*dpr);canvas.height=Math.round(cssH*dpr);
   S=cssH/H;W=cssW/S;
-  if(sim)reset();}
+  reset();}
 function shadeRect(x,y,w,h,c,b=12){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,b);g.fill();}
 function line(x1,y1,x2,y2,color='#234044',wide=3){g.strokeStyle=color;g.lineWidth=wide;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
 function txt(s,x,y,size=24,col='#1f3a3a',align='center',weight=900){g.textAlign=align;g.textBaseline='middle';g.fillStyle=col;g.font=`${weight} ${size}px Impact,'Arial Narrow',Arial,sans-serif`;g.fillText(s,x,y);}

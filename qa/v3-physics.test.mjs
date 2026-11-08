@@ -30,14 +30,14 @@ check('gravity accelerates real dynamic fixtures',()=>{
 });
 check('unique stable IDs and invalid body rejection',()=>{
   assert.throws(()=>sim.box({id:'paper',x:0,y:0,width:5,height:5}),/Unique/);
-  assert.throws(()=>sim.box({id:'bad',shape:'potato'}),/Shape/);
+  assert.throws(()=>sim.create({id:'bad',shape:'potato'}),/Shape/);
 });
 check('contacts delivered once per continuous overlap, no duplicate scoring',()=>{
   for(let i=0;i<60;i++)sim.step(1/60);
   assert.ok(events.some(e=>e.type==='contact-begin'&&e.a==='paper'||e.type==='contact-begin'&&e.b==='paper'));
   assert.ok(events.every(e=>Number.isInteger(e.tick)&&typeof e.speed==='number'));
   const pair=e=>e.type==='contact-begin'&&[e.a,e.b].sort().join(':')==='floor:paper';
-  assert.ok(events.filter(pair).length<=2,'one contact at rest; restitution may briefly separate');
+  const transitions=events.filter(e=>[e.a,e.b].sort().join(':')==='floor:paper'); let active=false;for(const evt of transitions){if(evt.type==='contact-begin'){assert.equal(active,false,'duplicate begin without an end');active=true;}else if(evt.type==='contact-end'){assert.equal(active,true,'end without begin');active=false;}}
 });
 check('mouse joint picks actual fixture, follows, and releases',()=>{
   const s=sim.state(file),grabbed=sim.grab(s.x,s.y,{filter:x=>x.id==='paper'});
