@@ -304,9 +304,9 @@ jobs:
         run: |
           mkdir -p staging/previews
           cp release-harness/previews/v3-release-composition.html staging/previews/v3-release-composition.html
-      - name: Install Chromium for real source-composed visual QA
+      - name: Install Chromium and production-grade esbuild bundler
         run: |
-          npm --prefix release-harness install --no-save playwright@1.58.2
+          npm --prefix release-harness install --no-save playwright@1.58.2 esbuild@0.25.12
           ./release-harness/node_modules/.bin/playwright install --with-deps chromium
       - name: Serve all composed scene modules and the shared test canvas
         working-directory: staging
@@ -335,6 +335,11 @@ jobs:
           cat >"$target/README.txt" <<'README'
           QUOTA PANIC / NIGHT SHIFT V3: 14-SCENE REHEARSAL
           ------------------------------------------------
+          EASIEST PLAY: Double-click index.html, a fully bundled
+          no-server version of the exact author-owned original module code.
+          The offline copy is independently tested in real Chromium.
+
+          Alternative with inspectable modules and an HTTP server:
           This artifact contains 12 playable Intake/Services/PR scenes and both
           bosses assembled from original agent-owned source branches. It is
           a temporary same-canvas INPUT AND RENDER test, NOT the finished
@@ -350,6 +355,12 @@ jobs:
           
           Do NOT submit as the complete course game or replace Night Shift HD.
           README
+      - name: Bundle everything into one portable no-server HTML file
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-offline-bundle.cjs
+      - name: Verify standalone file URL with genuine Chromium
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-offline.test.cjs
       - name: Upload independently runnable composed rehearsal
         uses: actions/upload-artifact@v4
         if: always()
