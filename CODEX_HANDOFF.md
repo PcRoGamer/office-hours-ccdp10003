@@ -1,0 +1,92 @@
+# CODEX EXECUTION HANDOFF | QUOTA PANIC: FIRST SHIFT
+Prepared 8 November 2026. Repo: https://github.com/PcRoGamer/office-hours-ccdp10003
+Authoritative target: a polished, self-contained CCDP10003 Project 2 vertical slice of the larger NIGHT SHIFT microgame roguelite. Not a prototype, plan, pitch, or trailer.
+**Mandatory reference: https://github.com/Donchitos/Claude-Code-Game-Studios**
+
+## DO THIS, DON'T ASK FOR ANOTHER PLAN
+You are the producer, technical director and accountable integrator. Execute end to end: read actual source; preserve baseline; implement game; run Playwright; visually inspect screenshots/video; correct defects; rerun QA; verify public candidate URL; report real results. Do not offload testing or obvious decisions to the user. If subagents are available, delegate safely; otherwise do separated independent reviews yourself. No false agent runs, file edits, builds, browser results or submission receipts. Ask only for credentials/permission or irreversible actions.
+
+## SOURCE STATE AND BOUNDARIES
+Baseline main inspected at 3e9f0397716e41bf8f38b6221de5e7b41ddf7039 on 8 Nov; recheck moving HEAD and worktree before edits. This branch is feat/first-shift. Start from **arcade-office-hd.html** in main, with reusable Canvas2D HiDPI input mapping, sprite atlas, WebAudio, pause, pointer-driven games, intermission Aster Mail + spreadsheet perk draft. Existing QA: qa/arcade-office-hd.test.cjs and .github/workflows/verify-office-hd.yml. Reference arcade-v3.html, arcade-nightshift.html, and sprite-art variants; Workday PR #8 has research/chart and downstream consequences but its app desktop must not be transplanted. Index presently redirects to 2d.html. **Never modify index.html, original arcade variants, Workday, 2d.html, or main baseline before full release QA.** Protect current user changes, no hard reset.
+
+Create **first-shift.html**, **first-shift/** modules, **assets/first-shift/**, **qa/first-shift-*.test.cjs**, dedicated .github/workflows/first-shift.yml. Extract/reuse minimal mature renderer/input/audio/draft code, tests must preserve behavior. No new engine or 3D scene. Prefer readable focused source modules over another 450KB inline monolith; extract embedded atlas only if rendering parity retained. Original/licensed assets, no scraped/copyrighted game art. Keep independent candidate route.
+
+## EXACT PLAYABLE CAMPAIGN
+Eight authored microgames in fixed initial order, TWO per department, upgrade after each pair:
+1. I1 STAMP GOOD! Tap 5 approved forms, avoid spam. Combo and recognizable projectiles.
+2. I3 CLOSE THE SCAMS! Close three counterfeit popups and preserve genuine signed Mira help.
+PROMOTION 1: choose Carbon Copy / Bank Shot / Mira Backup. Introduce FAST OR SAFE directive.
+3. S1 FILE FRENZY! Drag/release three packets into moving chutes, optional bank shots. Fast and safe physical routes.
+4. S2 SAVE THE COFFEE! Catch at least 2 of 3 cups on a tray. Protecting Mira's workstation has a real later assist.
+PROMOTION 2: choose Chain Stamp / Magnet Grip / Safety Net. Introduce SPONSORED WORKFLOW.
+5. P1 RESET THE SCALE! Drag a truncated graph axis to zero; game figures 1240 to 1280 = +40 = about 3.2%. Show real visual correction, no invented data.
+6. P4 HEADLINE OR CONTEXT? Route a verified paper physically. Headline yields a staff priority pass; Context yields a longer telegraph in boss. Distinct effect, no moral labels.
+PROMOTION 3: eligible draft from six perk pool. Introduce MANDATORY COLLABORATION.
+7. T1 GET THEM OUT! Guide at least 2 of 3 workers safely; third rescue adds tangible aid. Count actual interventions.
+8. T4 PASS THE TOOLS! Allocate two $40 licence tokens to Mira, Jules or SAVE. Show direct access consequences and saved budget; all 0/1/2 allocations legal, exact $80 conserved.
+PROMOTION 4: boss-relevant eligible draft. Introduce DOUBLE ENTRY.
+9. THE QUOTA: three complete physical attack/countershot phases, four FILE-vs-COOL packet decisions.
+10. CLOCK OUT: machine physically collapses; short expressive cast reaction; receipt shows two truthful metrics for the same frozen run, sources drawer, immediate PLAY AGAIN/new seed.
+
+Four departments; all eight cards playable in first successful run; four drafts; four directives; six perks; three genuinely different synergistic builds; three boss bolts; four boss packets; complete ending. First-run target 4.5–6.5 minutes, **must measure**; first meaningful action <=15 seconds. Cut breadth before game feel, polish, boss completeness or ending.
+
+## PERKS + RULE CHANGES MUST TRANSFORM PLAY
+Six production perks, max level 2, three visible synergy families:
+* Throughput: Carbon Copy + Chain Stamp creates one ghost packet that can resolve a DIFFERENT unmet ordinary filing target. No duplicated boss bonus packets, licence currency, recursive farming.
+* Precision: Bank Shot + Magnet Grip enables deliberate bumper routes and controlled catches/corrections.
+* Care/control: Mira Backup + Safety Net catches hazards, returns an ACTUAL object, creates an alternate safe counter opportunity.
+Draft 1 exact offers: carbon-copy / bank-shot / mira-backup. Draft 2: chain-stamp / magnet-grip / safety-net. Draft 3 and 4: 3 eligible seeded offers, synergy completion where possible; every newly offered perk must visibly activate in next two encounters or immediately in boss. Show actual 1.5-second usage preview, not numeric platitudes. At least three distinct build paths through actual play.
+Directive FAST OR SAFE transforms S1 and S2 routes; SPONSORED WORKFLOW introduces distinguishable legitimate/counterfeit aid on P1/P4; MANDATORY COLLABORATION changes physical worker gestures in T1/T4 without blocking solo play; DOUBLE ENTRY is a visible confirmation that opens a feeder counter route in boss, not a disguised time penalty. One directive at a time, never secretly switch input grammar.
+
+## BOSS DESIGN + MATH CONTRACT
+THE QUOTA assembles a recognizable module after each promotion, not an unrelated late boss sprite. P1 APPROVED: giant stamp attack telegraphed and avoided, feeder exposes bolt 1. P2 SPONSORED: fake and real aid, ad becomes cover, moving gear countershot hits bolt 2. P3 OPTIMISE: marked double-entry, changing lanes and learned trajectories, player hits bolt 3. All bolts require ACTION and are not slain by generic clicking. Distinct patterns, fair recovery, earned finisher.
+
+Four uniquely numbered boss packets, arranged 1/1/2 across phases. For each: FILE = +5 true Official QUOTA and +1 pressure capped at 2. COOL = no bonus and +750ms safe opening. 16 FILE/COOL masks all legal, including all FILE/all COOL with zero perks. Never award twice; synthetic copies aren't unique packets. All effects visibly affect boss and final receipt.
+
+Run ledger has stable runId/seed, 8 distinct committed card outcomes, elapsed/reference time, manually correct/wrong actions, longest clean streak, real notice handling, one Mira plus three worker support opportunities, chosen 0/1/2 licence assignments and $ saved, selected perks/directives, four packet resolutions and three bolts. Commit outcomes exactly once; retries, refreshes, load and late callbacks cannot farm rewards; pause/intermission/hidden tab never increases timer.
+
+Official QUOTA /100 = round(40*completedUniqueCards/8 + 15*average(clamp01(1 - elapsed/referenceTime)) + 15*clamp01(longestCommittedCleanManualStreak/8) + 10*savedDollars/80 + 5*numberOfUniqueFiledBossPackets). Reference times per card: I1 18000ms, I3 12000ms, other six 14000ms. Clamp once. Max component caps 40+15+15+10+20=100.
+People & Quality /100 = round(35*workersHelped/4 + 30*licenceTokensAssigned/2 + 20*correctManual/max(1,correctManual+wrongManual) + 15*safelyHandledRealNotices/encounteredRealNotices). Define and test zero-denominator notices honestly. Max 35+30+20+15=100.
+On T4 finalisation: savedDollars + 40*assignedLicenceCount == 80. A real saved token is not also assigned. Chart data are fictional game examples, not research findings. No misinformation about unreviewed evidence. Final two scores are views of SAME frozen ledger.
+
+## STYLE + FEEL
+Corporate Paper Theatre: expressive, original 2D office cartoon, distinct silhouettes and faces for Finch, Mira, Jules, modular QUOTA. Finch cheerful/greedy/alarmed; Mira working/relieved/frustrated/helping; Jules working/locked-out/helping; QUOTA idle/telegraph/hit/defeated. Art must be integrated at screen scale, not a generated sprite collage. Specific anticipation, squash/stretch, throw overshoot, hit-stop, purposeful particles, punchy layered synth/audio effects and reactive music. Uncluttered HUD: hearts, time, imperative and directive glyph only. Current incumbent has undersized sprites/empty space; specifically improve scene density and readable main-character action without obscuring hitboxes. Original or rights-cleared music/FX, mute, reduced motion, pause, readable color/shape cues. Four viewport tests 1440x900, 1366x768, 1024x600, 650x800 + DPR 2 retina test. No invisible buttons or visual regressions.
+
+## CCGS PROCESS ADAPTATION
+Read https://github.com/Donchitos/Claude-Code-Game-Studios as actual source. Adopt roles and gates: creative director (protect fun/vision), technical director (engine/state integrator), gameplay specialist (cards/perks/directives), art+audio/UX specialist (craft), independent QA lead (look/test/criticize), release manager (public link/rollback). Minimal process, not 49 agents. The upstream project is a Claude Code template: its .claude agents/slash commands/hooks **do not execute automatically in Codex**. Do not copy them wholesale. Use actual Codex subagents if installed, otherwise explicitly serial role reviews. At most 3 concurrent worker agents with separate source ownership. Only integrator edits shared state/main entry; QA must not self-approve implementation. Code -> launch -> screenshot -> inspect -> critique -> modify -> rerun; every visual change requires real image observation. Keep one terse STATUS.md with current SHA, facts, risks, gate and next step. No time wasted creating 30 planning docs.
+
+## BUILD ORDER AND EVIDENCE GATES
+T00 Baseline: record HEAD, dirty worktree, original URLs, snapshot/rollback, verify old QA.
+T01 Read-source archaeology + rubric check + CCGS roles + asset rights. In parallel read-only.
+T02 Isolated boot: first-shift.html working, high-DPI pointer mapping, sound/pause, **real I1 pointer-play** + screenshots.
+T03 Deterministic ledger/scoring/perks/directive data model, idempotent commit. Unit/property tests.
+T04 Intake I1/I3 and honest real/scam notifications.
+T05 Four promotion screens, six perk effects, three build families, all four directive adapters.
+T06 Services S1/S2 and meaningful route/coffee consequences, initial draft perk activation.
+T07 PR P1/P4, corrected scale and verified headline/context downstream branching.
+T08 Staff T1/T4, rescue count, $80 conservation and identity-based technical assistance.
+T09 Three-phase final boss + all 16 packet patterns, fair countershot, mandatory player actions.
+T10 Clock Out physical finale, two real score lenses, sources and real replay.
+T11 Art/audio/UX ongoing concurrently, but visual QA each integration, not after all cards.
+T12 Independent adversarial functional, rubric, art and gameplay red-team; fix and rerun.
+T13 Public candidate link, GitHub Pages subpath asset verification, preserved all older routes, rollback.
+T14 Canvas-format/deadline check and accurately report verified release/submission state. Actual Canvas submission only with necessary access/authority, NEVER invent receipt.
+
+Do not call T00–T14 complete from prose. Record commands, exits, source SHA, saved screenshot/video evidence, reviewer findings.
+
+## QA THAT ACTUALLY PROVES THE GAME
+- Run on a local HTTP server (not file://). Existing CI uses Node 22, Playwright 1.58.2, python3 -m http.server 4173, qa/arcade-office-hd.test.cjs. Preserve this style and isolate new tests/workflow. Install Chromium if needed.
+- Use real mouse/touch interaction for a complete clean-storage first-clear from title through final replay. State seeding acceptable only in independent targeted edge tests, never as sole full-campaign proof.
+- E2E verifies all eight cards and all three boss bolts, all four directives, actual perks triggered, three synergy builds, all 3 licence-count outcomes (and identities), 16 packet masks, pause/resume/reload/retry idempotence, no JS errors, realistic clock behavior.
+- Capture and *look at* title, four departments, draft, all directive versions, all boss phases, ending at four viewports, with before/after evidence. Fix legibility, sprite size, spacing, clipped controls, click transforms, animation clarity. Record measured time/fps/interaction and no invented human playtest feedback.
+- Validate directly against university rubric's four equally weighted 25-point criteria (engagement with topics/game strategies; critical gaming culture; inventiveness; clarity) with TWO OR MORE real playable examples each. If sourced course rubric differs, use actual rubric. Research is three short genuine links and optional in-context intermission notes; no mandatory lecture, final quiz or AI declaration. Never invent student biography.
+- The final build must be **more enjoyable and polished** than V3/Night Shift HD, not merely longer. Compare real frames and mechanics against those incumbents; reject cosmetic improvements that harm clarity.
+- Automated design contract check is NOT gameplay QA. A Playwright green result without screenshot inspection is NOT visual QA. A simulated input without a rendered game is NOT playtesting.
+
+## RELEASE AND HONEST FALLBACK
+Keep all original pages and public default unchanged until every gate passes. Release First Shift at /first-shift.html and verify the GitHub Pages URL under /office-hours-ccdp10003/ including relative paths. Provide SHA, tests, screenshots, measured run length, known issues and rollback. Only promote default route with positive actual evidence. Cached course deadline is Monday 9 Nov 2026 11:59pm Melbourne, verify in Canvas; do not wait on Canvas to write code. If a hard blocker prevents completing First Shift, preserve the strongest verified incumbent rather than shipping a broken slice and falsely promising grade.
+
+## FINAL DELIVERABLE
+A polished playable standalone link, working complete run and replay, modular source, automated functional/browser/rubric QA with visual evidence, real upgrade and directive effects, a real three-phase boss, side-by-side incumbent comparison, concise PLAY instructions and truthful final status. No remaining unresolved high-impact issue that can be fixed without damaging another rubric criterion. Never claim 100/100, real user enjoyment, or university submission without evidence.
+
+**GO:** Start by checking git status/HEAD, reading arcade-office-hd.html and its QA, launching baseline, then producing a genuine working First Shift title+I1 in the browser. Do not stop at another plan.
