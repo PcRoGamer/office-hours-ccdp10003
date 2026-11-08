@@ -53,3 +53,23 @@ The non-`require-game` mode can validate specs while code is incomplete. The `--
 **Genuine blocker:** No new built v3 game existed in this lane's checkout at audit time; cannot claim research is already in a first promotion or that actual classroom-grade criteria are satisfied.
 
 **No other lane-owned code was modified.** Future integrator should check new v3 app and rerun this test with the final URL, then inspect the source panel timing and actual cards.
+
+
+## New real-browser acceptance checks: first promotion and first playable action
+
+**After initial report:** The COURSE lane implemented two additional independently executable browser audits, each with actual Windows Edge/Playwright execution, not code-only guesses.
+
+### First promotion / source discoverability (against STORY PR #14)
+- Test: `qa/v3-course-story-research.test.cjs`, real opened first promotion in `previews/v3-story.html`, revealed optional source disclosure, checked visible anchor labels and URLs, and captured two real screenshots locally.
+- **Result: `GDD_RESEARCH_FAIL`** on four explicit checks: primary citations for Dumb Ways to Die, Brotato, Job Simulator, and in-promotion WHY NOW rationale. The only visible first-promotion link was Deterding et al. (2011); this is a meaningful secondary source, not a substitute for the three game-design studies.
+- Actual JS page errors: **zero**; the panel *works*, but research integration is insufficient. Test findings and compatible fix were sent directly to [STORY PR #14](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/14). No STORY-owned files modified.
+- Run with Playwright installed: `node qa/v3-course-story-research.test.cjs --url=http://127.0.0.1:4173/previews/v3-story.html` after starting HTTP server in the STORY worktree. Output `qa-artifacts/v3-course-story/evidence.json` plus two actual PNG captures.
+
+### First real pointer action / viewport-filling scene (against INTAKE PR #20)
+- Test: `qa/v3-course-first-action.browser.cjs`, using its own ephemeral real HTTP server. It clicks CLOCK IN, waits for I1's first authored approved form, transforms the actual authored world to screen coordinates using the preview camera and performs **real mouse input**, then checks `snapshot().progress` increased. It also asserts zero-margin full-screen canvas geometry and absence of page exceptions.
+- **Result: `FIRST_ACTION_SMOKE_PASS_ONLY`**, **32/32 actual browser checks PASS**, across **1440×900, 1920×1080, 3840×2160, and 650×800**. First target remained onscreen and was stamped successfully in all viewports. Scripted interaction was under 15 seconds, but this is explicitly NOT a human comprehension/time-to-action sample.
+- Real screenshots and JSON evidence were committed in `qa/v3-course-first-action-evidence/`, including a native physical 4K screenshot. I also directly inspected the desktop and narrow rendered images. The full-screen office world and gameplay area are actually rendered, not inferred from canvas bounds alone. First Stamp shows animated conveyor/office scene; this is not a completed integrated campaign.
+- Reproduce: `NODE_PATH=<installed-playwright-node_modules> node qa/v3-course-first-action.browser.cjs --root=<intake-branch-working-copy>`. Self-hosted ephemeral HTTP requires no persistent server. The debug API currently exposes forms' X but omits Y; test uses documented I1 authored alternating Y lanes (331/446), and INTAKE was informed that adding Y to snapshots would improve future robustness.
+- PR findings/evidence posted to [INTAKE PR #20](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/20) and [COURSE PR #11](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/11).
+
+**Quality boundary:** The four-viewpoint check establishes first action and actual no-letterbox canvas on a standalone Intake preview only. It does NOT establish real 7–10 minute human pacing, global integrated cards, HD-or-better art quality, music, two bosses, or a course grade. The separate STORY research fail remains a recorded course-alignment defect; do not silently conflate these results into a green full-game release.
