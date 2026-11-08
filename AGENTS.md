@@ -1,5 +1,7 @@
 # QUOTA PANIC: NIGHT SHIFT v3 | instructions for all AI collaborators
 
+**AUTONOMOUS BY DEFAULT:** [coordination/AUTONOMY_POLICY.md](coordination/AUTONOMY_POLICY.md) is binding for every agent. Do not ask routine clarifications or permission to continue; execute reversible development, tests, inspection, fixes, commits and draft PRs without waiting for the user. Stop only at real authorization or irreversible boundaries. Chats do not run in the background after a turn; leave executable handoff state.
+
 **You are working on a shared, quality-gated rebuild rooted in Night Shift HD.** Start by reading this file, [REBUILD_HANDOFF.md](REBUILD_HANDOFF.md), [coordination/SWARM.md](coordination/SWARM.md), and the full [design/NIGHT_SHIFT_GDD_V3.md](design/NIGHT_SHIFT_GDD_V3.md). Then read the technical and visual contracts and the exact source files belonging to your claimed lane.
 
 ## Final intent (never silently lower it)
