@@ -11,3 +11,11 @@
 - **Report:** `coordination/reports/visual-audit-2026-11-08.md` on the PR branch.
 - **Blockers:** Integration branch had no `night-shift-v3.html` at last inspection; local browser has URL-navigation restrictions; connected Windows device offline. LEAD/QA_GAME must supply genuine v3 scene states for boss/ending captures.
 - **Release gate:** HOLD. Never replace Night Shift HD based only on fixture/browser geometry success.
+
+## Subsequent real evidence (8 Nov, 20:50 AEDT)
+
+- Recovered authentic GitHub Actions HD (run 42363190010) and historical First Shift (42460980521) screenshot ZIPs, inspected real PNG frames.
+- PR #15 now contains an executable PNG archive importer, true screenshot review mode, quantitative border and low-detail measurements and a browser self-test using real PNG bytes.
+- HD portrait 650×800 title: 47.25% uniform outer scanlines; historical First Shift I1 portrait: entire lower 38% has low spatial detail. These are measured *negative baseline risks*, not a claim of v3 visual acceptance.
+- Browser reviewer real-image self-test PASS; preserved source provenance; matching-only overlay. Exact report: coordination/reports/visual-hd-archive-2026-11-08.md in PR branch.
+- Outstanding: integrate actual v3 route and capture matching gameplay states; no release authority yet.
