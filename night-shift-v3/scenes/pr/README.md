@@ -18,3 +18,12 @@ python qa/v3-pr.browser.py
 Public Relations P1 and P4 are mandatory per v3 GDD; P2 or P3 is drafted by SYSTEMS. P4's one-use `effect` is evidence for SYSTEMS to commit, not a direct mutation. Pass pointer data in world coordinates (`screenToWorld`). Only `card-complete` finalises a card; no scene awards corporate score directly.
 
 Scenarios: baseline 1200→0 stamp, 2 ads plus signed help, 3 moving focus locks, truth-preserving framed route. Optional injected `audio.play` receives `hit`, `miss`, `card-win`, `card-fail`.
+
+
+## 8 November review repairs
+
+The authoritative Corporate pace/scoring references are **P1 14,000ms; P2 12,000ms; P3 12,000ms; P4 14,000ms**. Each `definitions[].authoredReferenceMs` and emitted completion evidence use those values. The separate `seconds` property remains a longer *playable shutter*, **not** a scoring baseline. This prevents inflated pace points.
+
+P1 SEND now requires a zero axis at the moment of submission, even after a player corrects the chart and drags the baseline back up. The Y-axis tick labels reflect the actual current baseline; bars are centered for better legibility. A correct axis action is not farmable with repeated drags.
+
+Run `node --test qa/v3-pr.test.mjs` for the canonical-contract, axis-reversal, P2 help-recovery and invalid-time-step tests. Run `python qa/v3-pr.regression-browser.py` for the fast 1920×1080 and 650×800 real Chromium/ES-module gameplay checks. The existing `qa/v3-pr.browser.py` remains the full viewport/playthrough suite. Both browser scripts load the **unmodified native ES module graph** via data-URL imports when Chromium administrator policy blocks localhost navigation: this still tests actual exports/imports, not a flattened JS facsimile.
