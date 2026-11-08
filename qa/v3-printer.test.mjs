@@ -53,7 +53,6 @@ test('one completed boss result per entry; restart intentionally starts fresh',(
  assert.equal(events.filter(e=>e.type==='boss-complete').length,2);
 });
 
-
 test('telegraph sheet parry materially widens the manual feeder target while zero-parry remains viable',()=>{
  const parry=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
  const solo=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
