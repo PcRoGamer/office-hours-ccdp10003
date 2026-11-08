@@ -40,7 +40,7 @@ def cycle(p,d):
   s=state(p)
   if d=='DOUBLE_ENTRY':click(p,(s['feederX'],-28))
   if d=='SPONSORED_WORKFLOW':drag(p,(45,65),(228,65))
-  if d=='MANDATORY_COLLABORATION':click(p,(-260,153))
+  if d=='MANDATORY_COLLABORATION':click(p,(260,153))
   s=state(p);drag(p,(s['packet']['x'],s['packet']['y']),(s['feederX'],50));phase(p,'impact')
   advance(p,1.5)
 
@@ -66,7 +66,7 @@ with sync_playwright() as pw:
     s=state(page)
     if directive=='DOUBLE_ENTRY':click(page,(s['feederX'],-28))
     if directive=='SPONSORED_WORKFLOW':drag(page,(45,65),(228,65))
-    if directive=='MANDATORY_COLLABORATION':click(page,(-260,153))
+    if directive=='MANDATORY_COLLABORATION':click(page,(260,153))
     s=state(page)
     drag(page,(s['packet']['x'],s['packet']['y']),(s['feederX'],50));phase(page,'impact')
     if name in ('1920x1080','650x800'):page.screenshot(path=str(EVIDENCE/f'{name}-impact.png'))
