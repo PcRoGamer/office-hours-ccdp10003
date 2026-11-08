@@ -12,6 +12,31 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'qa'/'v3-physics-evidence'
 OUT.mkdir(exist_ok=True)
+
+def deliver_form(page, snapshot, form_id):
+    """Human-speed pointer route above the two physical bumpers, then into the chute."""
+    form=next(body for body in snapshot['sim']['bodies'] if body['id']==form_id)
+    scale=snapshot['viewport']['height']/760
+    target_x=snapshot['worldWidth']-115
+    page.mouse.move(form['x']*scale,form['y']*scale)
+    page.mouse.down()
+    grabbed=page.evaluate('window.__physicsPreview.snapshot().sim.activeDrag')
+    assert grabbed==form_id, f'Pointer hit wrong prop: wanted {form_id}, got {grabbed}'
+    # Lifting over machinery keeps the direct filing skill available without
+    # suppressing real bumper collision mechanics or faking sensor events.
+    for j in range(30):
+        a=(j+1)/30
+        page.mouse.move((form['x']*(1-a)+target_x*a)*scale,
+                        (form['y']*(1-a)+240*a)*scale,steps=1)
+        page.wait_for_timeout(25)
+    for j in range(22):
+        a=(j+1)/22
+        page.mouse.move(target_x*scale,(240*(1-a)+635*a)*scale,steps=1)
+        page.wait_for_timeout(25)
+    # Allow the actual Planck mouse joint to complete a physical arrival.
+    page.wait_for_timeout(300)
+    page.mouse.up()
+    page.wait_for_timeout(300)
 with socket.socket() as bound:
     bound.bind(('127.0.0.1',0))
     port=bound.getsockname()[1]
@@ -47,19 +72,8 @@ try:
                 browser.close()
                 continue
             # Physical manual drag path into the chute. World coords use H=760.
-            scale=height/760
-            form=next(x for x in s['sim']['bodies'] if x['id']=='form-0')
-            to_x=(s['worldWidth']-115)*scale
-            to_y=648*scale
-            page.mouse.move(form['x']*scale,form['y']*scale)
-            page.mouse.down()
-            for j in range(10):
-                a=(j+1)/10
-                page.mouse.move((form['x']*(1-a)+(s['worldWidth']-115)*a)*scale,
-                                (form['y']*(1-a)+630*a)*scale,steps=1)
-                page.wait_for_timeout(30)
-            page.mouse.up()
-            page.wait_for_timeout(350)
+            s=page.evaluate('window.__physicsPreview.snapshot()')
+            deliver_form(page,s,'form-0')
             after=page.evaluate('window.__physicsPreview.snapshot()')
             assert after['score']>=1, f'pointer drag did not register: {width}x{height} {after}'
             # Resize after a real scored physical gesture. This used to erase the run.
@@ -90,16 +104,7 @@ try:
             assert not resumed['paused'] and resumed['sim']['tick']>frozen['sim']['tick']
             # The remaining forms must remain physically interactable after reflow.
             form=next(body for body in resumed['sim']['bodies'] if body['id'] in saved_unscored)
-            scale=1080/760
-            page.mouse.move(form['x']*scale,form['y']*scale)
-            page.mouse.down()
-            for j in range(18):
-                a=(j+1)/18
-                page.mouse.move((form['x']*(1-a)+(resumed['worldWidth']-115)*a)*scale,
-                                (form['y']*(1-a)+630*a)*scale,steps=1)
-                page.wait_for_timeout(24)
-            page.mouse.up()
-            page.wait_for_timeout(420)
+            deliver_form(page,resumed,form['id'])
             after_reflow=page.evaluate('window.__physicsPreview.snapshot()')
             assert after_reflow['score']>=saved_score+1, f'REFLOWED DESK NOT PLAYABLE: {after_reflow}'
             page.screenshot(path=str(OUT/'desk-reflow-continued-1920x1080.png'))
