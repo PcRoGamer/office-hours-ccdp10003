@@ -119,7 +119,8 @@ function action(c,s,w,t,opts){
   if(s.projectile){const p=s.projectile;paper(c,p.x,p.y,113,64,Math.atan2(p.vy,p.vx)*.17,'COUNTER',C.gold);}
   if(s.state==='telegraph'){
     for(const p of s.waves){if(p.hit)continue;paper(c,p.x,p.y,92,58,p.angle,'URGENT',C.red);}
-    label(c,'INCOMING PAPER WAVE!',0,175,340,49,'#a9453c','#fff4db');
+    label(c,'STAMP A SHEET · WIDER FEEDER',0,175,compact?365:425,49,'#a9453c','#fff4db');
+    if(s.cycleParries>0)label(c,`PARRIED ${s.cycleParries} ✓`,0,227,180,35,'#1c7965',C.paper);
   }
   if(s.state==='counter'&&!s.adMoved){
     c.save();c.translate(s.adX,65);c.rotate(Math.sin(t*4)*.045);rr(c,-108,-76,216,152,11);c.fillStyle='#f7e9c5';c.fill();c.lineWidth=8;c.strokeStyle='#ac6545';c.stroke();
