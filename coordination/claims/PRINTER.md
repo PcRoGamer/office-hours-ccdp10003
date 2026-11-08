@@ -20,3 +20,11 @@
 - **Final Chromium QA:** full 3/3 manual counters, no page errors at **1920×1080**, **650×800**, **2560×1440**, **3440×1440**, **3840×2160 native** (DPR2); viewport backing asserted. Pause/blur/replay exercised in browser.
 - **Committed actual screenshot proof:** `qa/v3-printer-evidence/1920x1080-counter.jpg`, `650x800-counter.jpg`, `1920x1080-victory.jpg` on PRINTER branch. The checked-in JPEGs predate the optional parry enhancement; final implementation was re-rendered in live Chromium.
 - **Report:** `coordination/reports/printer-r8c2.md` updated with test matrix and command. **Integration quality boundary unchanged:** LEAD must still inspect direct HD comparison, wire AUDIO/Planck services and test the complete new release.
+
+
+## HD baseline comparison: inspected and improved
+- Retrieved **actual** HD title frames from Actions run `42363190010`, artifact `13570517378`. Compared source screenshot vs independently rendered PRINTER title, not imaginary references.
+- Replaced weak dark-modal boss preview with HD-family fullscreen split cream/coral poster, live Canvas2D printer and angled corporate ribbon; fixed washed-out overlays, leaking inactive HUD and a CSS declaration defect after actual visual inspections.
+- Confirmed genuine title animation via two browser captures 460 ms apart while gameplay elapsed stays 0. Desktop and narrow real browsers inspected; 17/17 Node tests and full 3/3 browser victory across five viewports preserved.
+- **Latest PR head:** `fc81e94650463a3fbc4d2610a65ba0518a64694f`. Visual report and code in [draft PR #19](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/19).
+- No change to HD release, shared scene owners or final integrated acceptance status. 
