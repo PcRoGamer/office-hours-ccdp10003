@@ -1,23 +1,14 @@
 # Physics-driven office toy: implementation decision (8 Nov 2026)
 
-Status: APPROVED DESIGN DIRECTION; NOT YET IMPLEMENTED OR BENCHMARKED.
+Status: LOCKED IMPLEMENTATION CHOICE (Planck.js); NOT YET BUILT OR GAMEPLAY-TESTED.
 
-## Engine choice (Box2D-family preflight, supersedes Matter-first)
+## Locked engine: Planck.js only
 
-**Introduce real 2D rigid-body simulation for the interactive office props.** The first engine spike is **Planck.js v1.5.1** (the actively maintained JavaScript/TypeScript Box2D-style implementation): https://github.com/piqnt/planck.js and https://www.npmjs.com/package/planck . Why first: browser-native JS, familiar Box2D world/bodies/fixtures/joints, broad 2D collision mechanics, clean local bundling and no asynchronous WASM startup dependency for an intentionally small Canvas2D microgame.
+**Use Planck.js v1.5.1**, the JavaScript Box2D-style 2D rigid-body physics library: https://github.com/piqnt/planck.js and https://www.npmjs.com/package/planck . Pin the installed version and ship its required browser bundle locally. This is a **final tool choice, not a request for a physics engine bake-off**.
 
-**Second candidates, only when measured shortcomings justify them:**
-- **box2d-wasm v7.0.0:** https://github.com/Birch-san/box2d-wasm and https://www.npmjs.com/package/box2d-wasm . It exposes **Box2D C++ 2.4.1**, not the current **Box2D 3 C17 API**. Maintainer docs show a WASM payload plus JS bridge, with a notably old published release. Verify availability, bindings, correct fixed-step integration, async load, relative public asset URLs and actual results. Do not assume free multithreading, automatic speedups or "perfect" continuous collision detection.
-- **Rapier 2D:** https://rapier.rs/docs/user_guides/javascript/getting_started_js/ . Rust/WASM with modern 2D CCD, sensors and joints. A strong actively developed alternative, but needs correct initialization and bundle asset handling. Compare it when projectile tunnelling, complex joints or stability tests make it worth switching.
-- **Matter.js 0.20.0:** https://brm.io/matter-js/docs/index.html . Retain as a lightweight control implementation/backup; not the default if Planck gives better actual physical feel.
+**Do not investigate, benchmark, prototype or evaluate other physics engines.** Do not spend development time comparing Planck against Matter, Rapier, Box2D WASM, or a Three.js stack. Do not migrate the existing Canvas2D renderer to a new game engine. Codex must implement the office toy interactions using Planck.js and focus its tests on actual gameplay, feel, stability, browser compatibility and full campaign completion. If a specific prop misbehaves, tune its Planck parameters, collision geometry, constraints, input code or fallback to deliberate kinematic motion for that prop; this does not authorize an engine search.
 
-**Don't confuse Box2D implementations.** Official current engine documentation at https://box2d.org/documentation/ describes Box2D 3 (C17). `box2d-wasm` maps the older v2.4.1 C++ API. Planck is a JavaScript rewrite influenced by Box2D, NOT current official Box2D 3. A wrapper's upstream age, license, packaging and deployment matter as much as the low-level solver.
-
-**CCD is never a promise of perfect hit registration:** Box2D and Rapier use approximations and have documented motion/tunnelling limits. Design fast projectiles with sensible size/velocity caps and use sweep tests / sensor tolerances where justified. Physics contacts trigger idempotent game intents; they must not duplicate cards, packets, score or licence tokens.
-
-**Do not convert this 2D game into Three.js.** The user-provided Three.js RapierPhysics, JoltPhysics, Cannon-es and Ammo references target 3D. Existing Night Shift HD is Canvas2D, and the First Shift target remains fast, authored 2D microgames.
-
-**Evidence-driven selection, with time-boxed experiment rather than architecture debate:** Build the same *one* real desk toy for Planck first; inspect throwing, sliding, stacking, collisions, joint spring, chutes, target sensor, input latency, runtime stability and performance at realistic object counts. If Planck doesn't meet the creative bar or has real defects, compare a WASM candidate using identical inputs. Report measurements and video screenshots, don't invent results. Select the lightest engine with demonstrably better play feel, physics correctness and integration cost. Never postpone the complete eight-card boss/release for a hypothetical 1000-body stress test.
+Implementation still needs reliable fixed-timestep integration, pointer mappings, stable contacts, fast-object hit handling and idempotent score commits. No simulation is collision-proof: shape, velocity and continuous-collision configuration must be tested in the real game, not asserted from theory.
 
 
 ## Required physics scenes and affordances
@@ -43,9 +34,9 @@ At least three different office props must be satisfying to manipulate even with
 
 ## Implementation gate and proof
 
-**FIRST: build and run one isolated Planck.js desk physics spike before wholesale integration.** Use folder, paper, cup, stapler, tray and chute. Demonstrate pick-up, release, momentum, bounce, contact stacking, collision event, a true scored chute and pause/resume/reset. Capture actual video/screenshots, inspect and compare scripted version versus simulation for tactility, clarity, fairness and input feel. If Planck has observed deficiencies, benchmark box2d-wasm or Rapier2D in that SAME scene before switching; select on measurements and on-screen experience, not on assumed native/WASM superiority.
+**FIRST: implement a real Planck.js desk toy as the first working gameplay component, not as an engine-comparison spike.** Use folder, paper, cup, stapler, tray and chute. Demonstrate pick-up, release, momentum, bounce, contact stacking, collision event, a true scored chute and pause/resume/reset. Capture real browser screenshots/video, inspect interaction quality, fix defects in Planck implementation and then carry the same code into the first playable microgames. Do not run an engine bake-off.
 
-Test actual drag mapping at 1440x900, 1366x768, 1024x600 and 650x800, plus DPR2 and touch. Test variable frame pacing, hidden tab and pause, 50 repeatedly spawned bodies, reset/retry no leaks, score idempotence, physics-assisted perks and all boss collision patterns. Record actual FPS/load measurements, not invented benchmark claims. Maintain all original browser QA.
+Test actual drag mapping at 1440x900, 1366x768, 1024x600 and 650x800, plus DPR2 and touch. Test variable frame pacing, hidden tab and pause, 50 repeatedly spawned bodies, reset/retry no leaks, score idempotence, physics-assisted perks and all boss collision patterns. Record actual FPS/load measurements for the finished Planck gameplay, not comparative engine benchmarks or invented claims. Maintain all original browser QA.
 
 Physics must be **improving the game**, not converting easy microgames into frustrating simulations. Constrain or omit simulation in an individual game where it damages clarity, precision or pace; there still must be multiple actual physics-driven toys. Never trade away the completed demo or release checks for a physics toy prototype.
 
