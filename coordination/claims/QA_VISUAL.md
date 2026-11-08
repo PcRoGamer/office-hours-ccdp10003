@@ -19,3 +19,13 @@
 - HD portrait 650×800 title: 47.25% uniform outer scanlines; historical First Shift I1 portrait: entire lower 38% has low spatial detail. These are measured *negative baseline risks*, not a claim of v3 visual acceptance.
 - Browser reviewer real-image self-test PASS; preserved source provenance; matching-only overlay. Exact report: coordination/reports/visual-hd-archive-2026-11-08.md in PR branch.
 - Outstanding: integrate actual v3 route and capture matching gameplay states; no release authority yet.
+
+
+## Multibranch QA after 21:47 AEDT
+
+- No longer blocked by an incomplete integrated LEAD shell for *component-level* QA. PR #15 now captures six independent authored PR workstreams (Intake I1-I4, Services S1-S4, PR P1-P4, Printer, QUOTA, Story) directly from their feature branches.
+- New `qa/v3-visual-branch-matrix.py` uses isolated temporary git clones, 8 viewport/DPR sizes, screenshot capture, SHA256 source provenance, JS error/geometry tests, automatic source-preserving ES-module-inlining fallback in restricted Chromium, plus `previews/v3-visual-branch-matrix.html` for review.
+- Actual local Chromium fixture self-test PASSED for nested ES imports/CSS and desktop/portrait; genuine PR branch preview contents/API exports verified through GitHub but **not** yet rendered in this network-isolated container. Real browser-archive images remain authentic HD/historic donor, not current v3.
+- New `qa/v3-visual-boss-phases.py` executes author PRINTER+QUOTA E2E three-phase pointer-play tests and collects **fresh only** gameplay screenshots, full logs, SHA256 image provenance. Its independently executed fixture self-test PASSED: fresh mock PNG collected, old mock PNG rejected. Copies `--source` worktree before running to protect users' files.
+- New reports: `coordination/reports/visual-branch-matrix-2026-11-08.md` and `visual-boss-phases-2026-11-08.md`.
+- STILL HOLD release until an integrated v3 game is available for full HD-vs-v3 gameplay/audio/art acceptance. Do not ask user for routine engineering decisions.
