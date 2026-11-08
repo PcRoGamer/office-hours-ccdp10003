@@ -3,7 +3,7 @@
 **Execution:** Sunday 8 Nov 2026 AEDT.  
 **PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/10  
 **Authoring branch:** `agents/v3-release-nova0811`  
-**Actual test:** https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474195185
+**Actual test:** https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474616806
 
 ## Implemented, not hypothetical
 
@@ -22,7 +22,7 @@ These are 12 individually authored microgames plus both bosses. **Not a full 12-
 
 - `qa/v3-release-composition.test.mjs`: actually imports, constructs, enters, ticks, snapshots, cancels and disposes the 14 original scenes using a shared injectable context; asserts event idempotency and no completion awarded without manual actions.
 - `previews/v3-release-composition.html`: full-viewport interactive source rehearsal, select any of 14 real modules, drag/click, no fictional score commits. Includes one consistent viewport/input adapter with intact viewport object across live resize.
-- `qa/v3-release-composition.browser.cjs`: real Chromium rendering and error/missing-asset checks, 19 screenshots across 1920×1080 and 650×800, on-the-fly desktop-to-portrait resize.
+- `qa/v3-release-composition.browser.cjs`: real Chromium rendering and error/missing-asset checks, 19 clean scene screenshots across 1920×1080 and 650×800, two physical-input captures, on-the-fly desktop-to-portrait resize.
 - `.github/workflows/night-shift-v3.yml`: read-only nine-lane browser + unit matrix, isolated scene composition, published HD fallback QA, manually gated Pages deployment, and a downloadable standalone `playable` source bundle with a README and pinned source SHAs.
 - `qa/v3-release-previews.cjs`: expanded to cover PR, both bosses and accessibility.
 
@@ -31,12 +31,12 @@ These are 12 individually authored microgames plus both bosses. **Not a full 12-
 Run [42474195185](https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474195185) yielded:
 
 - **266/266 source composition checks passed; 0 failures; 5 explicit missing-production warnings.**
-- **45/45 Chromium composition checks passed; 19 actual screenshots; 0 runtime/network failures.**
+- **47/47 Chromium composition checks passed; 19 scene screenshots plus two actual physical-input captures; 0 runtime/network failures.** The shared canvas pointer transform was tested via a real click on a moving approved I1 paper, exactly one manual approval at both **1920×1080** and **650×800**. Also tested desktop→portrait resize without stale hit-test dimensions.
 - **9/9 independently contributed module preview jobs passed** their own native unit/browser smoke stages.
 - **HD fallback browser regression passed**; existing releases remain unchanged.
 - **Candidate production route gate FAILED** because `night-shift-v3.html` genuinely does not exist on integration branch; **publish SKIPPED**. This is expected and correct, not a passing release.
 
-Download genuine evidence: https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474195185/artifacts/13614771698  
+Download genuine evidence: https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474616806  
 Standalone runnable source bundle: https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474195185/artifacts/13614033443
 
 **Bundle run:** Unzip, `cd` into extracted directory, `python3 -m http.server 4173`, open `http://localhost:4173/previews/v3-release-composition.html`. This is a real playable **rehearsal**, not a finished/university-ready game.
