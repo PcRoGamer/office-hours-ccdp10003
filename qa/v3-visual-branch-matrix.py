@@ -121,13 +121,36 @@ def select(page,lane,state):
     page.locator('#story [data-pick]:not([disabled])').first.click(timeout=9000)
     page.wait_for_function('(n)=>window.__storyPreview.phase > n',arg=index,timeout=9000)
    page.wait_for_function('()=>window.__storyPreview.receipt===true',timeout=5000)
+def check_scene_state(page,lane,state):
+ """Prove that the requested authored gameplay state rendered, not just a canvas."""
+ if lane=='fixture':return {'scene':'FIXTURE','validated':True}
+ scripts={
+  'intake':'() => ({scene:window.__intakeDebug.getState()?.id,paused:window.__intakeDebug.getState()?.paused})',
+  'services':'() => ({scene:window.__services.state?.scene?.snapshot?.()?.id,paused:window.__services.state?.paused})',
+  'pr':'() => ({scene:window.__pr.card,paused:window.__pr.paused})',
+  'printer':'() => ({scene:"PRINTER",boss:window.__printerQA?.()?.phase})',
+  'quota':'() => ({scene:"QUOTA",boss:window.__QUOTA_STATE?.mode,phase:window.__QUOTA_STATE?.phase})',
+  'story':'() => ({scene:window.__storyPreview?.receipt?"RECEIPT":"PROMOTION",promotion:window.__storyPreview?.phase,receipt:window.__storyPreview?.receipt})'
+ }
+ snap=page.evaluate(scripts[lane])
+ if not snap or snap.get('scene')!=state:
+  raise AssertionError(f'Wrong rendered scene: requested {state}, got {snap}')
+ if lane in ('printer','quota') and not snap.get('boss'):
+  raise AssertionError(f'Boss runtime absent at requested {state}')
+ if lane=='story' and state=='RECEIPT' and (not snap.get('receipt') or snap.get('promotion',0)<=5):
+  raise AssertionError('Story ending reached without five real promotions')
+ return snap
+
 def capture_lane(browser,lane,root,out,quick=False):
  conf=LANES[lane];path=root/conf['page'];bundle=Bundle(root);rows=[]
  sha=subprocess.run(['git','rev-parse','HEAD'],cwd=root,capture_output=True,text=True).stdout.strip() or None
+ dirty=subprocess.run(['git','status','--porcelain','--untracked-files=no'],cwd=root,capture_output=True,text=True)
+ working_dirty=dirty.returncode==0 and bool(dirty.stdout.strip())
  with Server(root) as server:
   for name,w,h,dpr in (SIZES[:1]+SIZES[-3:-2] if quick else SIZES):
    ctx=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=dpr,reduced_motion='reduce')
    page=ctx.new_page();errors=[];network=[];page.on('pageerror',lambda e:errors.append(str(e)))
+   page.on('console',lambda m:errors.append('Console error: '+m.text) if m.type=='error' else None)
    page.on('response',lambda r:network.append(f'{r.status} {r.url}') if r.status>=400 else None)
    mode='http'
    try:
@@ -138,17 +161,20 @@ def capture_lane(browser,lane,root,out,quick=False):
     except Exception:
      mode='inline-original-esm';page.close();page=ctx.new_page()
      page.on('pageerror',lambda e:errors.append(str(e)))
+     page.on('console',lambda m:errors.append('Console error: '+m.text) if m.type=='error' else None)
      page.set_content(bundle.html(path),wait_until='load',timeout=15000)
     page.wait_for_function('()=>!!('+conf['probe']+')',timeout=12000)
     states=conf['states'] if name in ('1080p','portrait') else conf['states'][:1]
     for state in states:
      entry={'lane':lane,'sourceBranch':conf['branch'],'sourceSha':sha,'scene':state,'viewport':name,
-       'size':[w,h],'dpr':dpr,'mode':mode,'sourceFilesSHA256':dict(bundle.hashes)}
+       'size':[w,h],'dpr':dpr,'mode':mode,'sourceFilesSHA256':dict(bundle.hashes),'workingTreeDirty':working_dirty}
      try:
       select(page,lane,state);page.wait_for_timeout(250)
       if lane=='quota':page.wait_for_function('()=>!!window.__QUOTA_STATE',timeout=7000)
+      entry['sceneSnapshot']=check_scene_state(page,lane,state)
       diag=page.evaluate(JS_DIAG);entry['diagnostics']=diag
       entry['failures'],entry['warnings']=violations(diag)
+      if working_dirty:entry['warnings'].append('Uncommitted source: evidence not identical to recorded SHA')
       outfile=out/f'{lane}-{state}-{name}.png';page.screenshot(path=str(outfile),animations='disabled',timeout=35000)
       entry['screenshot']=outfile.name
       if name=='1080p':
@@ -159,7 +185,8 @@ def capture_lane(browser,lane,root,out,quick=False):
        if a==b:entry['warnings'].append('No canvas pixel change over 430ms, inspect paused/intro state')
      except Exception as e:entry['failures']=['Scene capture error: '+str(e)]
      entry['browserErrors']=errors[:];entry['networkErrors']=network[:]
-     if errors:entry['failures'].append('JavaScript page exceptions')
+     if errors:entry['failures'].append('JavaScript/console exceptions')
+     if network:entry['failures'].append('HTTP 4xx/5xx asset failures')
      rows.append(entry)
    except Exception as e:rows.append({'lane':lane,'sourceBranch':conf['branch'],'viewport':name,
        'failures':['Load/boot failed: '+str(e)],'browserErrors':errors,'networkErrors':network})
