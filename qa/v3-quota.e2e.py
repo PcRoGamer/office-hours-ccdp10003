@@ -27,10 +27,16 @@ with sync_playwright() as p:
   page.mouse.click(R['x']+q['x']/W*R['width'],R['y']+q['y']/760*R['height'])
  def shot(name):page.screenshot(path=str(evidence/('quota-e2e-'+name+'.png')),full_page=True)
  await_mode('bonus',5000);shot('bonus-first')
- drag('bonus','file');await_mode('telegraph');await_mode('recovery');shot('recovery')
+ drag('bonus','file');shot('bonus-flight');await_mode('telegraph');await_mode('recovery');shot('recovery')
  drag('strip','stripTo');await_mode('verify');click('seal');await_mode('opening');shot('gear-first');drag('counter','gear');await_mode('counter-hit');await_mode('bonus');assert state()['phase']==2
  drag('bonus','cool');await_mode('ads');shot('ads');drag('fake','trash');await_mode('verify');click('seal');await_mode('opening');drag('counter','gear');await_mode('counter-hit');await_mode('bonus');assert state()['phase']==3
  drag('bonus','file');await_mode('route');shot('route');
- while state()['clockSeconds']%4.1<1.15:page.wait_for_timeout(150)
- drag('doc','safe');await_mode('bonus');shot('bonus-fourth');drag('bonus','cool');await_mode('latch');drag('latch','latchTo');await_mode('verify');click('seal');await_mode('opening');shot('gear-last');drag('counter','gear');await_mode('counter-hit');await_mode('clockout');shot('clockout');drag('stamp','stampTo');await_mode('complete');shot('complete');s=state();print('BROWSER WIN:',json.dumps({key:s[key] for key in ['phase','mode','boltsRemoved','bonusOutcomes','bonusCorporatePoints','pressure','activeTimeMs']}));print('EVENTS:',json.dumps(page.evaluate('window.__QUOTA_EVENTS().map(x=>({type:x.type,id:x.objectId,outcome:x.outcome,delta:x.delta}))')));print('ERRORS',errors);assert not errors
+ for attempt in range(10):
+  q=state()['clockSeconds']%4.1
+  while q<1.35 or q>3.3:
+   page.wait_for_timeout(120);q=state()['clockSeconds']%4.1
+  drag('doc','safe')
+  if state()['mode']=='bonus':break
+ else:raise AssertionError('Route gesture failed across 10 distinct safe windows')
+ await_mode('bonus');shot('bonus-fourth');drag('bonus','cool');await_mode('latch');drag('latch','latchTo');await_mode('verify');click('seal');await_mode('opening');shot('gear-last');drag('counter','gear');await_mode('counter-hit');await_mode('clockout');shot('clockout');drag('stamp','stampTo');await_mode('complete');shot('complete');s=state();print('BROWSER WIN:',json.dumps({key:s[key] for key in ['phase','mode','boltsRemoved','bonusOutcomes','bonusCorporatePoints','pressure','activeTimeMs']}));print('EVENTS:',json.dumps(page.evaluate('window.__QUOTA_EVENTS().map(x=>({type:x.type,id:x.objectId,outcome:x.outcome,delta:x.delta}))')));print('ERRORS',errors);assert not errors
  b.close()
