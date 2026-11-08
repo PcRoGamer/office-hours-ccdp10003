@@ -296,8 +296,29 @@ jobs:
           SOURCES
           git -C staging status --short >staging/qa-artifacts/v3-release-composition/worktree-status.txt
       - name: Exercise imported scene lifecycles, stable IDs and no-auto-score invariants
+        id: composed-contract
+        continue-on-error: true
         working-directory: staging
         run: node ../release-harness/qa/v3-release-composition.test.mjs
+      - name: Build a single-canvas interactive visual rehearsal, not a product release
+        run: cp release-harness/previews/v3-release-composition.html staging/previews/v3-release-composition.html
+      - name: Install Chromium for real source-composed visual QA
+        run: |
+          npm --prefix release-harness install --no-save playwright@1.58.2
+          ./release-harness/node_modules/.bin/playwright install --with-deps chromium
+      - name: Serve all composed scene modules and the shared test canvas
+        working-directory: staging
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/night-shift-composition.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/previews/v3-release-composition.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/night-shift-composition.log
+          exit 1
+      - name: Capture 14 real authored scenes and inspect runtime at desktop/portrait
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-composition.browser.cjs
       - name: Upload source SHAs, integration contract report and defect evidence
         uses: actions/upload-artifact@v4
         if: always()
@@ -305,3 +326,6 @@ jobs:
           name: night-shift-v3-composition-${{ github.run_id }}
           path: staging/qa-artifacts/v3-release-composition/
           retention-days: 21
+      - name: Contract failure remains fatal after browser evidence
+        if: ${{ always() && steps.composed-contract.outcome == 'failure' }}
+        run: exit 1
