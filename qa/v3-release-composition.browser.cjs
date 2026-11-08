@@ -59,6 +59,27 @@ async function main(){
      report.screens.push({id,viewport:[w,h],name,snapshotKeys:Object.keys(state.scene||{}).slice(0,15)});
     }catch(e){fail('Switch and render '+id+' '+w+'x'+h,{error:String(e.stack||e)})}
    }
+   // Real physical input through the shared canvas transform. No synthetic
+   // direct scene method calls: screen pointer -> viewport -> authored stamp.
+   try{
+    await page.evaluate(()=>window.__swarmComposition.choose('I1'));
+    await page.waitForTimeout(1650);
+    const item=await page.evaluate(()=>{
+     const app=window.__swarmComposition,form=app.scene?.forms?.find(f=>f.kind==='approved'&&!f.hit&&f.x>0&&f.x<1200);
+     if(!form)return null;
+     return{point:app.viewport.worldToScreen(form.x+form.w/2,form.y+form.h/2),before:app.scene.snapshot().progress};
+    });
+    if(!item)fail('Stamped form is visible to the player '+w+'x'+h);
+    else{
+     await page.mouse.click(item.point.x,item.point.y);
+     const after=await page.evaluate(()=>window.__swarmComposition.scene.snapshot().progress);
+     if(after===item.before+1)pass('Real screen pointer resolves one and only one authorized I1 stamp '+w+'x'+h);
+     else fail('Real screen pointer stamp mismapped or duplicated '+w+'x'+h,{before:item.before,after,point:item.point});
+     await page.evaluate(()=>document.body.classList.add('capture'));
+     await page.screenshot({path:path.join(out,'I1-physical-stamp-'+w+'x'+h+'.png')});
+     await page.evaluate(()=>document.body.classList.remove('capture'));
+    }
+   }catch(e){fail('Cross-module physical input regression '+w+'x'+h,{error:String(e.stack||e)})}
    if(w===1920){
     try{
      const before=await page.evaluate(()=>window.__swarmComposition.viewport.cssWidth);
