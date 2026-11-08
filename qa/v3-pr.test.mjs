@@ -90,3 +90,17 @@ test('P1 Sponsored Workflow exposes signed help and dismissible fraudulent cosme
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,720),viewport);x.scene.pointerUp(p(400,720),viewport);
  x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
 });
+
+test('P2 thrown ad physically shields projector and extends only shutter, not scoring reference',()=>{
+ const x=setup('P2');
+ x.scene.pointerDown(p(220,230),viewport);x.scene.pointerMove(p(720,245),viewport);x.scene.pointerUp(p(720,245),viewport);
+ const st=x.scene.snapshot();assert.equal(st.coverBeats,1);assert.equal(st.graceSeconds,.8);
+ assert.equal(x.events.filter(e=>e.type==='popup-cover').length,1);
+ assert.equal(x.events.filter(e=>e.type==='popup-cover')[0].bonusWindowSeconds,.8);
+ assert.equal(x.done().length,0);
+ for(let i=0;i<322;i++)x.scene.update(.1);
+ assert.equal(x.done().length,0);
+ for(let i=0;i<10;i++)x.scene.update(.1);
+ assert.equal(x.done()[0].outcome,'failure');
+ assert.equal(x.done()[0].evidence.authoredReferenceMs,12000);
+});
