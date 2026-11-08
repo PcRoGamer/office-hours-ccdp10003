@@ -54,3 +54,14 @@ Visual iteration: first desktop capture showed stage-sign/HUD collision, correct
 The branch does not change Night Shift HD or any other agent's paths. It is not the final 16-card integrated game. Authored deterministic packet kinematics are used here, with Planck.js contact integration deferred to the PHYSICS and LEAD modules if necessary. Source reviewed against HD palette/paper-theatre grammar; a real HD-to-v3 rendered side-by-side remains pending. Audio lane may replace the local procedural musical sketch. Full hardware 4K/ultrawide and live public deploy are not claimed as accepted.
 
 This contribution is a working independently playable boss, not a plan-only PR.
+
+
+## Native-resolution follow-up, 2026-11-08 AEDT
+
+An earlier 4K capture exposed a hidden internal canvas cap (a physical 3840×2160 viewport yielded 3771×2121). Corrected `previews/v3-printer.html` so the backing canvas matches actual CSS viewport × devicePixelRatio, and added an explicit native-resolution assertion to `qa/v3-printer-browser.py`. Re-rendered and inspected genuine 4K-DPR2 counter frame.
+
+```json
+{"viewport":"3840x2160","css":[1920,1080],"dpr":2,"directive":"FAST_OR_SAFE","screenshots":4,"bolts":1,"manualHits":1,"pageErrors":[],"backing":[3840,2160]}
+```
+
+**Native 4K resolution assertion PASSED**; one first-cycle manual counter PASSED, with no page exceptions. Not yet a verified full three-counter 4K fight. Final unit suite after fix: **12/12 passed**, plus `python -m py_compile qa/v3-printer-browser.py`. The reference 650×800 and physical 4K browser counter captures were actually inspected. Browser navigation to loopback and local file URLs was blocked by the isolated test environment; test harness uses browser `set_content` populated from the actual module and preview sources. Standard `python -m http.server 4173` remains the intended user-facing browser route on normal hosts.
