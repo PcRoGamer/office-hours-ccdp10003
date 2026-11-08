@@ -120,9 +120,54 @@ with sync_playwright() as p:
             check(state(page)['mode']=='trace','S4 moving-goalposts holds before restart test')
             page.evaluate('''() => {for(let i=0;i<165;i++)window.__services.state.scene.update(.05)}''')
             check(abs(state(page)['goalShift'])>.01 and state(page)['mode']=='hold','S4 timed restart visibly moves target port for next physical try')
+            # FAST OR SAFE in S1 offers a physically smaller, closer chute and normal safe inbox.
+            page.select_option('#directive','fast-or-safe');page.evaluate('window.__services.load(0)')
+            sp=max(180,min(475,(page.evaluate('window.__services.viewport.worldWidth')-100)*.5))
+            f=state(page)['files'][0];drag(page,f['x'],f['y'],600+sp*.21,468)
+            check(state(page)['filed']==1,'S1 fast route is a distinct smaller physical filing target')
+            for j in (1,2):
+                f=state(page)['files'][j];drag(page,f['x'],f['y'],600+sp*.68,390)
+            ev=page.evaluate('window.__lastCardEvent')
+            check(ev['cardId']=='S1' and ev['evidence']['routes']==['fast','safe','safe'],'S1 player can mix fast and safe routes with audited evidence')
+            # MOVING GOALPOSTS in S2 forces a tray reposition and a deliberate new grab.
+            page.select_option('#directive','moving-goalposts');page.evaluate('window.__services.load(1)')
+            p0=screen(page,600,534);page.mouse.move(p0['x'],p0['y']);page.mouse.down()
+            for k in range(90):
+                s=state(page);cs=[c for c in s['cups'] if not c['done']]
+                if cs:
+                    target=max(cs,key=lambda c:c['y']);pointer=screen(page,target['x'],534);page.mouse.move(pointer['x'],pointer['y'])
+                if s['movingLane']>0:break
+                page.wait_for_timeout(40)
+            s=state(page)
+            check(s['movingLane']>0 and s['caught']+s['spilled']>0,'S2 moving-goalposts physically relocates the tray between resolved mugs')
+            old=s['trayX'];wrong=screen(page,600-sp*.4,534);page.mouse.move(wrong['x'],wrong['y']);page.mouse.up()
+            page.mouse.click(wrong['x'],wrong['y']);pointer=screen(page,600+sp*.52,534);page.mouse.move(pointer['x'],pointer['y'])
+            check(abs(state(page)['trayX']-old)<3,'S2 player cannot move shifted tray without grabbing actual handle')
+            p=screen(page,old,534);page.mouse.move(p['x'],p['y']);page.mouse.down();new=screen(page,600+sp*.36,534);page.mouse.move(new['x'],new['y']);page.mouse.up()
+            check(abs(state(page)['trayX']-old)>20,'S2 manually regripping tray unlocks new movement')
+            page.screenshot(path=str(OUT/'services-s2-moving-rail.png'))
+            # MANDATORY COLLABORATION in S3 extends the safe light but does not pull the page.
+            page.select_option('#directive','mandatory-collaboration');page.evaluate('window.__services.load(2)')
+            p=screen(page,600-sp*.80,485);page.mouse.click(p['x'],p['y']);s=state(page)
+            check(s['helper'] and not s['emitted'],'S3 Mira stabilizer changes safe window with an optional tap, no auto-open')
+            page.wait_for_function('window.__services.state.scene.snapshot().safe')
+            drag(page,600,477,600+sp*.67,571)
+            check(state(page)['emitted'],'S3 after Mira help still requires physical page pull')
+            page.screenshot(path=str(OUT/'services-s3-mira-stabilizer.png'))
+            # SPONSORED WORKFLOW in S4 physically blocks the true connection until dragged aside.
+            page.select_option('#directive','sponsored-workflow');page.evaluate('window.__services.load(3)')
+            start=600-sp*.59;end=600+sp*.65
+            p=screen(page,start,518);page.mouse.move(p['x'],p['y']);page.mouse.down();page.wait_for_timeout(1100);page.mouse.up()
+            drag(page,start,518,end,470)
+            s=state(page);check(s['adVisible'] and s['errors']>=1 and not s['emitted'],'S4 sponsored false-port cover prevents an unverified cable connection')
+            drag(page,end,470,600,335)
+            s=state(page);check(not s['adVisible'] and not s['emitted'],'S4 fake port overlay is physically dismissed, without automatic completion')
+            drag(page,start,518,end,470)
+            check(state(page)['emitted'],'S4 authentic port connects only after manual ad removal and cable trace')
+            page.screenshot(path=str(OUT/'services-s4-sponsored-port.png'))
             # Automatic timeout is never misrepresented as a manual successful action.
             page.select_option('#directive','');page.evaluate('window.__services.load(0)')
-            page.evaluate("() => {for(let i=0;i<550;i++)window.__services.state.scene.update(.05)}")
+            page.evaluate('''() => {for(let i=0;i<550;i++)window.__services.state.scene.update(.05)}''')
             ev=page.evaluate('window.__lastCardEvent')
             check(ev['type']=='card-failed' and ev['evidence']['manual'] is False,'Timer expiry emits failure without false manual-action provenance')
             # Sponsored-workflow popups are physical movable obstructions, never free progression.
