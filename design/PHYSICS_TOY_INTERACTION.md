@@ -2,11 +2,23 @@
 
 Status: APPROVED DESIGN DIRECTION; NOT YET IMPLEMENTED OR BENCHMARKED.
 
-## Engine choice
+## Engine choice (Box2D-family preflight, supersedes Matter-first)
 
-**Introduce a genuine 2D rigid-body physics system for the interactive office props.** First candidate: **Matter.js 0.20.0** (MIT), https://brm.io/matter-js/docs/index.html and https://brm.io/matter-js/docs/classes/MouseConstraint.html . Matter offers rigid bodies, collision events, constraints, friction, restitution, stacking and direct browser integration with the existing Canvas2D renderer. Compare with **Rapier 2D** (Rust/WASM), https://rapier.rs/docs/user_guides/javascript/getting_started_js/ , using the same small physical desk scene if Matter fails a fidelity, stability, latency or FPS test. Planck.js is another established 2D alternative. User-listed Three.js RapierPhysics, JoltPhysics, Cannon-es and Ammo target **3D** rigid bodies and are the wrong default for the existing 2D architecture. No Three.js conversion.
+**Introduce real 2D rigid-body simulation for the interactive office props.** The first engine spike is **Planck.js v1.5.1** (the actively maintained JavaScript/TypeScript Box2D-style implementation): https://github.com/piqnt/planck.js and https://www.npmjs.com/package/planck . Why first: browser-native JS, familiar Box2D world/bodies/fixtures/joints, broad 2D collision mechanics, clean local bundling and no asynchronous WASM startup dependency for an intentionally small Canvas2D microgame.
 
-**This is a tactile-gameplay feature, not an excuse for scope expansion.** Keep the eight short, varied microgames, corporate Promotion Trap, characters, research and complete boss. Physics should make work objects enjoyable in their own right. Job Simulator contributes tactile job play, not 3D VR or a requirement to clone its assets.
+**Second candidates, only when measured shortcomings justify them:**
+- **box2d-wasm v7.0.0:** https://github.com/Birch-san/box2d-wasm and https://www.npmjs.com/package/box2d-wasm . It exposes **Box2D C++ 2.4.1**, not the current **Box2D 3 C17 API**. Maintainer docs show a WASM payload plus JS bridge, with a notably old published release. Verify availability, bindings, correct fixed-step integration, async load, relative public asset URLs and actual results. Do not assume free multithreading, automatic speedups or "perfect" continuous collision detection.
+- **Rapier 2D:** https://rapier.rs/docs/user_guides/javascript/getting_started_js/ . Rust/WASM with modern 2D CCD, sensors and joints. A strong actively developed alternative, but needs correct initialization and bundle asset handling. Compare it when projectile tunnelling, complex joints or stability tests make it worth switching.
+- **Matter.js 0.20.0:** https://brm.io/matter-js/docs/index.html . Retain as a lightweight control implementation/backup; not the default if Planck gives better actual physical feel.
+
+**Don't confuse Box2D implementations.** Official current engine documentation at https://box2d.org/documentation/ describes Box2D 3 (C17). `box2d-wasm` maps the older v2.4.1 C++ API. Planck is a JavaScript rewrite influenced by Box2D, NOT current official Box2D 3. A wrapper's upstream age, license, packaging and deployment matter as much as the low-level solver.
+
+**CCD is never a promise of perfect hit registration:** Box2D and Rapier use approximations and have documented motion/tunnelling limits. Design fast projectiles with sensible size/velocity caps and use sweep tests / sensor tolerances where justified. Physics contacts trigger idempotent game intents; they must not duplicate cards, packets, score or licence tokens.
+
+**Do not convert this 2D game into Three.js.** The user-provided Three.js RapierPhysics, JoltPhysics, Cannon-es and Ammo references target 3D. Existing Night Shift HD is Canvas2D, and the First Shift target remains fast, authored 2D microgames.
+
+**Evidence-driven selection, with time-boxed experiment rather than architecture debate:** Build the same *one* real desk toy for Planck first; inspect throwing, sliding, stacking, collisions, joint spring, chutes, target sensor, input latency, runtime stability and performance at realistic object counts. If Planck doesn't meet the creative bar or has real defects, compare a WASM candidate using identical inputs. Report measurements and video screenshots, don't invent results. Select the lightest engine with demonstrably better play feel, physics correctness and integration cost. Never postpone the complete eight-card boss/release for a hypothetical 1000-body stress test.
+
 
 ## Required physics scenes and affordances
 
@@ -31,7 +43,7 @@ At least three different office props must be satisfying to manipulate even with
 
 ## Implementation gate and proof
 
-**FIRST: build and run one isolated desk physics spike before wholesale integration.** Use folder, paper, cup, stapler, tray and chute. Demonstrate pick-up, release, momentum, bounce, contact stacking, collision event, a true scored chute and pause/resume/reset. Capture actual video/screenshots, inspect and compare scripted version versus simulation for tactility, clarity, fairness and input feel. If Matter is not the best choice, test Rapier2D in the same scene; choose on observed results, not technology loyalty.
+**FIRST: build and run one isolated Planck.js desk physics spike before wholesale integration.** Use folder, paper, cup, stapler, tray and chute. Demonstrate pick-up, release, momentum, bounce, contact stacking, collision event, a true scored chute and pause/resume/reset. Capture actual video/screenshots, inspect and compare scripted version versus simulation for tactility, clarity, fairness and input feel. If Planck has observed deficiencies, benchmark box2d-wasm or Rapier2D in that SAME scene before switching; select on measurements and on-screen experience, not on assumed native/WASM superiority.
 
 Test actual drag mapping at 1440x900, 1366x768, 1024x600 and 650x800, plus DPR2 and touch. Test variable frame pacing, hidden tab and pause, 50 repeatedly spawned bodies, reset/retry no leaks, score idempotence, physics-assisted perks and all boss collision patterns. Record actual FPS/load measurements, not invented benchmark claims. Maintain all original browser QA.
 
