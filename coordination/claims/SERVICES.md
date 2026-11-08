@@ -36,3 +36,12 @@
 - **Visual loop:** S4 target relocation and S3 safe-hold screenshots inspected and improved, specifically removing feedback text overlap.
 - **PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/16, `qa/v3-services-timing.test.mjs` and `coordination/reports/services-implementation.md`.
 - **Remaining gates:** true HTTP/Pages load and shared-branch integration, HD comparative character/art/audio quality and entire campaign release QA. Existing Night Shift HD is protected.
+
+
+## Final refinement after recovery (2026-11-08 AEDT)
+- **Current branch head:** `9392a26651dd97e640770d17dbf5a8025396cfd5`.
+- **PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/16 (draft into `rebuild/night-shift-v3-hd`).
+- **Gameplay and visual revision:** fair S3 timing latch; S4 continuous hold and live moving port; terminal input freeze; persistent caught/spilled S2 mug objects, animated settling, Mira reaction and clear preview outcome copy.
+- **Test evidence:** full independent Chromium **53/53**, focused Chromium **21/21**, committed Node timing tests **11/11**; `node --check` and real browser-native data-URL ESM import both pass.
+- **Real visual evidence:** inspected S2 rescued/spilled 1440×900 screenshots, S3 safe-grab latch, S4 moving port after collision/layout correction. Latest archive delivered in the chat and report updated.
+- **Release control:** Only SERVICES-owned paths were changed. HD and `main` untouched. LEAD performs full-game HD visual/audio acceptance; this independent PR remains draft.
