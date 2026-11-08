@@ -126,7 +126,7 @@ function action(c,s,w,t,opts){
     text(c,'SPONSORED',0,-49,17,C.rust);text(c,'TONER NFT',0,-12,30,C.dark);text(c,'DRAG ME ASIDE  →',0,37,15,'#32685c');c.restore();
   }
   if(opts.hasMira&&s.state==='counter'&&!s.miraUsed){
-    const x=-Math.min(260,w*.35);blob(c,x,157,49,'#153b3a');blob(c,x,151,38,C.gold);blob(c,x-13,142,5,C.night);blob(c,x+13,142,5,C.night);
+    const x=Math.min(260,w*.35);blob(c,x,157,49,'#153b3a');blob(c,x,151,38,C.gold);blob(c,x-13,142,5,C.night);blob(c,x+13,142,5,C.night);
     c.beginPath();c.arc(x,155,19,.1,Math.PI-.1);stroke(c,C.night,4);
     label(c,'MIRA: HOLD?',x,220,171,38,'#2b806c',C.paper);
   }
