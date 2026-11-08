@@ -54,7 +54,7 @@ export function createStoryExperience({host,audio,reduceMotion=false}={}){
    try{onPick({perkId,index,directive});}catch(error){closing=false;buttons.forEach(btn=>{btn.disabled=false;btn.classList.remove('ns-chosen')});throw error}
    stop();const notice=$('div','ns-announcement');notice.setAttribute('role','status');notice.innerHTML=`<span>BOARD RESOLUTION ${String(index).padStart(2,'0')}</span><strong>${escapeHtml(m.directive?.headline??'UPGRADE APPROVED')}</strong><p>${escapeHtml(m.directive?.hint??'Your new equipment has been allocated.')}</p><div class="ns-machine-install" aria-hidden="true"><span class="ns-install-module">▤</span><span class="ns-install-impact">✸</span><span class="ns-install-rig">▥ QUOTA PART ${String(index).padStart(2,'0')} / 05</span></div><div class="ns-announcement-bar"></div>`;article.append(notice);
    const done=()=>{if(mode!=='promotion'||host.firstElementChild!==article||!closing)return;clear();onContinue({index,perkId,directive})};
-   notice.addEventListener('click',done,{once:true});continueTimer=window.setTimeout(done,reduceMotion?350:1650);
+   notice.addEventListener('click',done,{once:true});continueTimer=window.setTimeout(done,(reduceMotion||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)?350:1650);
   }));startDemo();return article;
  }
  function renderReceipt({run={},snapshot,onReplay=()=>{}}){const m=receiptNarrative({run,snapshot});clear();mode='receipt';host.hidden=false;let side='official',details=false;
