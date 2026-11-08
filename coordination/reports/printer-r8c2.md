@@ -65,3 +65,33 @@ An earlier 4K capture exposed a hidden internal canvas cap (a physical 3840×216
 ```
 
 **Native 4K resolution assertion PASSED**; one first-cycle manual counter PASSED, with no page exceptions. Not yet a verified full three-counter 4K fight. Final unit suite after fix: **12/12 passed**, plus `python -m py_compile qa/v3-printer-browser.py`. The reference 650×800 and physical 4K browser counter captures were actually inspected. Browser navigation to loopback and local file URLs was blocked by the isolated test environment; test harness uses browser `set_content` populated from the actual module and preview sources. Standard `python -m http.server 4173` remains the intended user-facing browser route on normal hosts.
+
+
+## Continuation QA and design refinement | 8 Nov 2026, after first draft PR
+
+**Source verified:** Original PR #19 branch files and local tested files match Git blob SHAs for boss, renderer, preview and browser harness. The Node test file differs only in a blank line preceding the 17th test; test logic is the same.
+
+### Bugs and gameplay defects actually fixed
+
+1. **Moving Goalposts previously teleported its feeder position between cycles.** It now smoothly travels along its existing illustrated rail during the 1.65-second telegraph lull, remains fixed through jam and counter, and is tested at mid-rail and at rest. No target relocates beneath a grabbed packet.
+2. **Mira's visible HOLD label was not clickable.** The face and label now activate the same one-use, genuinely wider counter opportunity, with no double application.
+3. **Pausing or hiding the tab during a drag could retain a captured pointer.** The standalone preview now calls `cancelPointer()` on pause/blur, restoring the packet without a lost attempt.
+4. **Incoming sheets were decorative parry targets.** Clicking one now visibly registers a manual parry, changes the hint and earns +15 world units of feeder width per sheet (capped at three sheets per cycle). The next counter is easier; parry is optional and zero-parry wins remain possible. The Fast or Safe adapter retains this earned modifier when its width changes.
+
+### Final executed checks
+
+`node --test qa/v3-printer.test.mjs`: **17/17 pass, zero failures** (five full directive victories, five bug/regression cases and one real parry-benefit test). `python -m py_compile qa/v3-printer-browser.py`: pass.
+
+Real headless Chromium/Playwright used actual pointer-down/move/up events and untouched authored Canvas2D boss/render source in an in-memory HTML module assembly. The isolated browser policy refuses localhost and external URL navigation; the served Pages route **has not** been independently HTTP verified. Every viewport below completed **all three manual bolt-removal cycles**, emitted no page errors and matched the expected canvas backing size:
+
+| CSS viewport and backing | Directive | Manual counters | Canvas backing | Browser errors |
+| --- | --- | ---: | --- | ---: |
+| 1920×1080 @ DPR1 | Moving Goalposts | 3/3 | 1920×1080 | 0 |
+| 650×800 @ DPR1 | Mandatory Collaboration | 3/3 | 650×800 | 0 |
+| 2560×1440 @ DPR1 | Double Entry | 3/3 | 2560×1440 | 0 |
+| 3440×1440 @ DPR1 | Sponsored Workflow | 3/3 | 3440×1440 | 0 |
+| 1920×1080 CSS @ DPR2 | Fast or Safe | 3/3 | **3840×2160 native** | 0 |
+
+The desktop browser test additionally toggles Escape pause and confirms zero gameplay clock advancement, cancels an active packet drag with Escape and verifies respawn, then clicks real victory replay and verifies a clean next run. Re-run filters: `V3_PRINTER_FILTER=3840x2160 python qa/v3-printer-browser.py`, and likewise for each other viewport. Five separate scoped runs were used after the combined multi-viewport run reached the sandbox timeout. Original captured JPEGs checked into `qa/v3-printer-evidence/` are real earlier-browser render frames, not concept images; the above browser passes were repeated against the refined version. Final telegraph/portrait/4K PNG recaptures were inspected locally and retain the same screenshot reproduction command.
+
+**Remaining global release checks, not claimed as complete:** direct Night Shift HD visual/audio side-by-side, deployment HTTP route and relative asset check, connected Planck collision service when available, shared AUDIO's orchestration, and end-to-end campaign integration. The completed PRINTER module is still independently playable with authored kinematics and existing event service hook. Never count this PR as global v3 release validation.
