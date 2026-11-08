@@ -40,6 +40,14 @@ Canvas title: **Project 2: Exploring Gaming Culture**. The brief permits video g
 
 **Validation gate:** for at least three distinct props (for example stamped paper, a thrown folder, a rescued coffee cup) capture genuine pointer/touch interaction and a direct positive visual/sound response. Observe whether each interaction is legible and expressive without relying on score popups. If the same interaction feels like clicking a generic UI button, redesign it.
 
+## Additional game reference: Papers, Please (2013) | bureaucracy as systems-driven storytelling
+- **Original developer source:** https://www.papersplea.se/ (Lucas Pope).
+- **MIT Docubase interpretation:** https://docubase.mit.edu/project/papers-please/ .
+- **Mechanism:** documentation, successive new regulations, throughput pressure, personal consequences and fiction communicated through the actions of a job rather than through speeches. The bureaucracy itself tells the story.
+- **Take into Quota Panic:** The Promotion Trap and Finch's new directives are not arbitrary difficulty modifiers: management announces policy revisions, and the player must work within them. Some fast/efficient actions benefit the company but affect Mira and Jules. Distinct source of narrative tension: a *fun toy job* becomes more absurd and demanding as rules accrue. The player's successful work visibly helps construct THE QUOTA.
+- **Do not take:** painstaking passport checking, long document comparisons, oppressive realistic pacing or a dour political message. This is a 2D comedic **microgame roguelite**, not a Papers, Please clone. Let objects remain satisfying to handle; decisions should fit brief, lively actions.
+- **Prove:** At least one visibly announced directive changes a real physical task; one player choice visibly affects a coworker; boss construction is causal across promotions. Optional in-game research source credit; don't interrupt the 15-second opening challenge with four references at once.
+
 ## Authoritative creative formula | not a workplace-gamification thesis
 **Dumb Ways to Die = MICROGAMES. Brotato = ROGUELITE. Job Simulator = TACTILE JOB-AS-TOY. Quota Panic = THEIR ORIGINAL SYNTHESIS WITH CORPORATE LORE.** This is the user-approved conceptual frame and outranks older wording that casts the game principally as an employer-gamification critique.
 
