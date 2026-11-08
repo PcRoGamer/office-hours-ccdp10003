@@ -132,3 +132,6 @@
 .ns-mail{flex:0 0 auto}
 .ns-book{flex:0 0 auto}
 }
+
+/* The existing flip button already teaches the interaction. Do not print a hint over the score heading. */
+.ns-receipt::before{display:none}
