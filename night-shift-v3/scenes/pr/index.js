@@ -9,6 +9,11 @@ const cards=[
   {id:'P4', imperative:'HEADLINE OR CONTEXT?',title:'SAME FACTS. DIFFERENT STORY.',seconds:35,referenceMs:14000}
 ];
 const noop=()=>{};
+// Directives are injected by SYSTEMS/LEAD. Missing services retain a fair standalone route.
+function directiveId(context){
+  const d=context?.run?.activeDirective??context?.run?.directive??context?.effects?.activeDirective??context?.effects?.directive??context?.options?.directive;
+  return typeof d==='string'?d:(d?.id??d?.type??null);
+}
 function base(context,meta){
   const state={time:0,finished:false,correct:0,wrong:0,gesture:null,flash:0,scene:meta.id};
   const emit=(event)=>context?.events?.emit?.({...event,cardId:meta.id});
@@ -192,15 +197,24 @@ function createP4(context,meta){
   const b=base(context,meta),s=b.state;
   const events=Array.isArray(context?.run?.events)?context.run.events:[];
   const incident=context?.run?.miraIncident ?? events.find(e=>e?.type==='mira-spill' || e?.type==='mira-saved');
-  Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident});
+  Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident,goalposts:directiveId(context)==='moving-goalposts',routeShift:0,shiftAnnounced:false});
   const geo=v=>{const l=vw(v),width=l.width,routeW=Math.min(360,(width-50)/2),routeY=l.H-268;return {...l,cardW:Math.min(360,width*.62),cardH:132,restX:l.cx,restY:402,routeY,routeW,leftRoute:{x:l.cx-routeW-11,y:routeY,w:routeW,h:154},rightRoute:{x:l.cx+11,y:routeY,w:routeW,h:154}};};
+  // A route changes physical position only between gestures; art and collision use the same geometry.
+  const routes=v=>{const g=geo(v),travel=g.rightRoute.x-g.leftRoute.x,t=s.routeShift;
+    return {headline:{...g.leftRoute,x:g.leftRoute.x+travel*t},context:{...g.rightRoute,x:g.rightRoute.x-travel*t}};
+  };
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
     theatrePanel(ctx,l.cx-Math.min(l.width*.45,480),171,Math.min(l.width*.9,960),238,'#eed9ba');
     tx(ctx,'MONTHLY REPORT',l.cx,197,l.portrait?22:30,C.ink);
     tx(ctx,'1,240  →  1,280 CLICKS  /  +3.2%',l.cx,238,l.portrait?16:25,C.ink);
     tx(ctx,s.incidentObserved?'WORKSTATION INTERRUPTION RECORDED':'MIRA INCIDENT: NOT OBSERVED',l.cx,272,l.portrait?13:18,C.slate);
     tx(ctx,'THE FACTS DO NOT CHANGE. THE EMPHASIS DOES.',l.cx,307,l.portrait?11:16,C.slate);
-    for(const [name,r,col,subtitle] of [['HEADLINE',g.leftRoute,C.gold,'NEXT STAFF TASK: PRIORITY PASS'],['CONTEXT',g.rightRoute,C.mint,'QUOTA BOSS: +0.6s WARNING']]){
+    if(s.goalposts){
+       const y=g.routeY+g.leftRoute.h+13;line(ctx,g.leftRoute.x+18,y,g.rightRoute.x+g.rightRoute.w-18,y,C.gold,4);
+       tx(ctx,s.routeShift<1?'GOALPOSTS MOVING ON A RAIL':'TARGET POSITIONS SWAPPED!',l.cx,y+10,l.portrait?10:15,C.gold);
+     }
+     const mapped=routes(v);
+     for(const [name,r,col,subtitle] of [['HEADLINE',mapped.headline,C.gold,'NEXT STAFF TASK: PRIORITY PASS'],['CONTEXT',mapped.context,C.mint,'QUOTA BOSS: +0.6s WARNING']]){
       rr(ctx,r.x+3,r.y+6,r.w,r.h,17,C.shadow,null);rr(ctx,r.x,r.y,r.w,r.h,17,col,C.ink,5);
       tx(ctx,name,r.x+r.w/2,r.y+40,l.portrait?23:30,C.ink);
       const words=subtitle.split(':');tx(ctx,words[0],r.x+r.w/2,r.y+79,l.portrait?11:13,C.ink);tx(ctx,words[1]||'',r.x+r.w/2,r.y+100,l.portrait?12:17,C.ink);
@@ -215,12 +229,19 @@ function createP4(context,meta){
   }
   function pointerDown(p,v){if(s.finished)return;const g=geo(v);if(Math.abs(p.x-g.restX)<g.cardW/2+17&&Math.abs(p.y-g.restY)<g.cardH/2+22){s.dragging={id:p.id,downX:p.x,downY:p.y};s.cardX=p.x;s.cardY=p.y;}}
   function pointerMove(p){if(s.dragging?.id!==p.id)return;s.cardX=p.x;s.cardY=p.y;}
-  function pointerUp(p,v){if(s.dragging?.id!==p.id)return;const g=geo(v),route=pointIn(p,g.leftRoute)?'headline':pointIn(p,g.rightRoute)?'context':null;s.dragging=null;
+  function pointerUp(p,v){if(s.dragging?.id!==p.id)return;const g=routes(v),route=pointIn(p,g.headline)?'headline':pointIn(p,g.context)?'context':null;s.dragging=null;
     if(!route){b.act(false,'unrouted-report');s.cardX=0;s.cardY=0;return;}
     s.selected=route;b.act(true,'route-report',{route});const effect=route==='headline'?{type:'priority-pass',uses:1,target:'next-staff-card'}:{type:'quota-warning-card',leadSeconds:.6,uses:1,target:'the-quota'};
     b.complete('success',{facts:{before:1240,after:1280,percentageIncrease:40/1240*100,miraIncidentObserved:!!incident},framing:route,effect});
   }
-  return {enter:noop,update:b.update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=null},snapshot:b.snapshot,dispose:noop};
+  function update(dt){
+     b.update(dt);
+     const step=clamp(Number.isFinite(dt)?dt:0,0,.1);
+     if(s.finished||!s.goalposts||s.dragging||s.time<1.6)return;
+     if(!s.shiftAnnounced){s.shiftAnnounced=true;b.emit({type:'directive-shift',directive:'moving-goalposts',synthetic:true});}
+     s.routeShift=clamp(s.routeShift+step/0.7,0,1);
+   }
+   return {enter:noop,update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=null},snapshot:b.snapshot,dispose:noop};
 }
 
 export const definitions=Object.freeze(cards.map((meta,i)=>Object.freeze({
