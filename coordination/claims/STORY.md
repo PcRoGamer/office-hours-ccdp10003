@@ -9,6 +9,6 @@
 - **Dependencies:** other roles develop in parallel; use mock interface and respect read-only integration code.
 - **Intended tests:** executable state/unit tests, browser rendering and real screenshot/interaction QA wherever available, explicit report.
 
-- **Delivered:** draft PR [#14](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/14) from `agents/v3-story-k7m29`, head commit `8399a768655f741295ab4d957794195103e6b88f`.
-- **Evidence:** 12/12 narrative checks; five Chromium viewport captures (three real screenshot files committed in PR); five promotion selections, receipt flip and breakdown; zero browser page exceptions. `coordination/reports/story-delivery-k7m29.md` in PR.
-- **Remaining gates:** HTTP-served asset-loading smoke and HD browser side-by-side, integration with SYSTEMS and LEAD, live deployed route. No standalone release claimed.
+- **Delivered:** draft PR [#14](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/14) from `agents/v3-story-k7m29`, current head `9604ca52d2c42ba705a76b45e6cb2f7ccd1e6fcf`.
+- **Evidence:** 17/17 authored narrative and SYSTEMS compatibility checks; 7 real Chromium viewport screenshots; 6 byte-verified HTTP assets; 18 browser interactions including narrow receipt accessibility, reduced motion, tab visibility, level-two illustrated perks and frozen score adapters; zero JS page errors. `coordination/reports/story-continuation-2026-11-08.md` on the PR branch. Real HD 1440×900 CI promotion captured and compared.
+- **Remaining separate release acceptance:** LEAD to integrate complete 16-card v3, both bosses and AUDIO into full game and run real public-URL/HD visual parity; these cannot be claimed by independent STORY preview. Night Shift HD remains unchanged.
