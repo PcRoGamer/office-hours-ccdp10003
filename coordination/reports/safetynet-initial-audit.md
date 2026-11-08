@@ -59,3 +59,55 @@ python qa/v3-safetynet.browser.py
 The CDP script requires locally installed Chrome or Chromium. Set `CHROME_PATH` for a nonstandard installation. It uses an isolated temporary Chrome profile and does not require the workstation's usual browser session.
 
 **Release distinction:** source gate and actual HD baseline are now verified. Full v3 gameplay, both bosses, soundtrack and public release remain pending integration. This report does not authorize publishing over the working HD fallback.
+
+---
+
+## Continuation: independent staged-module test, 8 November 2026 evening AEDT
+
+The previous HD/source safety report is retained above. This continuation goes materially further: it **assembles genuine code from nine specialist branches and actually exercises those specialist modules** in Chrome and Node. It does **not** pretend that the unmerged integration route already exists.
+
+### Reproducible assembly, without interference
+
+`tools/v3-safetynet/assemble.mjs` and `tools/v3-safetynet/rehearsal-sources.json` created a **brand-new detached worktree** on the authenticated Windows host and copied **29 owned production/preview files** from nine existing specialist refs (Intake, Services, PR, Staff claim, Printer, Quota, Systems, Physics, Story). No existing release or other agent-owned source file was updated. Source copies use `git show`, so binary assets keep exact bytes and no `git restore` index lock is needed.
+
+The Staff lane's branch had **no Staff production files** when assembled. The script records that absence rather than inventing T1–T4 modules. The live integration branch still had no `night-shift-v3.html` when rechecked, so the candidate is an **isolated rehearsal, not a deployed/integrated v3 game**.
+
+### Actual real-browser captures and input checks
+
+`qa/v3-safetynet-preview-matrix.mjs` runs Chrome through DevTools Protocol against a local HTTP server serving the real staged preview sources. A real mouse click is dispatched to the Start/CLOCK IN control when present, with captured game frames **after** interaction. The first run revealed a test bug: scene tabs took priority over CLOCK IN, leaving the welcome modal open. I corrected input priority and recaptured Intake in action. A second defect, an occasional Windows `EBUSY` when reading `DevToolsActivePort`, was fixed with a bounded retry and retested.
+
+**Result: 16 of 16 preview/viewport samples passed** the canvas-present/basic-input/uncaught-JS/static-asset/overflow checks, across Intake, Services, PR, Printer, Quota, Systems, Physics and Story at **1440×900 and 650×800**. Each independent preview is **real specialist production code**, not a generated illustration. This automated result is a **startup+basic interaction result only**, not a full clear of each microgame/boss.
+
+Evidence committed to this PR:
+- [Full machine-readable 16-sample matrix + screenshot hashes](../../qa/v3-safetynet-preview-evidence/matrix-results.json)
+- [Intake/Services/PR desktop](../../qa/v3-safetynet-preview-evidence/desktop-1.jpg) and [portrait](../../qa/v3-safetynet-preview-evidence/portrait-1.jpg)
+- [Printer/Quota/Systems desktop](../../qa/v3-safetynet-preview-evidence/desktop-2.jpg) and [portrait](../../qa/v3-safetynet-preview-evidence/portrait-2.jpg)
+- [Physics/Story desktop](../../qa/v3-safetynet-preview-evidence/desktop-3.jpg) and [portrait](../../qa/v3-safetynet-preview-evidence/portrait-3.jpg)
+
+**Visual judgement, not a test-count illusion:** Intake shows a recognisable conveyor/Finch scene; PR has a legible, theatrical graph manipulation; the two boss previews have readable, mechanically distinct machine silhouettes; Story presents a genuinely formatted email/workbook. Services has comparatively small characters and a sparse dark stage at gameplay scale; Physics likewise is a sparse toy bench. Those should be reviewed and improved against HD, not accepted merely because they boot. The HD narrow-camera letterboxing problem remains an explicit target to surpass.
+
+### Direct production-module lifecycle and deck integration check
+
+`qa/v3-safetynet-contract-matrix.mjs` dynamically imports the actual staged source modules. It instantiates each definition with an injected SceneContext, calls **all nine required scene methods**, exercises a harmless pointer lifecycle, and verifies deterministic serialisable snapshots. It also executes **128 seeded decks** through the **real SYSTEMS production module**, checking 12 cards, five promotion stages, both bosses and coverage of the full 16-card source roster.
+
+**Result: 15 passed / 0 failed / 4 pending**:
+- 12 cards (I1–I4, S1–S4, P1–P4) passed the module interface probe.
+- Printer Mutiny B1 and THE QUOTA B2 passed the module interface probe.
+- SYSTEMS passed the 128-seed topology check.
+- T1–T4 are pending; the Staff files were absent from the staged source refs.
+- `--release` deliberately returned **exit code 1** with these four pending, rather than publishing a false green result.
+
+[Exact machine-readable contract result](../../qa/v3-safetynet-preview-evidence/contract-results.json).
+
+### Exact commands from an up-to-date local Git worktree
+
+```sh
+node tools/v3-safetynet/assemble.mjs --repo . --out /tmp/nightshift-v3-rehearsal
+node qa/v3-safetynet-contract-matrix.mjs --root /tmp/nightshift-v3-rehearsal --out /tmp/v3-contract.json
+node qa/v3-safetynet-contract-matrix.mjs --root /tmp/nightshift-v3-rehearsal --release --out /tmp/v3-release-contract.json
+node qa/v3-safetynet-preview-matrix.mjs --root /tmp/nightshift-v3-rehearsal --out /tmp/v3-preview-frames
+```
+
+Use fresh Windows `%TEMP%` paths for outputs; the assembler refuses existing worktree destinations. No external LLM calls were made.
+
+**The remaining release gate is a full HD-superior integrated v3 gameplay build**. This lane has now replaced untested assertions with reproducible real-browser and real-module evidence, but full boss routes, Staff gameplay, actual audio/music, all perk interactions, human timing and a fresh-public-URL run still require end-to-end integration and acceptance. The incumbent HD stays untouched.
