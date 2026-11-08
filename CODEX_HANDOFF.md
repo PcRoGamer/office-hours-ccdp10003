@@ -3,6 +3,13 @@ Prepared 8 November 2026. Repo: https://github.com/PcRoGamer/office-hours-ccdp10
 Authoritative target: a polished, self-contained CCDP10003 Project 2 vertical slice of the larger NIGHT SHIFT microgame roguelite. Not a prototype, plan, pitch, or trailer.
 **Mandatory reference: https://github.com/Donchitos/Claude-Code-Game-Studios**
 
+## RUBRIC-CORRECTED PRIMARY RESEARCH: MANDATORY
+READ [design/CCDP_P2_GAME_RESEARCH.md](design/CCDP_P2_GAME_RESEARCH.md) before implementing game/tutorial/credits. The **actual CCDP10003 Project 2 brief** (https://canvas.lms.unimelb.edu.au/courses/239834/assignments/658087) explicitly accepts video games as research. The TWO primary game case studies for First Shift are **Dumb Ways to Die (2013)** (fast, funny, immediately legible microgames) and **Brotato (2023)** (short waves, between-wave draft/shop, synergistic run builds). Their primary original/developer sources are linked with actual critical limitations and the transform-not-copy table in the research file. Supporting literature establishes contemporary ethical debate on workplace gamification, including positive effects, not a predetermined one-sided lesson.
+
+Make direct, **clickable sources and a concise "WHY THIS GAME? / WHY NOW?" a naturally encountered part of the FIRST IN-GAME TUTORIAL** and first promotion. The Full Game Design rubric says show/do, not tell; a detached academic "research menu" alone does NOT satisfy the assignment. At first actionable stamp explain in-world why repeated work can be entertaining; first promotion shows how rewards change labour and cites both exemplar games; an actual playable safe/speed choice and final dual-score receipt provide critical response. The full game must clearly evolve the existing Project 1.1/1.2 office survival proposal. No fake student autobiography, fake research findings, borrowed sprites/music, or copying existing game-specific challenge scenes.
+
+This research is a **rubric gate**, not optional polish. Independent QA must verify two primary-game source links visible/clickable by first promotion; the actual research reasoning visible in the interactive tutorial; explicit design comparison/critique in optional source drawer; strong mechanics-first demonstration; and coverage of all four 25-point criteria. Full Game Design Canvas submission is a playable URL, NOT a ZIP. Due 9 November 2026, 11:59 pm Melbourne time according to synced Canvas. Protect the release until browser QA passes.
+
 ## DO THIS, DON'T ASK FOR ANOTHER PLAN
 You are the producer, technical director and accountable integrator. Execute end to end: read actual source; preserve baseline; implement game; run Playwright; visually inspect screenshots/video; correct defects; rerun QA; verify public candidate URL; report real results. Do not offload testing or obvious decisions to the user. If subagents are available, delegate safely; otherwise do separated independent reviews yourself. No false agent runs, file edits, builds, browser results or submission receipts. Ask only for credentials/permission or irreversible actions.
 
@@ -57,7 +64,7 @@ Read https://github.com/Donchitos/Claude-Code-Game-Studios as actual source. Ado
 
 ## BUILD ORDER AND EVIDENCE GATES
 T00 Baseline: record HEAD, dirty worktree, original URLs, snapshot/rollback, verify old QA.
-T01 Read-source archaeology + rubric check + CCGS roles + asset rights. In parallel read-only.
+T01 Read-source archaeology + official Canvas rubric + TWO primary-game case studies in design/CCDP_P2_GAME_RESEARCH.md + CCGS roles + asset rights. In parallel read-only.
 T02 Isolated boot: first-shift.html working, high-DPI pointer mapping, sound/pause, **real I1 pointer-play** + screenshots.
 T03 Deterministic ledger/scoring/perks/directive data model, idempotent commit. Unit/property tests.
 T04 Intake I1/I3 and honest real/scam notifications.
@@ -66,7 +73,7 @@ T06 Services S1/S2 and meaningful route/coffee consequences, initial draft perk 
 T07 PR P1/P4, corrected scale and verified headline/context downstream branching.
 T08 Staff T1/T4, rescue count, $80 conservation and identity-based technical assistance.
 T09 Three-phase final boss + all 16 packet patterns, fair countershot, mandatory player actions.
-T10 Clock Out physical finale, two real score lenses, sources and real replay.
+T10 Clock Out physical finale, two real score lenses, credited DWTD/Brotato source drawer, contemporary gamification sources and real replay.
 T11 Art/audio/UX ongoing concurrently, but visual QA each integration, not after all cards.
 T12 Independent adversarial functional, rubric, art and gameplay red-team; fix and rerun.
 T13 Public candidate link, GitHub Pages subpath asset verification, preserved all older routes, rollback.
