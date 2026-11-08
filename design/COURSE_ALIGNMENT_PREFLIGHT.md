@@ -40,6 +40,8 @@ Suggested actual design-author rationale, grounded in the expressed creative dir
 
 Contemporary culture argument (one concrete, defensible sentence): **"Games can transform work-like routine into play, but their familiar reward systems are only interesting when they give players meaningful choices and consequences."** Demonstrate both immediate fun and how rules affect agency. There is no requirement to make corporate ethics the sole research topic.
 
+**Personal and global relevance, as required in Canvas:** include one brief authored statement grounded in the creator's expressed intention, e.g. **"I wanted a mundane job to feel genuinely playful, not like homework with points."** For broader relevance, keep it a design position rather than an unsupported social-science claim: **"People everywhere face repetitive instructions and systems of reward; games let us experiment with those rules and notice how they change our decisions."** Both are editorial proposals, integrated diegetically in the tutorial/promotion, not a required paragraph or invented biographical story.
+
 No compulsory citation slideshow, extensive tutorial, second academic mini-game, quiz, or courtroom ending. For each major game design inspiration include game developer/year and a direct clickable official or primary source in a compact in-game panel. Papers, Please may have a clearly separated narrative-philosophy credit.
 
 ## Rubric acceptance matrix: *observable* not hypothetical
