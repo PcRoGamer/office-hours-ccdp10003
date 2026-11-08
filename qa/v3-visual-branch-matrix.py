@@ -141,6 +141,15 @@ def check_scene_state(page,lane,state):
   raise AssertionError('Story ending reached without five real promotions')
  return snap
 
+def permitted_inline_fallback(lane,error):
+ """Policy-blocked navigation may use identical-source in-memory modules.
+ Broken URLs, missing assets and HTTP errors must NEVER be silently bypassed."""
+ if lane=='fixture':return True
+ reason=str(error)
+ return any(k in reason for k in (
+  'net::ERR_BLOCKED_BY_ADMINISTRATOR','net::ERR_ACCESS_DENIED',
+  'net::ERR_BLOCKED_BY_CLIENT','net::ERR_NETWORK_ACCESS_DENIED'))
+
 def capture_lane(browser,lane,root,out,quick=False):
  conf=LANES[lane];path=root/conf['page'];bundle=Bundle(root);rows=[]
  sha=subprocess.run(['git','rev-parse','HEAD'],cwd=root,capture_output=True,text=True).stdout.strip() or None
@@ -158,7 +167,8 @@ def capture_lane(browser,lane,root,out,quick=False):
      if lane=='fixture':raise RuntimeError('Deliberately exercise in-memory original-source fallback')
      response=page.goto(server+'/'+conf['page'],wait_until='domcontentloaded',timeout=11000)
      if not response or not response.ok:raise RuntimeError('HTTP response not OK')
-    except Exception:
+    except Exception as error:
+     if not permitted_inline_fallback(lane,error):raise
      mode='inline-original-esm';page.close();page=ctx.new_page()
      page.on('pageerror',lambda e:errors.append(str(e)))
      page.on('console',lambda m:errors.append('Console error: '+m.text) if m.type=='error' else None)
@@ -248,5 +258,8 @@ def main():
   assert all(r['mode']=='inline-original-esm' for r in results)
   assert all('night-shift-v3/palette.js' in r['sourceFilesSHA256'] for r in results)
   assert all('previews/demo.css' in r['sourceFilesSHA256'] for r in results)
+  assert permitted_inline_fallback('intake',Exception('net::ERR_BLOCKED_BY_ADMINISTRATOR'))
+  assert not permitted_inline_fallback('intake',Exception('HTTP 404 missing real JS asset'))
+  assert not permitted_inline_fallback('intake',Exception('net::ERR_CONNECTION_REFUSED'))
   print('BROWSER_MATRIX_SELFTEST_PASS: nested authored ES modules, CSS, 1080p, portrait')
 if __name__=='__main__':main()
