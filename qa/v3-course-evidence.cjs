@@ -129,7 +129,7 @@ function selfTest(){
   assert.equal(EXPECTED.ids.length,16);
   assert.equal(new Set(EXPECTED.ids).size,16);
   assert.equal(EXPECTED.research.length,3);
-  assert.equal(EXPECTED.research[0].re.test('Dumb Ways to Die'),'true');
+  assert.equal(EXPECTED.research[0].re.test('Dumb Ways to Die'),true);
   assert.equal(EXPECTED.research[1].re.test('Brotato'),true);
   assert.equal(EXPECTED.research[2].re.test('Job Simulator'),true);
   console.log('V3_COURSE_GATE_SELF_TEST_PASS 16 authored cards, three gameplay references, independent source-vs-runtime distinction');
