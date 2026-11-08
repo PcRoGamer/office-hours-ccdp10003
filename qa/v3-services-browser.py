@@ -165,6 +165,18 @@ with sync_playwright() as p:
             drag(page,start,518,end,470)
             check(state(page)['emitted'],'S4 authentic port connects only after manual ad removal and cable trace')
             page.screenshot(path=str(OUT/'services-s4-sponsored-port.png'))
+            # Import-facing directive IDs accept readable labels and structured objects.
+            norm=page.evaluate("""() => {
+              const api=window.__services, w=api.viewport.worldWidth, span=Math.max(180,Math.min(475,(w-100)*.5));
+              const base={viewport:api.viewport,options:{attemptId:'qa-normalize'},events:{emit(){}}};
+              const s1=api.definitions[0].create({...base,run:{directive:'FAST OR SAFE'}}),f=s1.snapshot().files[0],target={x:600+span*.21,y:468};
+              s1.pointerDown({x:f.x,y:f.y});s1.pointerMove(target);s1.pointerUp(target);
+              const s4=api.definitions[3].create({...base,run:{directive:{id:'MANDATORY COLLABORATION'}}});
+              s4.pointerDown({x:600+span*.65,y:320});
+              return {fast:s1.snapshot().filed===1,helper:s4.snapshot().helper};
+            }""")
+            check(norm['fast'],'S1 readable uppercase director directive normalizes to real fast chute')
+            check(norm['helper'],'S4 structured director directive normalizes to physical Jules interaction')
             # Automatic timeout is never misrepresented as a manual successful action.
             page.select_option('#directive','');page.evaluate('window.__services.load(0)')
             page.evaluate('''() => {for(let i=0;i<550;i++)window.__services.state.scene.update(.05)}''')
