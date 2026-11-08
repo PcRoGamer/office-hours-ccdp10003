@@ -116,4 +116,5 @@ test('S2 uncaught mugs remain represented as actual spills',()=>{
   const s=game.snapshot();assert.ok(s.spilled>=2);
   assert.equal(s.cups.filter(c=>c.spilled).length,s.spilled);
   assert.equal(completed(events).length,0);
+  assert.equal(events.find(e=>e.type==='card-failed')?.evidence?.miraWorkstation,'disrupted');
 });
