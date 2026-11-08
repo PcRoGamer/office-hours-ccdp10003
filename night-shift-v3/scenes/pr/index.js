@@ -48,8 +48,9 @@ function drawResult(ctx,l,s,msg){
 
 function createP1(context,meta){
   const b=base(context,meta),s=b.state;
-  Object.assign(s,{baseline:1200,dragging:false,sent:false,corrected:false,axisHint:true});
+  Object.assign(s,{baseline:1200,dragging:false,sent:false,corrected:false,axisHint:true,sponsored:directiveId(context)==='sponsored-workflow',tipOpened:false,fakeDismissed:false,promoDrag:null,promoFlight:null,cosmeticPulse:0});
   const geo=v=>{const l=vw(v),x=l.cx-l.width*.44,w=l.width*.88;return {...l,x,w,chart:{x:x+25,y:207,w:w-50,h:326},handle:{x:x+25,y:510,w:w-50,h:60},send:{x:l.cx-84,y:l.H-159,w:168,h:66}}};
+  const promoRect=(g,kind)=>{const w=g.portrait?130:208,h=g.portrait?61:76;return {x:g.x+g.w-w-24,y:g.chart.y+(kind==='tip'?54:155),w,h};};
   function enter(){};
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
     theatrePanel(ctx,g.x,170,g.w,l.H-292,C.paper);
@@ -68,18 +69,58 @@ function createP1(context,meta){
     tx(ctx,`BASELINE ${Math.round(s.baseline).toLocaleString('en-US')}     ↓ DRAG`,p.x+p.w/2,handleY+1,l.portrait?13:18,C.ink);
     if(s.corrected&&s.baseline===0){rr(ctx,g.x+25,g.chart.y-7,g.w-50,37,9,C.mint,C.ink,3);tx(ctx,'+40 CLICKS   /   +3.2%   /   ZERO BASELINE',l.cx,g.chart.y+12,l.portrait?13:19,C.ink);}
     else sticker(ctx,'MISLEADING!',g.x+g.w-85,g.chart.y+5,{size:l.portrait?11:15});
+    // Sponsored Workflow: genuine signed help and cosmetic ad coexist; no automatic axis change.
+    if(s.sponsored){
+      for(const kind of ['tip','fake']){
+        if(kind==='fake'&&s.fakeDismissed)continue;
+        const r=promoRect(g,kind),held=s.promoDrag?.kind===kind;
+        ctx.save();ctx.translate(held?s.promoDrag.dx:0,held?s.promoDrag.dy:0);
+        rr(ctx,r.x+5,r.y+6,r.w,r.h,10,C.shadow,null);
+        rr(ctx,r.x,r.y,r.w,r.h,10,kind==='tip'?'#d7fff0':'#ffe4bd',C.ink,3);
+        rr(ctx,r.x,r.y,r.w,Math.min(24,r.h*.38),8,kind==='tip'?C.mint:C.red,C.ink,2);
+        tx(ctx,kind==='tip'?'ASTER IT / VERIFIED':'PAID PLACEMENT',r.x+r.w/2,r.y+13,l.portrait?9:13,C.ink);
+        tx(ctx,kind==='tip'?(s.tipOpened?'ZERO IS DOWN ↓':'OPEN REAL TIP'):'ADD 40% MORE GLOW',r.x+r.w/2,r.y+r.h*.57,l.portrait?10:15,C.ink);
+        tx(ctx,kind==='tip'?'TAP FOR A HINT':'FLICK TO DISMISS',r.x+r.w/2,r.y+r.h*.83,l.portrait?9:12,C.slate);
+        ctx.restore();
+      }
+      if(s.tipOpened&&!s.corrected){
+        ctx.save();ctx.setLineDash([9,7]);line(ctx,g.chart.x+17,510,g.chart.x+17,580,C.mint,5);ctx.restore();
+        tx(ctx,'PULL DOWN TO 0',g.chart.x+122,577,l.portrait?12:18,C.slate);
+      }
+      if(s.promoFlight){const f=s.promoFlight;ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);rr(ctx,-56,-22,112,44,7,C.red,C.ink,3);tx(ctx,'SPONSORED',0,0,12,C.ink);ctx.restore();}
+    }
     button(ctx,s.corrected?'STAMP  SEND':'SHOW  ZERO',g.send.x,g.send.y,g.send.w,g.send.h,{disabled:!s.corrected,small:l.portrait});
     if(!l.portrait)tx(ctx,s.corrected?'CORRECT SCALE. ORIGINAL DATA.':'PULL THE RED BASELINE DOWN TO ZERO',l.cx,l.H-28,l.portrait?13:17,C.cream);
     if(s.flash>0)stars(ctx,l.cx+g.w*.31,195,s.time*6,15,context?.options?.reducedMotion);
     drawResult(ctx,l,s,s.sent?'SENT WITH THE REAL SCALE':'SHUTTER CLOSED');
   }
   function pointerDown(p,v){if(s.finished)return;const g=geo(v);
+    if(s.sponsored){for(const kind of ['tip','fake']){
+      if(kind==='fake'&&s.fakeDismissed)continue;
+      if(pointIn(p,promoRect(g,kind))){s.promoDrag={id:p.id,kind,startX:p.x,startY:p.y,dx:0,dy:0};return;}
+    }}
     if(pointIn(p,g.send)){if(s.corrected&&s.baseline===0){s.sent=true;b.act(true,'send-real-chart',{base:0,from:1240,to:1280});b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40});}else b.act(false,'premature-send');return;}
     if(pointIn(p,{...g.handle,y:g.handle.y-28,h:94})){s.dragging=true;s.gesture={id:p.id,startY:p.y,startBaseline:s.baseline};return;}
   }
-  function pointerMove(p){if(!s.dragging||s.gesture?.id!==p.id||s.finished)return;const dy=p.y-s.gesture.startY;s.baseline=clamp(s.gesture.startBaseline-dy*8,0,1200);if(s.baseline<45)s.baseline=0;s.corrected=s.baseline===0;}
-  function pointerUp(p){if(s.dragging&&s.gesture?.id===p.id){s.dragging=false;s.gesture=null;s.corrected=s.baseline===0;if(s.corrected&&!s.axisScored){s.axisScored=true;b.act(true,'correct-chart-axis',{before:1200,after:0});}}}
-  return {enter,update:b.update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=false;s.gesture=null},snapshot:b.snapshot,dispose:noop};
+  function pointerMove(p){
+    if(s.promoDrag?.id===p.id){s.promoDrag.dx=p.x-s.promoDrag.startX;s.promoDrag.dy=p.y-s.promoDrag.startY;return;}
+    if(!s.dragging||s.gesture?.id!==p.id||s.finished)return;const dy=p.y-s.gesture.startY;s.baseline=clamp(s.gesture.startBaseline-dy*8,0,1200);if(s.baseline<45)s.baseline=0;s.corrected=s.baseline===0;}
+  function pointerUp(p){
+    if(s.promoDrag?.id===p.id){const drag=s.promoDrag,dist=Math.hypot(p.x-drag.startX,p.y-drag.startY);
+      s.promoDrag=null;
+      if(drag.kind==='tip'){
+        if(dist<=70&&!s.tipOpened){s.tipOpened=true;b.act(true,'open-signed-scale-tip',{source:'ASTER IT'});}
+        else if(dist>70)b.act(false,'fling-genuine-scale-tip');
+      }else if(dist>70){s.fakeDismissed=true;s.promoFlight={x:p.x,y:p.y,vx:(p.x-drag.startX)*2.5,vy:(p.y-drag.startY)*2.5,angle:0,ttl:.8};b.act(true,'flick-cosmetic-ad',{objectId:'fake-creative'});}
+      else {s.cosmeticPulse=.8;b.act(false,'accept-cosmetic-ad',{objectId:'fake-creative'});}
+      return;
+    }
+    if(s.dragging&&s.gesture?.id===p.id){s.dragging=false;s.gesture=null;s.corrected=s.baseline===0;if(s.corrected&&!s.axisScored){s.axisScored=true;b.act(true,'correct-chart-axis',{before:1200,after:0});}}}
+  function update(dt){b.update(dt);const step=clamp(Number.isFinite(dt)?dt:0,0,.1);
+    s.cosmeticPulse=Math.max(0,s.cosmeticPulse-step);
+    const f=s.promoFlight;if(f){f.x+=f.vx*step;f.y+=f.vy*step;f.vy+=560*step;f.angle+=step*3;f.ttl-=step;if(f.ttl<=0)s.promoFlight=null;}
+  }
+  return {enter,update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=false;s.gesture=null;s.promoDrag=null},snapshot:b.snapshot,dispose:noop};
 }
 
 function createP2(context,meta){
