@@ -145,6 +145,26 @@ async def main():
         assert await page.locator('.ns-receipt-title').count()==1, 'stale timer removed receipt'
         assert await page.evaluate('window.__storyPreview.phase')==1,'stale promotion continuation ran'
         report['interactions']['cancelledPromotionTimerSafe']=True
+        await page.close()
+        # Directly exercise the real SYSTEMS draft and readScores report schemas.
+        page=await browser.new_page(viewport={'width':1440,'height':900})
+        page.on('pageerror',lambda e:report['errors'].append(str(e)))
+        await page.set_content(html,wait_until='load')
+        await page.evaluate("""() => {
+            window.__systemsPicked=null;
+            story.showPromotion({index:1,run:{perkLevels:{'carbon-copy':1}},offers:['carbon-copy','bank-shot','mira-backup'],directive:'fast-or-safe',onPick:({perkId})=>window.__systemsPicked=perkId});
+        }""")
+        assert await page.get_by_role('button',name='Choose CARBON COPY level 2').count()==1
+        await page.get_by_role('button',name='Choose CARBON COPY level 2').click()
+        assert await page.evaluate('window.__systemsPicked')=='carbon-copy', 'purchase ID not compatible with SYSTEMS'
+        report['interactions']['systemsShortPerkId']=True
+        await page.evaluate("""() => story.showReceipt({run:{},snapshot:{officialScore:78,peopleScore:86,official:{completedWork:40},people:{toolAccess:30},completedCardIds:['S2','T4'],licenceTokensGiven:2,workstationIntact:false,bonusPacketOutcomes:{'quota:p1:b1':'file'}}})""")
+        assert await page.locator('.ns-receipt-score').inner_text()=='78/ 100'
+        await page.locator('.ns-receipt').click()
+        assert await page.locator('.ns-receipt-score').inner_text()=='86/ 100'
+        await page.locator('[data-details]').click()
+        assert await page.locator('.ns-breakdown').count()==1
+        report['interactions']['systemsFrozenScoreFields']=True
         await page.close();await browser.close()
     (OUT/'quality-report.json').write_text(json.dumps(report,indent=2))
     assert not report['errors'],report['errors']
