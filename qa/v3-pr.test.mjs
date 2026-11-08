@@ -77,3 +77,16 @@ test('P4 moving-goalposts rail freezes while carrying a report',()=>{
  for(let i=0;i<15;i++)x.scene.update(.1);
  assert.equal(x.scene.snapshot().routeShift,1);
 });
+
+test('P1 Sponsored Workflow exposes signed help and dismissible fraudulent cosmetic ad without bypassing manual scale',()=>{
+ const x=setup('P1',{directive:'sponsored-workflow'});
+ assert.equal(x.scene.snapshot().sponsored,true);
+ x.scene.pointerDown(p(930,300),viewport);x.scene.pointerUp(p(930,300),viewport);
+ assert.equal(x.scene.snapshot().tipOpened,true);
+ assert.equal(x.scene.snapshot().baseline,1200);assert.equal(x.done().length,0);
+ x.scene.pointerDown(p(930,415),viewport);x.scene.pointerMove(p(1100,250),viewport);x.scene.pointerUp(p(1100,250),viewport);
+ assert.equal(x.scene.snapshot().fakeDismissed,true);
+ assert.equal(x.actions().filter(e=>e.correct).length,2);
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,720),viewport);x.scene.pointerUp(p(400,720),viewport);
+ x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
+});
