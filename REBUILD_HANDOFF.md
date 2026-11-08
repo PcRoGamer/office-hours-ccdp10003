@@ -1,5 +1,7 @@
 # NIGHT SHIFT v3 | Astra-led HD-first rebuild and parallel production handoff
 
+**ENGINEERING JUDGMENT IS DELEGATED:** Make informed reversible calls, handle compiler/browser/merge/interface failures autonomously, and prove decisions with real tests. Do not ask the user to pick tools, diagnose exceptions or say whether you should fix errors. See [Autonomy Policy decision test](coordination/AUTONOMY_POLICY.md#delegated-technical-judgment-decide-build-prove). True authorization/irreversible actions remain explicit boundaries.
+
 **NO-ROUTINE-QUESTIONS DIRECTIVE:** Agents operate under [coordination/AUTONOMY_POLICY.md](coordination/AUTONOMY_POLICY.md). Make grounded defaults, implement and verify until a useful PR or genuine blocker exists; do not ask the user to say “continue,” choose routine options or approve ordinary fixes. No false promise of work after the turn ends.
 
 **Date:** Sunday 8 Nov 2026 AEDT
