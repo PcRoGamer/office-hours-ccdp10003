@@ -15,7 +15,7 @@ function directiveId(context){
   return typeof d==='string'?d:(d?.id??d?.type??null);
 }
 function base(context,meta){
-  const state={time:0,finished:false,correct:0,wrong:0,gesture:null,flash:0,scene:meta.id};
+  const state={time:0,finished:false,correct:0,wrong:0,actionSerial:0,gesture:null,flash:0,scene:meta.id};
   const emit=(event)=>context?.events?.emit?.({...event,cardId:meta.id});
   const complete=(outcome,evidence={})=>{
     if(state.finished)return false;
@@ -24,11 +24,29 @@ function base(context,meta){
     context?.audio?.play?.(outcome==='success'?'card-win':'card-fail');
     return true;
   };
+  // SYSTEMS requires a stable unique objectId for each *real* resolved target.
+  // Names describe a physical object, not the order the adapter happened to see it.
+  // Wrong attempts are individually traceable rather than silently deduplicated.
+  const targetIds=Object.freeze({
+    'correct-chart-axis':'pr:p1:axis',
+    'send-real-chart':'pr:p1:send',
+    'open-signed-scale-tip':'pr:p1:verified-scale-tip',
+    'open-signed-alert':'pr:p2:verified-alert',
+    'slide-alignment-lock':null,
+    'route-report':'pr:p4:report'
+  });
   const act=(correct,kind,details={})=>{
+    if(state.finished)return false;
+    const serial=++state.actionSerial;
+    const stable=targetIds[kind];
+    const objectId=details.objectId || (kind==='slide-alignment-lock'
+      ?`pr:p3:alignment-mark-${details.mark}`:(correct&&stable?stable:`pr:${meta.id}:${kind}:${serial}`));
     state[correct?'correct':'wrong']++;
     state.flash=correct?.35:.55;
-    emit({type:'card-action',kind,correct,synthetic:false,...details});
+    emit({type:'card-action',kind,correct,objectId,outcome:correct?'correct':'wrong',
+      gesture:details.gesture||'pointer',synthetic:false,actionSerial:serial,...details});
     context?.audio?.play?.(correct?'hit':'miss');
+    return true;
   };
   const update=(dt)=>{if(state.finished)return;const step=clamp(Number.isFinite(dt)?dt:0,0,.1);state.time+=step;state.flash=Math.max(0,state.flash-step);if(state.time>=meta.seconds+(state.graceSeconds||0))complete('failure',{cause:'shutter',progress:state.scene});};
   const snapshot=()=>JSON.parse(JSON.stringify(state));
@@ -204,11 +222,12 @@ function createP2(context,meta){
   }
   function update(dt){
     b.update(dt);if(s.finished)return;
-    s.coverShield=Math.max(0,s.coverShield-clamp(Number.isFinite(dt)?dt:0,0,.1));
-    if(s.restoreHelp>0){s.restoreHelp-=dt;if(s.restoreHelp<=0){s.overlays.find(o=>o.id==='real').removed=false;s.overlays.find(o=>o.id==='real').x=-.09;s.overlays.find(o=>o.id==='real').y=.04;}}
+    const step=clamp(Number.isFinite(dt)?dt:0,0,.1);
+    s.coverShield=Math.max(0,s.coverShield-step);
+    if(s.restoreHelp>0){s.restoreHelp-=step;if(s.restoreHelp<=0){s.overlays.find(o=>o.id==='real').removed=false;s.overlays.find(o=>o.id==='real').x=-.09;s.overlays.find(o=>o.id==='real').y=.04;}}
     const g=geo(context?.viewport||{worldWidth:1200,worldHeight:760});
     for(const f of s.flight){
-      const prevX=f.x;f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=620*dt;f.angle+=f.spin*dt;f.ttl-=dt;
+      const prevX=f.x;f.x+=f.vx*step;f.y+=f.vy*step;f.vy+=620*step;f.angle+=f.spin*step;f.ttl-=step;
       if(!f.cover&&((prevX<g.cx&&f.x>=g.cx)||(prevX>g.cx&&f.x<=g.cx))&&f.y>g.y&&f.y<g.y+g.h){
         creditCover(f);
       }
@@ -246,7 +265,13 @@ function createP3(context,meta){
   function pointerDown(p,v){if(s.finished)return;const g=geo(v);if(Math.abs(p.y-g.knobY)<65&&Math.abs(p.x-(g.cx+s.dial*g.max))<65){s.dragging={id:p.id};s.dial=clamp((p.x-g.cx)/g.max,-1,1);}}
   function pointerMove(p,v){if(s.dragging?.id!==p.id)return;const g=geo(v);s.dial=clamp((p.x-g.cx)/g.max,-1,1);}
   function pointerUp(p){if(s.dragging?.id===p.id){s.dragging=null;s.charge=0;}}
-  function update(dt){b.update(dt);if(s.finished||!s.dragging)return;const diff=Math.abs(s.dial-target());if(diff<.33){s.charge+=clamp(dt,0,.1);if(s.charge>=.76){s.charge=0;s.locked++;b.act(true,'slide-alignment-lock',{mark:s.locked});if(s.locked===3)b.complete('success',{alignmentMarks:3,physicalFocus:true});}}else{s.sideways++;s.charge=Math.max(0,s.charge-dt*.42);}}
+  function update(dt){b.update(dt);if(s.finished||!s.dragging)return;
+    const step=clamp(Number.isFinite(dt)?dt:0,0,.1);
+    if(step===0)return;
+    const diff=Math.abs(s.dial-target());
+    if(diff<.33){s.charge+=step;if(s.charge>=.76){s.charge=0;s.locked++;b.act(true,'slide-alignment-lock',{mark:s.locked});if(s.locked===3)b.complete('success',{alignmentMarks:3,physicalFocus:true});}}
+    else{s.sideways++;s.charge=Math.max(0,s.charge-step*.42);}
+  }
   return {enter:noop,update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=null;s.charge=0},snapshot:b.snapshot,dispose:noop};
 }
 
