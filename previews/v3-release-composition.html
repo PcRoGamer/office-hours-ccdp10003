@@ -5,6 +5,7 @@
 <style>
 :root{color-scheme:dark;--cream:#ffefd1;--gold:#f5c26b;--mint:#78d9bc;--ink:#0d2930}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0e2b32;color:var(--cream);font:800 14px Arial,sans-serif}
+body.capture #top,body.capture #toolbar{display:none!important}
 #world{display:block;position:fixed;inset:0;width:100vw;height:100dvh;touch-action:none;cursor:grab}#world:active{cursor:grabbing}
 #top{pointer-events:none;position:fixed;inset:0;z-index:2}
 #title{position:absolute;top:max(10px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));letter-spacing:.17em;font-size:clamp(10px,.8vw,16px);color:var(--gold);text-shadow:0 2px 5px #000}
@@ -47,10 +48,13 @@ function resize(){
  const lane=types.get(active)||'intake';
  if(lane==='intake'){const compact=w/h<1.05;scale=compact?w/1280:h/720;offsetX=(w-1280*scale)/2;offsetY=compact?(h-720*scale)*.57:(h-720*scale)/2;}
  else{scale=h/760;offsetY=lane==='printer'?h/2:0;offsetX=lane==='services'?w/2-600*scale:lane==='printer'?w/2:0;}
- viewport={worldWidth:w/scale,worldHeight:h/scale,cssWidth:w,cssHeight:h,dpr,
+ // Preserve the SAME injected viewport object on a live resize.
+ // Swapping it caused already-created scenes to retain stale hit-test dimensions.
+ const next={worldWidth:w/scale,worldHeight:h/scale,cssWidth:w,cssHeight:h,dpr,
   safeRect:{x:-offsetX/scale,y:-offsetY/scale,w:w/scale,h:h/scale},
   worldToScreen(x,y){return{x:x*scale+offsetX,y:y*scale+offsetY}},
   screenToWorld(x,y){return{x:(x-offsetX)/scale,y:(y-offsetY)/scale}}};
+ if(viewport)Object.assign(viewport,next);else viewport=next;
 }
 function choose(id){
  const def=all.find(x=>x.id===id);
