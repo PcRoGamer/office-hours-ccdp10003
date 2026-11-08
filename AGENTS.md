@@ -1,0 +1,25 @@
+# QUOTA PANIC: NIGHT SHIFT v3 | instructions for all AI collaborators
+
+**You are working on a shared, quality-gated rebuild rooted in Night Shift HD.** Start by reading this file, [REBUILD_HANDOFF.md](REBUILD_HANDOFF.md), [coordination/SWARM.md](coordination/SWARM.md), and the full [design/NIGHT_SHIFT_GDD_V3.md](design/NIGHT_SHIFT_GDD_V3.md). Then read the technical and visual contracts and the exact source files belonging to your claimed lane.
+
+## Final intent (never silently lower it)
+- Canonical creative target: **full Night Shift GDD v3**: **16** authored microgames (12 per normal run), **five** promotions/directives, **eight** perk types, **two** mechanic-driven bosses (Printer Mutiny and THE QUOTA), responsive fully staged ending, replay, genuine agency and correctly evidenced CCDP10003 course argument. The eight-card First Shift *slice* is historical, not binding. Use v3's exact mechanics and IDs.
+- **Night Shift HD is the minimum visual and experiential benchmark**. Read `arcade-office-hd.html` and inspect the actual browser game before implementing a replacement. Use `arcade-office-genai.html` and `arcade-v3.html` as additional selective references. NEVER use First Shift's beige-board visuals as the art baseline.
+- **Engine:** Canvas2D for rendering, locked **Planck.js** for 2D props. Reuse tested Planck physics/ledger algorithms from `feat/first-shift` only when they demonstrably improve the HD foundation. No new physics-engine comparisons, no 3D migration, no unnecessary HTML-based desktop simulation.
+- **Viewport:** edge-to-edge, **ZERO margins or letterboxing**, world fills physical screen, camera reframes/extends scenery by aspect ratio, HUD is overlaid and pinned to real viewport edges (hearts/time), gameplay targets remain legible and reachable; target native-looking 1080p, 1440p, 4K, ultrawide, narrow/portrait fallback. No 1200×760 rectangle with black bars.
+- **Audio:** original/licensed coherent adaptive music and detailed interaction sound; silent beeps are not the soundtrack. Responsive expressive animation; don't substitute a generated static sprite collage for gameplay.
+- **Course:** three actual gameplay influences are Dumb Ways to Die (microgames), Brotato (roguelite), Job Simulator (tactile job toys). Papers, Please is a philosophical/narrative influence, *not* fourth gameplay pillar. Show the research through action, not mandatory credits slides or quizzes.
+- **Submission:** a real public playable URL, real Playwright+manual/browser visual QA, hard rollback. The cached deadline is Monday **9 Nov 2026 23:59 AEDT** (verify live Canvas before claiming submission). Never claim an earned 100/100, a human playtest, or Canvas submission without evidence.
+
+## Your collaboration duties
+1. **Read live** `coordination/SWARM.md`, `coordination/NEW_CHAT_PROMPT.md`, current claims, open PRs and branch HEAD. A previous chat's summary may be stale.
+2. **Claim precisely one lane** with an atomic GitHub create-file at `coordination/claims/<LANE>.md`, on `rebuild/night-shift-v3-hd`. If it exists, select another. Do not just say you're helping.
+3. Create unique branch `agents/v3-<lane>-<slug>` from the current rebuild head. Use isolated git worktrees, never reset or clean a shared user's existing checkout.
+4. Work within exact lane-owned paths in [coordination/SWARM.md](coordination/SWARM.md); other lanes' paths are review-only. Build a real independently runnable preview/mock-service prototype and relevant automated test. Share a draft PR **into the rebuild branch**, never `main`.
+5. Before marking done, **inspect actual rendered frames, compare with HD**, capture screenshots with source URL/viewport/date, run functional QA, revise. A green unit test does not certify joy or visual superiority.
+6. Implement and deliver in the active turn, with accurate claims. Do not rely on async inter-chat messages, timer wakeups or shared hidden memory. External model API/CLI calls are NOT required and should not be made unless the user separately authorizes.
+7. If your lane can't integrate because a dependency is absent, implement/test using a small documented mock adapter, then provide a concrete interface-compatible PR instead of stopping at a plan.
+8. Preserve older routes, `main`, legacy scripts and local changes. No force pushes or unilateral merges of others' PRs.
+
+## Stop conditions
+Do not redefine the target because of time or tool limitations. Distinguish **design target**, **partially implemented**, **browser tested**, **visual accepted**, **public released**. If deadline requires fallback, **HD remains the defensible existing playable**, while the rebuild continues without fake completion. Lead/integrator is accountable for actual end-to-end experience.
