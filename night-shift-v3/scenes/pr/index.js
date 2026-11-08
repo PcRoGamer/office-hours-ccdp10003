@@ -30,7 +30,7 @@ function base(context,meta){
     emit({type:'card-action',kind,correct,synthetic:false,...details});
     context?.audio?.play?.(correct?'hit':'miss');
   };
-  const update=(dt)=>{if(state.finished)return;const step=clamp(Number.isFinite(dt)?dt:0,0,.1);state.time+=step;state.flash=Math.max(0,state.flash-step);if(state.time>=meta.seconds)complete('failure',{cause:'shutter',progress:state.scene});};
+  const update=(dt)=>{if(state.finished)return;const step=clamp(Number.isFinite(dt)?dt:0,0,.1);state.time+=step;state.flash=Math.max(0,state.flash-step);if(state.time>=meta.seconds+(state.graceSeconds||0))complete('failure',{cause:'shutter',progress:state.scene});};
   const snapshot=()=>JSON.parse(JSON.stringify(state));
   return {state,emit,complete,act,update,snapshot,meta};
 }
@@ -125,10 +125,10 @@ function createP1(context,meta){
 
 function createP2(context,meta){
   const b=base(context,meta),s=b.state;
-  Object.assign(s,{coverBeats:0,flight:[],restoreHelp:0,overlays:[{id:'saleA',kind:'sale',x:-.26,y:-.08,removed:false,rotation:-.07},{id:'saleB',kind:'sale',x:.10,y:.22,removed:false,rotation:.08},{id:'real',kind:'help',x:-.09,y:.04,removed:false,opened:false,rotation:-.02}],dragging:null,opened:false});
+  Object.assign(s,{coverBeats:0,coverShield:0,graceSeconds:0,flight:[],restoreHelp:0,overlays:[{id:'saleA',kind:'sale',x:-.26,y:-.08,removed:false,rotation:-.07},{id:'saleB',kind:'sale',x:.10,y:.22,removed:false,rotation:.08},{id:'real',kind:'help',x:-.09,y:.04,removed:false,opened:false,rotation:-.02}],dragging:null,opened:false});
   const geo=v=>{const l=vw(v),w=Math.min(l.width*.92,880),h=Math.min(410,l.H*.53),x=l.cx-w/2,y=186;return {...l,x,y,w,h};};
   const cardsGeo=v=>{const g=geo(v),cw=Math.min(g.w*.54,400),ch=Math.min(g.portrait?140:173,g.h*.41);return s.overlays.map((o,i)=>({o,rect:{x:g.cx+o.x*g.w-cw*.5,y:g.y+g.h*.30+o.y*g.h-ch*.5,w:cw,h:ch},cw,ch}));};
-  function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
+  function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds+s.graceSeconds);
     theatrePanel(ctx,g.x,g.y,g.w,g.h,'#e9f6e8');rr(ctx,g.x+18,g.y+32,g.w-36,g.h-50,10,'#c7e1d7',C.ink,4);
     for(let i=0;i<7;i++){line(ctx,g.x+45,g.y+60+i*41,g.x+g.w-45,g.y+60+i*41,'#95b5b0',2)}
     tx(ctx,'PROJECTOR LIVE  •  CLIENT MEETING',l.cx,g.y+18,l.portrait?12:17,C.ink);
@@ -147,6 +147,11 @@ function createP2(context,meta){
     }
     for(const f of s.flight){
       ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);rr(ctx,-f.w/2,-f.h/2,f.w,f.h,9,C.red,C.ink,5);tx(ctx,'SPONSORED',0,0,l.portrait?10:16,C.ink);ctx.restore();
+    }
+    // Earned impact toast stays legible OVER flying paper.
+    if(s.coverShield>0){
+      const w=Math.min(g.w-36,l.portrait?320:430);rr(ctx,l.cx-w/2,g.y+23,w,48,12,C.mint,C.ink,4);
+      tx(ctx,'AD BLOCK!  +0.8s SHUTTER',l.cx,g.y+49,l.portrait?13:19,C.ink);
     }
     const n=s.overlays.filter(x=>x.kind==='sale'&&x.removed).length;
     rr(ctx,l.cx-Math.min(l.width*.4,320),l.H-153,Math.min(l.width*.8,640),70,14,C.ink,C.mint,3);
@@ -181,20 +186,31 @@ function createP2(context,meta){
     }else if(distance>=threshold){
       o.removed=true;
       const r=cardsGeo(v).find(entry=>entry.o.id===o.id)?.rect;
-      s.flight.push({id:o.id,x:p.x,y:p.y,w:r?.w||220,h:r?.h||120,vx:dx*3,vy:dy*3,angle:o.rotation,spin:dx*.004,ttl:1.25,cover:false});
+      const flying={id:o.id,x:p.x,y:p.y,w:r?.w||220,h:r?.h||120,vx:dx*3,vy:dy*3,angle:o.rotation,spin:dx*.004,ttl:1.25,cover:false};
+      s.flight.push(flying);
+      // Detect cover swept across the projector DURING the drag, not only after release.
+      if(((d.startX<g.cx&&p.x>=g.cx)||(d.startX>g.cx&&p.x<=g.cx))&&p.y>=g.y&&p.y<=g.y+g.h)creditCover(flying);
       b.act(true,'flick-hostile-overlay',{objectId:o.id,manualDistance:Math.round(distance)});check();
     }else b.act(false,'uncommitted-flick',{objectId:o.id});
     if(!o.removed){o.x=d.oldX;o.y=d.oldY;o.rotation=d.oldRotation;}
     s.dragging=null;
   }
+  function creditCover(f){
+    if(f.cover)return;
+    f.cover=true;s.coverBeats++;
+    s.graceSeconds=Math.min(1.6,s.graceSeconds+.8);
+    s.coverShield=1.25;
+    b.emit({type:'popup-cover',objectId:f.id,synthetic:false,bonusWindowSeconds:.8});
+  }
   function update(dt){
     b.update(dt);if(s.finished)return;
+    s.coverShield=Math.max(0,s.coverShield-clamp(Number.isFinite(dt)?dt:0,0,.1));
     if(s.restoreHelp>0){s.restoreHelp-=dt;if(s.restoreHelp<=0){s.overlays.find(o=>o.id==='real').removed=false;s.overlays.find(o=>o.id==='real').x=-.09;s.overlays.find(o=>o.id==='real').y=.04;}}
     const g=geo(context?.viewport||{worldWidth:1200,worldHeight:760});
     for(const f of s.flight){
       const prevX=f.x;f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=620*dt;f.angle+=f.spin*dt;f.ttl-=dt;
       if(!f.cover&&((prevX<g.cx&&f.x>=g.cx)||(prevX>g.cx&&f.x<=g.cx))&&f.y>g.y&&f.y<g.y+g.h){
-        f.cover=true;s.coverBeats++;b.emit({type:'popup-cover',objectId:f.id,synthetic:false});
+        creditCover(f);
       }
       if(f.x<g.x||f.x>g.x+g.w){f.vx*=-.6;f.x=clamp(f.x,g.x,g.x+g.w);}
     }
