@@ -321,6 +321,42 @@ jobs:
       - name: Capture 14 real authored scenes and inspect runtime at desktop/portrait
         working-directory: staging
         run: node ../release-harness/qa/v3-release-composition.browser.cjs
+      - name: Package a standalone playable 14-scene rehearsal for reviewers
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=staging/qa-artifacts/v3-release-composition/playable
+          mkdir -p "$target/previews" "$target/night-shift-v3"
+          cp staging/previews/v3-release-composition.html "$target/previews/"
+          cp -R staging/night-shift-v3/scenes "$target/night-shift-v3/"
+          cp -R staging/night-shift-v3/bosses "$target/night-shift-v3/"
+          cp -R staging/night-shift-v3/systems "$target/night-shift-v3/"
+          cp staging/qa-artifacts/v3-release-composition/owners.txt "$target/SOURCE-COMMITS.txt"
+          cat >"$target/README.txt" <<'README'
+          QUOTA PANIC / NIGHT SHIFT V3: 14-SCENE REHEARSAL
+          ------------------------------------------------
+          This artifact contains 12 playable Intake/Services/PR scenes and both
+          bosses assembled from original agent-owned source branches. It is
+          a temporary same-canvas INPUT AND RENDER test, NOT the finished
+          16-microgame Night Shift game. STAFF, full progression, final art/audio
+          and LEAD production shell are NOT present.
+          
+          RUN: extract this "playable" folder, then from inside it:
+            python3 -m http.server 4173
+          OPEN: http://127.0.0.1:4173/previews/v3-release-composition.html
+          Select any authored card or boss in the bottom bar, interact on the
+          canvas, and use PAUSE/RETRY. It does not commit fictional scores.
+          SOURCE-COMMITS.txt pins every authored module's actual Git SHA.
+          
+          Do NOT submit as the complete course game or replace Night Shift HD.
+          README
+      - name: Upload independently runnable composed rehearsal
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-playable-rehearsal-${{ github.run_id }}
+          path: staging/qa-artifacts/v3-release-composition/playable/
+          retention-days: 21
       - name: Upload source SHAs, integration contract report and defect evidence
         uses: actions/upload-artifact@v4
         if: always()
