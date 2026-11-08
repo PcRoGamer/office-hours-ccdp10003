@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>QUOTA PANIC | V3 temporary swarm integration rehearsal</title>
+<style>
+:root{color-scheme:dark;--cream:#ffefd1;--gold:#f5c26b;--mint:#78d9bc;--ink:#0d2930}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0e2b32;color:var(--cream);font:800 14px Arial,sans-serif}
+#world{display:block;position:fixed;inset:0;width:100vw;height:100dvh;touch-action:none;cursor:grab}#world:active{cursor:grabbing}
+#top{pointer-events:none;position:fixed;inset:0;z-index:2}
+#title{position:absolute;top:max(10px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));letter-spacing:.17em;font-size:clamp(10px,.8vw,16px);color:var(--gold);text-shadow:0 2px 5px #000}
+#state{position:absolute;top:max(10px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));max-width:40vw;text-align:right;font-size:11px;line-height:1.4;color:#e3ecd9;text-shadow:0 2px 5px #000}
+#title strong{display:block;font:900 clamp(21px,2.8vw,43px) Impact,'Arial Narrow',sans-serif;letter-spacing:-.005em;color:var(--cream)}
+#banner{position:absolute;left:50%;top:12%;transform:translateX(-50%);max-width:65vw;background:#081f29bc;border:1px solid #f1c37091;border-radius:8px;padding:8px 12px;text-align:center;font:800 10px Arial,sans-serif;letter-spacing:.1em;color:#e5c788}
+#toolbar{position:fixed;z-index:4;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:10px max(13px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#091a20ed 29%);max-height:min(27vh,150px);overflow-y:auto}
+#toolbar button{font:900 12px Arial,sans-serif;min-height:36px;padding:7px 10px;cursor:pointer;color:#f4e7c5;background:#245057;border:2px solid #5c8a80;border-radius:7px}
+#toolbar button.active{color:#102932;background:var(--gold);border-color:var(--cream)}
+#toolbar button:focus-visible{outline:3px solid white;outline-offset:2px}
+#record{position:fixed;left:14px;bottom:clamp(116px,18vh,165px);max-width:48vw;font-size:11px;color:#fff0d2;text-shadow:0 2px 6px #000;pointer-events:none}
+@media(max-width:720px){#banner{top:13%;font-size:8px;max-width:86vw}#title{font-size:9px}#toolbar button{font-size:10px;padding:5px 8px;min-height:35px}#toolbar{max-height:120px}#record{bottom:123px;max-width:75vw}}
+</style></head><body>
+<canvas id="world" aria-label="Temporary integrated source rehearsal. Select cards or bosses below and interact with the actual scene implementation."></canvas>
+<div id="top"><div id="title">QUOTA PANIC · V3 TEST BENCH<strong id="imperative">LOADING AUTHOR MODULES…</strong></div>
+<div id="state">Independent modules on the SAME canvas.<br>Not the public game.</div>
+<div id="banner">SOURCE-LEVEL INTEGRATION TEST · NO SCORES COMMITTED · STAFF / ART / AUDIO / LEAD NOT IN THIS REHEARSAL</div>
+<div id="record" role="status"></div></div>
+<nav id="toolbar" aria-label="Choose an independently authored microgame or boss"></nav>
+<script type="module">
+import {definitions as intake} from '../night-shift-v3/scenes/intake/index.js';
+import {definitions as services} from '../night-shift-v3/scenes/services/index.js';
+import {definitions as publicRelations} from '../night-shift-v3/scenes/pr/index.js';
+import {definitions as printer} from '../night-shift-v3/bosses/printer/index.js';
+import {definitions as quota} from '../night-shift-v3/bosses/quota/quota.mjs';
+import {newRun} from '../night-shift-v3/systems/engine.js';
+const all=[...intake,...services,...publicRelations,...printer,...quota];
+const types=new Map(all.map(x=>[x.id,x.id.startsWith('I')?'intake':x.id.startsWith('S')?'services':x.id.startsWith('P')?'pr':x.id==='B1'?'printer':'quota']));
+const c=document.querySelector('#world'),g=c.getContext('2d',{alpha:false}),bar=document.querySelector('#toolbar'),out=document.querySelector('#record');
+const run=newRun({seed:20261108,firstRun:true}),eventLog=[];
+const events={emit:e=>{eventLog.push(structuredClone(e));out.textContent=e.type.toUpperCase()+(e.cardId?' · '+e.cardId:'');}};
+let active,scene,viewport,scale,offsetX,offsetY,paused=false,last=0,ptr=null,errors=[];
+const base={run:{runId:'swarm-integration-preview',seed:20261108,perks:{},perkLevels:{},completedCards:['S2','S4'],currentDirective:'FAST OR SAFE',activeDirective:'FAST OR SAFE',directive:'fast-or-safe',licences:{mira:true,jules:true},publicRelationsFrame:'context',coffeePerfect:true,events:[]},
+  options:{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,directive:'fast-or-safe',attemptId:'swarm-preview'},
+  rng:()=>.41,events,audio:{play(){}},clock:{now:()=>0},
+  ledger:{},effects:{},story:{}};
+function resize(){
+ const w=innerWidth,h=innerHeight,dpr=Math.min(2,devicePixelRatio||1);
+ c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
+ const lane=types.get(active)||'intake';
+ if(lane==='intake'){const compact=w/h<1.05;scale=compact?w/1280:h/720;offsetX=(w-1280*scale)/2;offsetY=compact?(h-720*scale)*.57:(h-720*scale)/2;}
+ else{scale=h/760;offsetY=lane==='printer'?h/2:0;offsetX=lane==='services'?w/2-600*scale:lane==='printer'?w/2:0;}
+ viewport={worldWidth:w/scale,worldHeight:h/scale,cssWidth:w,cssHeight:h,dpr,
+  safeRect:{x:-offsetX/scale,y:-offsetY/scale,w:w/scale,h:h/scale},
+  worldToScreen(x,y){return{x:x*scale+offsetX,y:y*scale+offsetY}},
+  screenToWorld(x,y){return{x:(x-offsetX)/scale,y:(y-offsetY)/scale}}};
+}
+function choose(id){
+ const def=all.find(x=>x.id===id);
+ if(!def)throw Error('Unknown authored scene '+id);
+ try{scene?.cancelPointer?.();scene?.dispose?.();}catch(e){errors.push(String(e));}
+ active=id;ptr=null;eventLog.length=0;out.textContent='';
+ resize();
+ const ctx={...base,viewport,cardId:id,run:{...base.run,attemptId:'stage-'+id}};
+ scene=def.create(ctx);scene.enter?.();
+ document.querySelector('#imperative').textContent=def.imperative;
+ bar.querySelectorAll('button[data-card]').forEach(b=>b.classList.toggle('active',b.dataset.card===id));
+ document.querySelector('#state').textContent=def.department?.toUpperCase()+' / '+id+' · SOURCE REHEARSAL';
+}
+for(const d of all){const b=document.createElement('button');b.type='button';b.textContent=d.id+' · '+d.imperative;b.dataset.card=d.id;b.onclick=()=>choose(d.id);bar.append(b);}
+const pause=document.createElement('button');pause.id='pause';pause.textContent='PAUSE';pause.onclick=()=>{paused=!paused;pause.textContent=paused?'RESUME':'PAUSE';};bar.append(pause);
+const reset=document.createElement('button');reset.id='retry';reset.textContent='RETRY';reset.onclick=()=>choose(active);bar.append(reset);
+window.addEventListener('resize',()=>{resize();});
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();pause.click();}if(e.key==='r')reset.click();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)paused=true;});
+function at(e){const r=c.getBoundingClientRect();const p=viewport.screenToWorld(e.clientX-r.left,e.clientY-r.top);return{...p,id:e.pointerId,kind:e.pointerType};}
+c.addEventListener('pointerdown',e=>{if(paused)return;ptr=e.pointerId;c.setPointerCapture(e.pointerId);scene?.pointerDown?.(at(e));});
+c.addEventListener('pointermove',e=>{if(paused||ptr!==e.pointerId)return;scene?.pointerMove?.(at(e));});
+c.addEventListener('pointerup',e=>{if(paused||ptr!==e.pointerId)return;scene?.pointerUp?.(at(e));ptr=null;});
+c.addEventListener('pointercancel',()=>{scene?.cancelPointer?.();ptr=null});
+function draw(t){
+ const dt=Math.max(0,Math.min(.05,(t-last)/1000||0));last=t;
+ const w=innerWidth,h=innerHeight,dpr=c.width/w;
+ try{
+  g.setTransform(dpr,0,0,dpr,0,0);
+  const bg=g.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#153a3e');bg.addColorStop(.65,'#335559');bg.addColorStop(1,'#744e3d');
+  g.fillStyle=bg;g.fillRect(0,0,w,h);
+  if(scene){
+   if(!paused)scene.update?.(dt);
+   g.save();g.setTransform(dpr*scale,0,0,dpr*scale,dpr*offsetX,dpr*offsetY);
+   scene.draw?.(g,viewport);g.restore();
+  }
+ }catch(e){errors.push(String(e.stack||e));out.textContent='SCENE CRASH · '+String(e);console.error(e);}
+ requestAnimationFrame(draw);
+}
+window.__swarmComposition={get id(){return active},get scene(){return scene},get viewport(){return viewport},get events(){return eventLog.slice()},get errors(){return errors.slice()},get importedIds(){return all.map(d=>d.id)},get engineFirstStage(){return run.stage.id},choose,reset:()=>choose(active),pause:()=>pause.click()};
+choose('I1');requestAnimationFrame(draw);
+</script></body></html>
