@@ -1,7 +1,7 @@
 # INTAKE lane claim
 - Role: GPT-6 independent v3 implementation contributor
 - Claimed: 2026-11-08 20:20 AEDT
-- Status: delivered in draft PR #20; awaiting real-browser / HD visual quality review
+- Status: delivered in draft PR #20; **real Chromium browser QA now passed**, awaiting LEAD HD side-by-side visual acceptance
 - Branch: `agents/v3-intake-81d47`
 - Owned paths: `night-shift-v3/scenes/intake/**, previews/v3-intake*, qa/v3-intake*, coordination/reports/intake-*`
 - Deliverable: Independent I1-I4 interactive demo with tactility, readable mechanics and HD quality gates.
@@ -10,6 +10,6 @@
 - Isolation: create own GitHub branch from latest integration branch; do not edit releases, claim files of others or outside owned paths.
 
 - Delivery PR: https://github.com/PcRoGamer/office-hours-ccdp10003/pull/20
-- Latest branch commit: `c039e32f810f324c89d9fb6f37be78002467a385`
+- Latest browser QA branch commit: see current head of `agents/v3-intake-81d47` (verified Chromium test updates after `c039e32f`).
 - Evidence: `qa/v3-intake-render-evidence.html` (real authored Canvas2D source renders, not browser screenshots); `coordination/reports/intake-20261108.md`.
-- Verified: Node deterministic mechanics/unit tests for I1-I4 and source render QA. Blocked: Chromium navigation by administrator URLBlocklist and offline Desktop Commander, therefore no actual browser/HD visual acceptance pass.
+- Verified: Node deterministic mechanics/unit tests, four real Chromium pointer-completion playthroughs, five fullscreen browser captures at 1080p/1440p/4K/ultrawide/portrait, zero uncaught browser errors. Browser URL policy solved using an in-memory module-loader fallback. See `qa/v3-intake-browser-evidence.html` and `qa/v3-intake-browser.py` on PR branch. HD side-by-side aesthetic comparison remains an integration review, not a local browser blocker.
