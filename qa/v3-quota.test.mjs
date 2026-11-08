@@ -1,0 +1,104 @@
+import assert from 'node:assert/strict';
+import {createQuotaBoss,BONUS_IDS,definitions} from '../night-shift-v3/bosses/quota/quota.mjs';
+let count=0;const tests=[];
+const test=(name,fn)=>{try{fn();tests.push({name,status:'PASS'});count++}catch(err){tests.push({name,status:'FAIL',error:err.stack});process.exitCode=1}};
+const make=(opts={})=>{let emitted=[];const ctx={run:{runId:'test-run',seed:23,currentDirective:opts.directive||'DOUBLE ENTRY',perkLevels:opts.perks||{},licences:opts.licences||{},publicRelationsFrame:opts.frame||'headline'},viewport:{worldWidth:1200,worldHeight:760},events:{emit:e=>emitted.push(e)}};return {b:createQuotaBoss(ctx),emitted}};
+const advance=(b,n)=>{for(let i=0;i<Math.ceil(n/.04);i++)b.update(Math.min(.04,n-i*.04))};
+const click=(b,pos)=>{const accepted=b.pointerDown({...pos,id:1});b.pointerUp({...pos,id:1});return accepted};
+const drag=(b,a,z)=>{assert.ok(a&&z,`missing target ${JSON.stringify(b.snapshot())}`);b.pointerDown({...a,id:1});b.pointerMove({...z,id:1});return b.pointerUp({...z,id:1})};
+function play(filings,opts={}){const {b,emitted}=make(opts);advance(b,1.9);assert.equal(b.snapshot().mode,'bonus');
+  let packet=0;
+  const resolve=(file)=>{const s=b.snapshot();assert.equal(s.mode,'bonus');assert.ok(drag(b,s.targets.bonus,s.targets[file?'file':'cool']));packet++};
+  const validate=()=>{let s=b.snapshot();if(s.mode==='verify'){assert.ok(click(b,s.targets.seal));s=b.snapshot()};assert.equal(s.mode,'opening',`expected opening, got ${s.mode}`);if(s.gateSeconds>0){advance(b,s.gateSeconds+.1);s=b.snapshot()}assert.ok(drag(b,s.targets.counter,s.targets.gear))};
+  resolve(filings.includes(0));advance(b,2.1);assert.equal(b.snapshot().mode,'recovery');let s=b.snapshot();assert.ok(drag(b,s.targets.strip,s.targets.stripTo));validate();advance(b,1.3);assert.equal(b.snapshot().phase,2);
+  resolve(filings.includes(1));s=b.snapshot();assert.equal(s.mode,'ads');assert.ok(drag(b,s.targets.fake,s.targets.trash));s=b.snapshot();if(s.mode==='ads')assert.ok(drag(b,s.targets.fake,s.targets.trash));validate();advance(b,1.3);assert.equal(b.snapshot().phase,3);
+  resolve(filings.includes(2));s=b.snapshot();assert.equal(s.mode,'route');while(b.snapshot().clockSeconds%4.1<1.15)advance(b,.15);s=b.snapshot();assert.ok(drag(b,s.targets.doc,s.targets.safe));resolve(filings.includes(3));s=b.snapshot();assert.equal(s.mode,'latch');assert.ok(drag(b,s.targets.latch,s.targets.latchTo));validate();advance(b,1.3);s=b.snapshot();assert.equal(s.mode,'clockout');assert.ok(drag(b,s.targets.stamp,s.targets.stampTo));
+  assert.equal(b.snapshot().mode,'complete');assert.equal(packet,4);assert.equal(emitted.filter(e=>e.type==='boss-phase-complete').length,3);assert.equal(emitted.filter(e=>e.type==='boss-complete').length,1);return {b,emitted};}
+for(let filed=0;filed<=4;filed++)test(`full physical win: exactly ${filed}/4 filed`,()=>{const f=Array.from({length:filed},(_,i)=>i);const {b,emitted}=play(f);const s=b.snapshot();assert.equal(s.bonusCorporatePoints,filed*5);assert.equal(s.boltsRemoved,3);assert.equal(Object.keys(s.bonusOutcomes).length,4);assert.equal(emitted.filter(e=>e.type==='quota-bonus-resolved').reduce((n,e)=>n+e.delta,0),filed*5);assert.equal(s.pressure,filed===0?0:filed===1?0:filed===2?0:filed===3?1:2)});
+test('bonus packet unique IDs and nonrecursive ledger; no fifth +5',()=>{let {b,emitted}=play([0,1,2,3]);const before=b.snapshot().bonusCorporatePoints;for(let i=0;i<100;i++){b.pointerDown({x:600,y:600,id:i});b.pointerUp({x:250,y:500,id:i});b.update(.04)}assert.equal(b.snapshot().bonusCorporatePoints,before);assert.deepEqual(emitted.filter(e=>e.type==='quota-bonus-resolved').map(e=>e.objectId),BONUS_IDS);});
+test('no perk required and no licence assistance required',()=>{const {b}=play([0,1],{perks:{},licences:{}});assert.equal(b.snapshot().boltsRemoved,3)});
+test('five directives retain counter routes',()=>{for(const directive of ['DOUBLE ENTRY','MOVING GOALPOSTS','FAST OR SAFE','SPONSORED WORKFLOW','MANDATORY COLLABORATION']){const {b}=play([0,2],{directive});assert.equal(b.snapshot().mode,'complete')}});
+test('timers never advance on pause / zero dt',()=>{const {b}=make();b.update(0);b.update(-3);assert.equal(b.snapshot().activeTimeMs,0);b.update(.045);assert.equal(b.snapshot().activeTimeMs,45);});
+test('missed counter never removes bolt; stale window re-opens',()=>{const {b}=make();advance(b,1.9);let s=b.snapshot();drag(b,s.targets.bonus,s.targets.cool);advance(b,2.2);s=b.snapshot();drag(b,s.targets.strip,s.targets.stripTo);s=b.snapshot();click(b,s.targets.seal);s=b.snapshot();drag(b,s.targets.counter,{x:1000,y:100});assert.equal(b.snapshot().boltsRemoved,0);advance(b,5);assert.equal(b.snapshot().boltsRemoved,0);assert.equal(b.snapshot().mode,'telegraph');});
+test('definition export conforms to scene contract',()=>{assert.equal(definitions[0].id,'B2');for(const key of ['enter','update','draw','pointerDown','pointerMove','pointerUp','cancelPointer','snapshot','dispose'])assert.equal(typeof definitions[0].create(make().b).update,'function');});
+// Print all groups after the continuation regression cases.
+
+test('resume after committed phase I FILE cannot re-file same packet',()=>{
+  const saved={runId:'test-run',seed:23,quotaBoltsRemoved:0,quotaPressure:1,
+    quotaBonusPacketOutcomes:{'quota:p1:b1':'file'}};
+  const emitted=[];
+  const b=createQuotaBoss({run:saved,viewport:{worldWidth:1200,worldHeight:760},events:{emit:e=>emitted.push(e)}});
+  advance(b,1.9);
+  assert.equal(b.snapshot().mode,'telegraph');
+  assert.equal(b.snapshot().bonusCorporatePoints,5);
+  assert.equal(b.snapshot().pressure,1);
+  advance(b,2.1);
+  let s=b.snapshot();assert.equal(s.mode,'recovery');
+  assert.ok(drag(b,s.targets.strip,s.targets.stripTo));
+  s=b.snapshot();assert.ok(click(b,s.targets.seal));
+  s=b.snapshot();assert.ok(drag(b,s.targets.counter,s.targets.gear));
+  assert.equal(emitted.filter(e=>e.type==='quota-bonus-resolved').length,0);
+  assert.equal(b.snapshot().boltsRemoved,1);
+});
+test('resume at phase III skips recorded packet one but offers packet two after routing',()=>{
+  const ctx={run:{runId:'test-run',seed:23,quotaBoltsRemoved:2,quotaPressure:0,currentDirective:'DOUBLE ENTRY',
+    quotaBonusPacketOutcomes:{'quota:p1:b1':'file','quota:p2:b1':'cool','quota:p3:b1':'cool'}},
+    viewport:{worldWidth:1200,worldHeight:760},events:{emit(){}}};
+  const b=createQuotaBoss(ctx);advance(b,1.9);
+  assert.equal(b.snapshot().mode,'route');
+  assert.equal(b.snapshot().boltsRemoved,2);
+  while(b.snapshot().clockSeconds%4.1<1.15)advance(b,.15);
+  let s=b.snapshot();assert.ok(drag(b,s.targets.doc,s.targets.safe));
+  assert.equal(b.snapshot().mode,'bonus');
+  const key=b.snapshot().targets.bonus;assert.ok(drag(b,key,b.snapshot().targets.file));
+  assert.equal(b.snapshot().mode,'latch');
+  assert.equal(b.snapshot().bonusCorporatePoints,10);
+});
+test('three restored bolts require manually dragged CLOCK OUT without duplicates',()=>{
+  const received=[];
+  const ctx={run:{runId:'test-run',seed:23,quotaBoltsRemoved:3,quotaPressure:2,quotaBonusPacketOutcomes:Object.fromEntries(BONUS_IDS.map(k=>[k,'file']))},viewport:{worldWidth:1200,worldHeight:760},events:{emit:e=>received.push(e)}};
+  const b=createQuotaBoss(ctx);
+  advance(b,1.9);let s=b.snapshot();assert.equal(s.mode,'clockout');
+  assert.equal(s.bonusCorporatePoints,20);
+  assert.ok(drag(b,s.targets.stamp,s.targets.stampTo));
+  assert.equal(received.filter(e=>e.type==='boss-complete').length,1);
+  assert.equal(b.pointerDown({x:600,y:608,id:1}),false);
+});
+test('all emitted events have stable ledger IDs and no in-place score mutation',()=>{
+  const {emitted}=play([0,2]);
+  const ids=emitted.map(e=>e.id);
+  assert.equal(new Set(ids).size,ids.length);
+  assert.ok(emitted.every(e=>e.runId==='test-run'&&e.encounterId==='B2'&&e.committed===false&&Object.isFrozen(e)));
+});
+
+
+test('perks cannot mint unearned Time Bank seconds',()=>{
+  function opening(perks={},reserve=0){
+    const ctx={run:{runId:'perk-audit',perkLevels:perks,timeBankReserve:reserve,currentDirective:'DOUBLE ENTRY'},viewport:{worldWidth:1200,worldHeight:760},events:{emit(){}}};
+    const b=createQuotaBoss(ctx);advance(b,1.9);let s=b.snapshot();drag(b,s.targets.bonus,s.targets.cool);advance(b,2.1);
+    s=b.snapshot();drag(b,s.targets.strip,s.targets.stripTo);s=b.snapshot();click(b,s.targets.seal);
+    assert.equal(b.snapshot().mode,'opening');return b;
+  }
+  assert.equal(opening({},10).useTimeBank(3),false);
+  assert.equal(opening({'perk:time-bank':1},0).useTimeBank(2),false);
+  let b=opening({'perk:time-bank':1},5);assert.equal(b.useTimeBank(5),true);
+  assert.equal(b.useTimeBank(1),false);
+  assert.equal(b.snapshot().timer>3.35,true);
+  b=opening({'perk:time-bank':2},1.5);assert.equal(b.useTimeBank(10),true);
+  assert.equal(b.useTimeBank(.1),false);
+});
+test('assistance and focus only activate during relevant live action',()=>{
+  const ctx={run:{runId:'assist-audit',licences:{mira:true,jules:true},perkLevels:{'perk:focus-lens':1}},viewport:{worldWidth:1200,worldHeight:760},events:{emit(){}}};
+  const b=createQuotaBoss(ctx);
+  assert.equal(b.activateAssist('jules'),false);
+  assert.equal(b.activateAssist('mira'),false);
+  assert.equal(b.scan(),false);
+  advance(b,1.9);
+  assert.equal(b.activateAssist('jules'),false);
+  assert.equal(b.scan(),false);
+  let s=b.snapshot();drag(b,s.targets.bonus,s.targets.cool);
+  assert.equal(b.activateAssist('mira'),false);
+  assert.equal(b.scan(),true);
+});
+console.log(tests.map(t=>`${t.status}: ${t.name}${t.error?'\n'+t.error:''}`).join('\n'));
+console.log(`${count}/${tests.length} total assertions passed`);
