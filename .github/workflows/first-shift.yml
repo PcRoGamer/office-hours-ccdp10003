@@ -1,0 +1,58 @@
+name: First Shift browser and ledger QA
+on:
+  push:
+    branches: [feat/first-shift]
+    paths:
+      - 'first-shift.html'
+      - 'first-shift/**'
+      - 'assets/first-shift/**'
+      - 'qa/first-shift-*.test.cjs'
+      - '.github/workflows/first-shift.yml'
+  pull_request:
+    paths:
+      - 'first-shift.html'
+      - 'first-shift/**'
+      - 'assets/first-shift/**'
+      - 'qa/first-shift-*.test.cjs'
+      - '.github/workflows/first-shift.yml'
+  workflow_dispatch:
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: node qa/first-shift-ledger.test.cjs
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/first-shift-http.log 2>&1 &
+          for i in $(seq 1 35); do curl -sf http://127.0.0.1:4173/first-shift.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/first-shift-http.log; exit 1
+      - name: Browser gameplay
+        run: node qa/first-shift-browser.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/first-shift.html
+      - name: Failure and retry
+        run: node qa/first-shift-browser.test.cjs
+        env:
+          TEST_BASE_URL: http://127.0.0.1:4173/first-shift.html
+          FIRST_SHIFT_FAILURE: '1'
+      - name: Boss held-contact regression
+        run: node qa/first-shift-boss.test.cjs
+      - name: Passive catch scoring regression
+        run: node qa/first-shift-passive-catch.test.cjs
+      - name: Physical scene interaction regressions
+        run: node qa/first-shift-physical-scenes.test.cjs
+      - name: Licence allocation pointer regressions
+        run: node qa/first-shift-licences-pointer.test.cjs
+      - name: Boss packet masks with real pointer input
+        run: node qa/first-shift-boss-masks.test.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first-shift-browser-evidence
+          path: qa-artifacts/first-shift/
