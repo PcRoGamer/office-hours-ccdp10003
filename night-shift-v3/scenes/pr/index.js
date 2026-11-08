@@ -66,8 +66,8 @@ function drawResult(ctx,l,s,msg){
 
 function createP1(context,meta){
   const b=base(context,meta),s=b.state;
-  Object.assign(s,{baseline:1200,dragging:false,sent:false,corrected:false,axisHint:true,sponsored:directiveId(context)==='sponsored-workflow',goalposts:directiveId(context)==='moving-goalposts',fastOrSafe:directiveId(context)==='fast-or-safe',safePointer:null,safeHold:0,doubleEntry:directiveId(context)==='double-entry',awaitCopy:false,copyStamped:false,sendShift:0,sendShiftAnnounced:false,tipOpened:false,fakeDismissed:false,promoDrag:null,promoFlight:null,cosmeticPulse:0});
-  const geo=v=>{const l=vw(v),x=l.cx-l.width*.44,w=l.width*.88;return {...l,x,w,chart:{x:x+25,y:207,w:w-50,h:326},handle:{x:x+25,y:510,w:w-50,h:60},send:{x:l.cx-84+s.sendShift*Math.min(125,l.width*.17),y:l.H-159,w:168,h:66},copy:{x:l.cx-84-Math.min(205,l.width*.29),y:l.H-159,w:168,h:66},safe:{x:l.cx-84-Math.min(205,l.width*.29),y:l.H-159,w:168,h:66},fast:{x:l.cx-84+Math.min(92,l.width*.19),y:l.H-159,w:76,h:66}}};
+  Object.assign(s,{baseline:1200,dragging:false,sent:false,corrected:false,axisHint:true,sponsored:directiveId(context)==='sponsored-workflow',goalposts:directiveId(context)==='moving-goalposts',fastOrSafe:directiveId(context)==='fast-or-safe',collaboration:directiveId(context)==='mandatory-collaboration',miraHelped:false,safePointer:null,safeHold:0,doubleEntry:directiveId(context)==='double-entry',awaitCopy:false,copyStamped:false,sendShift:0,sendShiftAnnounced:false,tipOpened:false,fakeDismissed:false,promoDrag:null,promoFlight:null,cosmeticPulse:0});
+  const geo=v=>{const l=vw(v),x=l.cx-l.width*.44,w=l.width*.88;return {...l,x,w,chart:{x:x+25,y:207,w:w-50,h:326},handle:{x:x+25,y:510,w:w-50,h:60},send:{x:l.cx-84+s.sendShift*Math.min(125,l.width*.17),y:l.H-159,w:168,h:66},copy:{x:l.cx-84-Math.min(205,l.width*.29),y:l.H-159,w:168,h:66},safe:{x:l.cx-84-Math.min(205,l.width*.29),y:l.H-159,w:168,h:66},fast:{x:l.cx-84+Math.min(92,l.width*.19),y:l.H-159,w:76,h:66},helper:{x:l.cx-84+190,y:l.H-159,w:132,h:66}}};
   const promoRect=(g,kind)=>{const w=g.portrait?130:208,h=g.portrait?61:76;return {x:g.x+g.w-w-24,y:g.chart.y+(kind==='tip'?54:155),w,h};};
   function enter(){};
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
@@ -120,6 +120,9 @@ function createP1(context,meta){
       rr(ctx,g.safe.x+11,g.safe.y+g.safe.h-10,(g.safe.w-22)*clamp(s.safeHold/.55,0,1),5,2,C.gold,null);
       if(!l.portrait)tx(ctx,'NARROW FAST TARGET  /  WIDE SAFE HOLD',l.cx,l.H-28,15,C.mint);
     }
+    if(s.collaboration){
+      button(ctx,s.miraHelped?'MIRA ✓':'MIRA HELP',g.helper.x,g.helper.y,g.helper.w,g.helper.h,{fill:C.mint,small:l.portrait});
+    }
     if(s.awaitCopy){
       rr(ctx,g.copy.x+4,g.copy.y-38,g.copy.w-8,31,9,C.mint,C.ink,3);
       tx(ctx,'LINKED CARBON COPY',g.copy.x+g.copy.w/2,g.copy.y-22,l.portrait?11:15,C.ink);
@@ -135,6 +138,12 @@ function createP1(context,meta){
       if(kind==='fake'&&s.fakeDismissed)continue;
       if(pointIn(p,promoRect(g,kind))){s.promoDrag={id:p.id,kind,startX:p.x,startY:p.y,dx:0,dy:0};return;}
     }}
+    if(s.collaboration&&pointIn(p,g.helper)){
+      if(!s.miraHelped){s.miraHelped=true;s.baseline=Math.max(0,s.baseline-450);s.corrected=s.baseline===0;
+        b.act(true,'mira-scale-assist',{objectId:'pr:p1:mira-assist'});
+        b.emit({type:'coworker-assist',actor:'mira',objectId:'pr:p1:axis',synthetic:false});}
+      return;
+    }
     if(s.fastOrSafe){
       if((!s.corrected||s.baseline!==0)&&(pointIn(p,g.safe)||pointIn(p,g.fast))){b.act(false,'premature-send');return;}
       if(pointIn(p,g.fast)){s.sent=true;b.act(true,'send-fast-lane',{objectId:'pr:p1:fast-chute'});
@@ -336,13 +345,13 @@ function createP4(context,meta){
   const miraOutcome=incident==null?'unobserved':(
     incident==='saved'||incident?.outcome==='helped'||incident?.type==='mira-saved'||incident?.outcome==='mira-saved'?'saved':
     incident==='spill'||incident?.outcome==='not-helped'||incident?.type==='mira-spill'||incident?.outcome==='mira-spill'?'interrupted':'recorded');
-  Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident,miraOutcome,goalposts:directiveId(context)==='moving-goalposts',doubleEntry:directiveId(context)==='double-entry',fastOrSafe:directiveId(context)==='fast-or-safe',safeWait:0,routeShift:0,pendingCopy:null,shiftAnnounced:false});
-  const geo=v=>{const l=vw(v),width=l.width,routeW=Math.min(360,(width-50)/2),routeY=l.H-268;return {...l,cardW:Math.min(360,width*.62),cardH:132,restX:l.cx,restY:402,routeY,routeW,leftRoute:{x:l.cx-routeW-11,y:routeY,w:routeW,h:154},rightRoute:{x:l.cx+11,y:routeY,w:routeW,h:154}};};
+  Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident,miraOutcome,goalposts:directiveId(context)==='moving-goalposts',doubleEntry:directiveId(context)==='double-entry',fastOrSafe:directiveId(context)==='fast-or-safe',collaboration:directiveId(context)==='mandatory-collaboration',miraHelped:false,safeWait:0,routeShift:0,pendingCopy:null,shiftAnnounced:false});
+  const geo=v=>{const l=vw(v),width=l.width,routeW=Math.min(360,(width-50)/2),routeY=l.H-268;return {...l,cardW:Math.min(360,width*.62),cardH:132,restX:l.cx,restY:402,helper:{x:l.cx+Math.min(360,width*.62)/2+12,y:402-46,w:l.portrait?94:138,h:52},routeY,routeW,leftRoute:{x:l.cx-routeW-11,y:routeY,w:routeW,h:154},rightRoute:{x:l.cx+11,y:routeY,w:routeW,h:154}};};
   // A route changes physical position only between gestures; art and collision use the same geometry.
   const routes=v=>{const g=geo(v),travel=g.rightRoute.x-g.leftRoute.x,t=s.routeShift;
     const headline={...g.leftRoute,x:g.leftRoute.x+travel*t};
     if(s.fastOrSafe){const w=headline.w*.64;headline.x+=(headline.w-w)/2;headline.w=w;}
-    return {headline,context:{...g.rightRoute,x:g.rightRoute.x-travel*t}};
+    return {headline,context:{...g.rightRoute,x:g.rightRoute.x-travel*t,h:g.rightRoute.h+(s.miraHelped?25:0)}};
   };
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
     theatrePanel(ctx,l.cx-Math.min(l.width*.45,480),171,Math.min(l.width*.9,960),238,'#eed9ba');
@@ -367,10 +376,20 @@ function createP4(context,meta){
     tx(ctx,s.pendingCopy?'LINKED APPROVAL COPY':'APPROVED CONTENT',0,-h/2+15,l.portrait?12:16,C.ink);
     tx(ctx,s.pendingCopy?'COPY  →':'REPORT →',0,-12,l.portrait?22:31,C.ink);
     tx(ctx,s.pendingCopy?'MATCH '+s.pendingCopy.toUpperCase():'DRAG TO A ROUTE',0,34,l.portrait?12:15,C.slate);ctx.restore();
+    if(s.collaboration){
+      button(ctx,s.miraHelped?'MIRA ✓':'MIRA TIP',g.helper.x,g.helper.y,g.helper.w,g.helper.h,{fill:C.mint,small:l.portrait});
+      if(s.miraHelped)tx(ctx,'MIRA WIDENED CONTEXT ROUTE',l.cx,g.routeY-19,l.portrait?10:15,C.mint);
+    }
     if(!l.portrait)tx(ctx,'ONE PHYSICAL CHOICE, TWO HONEST BENEFITS',l.cx,l.H-28,l.portrait?12:16,C.cream);
     drawResult(ctx,l,s,s.selected?`${s.selected} SELECTED`:'DOCUMENT NOT SENT');
   }
-  function pointerDown(p,v){if(s.finished)return;const g=geo(v);if(Math.abs(p.x-g.restX)<g.cardW/2+17&&Math.abs(p.y-g.restY)<g.cardH/2+22){s.dragging={id:p.id,downX:p.x,downY:p.y};s.cardX=p.x;s.cardY=p.y;}}
+  function pointerDown(p,v){if(s.finished)return;const g=geo(v);
+    if(s.collaboration&&pointIn(p,g.helper)){
+      if(!s.miraHelped){s.miraHelped=true;b.act(true,'mira-context-assist',{objectId:'pr:p4:mira-assist'});
+        b.emit({type:'coworker-assist',actor:'mira',objectId:'pr:p4:context',synthetic:false});}
+      return;
+    }
+    if(Math.abs(p.x-g.restX)<g.cardW/2+17&&Math.abs(p.y-g.restY)<g.cardH/2+22){s.dragging={id:p.id,downX:p.x,downY:p.y};s.cardX=p.x;s.cardY=p.y;}}
   function pointerMove(p){if(s.dragging?.id!==p.id)return;s.cardX=p.x;s.cardY=p.y;}
   function pointerUp(p,v){if(s.dragging?.id!==p.id)return;const g=routes(v),route=pointIn(p,g.headline)?'headline':pointIn(p,g.context)?'context':null;s.dragging=null;
     if(!route){b.act(false,'unrouted-report');s.cardX=0;s.cardY=0;return;}
