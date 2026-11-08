@@ -186,6 +186,22 @@ jobs:
             branch: agents/v3-story-k7m29
             preview: previews/v3-story.html
             unit: qa/v3-story.test.mjs
+          - lane: pr
+            branch: agents/v3-pr-g6-1108c
+            preview: previews/v3-pr.html
+            unit: qa/v3-pr.test.mjs
+          - lane: printer
+            branch: agents/v3-printer-r8c2
+            preview: previews/v3-printer.html
+            unit: qa/v3-printer.test.mjs
+          - lane: quota
+            branch: agents/v3-quota-q7n482
+            preview: previews/v3-quota.html
+            unit: qa/v3-quota.test.mjs
+          - lane: a11y
+            branch: agents/v3-a11y-6f2b1
+            preview: previews/v3-a11y.html
+            unit: qa/v3-a11y-unit.test.mjs
     steps:
       - name: Read latest original agent branch without changing it
         uses: actions/checkout@v4
