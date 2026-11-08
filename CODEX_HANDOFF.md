@@ -25,6 +25,9 @@ The 22 Oct CCDP Project 2 lecture stresses playable *form*, pacing contrast, nov
 
 **Important evidence boundary:** UniSync had cached course text/transcripts and instructor feedback, but some guest-lecture slides were unavailable. Do not claim exhaustive viewing of inaccessible slides or videos. The current First Shift docs are SPECIFICATIONS, not gameplay builds. A passing design validator does not prove actual art, interaction, play, assignment submission, rubric mark or browser tests.
 
+## REAL 2D PHYSICS IS NOW A FIRST-CLASS INTERACTION REQUIREMENT
+Read [design/PHYSICS_TOY_INTERACTION.md](design/PHYSICS_TOY_INTERACTION.md) for engine selection, architecture, physical scenes, benchmark gates and safety. **First candidate Matter.js 0.20.0**, with @dimforge/rapier2d as the tested alternative. DO NOT introduce Three.js/3D simply because the user linked 3D physics engines: this release is HD Canvas2D. Physics is required for **tactile toy objects**, not for UI/graphs/dialogs. Before broad integration build a real pointer-operated desk physics scene, capture and inspect it, assess actual playfeel, pick the best 2D engine and implement S1 filing throws, S2 catching, I1 stamping and final boss paper/gear collisions while retaining fair playable microgames and source/rubric narrative. If a scene is worse with physics, constrain it rather than sacrificing mechanics; preserve complete 8-card game and deadline.
+
 ## DO THIS, DON'T ASK FOR ANOTHER PLAN
 You are the producer, technical director and accountable integrator. Execute end to end: read actual source; preserve baseline; implement game; run Playwright; visually inspect screenshots/video; correct defects; rerun QA; verify public candidate URL; report real results. Do not offload testing or obvious decisions to the user. If subagents are available, delegate safely; otherwise do separated independent reviews yourself. No false agent runs, file edits, builds, browser results or submission receipts. Ask only for credentials/permission or irreversible actions.
 
@@ -80,14 +83,14 @@ Read https://github.com/Donchitos/Claude-Code-Game-Studios as actual source. Ado
 ## BUILD ORDER AND EVIDENCE GATES
 T00 Baseline: record HEAD, dirty worktree, original URLs, snapshot/rollback, verify old QA.
 T01 Read-source archaeology + official Canvas Project 2 and previous Project 1.1/1.2 qualitative feedback in design/COURSE_ALIGNMENT_PREFLIGHT.md + THREE direct game case studies (DWTD/Brotato/Job Simulator) and Papers, Please as lore in design/CCDP_P2_GAME_RESEARCH.md + CCGS roles + asset rights. In parallel read-only.
-T02 Isolated boot: first-shift.html working, high-DPI pointer mapping, sound/pause, **real I1 pointer-play** + screenshots.
+T02 Isolated boot: first-shift.html working, high-DPI pointer mapping, sound/pause. Build and visually inspect an isolated real 2D physics toy-desk spike (Matter.js candidate, compare Rapier2D if needed) including throws/stacking/collisions/drag before broad integration; then **real I1 pointer-play** + screenshots.
 T03 Deterministic ledger/scoring/perks/directive data model, idempotent commit. Unit/property tests.
 T04 Intake I1/I3 and honest real/scam notifications. Establish a reusable fair interruption mechanic, not merely a separate popup minigame; demonstrate it during actual precision play in at least two departments.
 T05 Four promotion screens, six perk effects, three build families, all four directive adapters.
-T06 Services S1/S2 and meaningful route/coffee consequences, initial draft perk activation.
+T06 Physics-driven Services S1/S2 with genuine mass, momentum, spring-grab, bounce and collision/sensor scoring; meaningful route/coffee consequences, initial draft perk activation. Do not settle for visually scripted physics.
 T07 PR P1/P4, corrected scale and verified headline/context downstream branching.
 T08 Staff T1/T4, rescue count, $80 conservation and identity-based technical assistance.
-T09 Three-phase final boss + all 16 packet patterns, fair countershot, mandatory player actions.
+T09 Three-phase final boss with actual physics-backed projectile/countershot interactions and moving gear collision, plus all 16 packet patterns, fair countershot, mandatory player actions.
 T10 Clock Out physical finale, two real score lenses, credited Dumb Ways to Die, Brotato and Job Simulator gameplay research with Papers, Please narrative credit and optional social-context sources, plus real replay. Avoid a compulsory explanatory ending.
 T11 Art/audio/UX ongoing concurrently, but visual QA each integration, not after all cards.
 T12 Independent adversarial functional, rubric, art and gameplay red-team; fix and rerun.
@@ -97,7 +100,7 @@ T14 Canvas-format/deadline check and accurately report verified release/submissi
 Do not call T00–T14 complete from prose. Record commands, exits, source SHA, saved screenshot/video evidence, reviewer findings.
 
 ## QA THAT ACTUALLY PROVES THE GAME
-- Run on a local HTTP server (not file://). Existing CI uses Node 22, Playwright 1.58.2, python3 -m http.server 4173, qa/arcade-office-hd.test.cjs. Preserve this style and isolate new tests/workflow. Install Chromium if needed.
+- Run on a local HTTP server (not file://). Existing CI uses Node 22, Playwright 1.58.2, python3 -m http.server 4173, qa/arcade-office-hd.test.cjs. Preserve this style and isolate new tests/workflow. New physics implementation must be real and browser-tested; include pointer-to-world mapping at DPR2, fixed timestep/pause, collisions, stacking, resets, no double scoring and published dependency URLs. Install Chromium if needed.
 - Use real mouse/touch interaction for a complete clean-storage first-clear from title through final replay. State seeding acceptable only in independent targeted edge tests, never as sole full-campaign proof.
 - E2E verifies all eight cards and all three boss bolts, all four directives, actual perks triggered, three synergy builds, all 3 licence-count outcomes (and identities), 16 packet masks, pause/resume/reload/retry idempotence, no JS errors, realistic clock behavior.
 - Capture and *look at* title, four departments, draft, all directive versions, all boss phases, ending at four viewports, with before/after evidence. Fix legibility, sprite size, spacing, clipped controls, click transforms, animation clarity. Record measured time/fps/interaction and no invented human playtest feedback.
