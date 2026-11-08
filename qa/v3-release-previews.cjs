@@ -72,6 +72,24 @@ async function test(){
       check(await page.locator('[data-pick]').count()===3,'promotion offers exactly 3 actionable perks');
       await page.locator('[data-pick]').first().click();
       check((await page.evaluate('window.__storyPreview?.picks?.length'))===1,'one real promotion selection registered');
+     }else if(lane==='pr'){
+      await page.locator('[data-card="P4"]').click();
+      check((await page.evaluate('window.__pr?.card'))==='P4','PR selects mandatory P4 framing card');
+      await page.locator('[data-card="P1"]').click();
+      check((await page.evaluate('window.__pr?.card'))==='P1','PR can return to truthful graph challenge');
+     }else if(lane==='printer'){
+      await page.locator('#go').click();
+      check(await page.evaluate('document.querySelector("#start")?.classList.contains("hidden")'),'Printer Mutiny enters real boss arena');
+      check(!!(await page.evaluate('window.__printerQA?.()')),'Printer Mutiny exposes real boss snapshot');
+     }else if(lane==='quota'){
+      check(!!(await page.evaluate('window.__QUOTA_STATE')),'THE QUOTA has live state and counter phases');
+      await page.locator('#pause').click();
+      check((await page.locator('#pause').innerText())==='RESUME','THE QUOTA pauses on actual input');
+      await page.locator('#pause').click();
+     }else if(lane==='a11y'){
+      await page.locator('#start').click();
+      check((await page.evaluate('window.__nightShiftA11yPreview?.snapshot()?.status'))==='play','Accessible controls start real stage');
+      check(await page.evaluate('document.querySelector("#hud")?.classList.contains("show")'),'Accessible hearts/time HUD becomes visible');
      }
     }catch(e){check(false,'real pointer/keyboard interaction: '+String(e))}
    }
