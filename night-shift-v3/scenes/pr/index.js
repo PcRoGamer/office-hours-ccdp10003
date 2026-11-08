@@ -198,9 +198,9 @@ function createP1(context,meta){
 
 function createP2(context,meta){
   const b=base(context,meta),s=b.state;
-  Object.assign(s,{coverBeats:0,coverShield:0,graceSeconds:0,flight:[],restoreHelp:0,overlays:[{id:'saleA',kind:'sale',x:-.26,y:-.08,removed:false,rotation:-.07},{id:'saleB',kind:'sale',x:.10,y:.22,removed:false,rotation:.08},{id:'real',kind:'help',x:-.09,y:.04,removed:false,opened:false,rotation:-.02}],dragging:null,opened:false});
+  Object.assign(s,{sponsored:directiveId(context)==='sponsored-workflow',sponsorUnlocked:false,coverBeats:0,coverShield:0,graceSeconds:0,flight:[],restoreHelp:0,overlays:[{id:'saleA',kind:'sale',x:-.26,y:-.08,removed:false,rotation:-.07},{id:'saleB',kind:'sale',x:.10,y:.22,removed:false,rotation:.08},{id:'real',kind:'help',x:-.09,y:.04,removed:false,opened:false,rotation:-.02}],dragging:null,opened:false});
   const geo=v=>{const l=vw(v),w=Math.min(l.width*.92,880),h=Math.min(410,l.H*.53),x=l.cx-w/2,y=186;return {...l,x,y,w,h};};
-  const cardsGeo=v=>{const g=geo(v),cw=Math.min(g.w*.54,400),ch=Math.min(g.portrait?140:173,g.h*.41);return s.overlays.map((o,i)=>({o,rect:{x:g.cx+o.x*g.w-cw*.5,y:g.y+g.h*.30+o.y*g.h-ch*.5,w:cw,h:ch},cw,ch}));};
+  const cardsGeo=v=>{const g=geo(v),cw=Math.min(g.w*.54,400),ch=Math.min(g.portrait?140:173,g.h*.41);const stack=s.sponsored&&!s.sponsorUnlocked?[s.overlays[2],s.overlays[0],s.overlays[1]]:s.overlays;return stack.map((o,i)=>({o,rect:{x:g.cx+o.x*g.w-cw*.5,y:g.y+g.h*.30+o.y*g.h-ch*.5,w:cw,h:ch},cw,ch}));};
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds+s.graceSeconds);
     theatrePanel(ctx,g.x,g.y,g.w,g.h,'#e9f6e8');rr(ctx,g.x+18,g.y+32,g.w-36,g.h-50,10,'#c7e1d7',C.ink,4);
     for(let i=0;i<7;i++){line(ctx,g.x+45,g.y+60+i*41,g.x+g.w-45,g.y+60+i*41,'#95b5b0',2)}
@@ -229,7 +229,7 @@ function createP2(context,meta){
     const n=s.overlays.filter(x=>x.kind==='sale'&&x.removed).length;
     rr(ctx,l.cx-Math.min(l.width*.4,320),l.H-153,Math.min(l.width*.8,640),70,14,C.ink,C.mint,3);
     tx(ctx,`${n} / 2 HOSTILE ADS FLICKED`,l.cx,l.H-126,l.portrait?17:22,C.cream);
-    tx(ctx,s.opened?'GENUINE ALERT OPENED':'PRESERVE THE SIGNED ALERT',l.cx,l.H-99,l.portrait?12:14,s.opened?C.mint:C.gold);
+    tx(ctx,s.sponsored&&!s.sponsorUnlocked?'SPONSORED: FIRST CLEAR A FAKE OVERLAY':s.opened?'GENUINE ALERT OPENED':'PRESERVE THE SIGNED ALERT',l.cx,l.H-99,l.portrait?12:14,s.opened?C.mint:C.gold);
     if(!l.portrait)tx(ctx,'FLICK AWAY SPONSORED WINDOWS • TAP SIGNED HELP',l.cx,l.H-28,l.portrait?11:16,C.cream);
     drawResult(ctx,l,s,n===2&&s.opened?'MEETING SAVED':'PROJECTOR OVERRUN');
   }
@@ -258,6 +258,7 @@ function createP2(context,meta){
       }else if(!o.opened){o.opened=true;s.opened=true;b.act(true,'open-signed-alert',{source:'ASTER IT'});check();}
     }else if(distance>=threshold){
       o.removed=true;
+      if(s.sponsored&&!s.sponsorUnlocked){s.sponsorUnlocked=true;b.emit({type:'directive-shift',directive:'sponsored-workflow',objectId:'pr:p2:real-alert',synthetic:true});}
       const r=cardsGeo(v).find(entry=>entry.o.id===o.id)?.rect;
       const flying={id:o.id,x:p.x,y:p.y,w:r?.w||220,h:r?.h||120,vx:dx*3,vy:dy*3,angle:o.rotation,spin:dx*.004,ttl:1.25,cover:false};
       s.flight.push(flying);
