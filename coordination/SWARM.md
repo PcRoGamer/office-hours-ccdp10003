@@ -1,5 +1,7 @@
 # Night Shift HD v3 | parallel GitHub swarm
 
+**AUTONOMY CONTRACT:** Read [AUTONOMY_POLICY.md](AUTONOMY_POLICY.md). The user is not managing seventeen conversations by answering routine questions. Claim your role, implement, test, fix defects and open a PR without asking permission or waiting for “continue.” Only authentic authorization boundaries warrant a question; chats cannot run after the turn completes. Write actionable handoffs.
+
 **Integration target:** `rebuild/night-shift-v3-hd`, branched from `main`, fully distinct from `feat/first-shift`.
 **Read first:** `AGENTS.md`, `REBUILD_HANDOFF.md`, `design/NIGHT_SHIFT_GDD_V3.md`, `design/TECHNICAL_INTEGRATION_CONTRACT.md`, `design/VISUAL_AUDIO_RELEASE_GATES.md`.
 **Deadline:** cached Canvas CCDP10003 Monday 9 November 2026 23:59 AEDT, live verification required.
