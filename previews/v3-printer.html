@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>PRINTER MUTINY · QUOTA PANIC NIGHT SHIFT v3</title>
+<style>
+:root{color-scheme:dark;--gold:#ffce76;--paper:#fff1d4;--green:#56dcb7;--ink:#142b30}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#11272b;font-family:'Arial Narrow',Impact,Arial,sans-serif;touch-action:none}
+canvas{position:fixed;inset:0;width:100vw;height:100dvh;display:block;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:2;color:var(--paper);text-shadow:0 2px 8px #0009}
+#stage{position:absolute;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-size:clamp(20px,2.3vw,34px);font-weight:1000;letter-spacing:.035em;text-align:center;white-space:nowrap;max-width:70vw}
+#label{display:block;font:900 clamp(10px,1vw,15px) Arial,sans-serif;letter-spacing:.24em;color:var(--gold);margin-top:7px}
+#bolts{position:absolute;left:max(17px,env(safe-area-inset-left));top:max(18px,env(safe-area-inset-top));font-size:clamp(16px,2.2vw,26px);font-weight:1000;letter-spacing:.06em}
+#bolts small{display:block;font:700 11px Arial,sans-serif;letter-spacing:.19em;color:#abcfbd;margin-bottom:4px}
+#bolts strong{color:var(--gold);font-size:clamp(28px,3.3vw,44px)}
+#time{position:absolute;right:max(20px,env(safe-area-inset-right));top:max(15px,env(safe-area-inset-top));text-align:right;font-size:clamp(24px,2.9vw,38px);font-weight:1000;font-variant-numeric:tabular-nums}
+#time small{display:block;font:700 11px Arial,sans-serif;letter-spacing:.2em;color:#a4cbb7;margin-bottom:5px}
+#toolbar{position:fixed;right:max(17px,env(safe-area-inset-right));bottom:max(15px,env(safe-area-inset-bottom));z-index:3;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:60vw}
+button{font:900 13px Arial,sans-serif;cursor:pointer;min-height:41px;border:2px solid #f4d7925c;border-radius:7px;padding:9px 13px;background:#14363bd9;color:var(--paper);letter-spacing:.04em;box-shadow:0 4px 12px #07171b88}
+button:hover,button:focus-visible{border-color:var(--gold);background:#225455;outline:none}
+#start{position:fixed;inset:0;z-index:8;display:flex;align-items:center;justify-content:flex-start;padding:clamp(25px,4.4vw,96px);background:linear-gradient(90deg,#f1ecdf 0%,#f1ecdf 53%,transparent 53%,transparent 100%);overflow:hidden}
+#start:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0 21px,#6b81721a 21px 23px);pointer-events:none}
+#start:after{content:'MANAGEMENT SAYS: IT IS FINE.';position:absolute;right:-4vw;bottom:13%;padding:15px 5.8vw;background:#19292a;color:#f6efdc;font:900 clamp(15px,1.8vw,28px) Arial,sans-serif;letter-spacing:.035em;transform:rotate(-7deg);box-shadow:0 14px 0 #0001;pointer-events:none}
+body:has(#start:not(.hidden)) #hud,body:has(#start:not(.hidden)) #toolbar,body:has(#start:not(.hidden)) #info{visibility:hidden}
+#start.hidden{display:none}
+#poster{position:relative;z-index:2;width:min(51%,880px);border:0;background:transparent;box-shadow:none;text-align:left;padding:0;transform:none}
+#poster .chapter{font:900 clamp(11px,1.1vw,17px) Arial,sans-serif;letter-spacing:.08em;color:#46605a;margin-bottom:clamp(20px,5vh,65px)}
+#poster h1{font-size:clamp(64px,9.0vw,155px);line-height:.84;color:#192a2a;letter-spacing:-.075em;margin:0 0 18px;text-shadow:none}
+#poster h1 b{color:#bb4938}
+#poster p{max-width:43ch;margin:10px 0 34px;font:700 clamp(14px,1.25vw,20px)/1.35 Arial,sans-serif;color:#34524b}
+#go{background:#14383a;color:#fff0d7;border:0;font-size:clamp(18px,1.75vw,26px);padding:20px 45px;min-height:65px;transform:rotate(-1deg)}
+#go:hover{background:#a44836;color:#fff7da}
+#info{position:fixed;left:14px;bottom:16px;color:#d3e7d1aa;font:700 10px Arial,sans-serif;z-index:2;pointer-events:none;letter-spacing:.13em}
+#done{position:fixed;inset:0;z-index:6;display:none;place-items:center;background:#07191dc9;padding:24px}
+#done.visible{display:grid}
+#done article{width:min(680px,95vw);text-align:center;color:var(--paper);background:#174b46;border:5px solid var(--gold);box-shadow:0 18px 80px #000a;padding:35px 28px 45px}
+#done h2{font-size:clamp(47px,6vw,78px);line-height:.9;margin:15px 0;color:var(--gold)}
+#done p{font:500 17px/1.45 Arial,sans-serif;margin:0 0 25px}
+#state{display:none}
+@media(max-width:760px){#start{display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse,#164644e8,#061b20f5 85%)}#start:after{display:none}#poster{width:min(720px,96vw);border:4px solid #f4dca9;background:#13423d;box-shadow:0 20px 60px #000a;text-align:center;padding:34px 18px;transform:rotate(-1deg)}#poster .chapter{color:var(--gold);margin:0}#poster h1{font-size:clamp(55px,12vw,85px);color:var(--paper);letter-spacing:-.05em;margin:25px 0}#poster h1 b{color:var(--gold)}#poster p{max-width:42ch;color:#e2eacb;margin:0 auto 22px;font-weight:500}#go{background:var(--gold);color:#143033;transform:none;min-height:55px;padding:14px 28px}#stage{top:72px;font-size:20px;max-width:92vw}#bolts strong{font-size:26px}#time{font-size:25px}#toolbar{top:127px;bottom:auto;max-width:94vw}#toolbar button{font-size:10px;padding:8px}#info{display:none}}
+@media(prefers-reduced-motion:reduce){#poster,#go{transform:none}}
+</style></head><body>
+<canvas id="world" aria-label="Printer Mutiny action stage; drag protruding page down when green, then flick paperwork into open feeder" tabindex="0"></canvas>
+<div id="hud" aria-live="polite"><div id="bolts"><small>MACHINE FASTENERS</small><strong id="boltCount">● ● ●</strong></div><div id="stage">STAMP A SHEET!<span id="label">PRINTER MUTINY · CYCLE 1 / 3</span></div><div id="time"><small>TIME ON SHIFT</small><span id="timer">00:00</span></div></div>
+<div id="toolbar"><button type="button" id="pause">PAUSE</button><button type="button" id="mute">MUTE</button><button type="button" id="restart">RETRY BOSS</button></div>
+<div id="info">QUOTA PANIC / NIGHT SHIFT V3 • INDEPENDENT PRINTER LANE PREVIEW</div>
+<section id="start"><div id="poster"><div class="chapter">MANAGEMENT'S VERY REASONABLE REQUEST</div><h1>PRINTER<br><b>MUTINY</b></h1><p>Three bolts. Three openings. Wait for the safe light, pull the jammed page, and flick a file into the feeder. Every bolt is earned by your hands.</p><button id="go">CLOCK IN →</button></div></section>
+<div id="done"><article><div style="letter-spacing:.23em;font:900 14px Arial,sans-serif">OFFICIAL OFFICE COMMUNICATION</div><h2>PRINTER<br>DEFEATED.</h2><p id="receipt">Three bolts removed. The printer has requested a union representative.</p><button id="again">ANOTHER SHIFT ↻</button></article></div>
+<script type="module">
+import {createPrinterMutiny,PRINTER_DIRECTIVES} from '../night-shift-v3/bosses/printer/index.js';
+const canvas=document.querySelector('#world'),cx=canvas.getContext('2d',{alpha:false}),el=id=>document.getElementById(id);
+let viewport={},boss,paused=true,started=false,muted=false,last=0,sound=null,musicBeat=0;
+const params=new URLSearchParams(location.search),directive=params.get('directive')||'MOVING_GOALPOSTS';
+const run={activeDirective:directive,completedCards:params.get('cable')==='1'?['S3','S4']:['S3'],miraAssist:params.get('mira')==='1'};
+class TinyMusic {
+ constructor(){this.a=new (window.AudioContext||window.webkitAudioContext)();this.count=0;}
+ ping(freq,duration=.12,wave='triangle',volume=.06,delay=0){if(muted)return;const t=this.a.currentTime+delay,o=this.a.createOscillator(),g=this.a.createGain();o.type=wave;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(42,freq*.72),t+duration);g.gain.setValueAtTime(volume,t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g).connect(this.a.destination);o.start(t);o.stop(t+duration+.02);}
+ noise(duration=.17){if(muted)return;const a=this.a,b=a.createBuffer(1,a.sampleRate*duration,a.sampleRate),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=Math.sin(i*22+i*i*.007)*Math.exp(-i/x.length*6);const src=a.createBufferSource(),g=a.createGain();src.buffer=b;g.gain.value=.07;src.connect(g).connect(a.destination);src.start();}
+ event(type){const cues={'printer-bolt-removed':[[493,.2],[740,.25],[987,.38]],'printer-jam-cleared':[[392,.12],[523,.12]],'printer-early-tug':[[180,.19]],'printer-page-parry':[[790,.07]],'printer-counter-miss':[[190,.21],[122,.23]],'printer-telegraph':[[220,.13],[277,.13]],'boss-complete':[[392,.2],[493,.2],[587,.2],[783,.55]]};const seq=cues[type];if(!seq)return;seq.forEach(([f,d],i)=>this.ping(f,d,'triangle',.065,i*.095));if(type==='printer-bolt-removed')this.noise(.2);}
+ beat(){const notes=[110,165,146.8,196,110,174.6,146.8,130.8],f=notes[this.count++%notes.length];this.ping(f,.12,'sawtooth',.015);if(this.count%4===1)this.ping(55,.17,'sine',.07);}
+}
+function resize(){const w=Math.max(1,innerWidth),h=Math.max(1,innerHeight),dpr=Math.max(1,devicePixelRatio||1);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);viewport={cssWidth:w,cssHeight:h,dpr,worldHeight:760,worldWidth:760*w/h,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,worldToScreen(x,y){return{x:w/2+x*h/760,y:h/2+y*h/760}},screenToWorld(x,y){return{x:(x-w/2)*760/h,y:(y-h/2)*760/h}}};window.__printerViewport=viewport;}
+addEventListener('resize',resize);resize();
+const ctx={get viewport(){return viewport},run,events:{emit(ev){window.__printerEvents.push(ev);sound?.event(ev.type);}},audio:{play(){}},options:{directive}};
+window.__printerEvents=[];function newBoss(){boss?.dispose();boss=createPrinterMutiny(ctx);window.__printer=boss;sync();el('done').classList.remove('visible');}
+function sync(){if(!boss)return;const s=boss.snapshot();el('boltCount').textContent=Array.from({length:3},(_,i)=>i<s.removed?'◌':'●').join('  ');el('stage').firstChild.textContent=({telegraph:'STAMP A SHEET!',jam:'PULL WHEN GREEN!',counter:'FLICK INTO FEEDER!',impact:'BOLT REMOVED!',victory:'PRINTER DEFEATED!'})[s.phase];el('label').textContent=`PRINTER MUTINY · CYCLE ${Math.min(3,s.cycle)} / 3 · ${run.activeDirective.replace(/_/g,' ')}`;el('timer').textContent=`${String(Math.floor(s.elapsed/60)).padStart(2,'0')}:${String(Math.floor(s.elapsed%60)).padStart(2,'0')}`;if(s.completed){paused=true;el('done').classList.add('visible');el('receipt').textContent=`Three actual bolts removed in ${Math.round(s.elapsed)} seconds with ${s.failedCounters} recovered misses. The printer has requested a union representative.`;}}
+function frame(timestamp){const dt=Math.min(.05,(timestamp-last)/1000||0);last=timestamp;if(started&&!paused){boss.update(dt);musicBeat+=dt;if(sound&&musicBeat>.33){musicBeat-=.33;sound.beat();}}cx.setTransform(viewport.dpr,0,0,viewport.dpr,0,0);cx.save();cx.translate(viewport.cssWidth/2+(started?0:viewport.cssWidth*.24),viewport.cssHeight/2);const scale=viewport.cssHeight/760;cx.scale(scale,scale);boss?.draw(cx,started?viewport:{...viewport,posterPreview:true,previewTime:timestamp/1000});cx.restore();sync();requestAnimationFrame(frame)}
+newBoss();requestAnimationFrame(frame);
+function coords(e){const r=canvas.getBoundingClientRect();return {...viewport.screenToWorld(e.clientX-r.left,e.clientY-r.top),id:e.pointerId,kind:e.pointerType||'mouse'};}
+canvas.addEventListener('pointerdown',e=>{if(paused||!started)return;canvas.setPointerCapture(e.pointerId);boss.pointerDown(coords(e));});
+canvas.addEventListener('pointermove',e=>{if(paused||!started)return;boss.pointerMove(coords(e));});
+canvas.addEventListener('pointerup',e=>{if(paused||!started)return;boss.pointerUp(coords(e));try{canvas.releasePointerCapture(e.pointerId)}catch{}});
+canvas.addEventListener('pointercancel',()=>boss.cancelPointer());
+document.addEventListener('visibilitychange',()=>{if(document.hidden){paused=true;boss.cancelPointer();}el('pause').textContent=paused?'RESUME':'PAUSE'});
+el('go').onclick=()=>{el('start').classList.add('hidden');started=true;paused=false;sound=new TinyMusic();sound.a.resume();};
+el('pause').onclick=()=>{if(!started)return;paused=!paused;if(paused)boss.cancelPointer();el('pause').textContent=paused?'RESUME':'PAUSE';};
+el('mute').onclick=()=>{muted=!muted;el('mute').textContent=muted?'UNMUTE':'MUTE';};
+el('restart').onclick=()=>{newBoss();started=true;paused=false;};el('again').onclick=el('restart').onclick;
+addEventListener('keydown',e=>{if(e.code==='Escape'){el('pause').click()}if(e.code==='KeyM')el('mute').click();if(e.code==='KeyF'&&!document.fullscreenElement)document.documentElement.requestFullscreen?.();});
+// Read-only browser QA probe. No gameplay script auto-plays.
+window.__printerQA=()=>boss.snapshot();window.__printerDirectives=PRINTER_DIRECTIVES;
+</script></body></html>

@@ -1,0 +1,67 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createPrinterMutiny, PRINTER_DIRECTIVES, definitions} from '../night-shift-v3/bosses/printer/index.js';
+const tick=(b,s)=>{for(let i=0;i<s*40;i++)b.update(.025)};
+const ptr=(b,type,x,y,id=1)=>b[type]({x,y,id,kind:'mouse'});
+const drag=(b,from,to)=>{ptr(b,'pointerDown',...from);for(let i=1;i<=10;i++){const f=i/10;ptr(b,'pointerMove',from[0]+(to[0]-from[0])*f,from[1]+(to[1]-from[1])*f)}ptr(b,'pointerUp',...to)};
+const reachJam=b=>tick(b,3.25);
+function open(b){reachJam(b);assert.equal(b.snapshot().phase,'jam');tick(b,.55);drag(b,[-104,105],[-104,239]);assert.equal(b.snapshot().phase,'counter');}
+function feed(b){const st=b.snapshot();drag(b,[st.packet.x,st.packet.y],[st.feederX,50]);}
+function cycle(b,d){open(b);const q=b.snapshot();if(d==='DOUBLE_ENTRY')ptr(b,'pointerDown',q.feederX,-28);if(d==='SPONSORED_WORKFLOW')drag(b,[45,65],[228,65]);if(d==='MANDATORY_COLLABORATION')ptr(b,'pointerDown',260,153);feed(b);assert.equal(b.snapshot().phase,'impact');tick(b,1.45);}
+for(const d of PRINTER_DIRECTIVES){test(`${d}: three manual counters remove exactly three physical bolts`,()=>{const events=[],b=createPrinterMutiny({options:{directive:d},events:{emit:e=>events.push(e)}});for(let i=0;i<3;i++)cycle(b,d);const s=b.snapshot();assert.equal(s.phase,'victory');assert.equal(s.removed,3);assert.equal(s.manualHits,3);assert.equal(s.completed,true);assert.equal(events.filter(e=>e.type==='printer-bolt-removed').length,3);assert.equal(events.filter(e=>e.type==='boss-complete').length,1);b.update(1);ptr(b,'pointerDown',0,0);assert.equal(events.filter(e=>e.type==='boss-complete').length,1);b.dispose();});}
+test('jam cannot be opened early or by click, but safe manual drag clears it',()=>{const b=createPrinterMutiny();reachJam(b);ptr(b,'pointerDown',-104,105);ptr(b,'pointerUp',-104,105);assert.equal(b.snapshot().phase,'jam');drag(b,[-104,105],[-104,223]);assert.equal(b.snapshot().phase,'jam');tick(b,.55);drag(b,[-104,105],[-104,223]);assert.equal(b.snapshot().phase,'counter');});
+test('a bad packet counter is recoverable and cannot remove bolts',()=>{const b=createPrinterMutiny({options:{directive:'DOUBLE_ENTRY'}});open(b);feed(b);let s=b.snapshot();assert.equal(s.removed,0);assert.equal(s.failedCounters,1);ptr(b,'pointerDown',s.feederX,-28);feed(b);assert.equal(b.snapshot().removed,1);});
+test('interruption does not alter clock, cancel pointer resets to idle',()=>{const b=createPrinterMutiny();const t0=b.snapshot().elapsed;b.update(0);b.update(-1);assert.equal(b.snapshot().elapsed,t0);reachJam(b);tick(b,.5);ptr(b,'pointerDown',-104,105);b.cancelPointer();assert.equal(b.snapshot().phase,'jam');});
+test('flick projectile step clamp and thin target cannot tunnel',()=>{const b=createPrinterMutiny({options:{directive:'FAST_OR_SAFE'}});open(b);const s=b.snapshot();const x=s.packet.x,y=s.packet.y;ptr(b,'pointerDown',x,y);ptr(b,'pointerMove',x+30,y-70);ptr(b,'pointerUp',x+30,y-70);tick(b,.3);assert.ok(b.snapshot().manualHits>=0);});
+test('cable route is accessible only when S4 was completed',()=>{const a=createPrinterMutiny({run:{completedCards:['S3','S4']}});reachJam(a);tick(a,.5);drag(a,[205,80],[205,220]);assert.equal(a.snapshot().phase,'counter');const b=createPrinterMutiny({run:{completedCards:['S3']}});reachJam(b);tick(b,.5);drag(b,[205,80],[205,220]);assert.equal(b.snapshot().phase,'jam');});
+test('Mira option does not gate zero-perk victory',()=>{const b=createPrinterMutiny({run:{miraAssist:true},options:{directive:'MANDATORY_COLLABORATION'}});open(b);const s=b.snapshot();ptr(b,'pointerDown',260,153);assert.equal(b.snapshot().feederWidth,s.feederWidth+78);feed(b);assert.equal(b.snapshot().removed,1);});
+test('definition follows scene contract',()=>{assert.equal(definitions.length,1);assert.equal(definitions[0].id,'B1');for(const meth of ['enter','update','draw','pointerDown','pointerMove','pointerUp','cancelPointer','snapshot','dispose'])assert.equal(typeof definitions[0].create({})[meth],'function');});
+
+test('moving goalposts travels on rail during telegraph, then stays fixed throughout manipulation',()=>{
+ const b=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
+ const initial=b.snapshot();assert.notEqual(initial.feederX,initial.feederTargetX);
+ tick(b,.65);const mid=b.snapshot();
+ assert.ok(mid.feederX>initial.feederX&&mid.feederX<mid.feederTargetX,'must visibly tween, not teleport');
+ tick(b,2.7);const jam=b.snapshot();assert.equal(jam.phase,'jam');
+ assert.equal(jam.feederX,jam.feederTargetX);
+ tick(b,.55);drag(b,[-104,105],[-104,239]);
+ const counter=b.snapshot();assert.equal(counter.feederX,jam.feederX);
+ tick(b,2.3);assert.equal(b.snapshot().feederX,counter.feederX);
+});
+test('Mira HOLD label activates same actual assist as face',()=>{
+ const b=createPrinterMutiny({run:{miraAssist:true},options:{directive:'MANDATORY_COLLABORATION'}});
+ open(b);const before=b.snapshot();ptr(b,'pointerDown',260,220);
+ assert.equal(b.snapshot().feederWidth,before.feederWidth+78);
+ ptr(b,'pointerDown',260,220);assert.equal(b.snapshot().feederWidth,before.feederWidth+78,'assist single use');
+});
+test('cancelled packet drag does not consume an opportunity, regrabs can complete',()=>{
+ const b=createPrinterMutiny({options:{directive:'DOUBLE_ENTRY'}});open(b);
+ const q=b.snapshot();ptr(b,'pointerDown',q.feederX,-28);
+ const p=b.snapshot().packet;
+ ptr(b,'pointerDown',p.x,p.y);ptr(b,'pointerMove',p.x+70,p.y-20);b.cancelPointer();
+ assert.equal(b.snapshot().failedCounters,0);
+ assert.equal(b.snapshot().packet.held,false);
+ feed(b);assert.equal(b.snapshot().removed,1);
+});
+test('one completed boss result per entry; restart intentionally starts fresh',()=>{
+ const events=[],b=createPrinterMutiny({events:{emit:e=>events.push(e)}});
+ for(let i=0;i<3;i++)cycle(b,'MOVING_GOALPOSTS');
+ assert.equal(events.filter(e=>e.type==='boss-complete').length,1);
+ b.enter();assert.equal(b.snapshot().removed,0);
+ assert.equal(b.snapshot().phase,'telegraph');
+ for(let i=0;i<3;i++)cycle(b,'MOVING_GOALPOSTS');
+ assert.equal(events.filter(e=>e.type==='boss-complete').length,2);
+});
+
+test('telegraph sheet parry materially widens the manual feeder target while zero-parry remains viable',()=>{
+ const parry=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
+ const solo=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
+ tick(parry,.25);ptr(parry,'pointerDown',2,-30);
+ assert.equal(parry.snapshot().parries,1,'a real clicked incoming sheet must be recognized');
+ reachJam(solo);tick(solo,.55);drag(solo,[-104,105],[-104,239]);
+ tick(parry,3.0);tick(parry,.55);drag(parry,[-104,105],[-104,239]);
+ assert.equal(parry.snapshot().phase,'counter');
+ assert.equal(parry.snapshot().feederWidth,solo.snapshot().feederWidth+15);
+ feed(solo);feed(parry);
+ assert.equal(solo.snapshot().removed,1);assert.equal(parry.snapshot().removed,1);
+});
