@@ -13,10 +13,17 @@ const perkLevel=(ctx,id)=>ctx?.run?.perkLevels?.[id]||ctx?.run?.perkLevels?.[`pe
 
 export function createQuotaBoss(context={}){
   const listeners=context.events;
+  // Rehydrate committed outcomes so restoring a phase cannot issue a fifth filing.
+  // The host ledger remains authoritative; this scene never commits score itself.
   const bonus=Object.create(null), events=[];
-  const phaseCounters=new Set();
-  let phase=1, mode='intro', clock=0, timer=1.7, activeTime=0;
-  let pressure=0, coolWindow=0, hearts=3, bolts=0, drag=null, packetFlights=[];
+  for(const key of BONUS_IDS){
+    const outcome=context.run?.quotaBonusPacketOutcomes?.[key];
+    if(['file','cool','expired'].includes(outcome))bonus[key]=outcome;
+  }
+  const restoredBolts=CLAMP(Math.trunc(Number(context.run?.quotaBoltsRemoved)||0),0,3);
+  const phaseCounters=new Set(Array.from({length:restoredBolts},(_,i)=>i+1));
+  let phase=restoredBolts+1, mode='intro', clock=0, timer=1.7, activeTime=0;
+  let pressure=CLAMP(Math.trunc(Number(context.run?.quotaPressure)||0),0,2), coolWindow=0, hearts=3, bolts=restoredBolts, drag=null, packetFlights=[];
   let scanUsed=false, supportUsed=false, printed=false, slash=0, shake=0, beam=0;
   let msg='CONGRATULATIONS. YOUR PRODUCTIVITY HAS BECOME SELF-SUSTAINING.';
   let result='', introShown=false, counterReady=false, doubleVerified=false;
@@ -25,7 +32,13 @@ export function createQuotaBoss(context={}){
   const id=context.run?.runId||`quota-preview-${context.run?.seed??0}`;
   const directive=normalizeDirective(context.run?.currentDirective?.id||context.run?.currentDirective||context.options?.directive||'DOUBLE ENTRY');
   const prefs={motion:context.options?.reducedMotion||false};
-  const emit=(type,evidence={})=>{const ev=Object.freeze({type,bossId:'B2',phase,attemptId:`${id}:quota:phase${phase}`,tActiveMs:Math.round(activeTime*1000),...evidence});events.push(ev);listeners?.emit?.(ev);};
+  const emit=(type,evidence={})=>{
+    const uniqueObject=evidence.objectId||`event${events.length+1}`;
+    const ev=Object.freeze({id:`${id}:quota:${type}:${uniqueObject}`,runId:id,encounterId:'B2',
+      type,bossId:'B2',phase,attemptId:`${id}:quota:phase${phase}`,
+      tActiveMs:Math.round(activeTime*1000),committed:false,...evidence});
+    events.push(ev);listeners?.emit?.(ev);
+  };
   const W=()=>context.viewport?.worldWidth||1200;
   const H=()=>context.viewport?.worldHeight||760;
   const pt=(x,y)=>({x:W()*x,y:H()*y});
@@ -71,7 +84,9 @@ export function createQuotaBoss(context={}){
   }
   function startPhase(n){phase=n;counterReady=false;doubleVerified=false;routeDone=false;latchDone=false;phase3Second=false;supportUsed=false;scanUsed=false;safetyUsed=false;targetOffset=0;adsRemaining=directive==='SPONSORED WORKFLOW'?2:1;
     if(n>3){mode='clockout';timer=0;tell('ONE LAST FORM. CLOCK OUT.',3);return;}
-    mode='bonus';timer=8.5;tell(`PHASE ${['I','II','III'][n-1]}: ${PHASES[n-1].name}`,2.4);
+    // A resumed phase may already have a committed packet. Never deadlock in bonus mode.
+    if(currentBonus()){mode='bonus';timer=8.5;tell(`PHASE ${['I','II','III'][n-1]}: ${PHASES[n-1].name}`,2.4);}
+    else nextMode();
   }
   function openCounter(){mode=directive==='DOUBLE ENTRY'&&!doubleVerified?'verify':'opening';
     if(mode==='verify'){timer=0;tell('DOUBLE ENTRY: SLAM THE VERIFICATION SEAL.');return;}
@@ -110,7 +125,7 @@ export function createQuotaBoss(context={}){
   function update(dt){
     if(!Number.isFinite(dt)||dt<=0||mode==='complete'||mode==='paused')return;
     dt=CLAMP(dt,0,.05);activeTime+=dt;clock+=dt;slash=Math.max(0,slash-dt);shake=Math.max(0,shake-dt);beam+=dt;
-    if(mode==='intro'&& (timer-=dt)<=0){introShown=true;startPhase(1);}
+    if(mode==='intro'&& (timer-=dt)<=0){introShown=true;startPhase(phase);}
     else if(mode==='bonus'&&(timer-=dt)<=0)expireBonus();
     else if(mode==='telegraph'&&(timer-=dt)<=0){mode='recovery';timer=2.65;tell('ARM REBOUNDING! PULL THE FEED STRIP.');}
     else if(mode==='recovery'&&(timer-=dt)<=0){mode='telegraph';timer=2.05;tell('TOO SLOW. HERE COMES THE STAMP AGAIN.');}
@@ -131,7 +146,7 @@ export function createQuotaBoss(context={}){
     if(mode==='clockout'){obj.stamp=pt(.50,.80);obj.stampTo=pt(.50,.37);}
     return obj;
   }
-  function pointerDown(p){if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return false;
+  function pointerDown(p){if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||mode==='complete'||mode==='paused')return false;
     const t=targets();const key=['bonus','strip','fake','doc','latch','counter','stamp'].find(k=>t[k]&&near(p,t[k],k==='bonus'?49:66));
     if(key){drag={key,start:{x:p.x,y:p.y},at:{x:p.x,y:p.y},id:p.id??0};return true;}
     if(mode==='bonus'&&near(p,t.skip,85)){expireBonus();return true;}
@@ -141,11 +156,12 @@ export function createQuotaBoss(context={}){
     if(near(p,pt(.91,.18),65))return applyAid('jules');
     return false;
   }
-  function pointerMove(p){if(drag&&drag.id===(p.id??0))drag.at={x:p.x,y:p.y};}
+  function pointerMove(p){if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&drag&&drag.id===(p.id??0))drag.at={x:p.x,y:p.y};}
   function pointerUp(p){if(!drag||drag.id!==(p.id??0))return false;
     const key=drag.key;const t=targets();drag=null;
     if(key==='bonus'&&mode==='bonus'){
-      const k=currentBonus();if(near(p,t.file,110))return resolveBonus(k,'file');if(near(p,t.cool,110))return resolveBonus(k,'cool');
+      const k=currentBonus();if(!k)return false;
+      if(near(p,t.file,110))return resolveBonus(k,'file');if(near(p,t.cool,110))return resolveBonus(k,'cool');
       tell('DRAG REPORT TO FILE OR COOL.',1.4);return false;
     }
     if(key==='strip'&&mode==='recovery'&&near(p,t.stripTo,85)){openCounter();return true;}
@@ -196,6 +212,13 @@ export function renderQuota(c,v,s,fx){
   for(let side of [-1,1]){const ax=x+side*(W*.48); c.save();c.translate(ax,H*.43);c.scale(side,1);c.fillStyle='#102e36';c.fillRect(-W*.075,-H*.22,W*.12,H*.45);c.fillStyle='#50847d';for(let i=0;i<5;i++)c.fillRect(-W*.06,-H*.18+i*H*.073,W*.09,2);c.restore();}
   const deck=c.createLinearGradient(0,H*.75,0,H);deck.addColorStop(0,'#35515a');deck.addColorStop(.17,'#6b6558');deck.addColorStop(1,'#151f2b');c.fillStyle=deck;c.beginPath();c.moveTo(0,H*.75);c.lineTo(W,H*.75);c.lineTo(W,H);c.lineTo(0,H);c.fill();
   c.fillStyle='#f7c567';c.fillRect(0,H*.75,W,5);c.fillStyle='#131c29bb';for(let i=0;i<16;i++)c.fillRect(i*W/16,H*.78,2,H*.24);
+  // Far-off factory clock faces and spotlit filing silhouettes sell the theatrical scale.
+  c.save();c.globalAlpha=.23;c.fillStyle='#f9dfad';
+  for(const sign of [-1,1]){
+    const sx=x+sign*Math.min(W*.36,530),sy=H*.19;
+    c.beginPath();c.arc(sx,sy,Math.min(47,H*.052),0,Math.PI*2);c.fill();
+    c.strokeStyle='#142d37';c.lineWidth=4;c.beginPath();c.moveTo(sx,sy);c.lineTo(sx+Math.sin(t*.34+sign)*20,sy-21);c.stroke();
+  }c.restore();
   // Corporate machine assembled from five distinct modules, physically substantial.
   const bw=Math.min(W*.59,620),bh=Math.min(H*.53,395),by=H*.37;
   c.fillStyle='#10252a';c.beginPath();c.ellipse(x,by+bh*.66,bw*.64,H*.072,0,0,Math.PI*2);c.fill();
@@ -206,11 +229,19 @@ export function renderQuota(c,v,s,fx){
   c.fillStyle='#dbf8d7';c.shadowColor='#95f5df';c.shadowBlur=16;
   for(const sign of [-1,1]){c.beginPath();const blink=Math.sin(t*1.08)>0.988?.15:1;c.ellipse(x+sign*bw*.14,by-bh*.11,bw*.074,bh*.063*blink,0,0,Math.PI*2);c.fill();}
   c.shadowBlur=0;
-  // The robot smile physically degrades as bolts fall.
+  // Corporate smile collapses into increasingly embarrassed mechanical expressions.
   c.beginPath();c.strokeStyle=phase===3?'#ed5e51':'#0e3b40';c.lineWidth=bw*.025;
   if(s.boltsRemoved===0)c.arc(x,by-bh*.10,bw*.20,.12,Math.PI-.13);
   else if(s.boltsRemoved===1){c.moveTo(x-bw*.21,by+bh*.04);c.quadraticCurveTo(x,by+bh*.15,x+bw*.19,by+bh*.04);}
   else {c.moveTo(x-bw*.20,by+bh*.075);c.lineTo(x+bw*.19,by+bh*.075);}c.stroke();
+  if(s.pressure>0&&s.mode!=='complete'){
+    for(const sign of [-1,1]){
+      c.fillStyle=s.pressure===2?'#e76851':'#eab969';
+      const puffy=1+Math.sin(t*3+sign)*.08;
+      c.beginPath();c.ellipse(x+sign*bw*.28,by+bh*.10,bw*.070*puffy,bh*.085*puffy,0,0,Math.PI*2);c.fill();
+      c.fillStyle='#fff4d7';c.beginPath();c.ellipse(x+sign*bw*.282,by+bh*.093,bw*.022,bh*.017,0,0,Math.PI*2);c.fill();
+    }
+  }
   // Pressure genuinely expands cheeks, pipes, warning lamps.
   c.strokeStyle=s.pressure>0?'#f1b455':'#74b9a8';c.lineWidth=12+s.pressure*3;
   for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*bw*.32,by);c.bezierCurveTo(x+sign*bw*.58,by-bh*.32,x+sign*bw*.59,by+bh*.27,x+sign*bw*.33,by+bh*.27);c.stroke();}
@@ -259,9 +290,13 @@ export function renderQuota(c,v,s,fx){
   if(fx.context?.run?.licences?.jules||s.directive==='MANDATORY COLLABORATION'){round(c,W*.865,H*.15,W*.095,H*.09,10,'#1b5454','#a9d3a8',2);label(c,'JULES',W*.912,H*.187,Math.min(W*.018,16),'#e9f5d7');}
   // Boss body pressure meter with actual outcome, no global score mutation.
   round(c,x-Math.min(W*.37,390),H*.055,Math.min(W*.74,780),H*.077,17,'#112d38dd','#80c5b075',2);
-  label(c,'THE QUOTA',x,H*.095,Math.min(W*.072,62),C.cream);
-  label(c,`PHASE ${phase>3?'CLEARED':phase} / 3  •  ${PHASES[Math.min(phase,3)-1].name}`,x,H*.172,Math.min(24,W*.035),C.gold);
+  label(c,'THE QUOTA',x,H*.095,Math.min(W*.058,54),C.cream);
+  label(c,`PHASE ${phase>3?'CLEARED':phase}/3  •  ${PHASES[Math.min(phase,3)-1].name}`,x,H*.15,Math.min(18,W*.026),C.gold);
   if(s.pressure){for(let p=0;p<s.pressure;p++){c.fillStyle=C.red;c.beginPath();c.arc(x+(p-.5)*26,H*.218,8,0,7);c.fill();}}
+  // Physical drag tether shows where the gesture began and where the object is going.
+  if(fx.drag){const from=({bonus:ptValue(.5,.792),strip:ptValue(.25,.70),fake:ptValue(.66,.47),doc:ptValue(.17,.78),latch:ptValue(.74,.55),counter:ptValue(.21,.8),stamp:ptValue(.5,.8)})[fx.drag.key];
+    if(from){c.save();c.setLineDash([9,9]);c.strokeStyle='#ffe5a5c4';c.lineWidth=5;c.beginPath();c.moveTo(from.x,from.y);c.lineTo(fx.drag.at.x,fx.drag.at.y);c.stroke();c.restore();}}
+  function ptValue(ax,ay){return {x:W*ax,y:H*ay};}
   const instruction=fx.slash>0?fx.msg:(s.mode==='bonus'?'DRAG THE BONUS REPORT':s.mode==='opening'?'FLING PACKET INTO THE OPEN GEAR':PHASES[Math.min(phase,3)-1].task);
   if(s.mode!=='bonus')label(c,instruction,x,H*.92,Math.min(24,W*.034),C.paper,Math.max(260,W*.93));
   c.restore();
