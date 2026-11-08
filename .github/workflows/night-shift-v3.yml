@@ -2,7 +2,9 @@ name: Night Shift v3 | release evidence and gated Pages publish
 
 on:
   push:
-    branches: [rebuild/night-shift-v3-hd, agents/v3-release-nova0811]
+    # Contributor PRs trigger through pull_request below; avoid duplicate
+    # full 13-job runs on every commit to the RELEASE feature branch.
+    branches: [rebuild/night-shift-v3-hd]
     paths:
       - 'night-shift-v3.html'
       - 'night-shift-v3/**'
