@@ -1,4 +1,4 @@
-"""Real Chromium viewport, screenshot, and pointer-flow QA. No network or server required.
+"""Real Chromium native-ESM, viewport, screenshot and pointer-flow QA. No server required.
 
 Run from repository root: python qa/v3-pr.browser.py
 Requires playwright Python package and a locally available Chromium executable.
@@ -6,18 +6,18 @@ When deployed, the same preview also runs natively with python -m http.server 41
 """
 from playwright.sync_api import sync_playwright
 from pathlib import Path
-import re,os,json,hashlib
+import os,json,base64
 ROOT=Path(__file__).resolve().parent.parent
 OUT=ROOT/'qa'/'v3-pr-screenshots'
 OUT.mkdir(parents=True,exist_ok=True)
 
 def bundled_html():
     h=(ROOT/'previews'/'v3-pr.html').read_text()
-    d=(ROOT/'night-shift-v3'/'scenes'/'pr'/'drawing.js').read_text().replace('export const C','const C').replace('export function ','function ')
-    i=(ROOT/'night-shift-v3'/'scenes'/'pr'/'index.js').read_text()
-    i=re.sub(r'^import .*?;\n','',i,flags=re.M).replace('export const definitions','const definitions').replace('export default definitions;','')
-    h=re.sub(r"import \{definitions\} from '../night-shift-v3/scenes/pr/index.js';",'',h)
-    return h.replace('<script type="module">','<script type="module">\n'+d+'\n'+i+'\n')
+    def uri(source):return 'data:text/javascript;base64,'+base64.b64encode(source.encode('utf-8')).decode('ascii')
+    d=(ROOT/'night-shift-v3/scenes/pr/drawing.js').read_text()
+    i=(ROOT/'night-shift-v3/scenes/pr/index.js').read_text()
+    i=i.replace("from './drawing.js'", "from '"+uri(d)+"'")
+    return h.replace("from '../night-shift-v3/scenes/pr/index.js'", "from '"+uri(i)+"'")
 
 html=bundled_html()
 report=[]
