@@ -47,7 +47,9 @@ export function createPhysics({planck = globalThis.planck, gravity = {x: 0, y: 9
   function ensure() {if (disposed) throw new Error('Disposed physics world');}
   function create(o) {
     ensure();
-    if (!o?.id || objects.has(o.id)) throw new Error(`Unique body id required: ${o?.id}`);
+    // Require canonical string IDs: numeric 7 and string '7' must not collide silently.
+    if (typeof o?.id !== 'string' || !o.id.trim() || objects.has(o.id))
+      throw new Error(`Unique nonempty string body id required: ${o?.id}`);
     if (!['box','circle'].includes(o.shape || 'box')) throw new Error('Shape must be box or circle');
     const type = o.type || (o.dynamic ? 'dynamic' : 'static');
     if (!['dynamic','static','kinematic'].includes(type)) throw new Error('Unknown Planck body type');
@@ -71,6 +73,17 @@ export function createPhysics({planck = globalThis.planck, gravity = {x: 0, y: 9
     const p=item.body.getPosition(),v=item.body.getLinearVelocity();
     return {id:item.id,kind:item.kind,x:p.x*S,y:p.y*S,vx:v.x*S,vy:v.y*S,
       angle:item.body.getAngle(),spin:item.body.getAngularVelocity(),awake:item.body.isAwake()};
+  }
+  // Reposition a live prop or fixture without reconstructing the whole world.
+  // Intended for camera reflow and staged layout changes, outside world.step().
+  function setTransform(item,x,y,angle) {
+    ensure();
+    if(typeof item==='string')item=objects.get(item);
+    if(!item || objects.get(item.id)!==item)return false;
+    if(!isNum(x)||!isNum(y)||(angle!==undefined&&!isNum(angle)))return false;
+    item.body.setTransform(vec(x,y),angle===undefined?item.body.getAngle():angle);
+    item.body.setAwake(true);
+    return true;
   }
   function setVelocity(item,vx,vy,spin) {
     if(typeof item==='string')item=objects.get(item);
@@ -144,7 +157,12 @@ export function createPhysics({planck = globalThis.planck, gravity = {x: 0, y: 9
     while(accumulator>=fixedStep-1e-10&&count<maxSubsteps){
       world.step(fixedStep,8,3);accumulator-=fixedStep;ticks++;count++;
     }
-    while(eventQueue.length)onEvent(eventQueue.shift());
+    // The consumer may remove a fixture while processing an earlier callback.
+    // Never publish stale collisions against an already-destroyed body.
+    while(eventQueue.length){
+      const evt=eventQueue.shift();
+      if(objects.has(evt.a)&&objects.has(evt.b))onEvent(evt);
+    }
     return count;
   }
   function snapshot(){return {tick:ticks,activeDrag:pointer?.id||null,
@@ -153,7 +171,7 @@ export function createPhysics({planck = globalThis.planck, gravity = {x: 0, y: 9
     for(const it of Array.from(objects.values()))remove(it);
     objects.clear();contacts.clear();eventQueue.length=0;disposed=true;}
   return {world,create,box:o=>create({...o,shape:'box'}),circle:o=>create({...o,shape:'circle'}),
-    objects,at,state,setVelocity,impulse,grab,move,release,remove,step,snapshot,dispose,
+    objects,at,state,setTransform,setVelocity,impulse,grab,move,release,remove,step,snapshot,dispose,
     get dragging(){return pointer?.id||null;},get tick(){return ticks;}};
 }
 
