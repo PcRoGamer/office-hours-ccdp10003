@@ -55,7 +55,7 @@ def probe(browser,url,label,w,h,dpr,args,out):
         report(checks,'keyboard-focus','PASS' if focus else 'FAIL',focus)
         # Start via accessible control, or explicit author-provided logical coordinates. Never guess hitboxes.
         started=False
-        for selector in ('[data-qa="clock-in"]','#clockIn','[data-testid="clock-in"]'):
+        for selector in ('[data-qa="clock-in"]','#clock-in','#clockIn','[data-testid="clock-in"]'):
             item=p.locator(selector)
             if item.count() and item.first.is_visible():item.first.focus();p.keyboard.press('Enter');started=True;break
         if not started and args.start_world:
@@ -64,8 +64,8 @@ def probe(browser,url,label,w,h,dpr,args,out):
                 p.mouse.click(x*v['scale']+v['ox'],y*v['scale']+v['oy']);started=True
             except Exception as e:report(checks,'start','REVIEW','Bad world transform: '+str(e))
         p.wait_for_timeout(80)
-        s=snapshot(p);active=val(s,'screen') in ('play','playing','action','game')
-        report(checks,'start','PASS' if started and active else 'REVIEW',f'control={started} state={val(s,"screen")}')
+        s=snapshot(p);active=val(s,'screen','mode') in ('play','playing','action','game','card','boss') and val(s,'paused') is not True
+        report(checks,'start','PASS' if started and active else 'REVIEW',f'control={started} state={val(s,"screen","mode")}')
         if active:
             # HD's first 80ms canvas frame precedes the moving forms; let the
             # action scene settle before capturing evidence. Gameplay clock keeps running.
@@ -75,7 +75,7 @@ def probe(browser,url,label,w,h,dpr,args,out):
             after=val(snapshot(p),'muted','isMuted')
             report(checks,'mute','PASS' if isinstance(before,bool) and isinstance(after,bool) and before!=after else 'REVIEW',f'{before}->{after}; audio output unverified')
             p.keyboard.press('Escape');p.wait_for_timeout(60);s=snapshot(p)
-            t0=val(s,'clock','time');paused=val(s,'screen') in ('pause','paused')
+            t0=val(s,'clock','time');paused=val(s,'paused') is True or val(s,'screen') in ('pause','paused')
             p.wait_for_timeout(300);t1=val(snapshot(p),'clock','time')
             report(checks,'pause-clock','PASS' if paused and t0 is not None and t0==t1 else ('FAIL' if paused and t0 is not None else 'REVIEW'),f'{paused} {t0}->{t1}')
             if paused:p.screenshot(path=str(out/f'{tag}-pause.png'),animations='disabled')
@@ -103,7 +103,33 @@ def probe(browser,url,label,w,h,dpr,args,out):
                 p.wait_for_timeout(30);new=val(snapshot(p),'actions')
                 report(checks,'primary-pointer','PASS' if isinstance(old,(int,float)) and isinstance(new,(int,float)) and new>old else 'REVIEW',f'{old}->{new}')
                 p.screenshot(path=str(out/f'{tag}-interacted.png'),animations='disabled')
-            else:report(checks,'primary-pointer','REVIEW','No safe authored QA target; do not guess')
+            else:
+                # The LEAD preview exposes authored semantic world targets (id/kind/x/y)
+                # and the exact world-camera dimensions. Do not guess pixel hitboxes.
+                st=snapshot(p);world=val(st,'targets');vp=val(st,'viewport')
+                eligible=next((t for t in world if isinstance(t,dict) and
+                               t.get('kind')=='good' and all(k in t for k in ('id','x','y'))),
+                              None) if isinstance(world,list) else None
+                if eligible and isinstance(vp,dict) and all(vp.get(k) for k in
+                           ('cssWidth','cssHeight','worldWidth','worldHeight')):
+                    x=eligible['x']*vp['cssWidth']/vp['worldWidth']
+                    y=eligible['y']*vp['cssHeight']/vp['worldHeight']
+                    if 0 <= x <= w and 0 <= y <= h:
+                        if w==650:p.touchscreen.tap(x,y)
+                        else:p.mouse.click(x,y)
+                        p.wait_for_timeout(80)
+                        remaining=val(snapshot(p),'targets')
+                        done=isinstance(remaining,list) and not any(
+                            t.get('id')==eligible['id'] for t in remaining if isinstance(t,dict))
+                        report(checks,'primary-pointer','PASS' if done else 'REVIEW',
+                               f'authored target={eligible["id"]} removed={done}; css=({x:.1f},{y:.1f})')
+                        p.screenshot(path=str(out/f'{tag}-interacted.png'),animations='disabled')
+                    else:
+                        report(checks,'primary-pointer','REVIEW','Authored target mapped outside viewport')
+                else:
+                    report(checks,'primary-pointer','REVIEW',
+                           'No safe authored QA target; do not guess')
+
         else:
             for n in ('mute','pause-clock','pointer-cancel','primary-pointer'):report(checks,n,'REVIEW','No safe active-play entry')
         motion=p.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
