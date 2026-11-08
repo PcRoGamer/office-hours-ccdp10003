@@ -60,7 +60,7 @@ try{
    await client.send('Page.navigate',{url:origin+'/'+rel});
    await sleep(1550);
    const before=await evaluate("({title:document.title,ready:document.readyState,overflow:document.documentElement.scrollWidth>innerWidth+4,canvases:[...document.querySelectorAll('canvas')].map(c=>{let r=c.getBoundingClientRect();return {width:r.width,height:r.height,x:r.x,y:r.y}}),buttons:[...document.querySelectorAll('button')].filter(b=>{let r=b.getBoundingClientRect();return r.width>10&&r.height>10}).map(b=>{let r=b.getBoundingClientRect();return {name:(b.innerText||b.ariaLabel||'').slice(0,60),x:r.x+r.width/2,y:r.y+r.height/2}}).slice(0,24)})");
-   const match=before.buttons.find(b=>/clock in|start|open your|next|^i[1-4]\b|^p[1-4]\b/i.test(b.name));
+   const match=before.buttons.find(b=>/clock in|start|open your/i.test(b.name))||before.buttons.find(b=>/next|^i[1-4]\b|^p[1-4]\b/i.test(b.name));
    const target=match||(before.canvases[0]?{name:'canvas',x:width/2,y:height/2}:null);
    if(target){await client.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});await client.send('Input.dispatchMouseEvent',{type:'mousePressed',x:target.x,y:target.y,button:'left',clickCount:1});await client.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:target.x,y:target.y,button:'left',clickCount:1})}
    await sleep(1000);
