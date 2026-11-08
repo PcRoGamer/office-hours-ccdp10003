@@ -77,6 +77,7 @@ with sync_playwright() as pw:
     page.wait_for_timeout(150)
     if state(page)['completed']:page.screenshot(path=str(EVIDENCE/f'{name}-victory.png'))
     r={'viewport':name,'css':[w,h],'dpr':dpr,'directive':directive,'screenshots':len(list(EVIDENCE.glob(f'{name}-*.png'))),'bolts':state(page)['removed'],'manualHits':state(page)['manualHits'],'pageErrors':errors,'backing':[page.locator('canvas').evaluate('e=>e.width'),page.locator('canvas').evaluate('e=>e.height')]}
+    assert r['backing']==[round(w*dpr),round(h*dpr)],('NATIVE_DPR_BACKING_FAIL',r)
     assert not errors,r
     results.append(r)
     print(json.dumps(r),flush=True)
