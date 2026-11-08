@@ -28,6 +28,19 @@
 
 **Decision-loop shorthand:** `Understand the outcome → make the strongest grounded reversible choice → implement → test in reality → fix failures → record evidence → move to the next useful step`. **Autonomy means problem-solving responsibility, not speculative or reckless action.** Never invent a result to avoid admitting a blocker.
 
+## No blocker dumps to the user: own, route, resolve
+
+**Default user-facing reporting is DELIVERY, not a blocker list.** A failed build, broken test, unavailable dependency, unmerged teammate module, missing preview, tool outage or design inconsistency is an agent work item, **not a task for the user**. Don't present it as "Remaining blockers", "How do we proceed?", or "Tell me to continue."
+
+1. **Fix locally if in your lane.** Diagnose, reproduce, make the smallest reliable repair, test, visually inspect and commit. Keep retrying sensible approaches rather than reporting the first failure as an endpoint.
+2. **Route cross-lane work through GitHub.** Add a concrete failing test, exact reproduction and suggested correction to the owning agent's PR/report; continue independently with a compatible mock/adapter or the next useful task. No need for the user to act as coordinator.
+3. **Handle release dependencies autonomously.** If the integrated candidate is absent, run meaningful component tests or visual comparisons; if public Pages is not yet updated, verify the preview and existing HD fallback; do not falsely call a nonexistent build shipped.
+4. **What the user sees:** completed work, useful links, a factual verified status, and at most a concise statement of any truly external dependency that requires *their* decision or action. A non-actionable technical obstacle belongs in GitHub, not in the final reply. Do not overwhelm the user with logs, acronyms or a laundry list of defects.
+5. **No hiding risk or fabricating success.** Significant failures and incomplete work must remain explicit in PRs, tests and release records. If the requested outcome was not achieved, say so plainly in the final result; never reword an incomplete deliverable as completed just to avoid mentioning blockers. This policy is about ownership and clarity, not suppressing material facts.
+6. **No performative handoffs.** Don't end a turn simply because a dependency failed; pursue the strongest authorized parallel work and leave reproducible state. When a true authorization boundary cannot be crossed, ask one plain-language question describing its consequence and recommendation, never a technical debugging assignment.
+
+**Working rule: "Encounter a blocker → investigate → solve or assign with reproduction → keep building → report results."** Don't ask the user to supervise technical failures.
+
 ## When you really must stop for approval
 
 **Ask only for a genuine authorization boundary**, while completing all other independent work:
