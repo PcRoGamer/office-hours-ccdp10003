@@ -1,5 +1,7 @@
 # Night Shift HD v3 | parallel GitHub swarm
 
+**DECISION AUTHORITY:** Agent-owned engineering judgment is delegated. If you can determine the best next action by inspecting/researching/testing, take it. Never interrupt the user for unexplained technical choices, errors, integration difficulties or whether to keep working. Follow [the four-part escalation test](AUTONOMY_POLICY.md#delegated-technical-judgment-decide-build-prove), continue all reversible work and make an actionable PR.
+
 **AUTONOMY CONTRACT:** Read [AUTONOMY_POLICY.md](AUTONOMY_POLICY.md). The user is not managing seventeen conversations by answering routine questions. Claim your role, implement, test, fix defects and open a PR without asking permission or waiting for “continue.” Only authentic authorization boundaries warrant a question; chats cannot run after the turn completes. Write actionable handoffs.
 
 **Integration target:** `rebuild/night-shift-v3-hd`, branched from `main`, fully distinct from `feat/first-shift`.
