@@ -81,7 +81,40 @@ with sync_playwright() as p:
         assert len(page.evaluate('window.__pr.events.filter(e=>e.type==="popup-cover")'))==1
         page.screenshot(path=str(OUT/f'P2-cover-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
         assert not errs,errs
-        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','popupCover':'real 0.8s bonus','runtimeErrors':errs})
+        # A second guaranteed PR card must visibly change for Moving Goalposts.
+        page.evaluate("window.__pr.context.run.directive='moving-goalposts';window.__pr.switchTo('P1')")
+        page.wait_for_timeout(2500)
+        assert snap()['sendShift']==1,snap()
+        page.screenshot(path=str(OUT/f'P1-goalposts-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        mouse_drag((c-180,520),(c-180,705))
+        page.mouse.click(*at(c,630))
+        assert len(done())==0,'old SEND hitbox still live after moved chute'
+        offset=min(125,v['W']*.17)
+        page.mouse.click(*at(c+offset,630))
+        assert done()[0]['outcome']=='success',done()
+        # P4 uses the committed immutable event ledger, never invented incidents.
+        page.evaluate("window.__pr.context.run.directive=null;window.__pr.context.run.miraIncident=null;window.__pr.context.run.eventLedger=[{kind:'worker',objectId:'mira-workstation',outcome:'not-helped',committed:true}];window.__pr.switchTo('P4')")
+        assert snap()['miraOutcome']=='interrupted',snap()
+        page.screenshot(path=str(OUT/f'P4-evidence-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        # Double Entry requires TWO separately manipulated linked objects in P1/P4.
+        page.evaluate("window.__pr.context.run.directive='double-entry';window.__pr.switchTo('P1')")
+        mouse_drag((c-180,520),(c-180,705))
+        page.mouse.click(*at(c,630))
+        assert snap()['awaitCopy'] and not done()
+        page.screenshot(path=str(OUT/f'P1-double-entry-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        copy_x=c-min(205,v['W']*.29)
+        page.mouse.click(*at(copy_x,630))
+        assert done()[0]['evidence']['linkedCopy'] is True,done()
+        page.evaluate("window.__pr.switchTo('P4')")
+        mouse_drag((c,402),(c-210,565))
+        assert snap()['pendingCopy']=='headline' and not done()
+        page.screenshot(path=str(OUT/f'P4-double-entry-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        mouse_drag((c,402),(c+205,565))
+        assert not done(),'wrong linked destination must not commit'
+        mouse_drag((c,402),(c-210,565))
+        assert done()[0]['evidence']['linkedCopy'] is True,done()
+        assert not errs,errs
+        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','popupCover':'real 0.8s bonus','P1Goalpost':'moved send hitbox confirmed','P4Evidence':'committed worker incident loaded','doubleEntry':'two physical linked-object routes','runtimeErrors':errs})
         page.close()
     browser.close()
 (OUT/'regression-audit.json').write_text(json.dumps(results,indent=2))
