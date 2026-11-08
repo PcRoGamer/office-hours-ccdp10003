@@ -71,14 +71,15 @@ with sync_playwright() as pw:
     drag(page,(s['packet']['x'],s['packet']['y']),(s['feederX'],50));phase(page,'impact')
     if name in ('1920x1080','650x800'):page.screenshot(path=str(EVIDENCE/f'{name}-impact.png'))
     advance(page,1.5)
-    if name in ('1920x1080','650x800','2560x1440'):
-      for j in range(2):cycle(page,directive)
-      assert state(page)['completed'],(name,state(page))
+    for j in range(2):cycle(page,directive)
+    assert state(page)['completed'],(name,state(page))
+    assert state(page)['manualHits']==3,(name,state(page))
     page.wait_for_timeout(150)
     if state(page)['completed']:page.screenshot(path=str(EVIDENCE/f'{name}-victory.png'))
     r={'viewport':name,'css':[w,h],'dpr':dpr,'directive':directive,'screenshots':len(list(EVIDENCE.glob(f'{name}-*.png'))),'bolts':state(page)['removed'],'manualHits':state(page)['manualHits'],'pageErrors':errors,'backing':[page.locator('canvas').evaluate('e=>e.width'),page.locator('canvas').evaluate('e=>e.height')]}
     assert r['backing']==[round(w*dpr),round(h*dpr)],('NATIVE_DPR_BACKING_FAIL',r)
     assert not errors,r
+    assert r['bolts']==3 and r['manualHits']==3,r
     results.append(r)
     print(json.dumps(r),flush=True)
     page.close()
