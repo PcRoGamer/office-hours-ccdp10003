@@ -97,3 +97,23 @@ test('S1 files three distinct manually handled objects once',()=>{
   assert.deepEqual(completed(events)[0].evidence.filed,[0,1,2]);
   assert.equal(completed(events)[0].evidence.manual,true);
 });
+
+
+test('S2 caught mugs remain as physical objects on the tray',()=>{
+  const {game}=make('S2');game.pointerDown({x:600,y:534});
+  for(let i=0;i<250&&!game.snapshot().emitted;i++){
+    const cups=game.snapshot().cups.filter(c=>!c.done);
+    if(cups.length)game.pointerMove({x:cups.reduce((a,b)=>a.y>b.y?a:b).x,y:534});
+    game.update(.05);
+  }
+  const s=game.snapshot();assert.ok(s.caught>=2);
+  assert.equal(s.cups.filter(c=>c.caught).length,s.caught);
+  assert.equal(s.cups.filter(c=>c.spilled).length,s.spilled);
+});
+
+test('S2 uncaught mugs remain represented as actual spills',()=>{
+  const {game,events}=make('S2');advance(game,12);
+  const s=game.snapshot();assert.ok(s.spilled>=2);
+  assert.equal(s.cups.filter(c=>c.spilled).length,s.spilled);
+  assert.equal(completed(events).length,0);
+});
