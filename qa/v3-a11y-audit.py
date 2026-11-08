@@ -67,6 +67,9 @@ def probe(browser,url,label,w,h,dpr,args,out):
         s=snapshot(p);active=val(s,'screen') in ('play','playing','action','game')
         report(checks,'start','PASS' if started and active else 'REVIEW',f'control={started} state={val(s,"screen")}')
         if active:
+            # HD's first 80ms canvas frame precedes the moving forms; let the
+            # action scene settle before capturing evidence. Gameplay clock keeps running.
+            p.wait_for_timeout(1200)
             p.screenshot(path=str(out/f'{tag}-play.png'),animations='disabled')
             before=val(s,'muted','isMuted');p.keyboard.press('m');p.wait_for_timeout(30)
             after=val(snapshot(p),'muted','isMuted')
@@ -77,9 +80,21 @@ def probe(browser,url,label,w,h,dpr,args,out):
             report(checks,'pause-clock','PASS' if paused and t0 is not None and t0==t1 else ('FAIL' if paused and t0 is not None else 'REVIEW'),f'{paused} {t0}->{t1}')
             if paused:p.screenshot(path=str(out/f'{tag}-pause.png'),animations='disabled')
             p.keyboard.press('Escape')
-            c=p.locator('canvas');c.dispatch_event('pointerdown',{'pointerId':9,'pointerType':'touch','clientX':w/2,'clientY':h/2})
-            c.dispatch_event('pointercancel',{'pointerId':9,'pointerType':'touch','clientX':w/2,'clientY':h/2})
-            report(checks,'pointer-cancel','PASS' if val(snapshot(p),'dragging') is False else 'REVIEW','cancelled gesture without gameplay score')
+            # Use the browser's real touch pipeline, not synthetic DOM pointerdown.
+            # Synthetic pointerdown has no active pointer and breaks setPointerCapture.
+            try:
+                cdp=ctx.new_cdp_session(p)
+                cdp.send('Input.dispatchTouchEvent',{'type':'touchStart',
+                    'touchPoints':[{'x':w/2,'y':h/2,'id':9}]})
+                p.wait_for_timeout(30)
+                cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]})
+                p.wait_for_timeout(30)
+                dragging=val(snapshot(p),'dragging')
+                report(checks,'pointer-cancel','PASS' if dragging is False else 'REVIEW',
+                       f'authentic touchStart/touchCancel; dragging={dragging}')
+            except Exception as e:
+                report(checks,'pointer-cancel','REVIEW',
+                       'Browser touch cancellation probe unsupported: '+str(e).splitlines()[0])
             target=val(snapshot(p),'qaTargets');old=val(snapshot(p),'actions')
             if isinstance(target,list) and target and target[0].get('coordinate')=='css':
                 x,y=target[0]['x'],target[0]['y']
@@ -115,13 +130,13 @@ def main():
                 for w,h,dpr in VIEWPORTS:data['cases'].append(probe(browser,url,label,w,h,dpr,args,out))
         finally:browser.close()
     data['counts']={n:sum(c['status']==n for case in data['cases'] for c in case['checks']) for n in ('PASS','FAIL','REVIEW','UNAVAILABLE')}
-    (out/'results.json').write_text(json.dumps(data,indent=2)+'\n')
+    (out/'results.json').write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
     lines=[f'# Night Shift v3 input/accessibility evidence',f'Provenance: **{data["provenance"]}**','',
            '| Case | Check | Status | Evidence |','|---|---|---|---|']
     for case in data['cases']:
         for c in case['checks']:lines.append(f'| {case["tag"]} | {c["name"]} | {c["status"]} | {c["detail"].replace(chr(124),"/")} |')
     lines+=['',f'Counts: {data["counts"]}','REVIEW is never a pass. Screenshots are actual Chromium captures, but mock fixtures do not certify Night Shift HD or v3.']
-    (out/'report.md').write_text('\n'.join(lines)+'\n')
+    (out/'report.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     print(json.dumps({'counts':data['counts'],'provenance':data['provenance'],'artifacts':str(out)}))
     return int(bool(data['counts']['FAIL'] or data['counts']['UNAVAILABLE'] or (args.strict and data['counts']['REVIEW'])))
 if __name__=='__main__':sys.exit(main())

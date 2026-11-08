@@ -1,0 +1,313 @@
+{
+  "provenance": "REAL Windows Chrome/Chromium Playwright over local HTTP, not injected fixture",
+  "source_branch": "agents/v3-qa-a11y-g6-62f91",
+  "route": "arcade-office-hd.html",
+  "cases": [
+    {
+      "tag": "target-1440x900-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1440, 'h': 900, 'pw': 1440, 'ph': 900, 'label': 'Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "1440x900"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes."
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'THE REAL RESEARCH', 'HOW TO PLAY']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=play"
+        },
+        {
+          "name": "mute",
+          "status": "REVIEW",
+          "detail": "None->None; audio output unverified"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 31.9->31.9"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authentic touchStart/touchCancel; dragging=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "REVIEW",
+          "detail": "No safe authored QA target; do not guess"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-650x800-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 650, 'h': 800, 'pw': 650, 'ph': 800, 'label': 'Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "650x800"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes."
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'THE REAL RESEARCH', 'HOW TO PLAY']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=play"
+        },
+        {
+          "name": "mute",
+          "status": "REVIEW",
+          "detail": "None->None; audio output unverified"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 33.7->33.7"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authentic touchStart/touchCancel; dragging=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "REVIEW",
+          "detail": "No safe authored QA target; do not guess"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-1920x1080-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1920, 'h': 1080, 'pw': 1920, 'ph': 1080, 'label': 'Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "1920x1080"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes."
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'THE REAL RESEARCH', 'HOW TO PLAY']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=play"
+        },
+        {
+          "name": "mute",
+          "status": "REVIEW",
+          "detail": "None->None; audio output unverified"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 33.6->33.6"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authentic touchStart/touchCancel; dragging=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "REVIEW",
+          "detail": "No safe authored QA target; do not guess"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-1920x1080-dpr2",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1920, 'h': 1080, 'pw': 2422, 'ph': 1362, 'label': 'Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "2422x1362"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes."
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Office Hours: Quota Panic, mouse-controlled 2D arcade. Click Clock In to start; click targets or drag files. Escape pauses. M mutes.', 'THE REAL RESEARCH', 'HOW TO PLAY']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=play"
+        },
+        {
+          "name": "mute",
+          "status": "REVIEW",
+          "detail": "None->None; audio output unverified"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 33.6->33.6"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authentic touchStart/touchCancel; dragging=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "REVIEW",
+          "detail": "No safe authored QA target; do not guess"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "PASS": 36,
+    "FAIL": 0,
+    "REVIEW": 20,
+    "UNAVAILABLE": 0
+  }
+}
