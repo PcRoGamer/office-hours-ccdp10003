@@ -106,7 +106,16 @@ async function browserCheck(report,url) {
   }
   let browser;
   try {
-    browser=await playwright.chromium.launch({headless:true,args:['--no-sandbox']});
+    const options={headless:true,args:['--no-sandbox']};
+    if (process.platform==='win32') {
+      for (const candidate of [
+        'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+        'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
+      ]) {
+        if (fs.existsSync(candidate)) {options.executablePath=candidate;break;}
+      }
+    }
+    browser=await playwright.chromium.launch(options);
     const page=await browser.newPage({viewport:{width:1440,height:900}});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
     const resp=await page.goto(url,{waitUntil:'domcontentloaded',timeout:20000});
