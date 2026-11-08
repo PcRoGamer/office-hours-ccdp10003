@@ -62,15 +62,25 @@ with sync_playwright() as p:
             check(s['caught']>=2,f"S2 manual tray catches at least 2 mugs (caught={s['caught']}, spilled={s['spilled']})")
             check(page.evaluate('window.__lastCardEvent?.evidence?.manual') is True,'S2 emits honest evidence')
             page.screenshot(path=str(OUT/'services-s2-result.png'))
+            # FAST OR SAFE is a tactile choice, not an invisible numerical modifier.
+            page.click('#restart');page.wait_for_timeout(70)
+            sp=max(180,min(475,(page.evaluate('window.__services.viewport.worldWidth')-100)*.5))
+            fp=screen(page,600-sp*.36,366);page.mouse.click(fp['x'],fp['y'])
+            check(state(page)['route']=='fast' and state(page)['trayWidth']==125,'S2 fast route physically selects narrow high-speed tray')
+            ap=screen(page,600+sp*.36,366);page.mouse.click(ap['x'],ap['y'])
+            check(state(page)['route']=='safe' and state(page)['trayWidth']==230,'S2 safe route physically selects wide slow tray')
+            page.screenshot(path=str(OUT/'services-s2-route-choice.png'))
             # S3 safe pull physical route
             page.click('#next');page.wait_for_timeout(150)
             for k in range(20):
                 if state(page)['safe']:break
                 page.wait_for_timeout(120)
             page.screenshot(path=str(OUT/'services-s3-safe.png'))
-            dest=600+max(180,min(475,(page.evaluate('window.__services.viewport.worldWidth')-100)*.5))*.67
-            drag(page,600,477,dest,571)
+            # Fast route = closer, smaller target; safe route = wider but farther.
+            dest=600+max(180,min(475,(page.evaluate('window.__services.viewport.worldWidth')-100)*.5))*.30
+            drag(page,600,477,dest,545)
             check(page.evaluate('window.__lastCardEvent?.cardId')=='S3','S3 safely pulled page to actual release target')
+            check(page.evaluate('window.__lastCardEvent?.evidence?.route')=='fast','S3 fast route is a smaller nearer physical target')
             page.screenshot(path=str(OUT/'services-s3-result.png'))
             # S4 held socket and plugged into port
             page.click('#next');page.wait_for_timeout(160)
@@ -88,6 +98,73 @@ with sync_playwright() as p:
             page.click('#restart');page.click('#pause');a=state(page)['remaining'];page.wait_for_timeout(500);b=state(page)['remaining']
             check(abs(a-b)<.05,'Pause freezes active timer')
             page.click('#pause')
+            # Double Entry changes S1 from one drop per file to a second linked physical chute.
+            page.select_option('#directive','double-entry');page.evaluate('window.__services.load(0)')
+            w=page.evaluate('window.__services.viewport.worldWidth')
+            sp=max(180,min(475,(w-100)*.5));folder=state(page)['files'][0]
+            drag(page,folder['x'],folder['y'],600+sp*.68,390)
+            ss=state(page);check(ss['secondary'] and ss['filed']==0,'S1 double entry requires a linked carbon chute before filing credit')
+            drag(page,600-sp*.52,480,600+sp*.68,515)
+            check(state(page)['filed']==1 and not state(page)['secondary'],'S1 linked second destination resolves exactly one original folder')
+            # Double Entry S4 requires an explicit human verification gesture.
+            page.evaluate('window.__services.load(3)')
+            sx=600-sp*.59;px=600+sp*.65;pp=screen(page,sx,518)
+            page.mouse.move(pp['x'],pp['y']);page.mouse.down();page.wait_for_timeout(1100);page.mouse.up()
+            drag(page,sx,518,px,470)
+            check(state(page)['mode']=='verify' and not state(page)['emitted'],'S4 linked verification cannot be bypassed by plugging the cable')
+            pp=screen(page,sx,518);page.mouse.click(pp['x'],pp['y'])
+            check(state(page)['emitted'] and page.evaluate('window.__lastCardEvent?.evidence?.method')=='socket-hold-trace+verification','S4 double-entry verification is a separate physical gesture')
+            # A failed restart pulse in moving-goalposts repositions the actual cable port.
+            page.select_option('#directive','moving-goalposts');page.evaluate('window.__services.load(3)')
+            pp=screen(page,sx,518);page.mouse.move(pp['x'],pp['y']);page.mouse.down();page.wait_for_timeout(1100);page.mouse.up()
+            check(state(page)['mode']=='trace','S4 moving-goalposts holds before restart test')
+            page.evaluate('''() => {for(let i=0;i<165;i++)window.__services.state.scene.update(.05)}''')
+            check(abs(state(page)['goalShift'])>.01 and state(page)['mode']=='hold','S4 timed restart visibly moves target port for next physical try')
+            # Sponsored-workflow popups are physical movable obstructions, never free progression.
+            page.select_option('#directive','sponsored-workflow')
+            page.evaluate('window.__services.load(1)')
+            s=state(page);check(s['couponVisible'] and not s['emitted'],'S2 sponsored fake coupon begins covering the mug catch zone')
+            drag(page,600,521,390,405)
+            s=state(page);check(not s['couponVisible'] and not s['emitted'],'S2 sponsor coupon moved away by player, no automatic score')
+            page.screenshot(path=str(OUT/'services-s2-sponsored-dismissed.png'))
+            page.evaluate('window.__services.load(2)');page.wait_for_timeout(80)
+            s=state(page);check(s['adVisible'] and not s['emitted'],'S3 sponsored interruption begins physically in front of release paper')
+            drag(page,600,477,390,403)
+            s=state(page);check(not s['adVisible'] and not s['emitted'],'S3 fake toner advertisement physically dismissed, task remains')
+            page.screenshot(path=str(OUT/'services-s3-sponsored-dismissed.png'))
+            # Double Entry requires a second human action, without new reward objects.
+            page.select_option('#directive','double-entry');page.evaluate('window.__services.load(2)')
+            page.wait_for_function('window.__services.state.scene.snapshot().safe')
+            goal=600+max(180,min(475,(page.evaluate('window.__services.viewport.worldWidth')-100)*.5))*.67
+            drag(page,600,477,goal,571)
+            s=state(page);check(s['confirm'] and not s['emitted'],'S3 double-entry second confirmation cannot auto-complete')
+            pseal=screen(page,goal,571);page.mouse.click(pseal['x'],pseal['y'])
+            check(state(page)['emitted'] and page.evaluate('window.__lastCardEvent?.evidence?.method')=='page-pull+carbon-confirm','S3 double-entry requires real human seal tap')
+            # Moving goalposts shifts a real target only when a safe window begins.
+            page.select_option('#directive','moving-goalposts');page.evaluate('window.__services.load(2)')
+            page.wait_for_function('window.__services.state.scene.snapshot().safe')
+            check(abs(state(page)['goalShift'])>.001,'S3 moving-goalposts shifts release target after safe telegraph')
+            # Mandatory collaboration offers optional helper but does not complete work.
+            page.select_option('#directive','mandatory-collaboration');page.evaluate('window.__services.load(3)')
+            span=max(180,min(475,(page.evaluate('window.__services.viewport.worldWidth')-100)*.5))
+            helper=screen(page,600+span*.65,320);page.mouse.click(helper['x'],helper['y'])
+            s=state(page);check(s['helper'] and not s['emitted'],'S4 Jules helper lowers hold threshold but cannot complete cable')
+            source=600-span*.59;port=600+span*.65
+            held=screen(page,source,518);page.mouse.move(held['x'],held['y']);page.mouse.down();page.wait_for_timeout(690);page.mouse.up()
+            check(state(page)['mode']=='trace','S4 assistance materially shortens real hold time')
+            drag(page,source,518,port,470)
+            check(state(page)['emitted'],'S4 assisted job still requires separate player plug action')
+            # Mandatory-collaboration coffee return must be a visible recovered object.
+            page.evaluate('window.__services.load(1)')
+            for k in range(235):
+                if state(page)['spilled']>=1:break
+                page.wait_for_timeout(50)
+            prior=state(page)
+            mira=screen(page,600+span*.94,397);page.mouse.click(mira['x'],mira['y'])
+            after=state(page)
+            check(prior['spilled']>=1 and after['helpUsed'] and after['spilled']==prior['spilled']-1,'S2 Mira returns one real spilled mug with new physical trajectory')
+            check(not after['emitted'],'S2 Mira help never auto-clears the encounter')
+            page.screenshot(path=str(OUT/'services-s2-mira-return.png'))
         page.close()
     browser.close()
 (OUT.parent/'v3-services-browser-results.json').write_text(json.dumps(results,indent=2))
