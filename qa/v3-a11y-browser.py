@@ -166,13 +166,19 @@ def browser_run(browser, width, height, dpr, label, smoke=False):
     check(not errors and not failed,f'{label}: extended keyboard/replay run has zero browser errors')
     ctx.close()
 
+SCENARIOS = [(1920,1080,1,'1080p',False),(650,800,1,'portrait',False),
+             (1920,1080,2,'4k-dpr2',True),(3440,1440,1,'ultrawide',True)]
+selected=os.environ.get('A11Y_VIEWPORT', 'all')
+if selected != 'all' and selected not in {s[3] for s in SCENARIOS}:
+    raise SystemExit(f'Unknown A11Y_VIEWPORT={selected!r}; choose all, 1080p, portrait, 4k-dpr2 or ultrawide')
+ran=[]
 with sync_playwright() as pw:
     browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
-    selected=os.environ.get('A11Y_VIEWPORT', 'all')
-    for w,h,dpr,label,smoke in [(1920,1080,1,'1080p',False),(650,800,1,'portrait',False),(1920,1080,2,'4k-dpr2',True),(3440,1440,1,'ultrawide',True)]:
+    for w,h,dpr,label,smoke in SCENARIOS:
         if selected=='all' or selected==label:
             browser_run(browser,w,h,dpr,label,smoke)
+            ran.append({'label':label,'cssViewport':f'{w}x{h}','dpr':dpr,'smokeOnly':smoke})
     browser.close()
 for x in EVIDENCE:print(x)
 print('TOTAL',len(EVIDENCE),'assertions; real screenshots:',OUT)
-(OUT/'report.json').write_text(json.dumps({'url':URL,'assertions':EVIDENCE,'viewports':['1920x1080','650x800','1920x1080 DPR2','3440x1440']},indent=2))
+(OUT/'report.json').write_text(json.dumps({'url':URL,'assertions':EVIDENCE,'viewportsActuallyTested':ran},indent=2))
