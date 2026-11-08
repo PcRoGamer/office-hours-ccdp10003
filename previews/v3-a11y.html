@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Night Shift v3 | Accessible Actions Lab</title>
+<style>
+:root{color-scheme:dark;--cream:#fff2d5;--green:#8ad4bb;--amber:#f6c76c;--red:#ed6b55}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071d24;font-family:'Arial Narrow',Impact,Arial,sans-serif;touch-action:none}
+canvas{position:fixed;inset:0;width:100vw;height:100dvh;display:block;touch-action:none;cursor:crosshair}
+#hud{position:fixed;inset:0;pointer-events:none;display:none;color:var(--cream);text-shadow:0 3px 9px #091c21;z-index:6}
+#hud.show{display:block}
+#hearts{position:absolute;top:max(20px,env(safe-area-inset-top));left:max(24px,env(safe-area-inset-left));font:bold clamp(16px,2.2vw,29px) Impact,Arial,sans-serif;letter-spacing:.07em}
+#timer{position:absolute;top:max(17px,env(safe-area-inset-top));right:max(24px,env(safe-area-inset-right));font:bold clamp(22px,3vw,42px) Impact,Arial,sans-serif;font-variant-numeric:tabular-nums;color:#fce2a0}
+#imperative{position:absolute;top:max(22px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);text-align:center;max-width:57vw;line-height:.9;font:900 clamp(22px,4.4vw,68px) Impact,'Arial Narrow',Arial,sans-serif;letter-spacing:.03em;-webkit-text-stroke:1px #142d2e;text-wrap:balance}
+#feedback{position:absolute;left:50%;top:20%;transform:translateX(-50%);font-weight:900;font-size:clamp(16px,2.8vw,39px);color:#ffe394;letter-spacing:.09em;white-space:nowrap;text-align:center}
+#footer{position:fixed;left:max(15px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));font:700 11px Arial,sans-serif;letter-spacing:.12em;color:#bdccc7;z-index:7;text-shadow:0 2px 6px black;pointer-events:none;max-width:65vw}
+#launch{position:fixed;z-index:12;inset:0;display:grid;place-items:center;text-align:center;background:radial-gradient(ellipse at 50% 43%,#102f37c8,#061b22eb);color:var(--cream);padding:25px}
+#launch[hidden]{display:none}
+#launch h1{font:900 clamp(55px,11vw,170px)/.8 Impact,'Arial Narrow',Arial,sans-serif;letter-spacing:-.025em;margin:0;color:#fff3d3;text-shadow:5px 7px 0 #d75b46,11px 16px 25px #000}
+#launch h1 small{font-size:.30em;display:block;line-height:1.7;letter-spacing:.25em;color:#7cdbbc;text-shadow:0 3px #093d3e}
+#launch p{font:700 clamp(14px,1.6vw,23px) Arial,sans-serif;color:#d5e4dc;max-width:510px;line-height:1.4;margin:26px auto 20px}
+#start{border:3px solid #ffe3a6;border-radius:9px;background:#efbd5e;color:#12353b;font:900 clamp(21px,3vw,39px) Impact,Arial,sans-serif;letter-spacing:.06em;padding:15px 44px;min-height:62px;cursor:pointer;box-shadow:0 9px 0 #a45b36,0 18px 30px #0006}
+#start:focus-visible,#replay:focus-visible{outline:5px solid #e4fff2;outline-offset:6px}
+#replay{position:fixed;z-index:20;bottom:clamp(70px,10dvh,125px);left:50%;transform:translateX(-50%);border:3px solid #ffe3a6;border-radius:11px;background:#eeb759;color:#12353b;font:900 clamp(19px,2.1vw,30px) Impact,Arial,sans-serif;letter-spacing:.07em;padding:14px 32px;min-height:56px;cursor:pointer;box-shadow:0 8px 0 #8a5436,0 18px 30px #0008;white-space:nowrap}
+#replay[hidden]{display:none}
+#launch .sub{margin:28px 0 0;font-size:12px;letter-spacing:.1em;color:#91b6af}
+#launch .practice{color:#ffc969;font-size:12px}
+@media(max-width:700px){#imperative{top:75px;max-width:85vw;font-size:34px}#feedback{top:22%;font-size:21px}#footer{font-size:9px;bottom:6px}#hearts{top:12px;left:12px;font-size:18px}#timer{top:10px;right:12px;font-size:24px}}
+@media(prefers-reduced-motion:reduce){#launch h1{text-shadow:4px 4px 0 #bb5544}}
+</style>
+</head>
+<body>
+<canvas id="stage" tabindex="0" role="application" aria-label="Night Shift interactive scene. Open Options for input assistance; F6 cycles targets, Enter acts, arrow keys drag, Escape cancels."></canvas>
+<div id="hud"><div id="hearts"></div><div id="imperative"></div><div id="timer"></div><div id="feedback"></div></div>
+<div id="footer">ACCESSIBILITY MODULE LAB · PLAYABLE THREE-ACTION SAMPLE · NOT THE FULL CAMPAIGN</div>
+<div id="launch"><div><h1><small>QUOTA PANIC</small>NIGHT SHIFT</h1><p>Three real office actions. One less excuse from management. Try pointer or enable keyboard targets in ⚙ OPTIONS.</p><button id="start">CLOCK IN</button><p id="mode" class="practice">STANDARD SHIFT · PRACTICE AVAILABLE IN OPTIONS</p><p class="sub">INDEPENDENT A11Y INTEGRATION PREVIEW</p></div></div>
+<button id="replay" hidden>CLOCK IN AGAIN</button>
+<script type="module" src="./v3-a11y-demo.mjs"></script>
+</body>
+</html>
