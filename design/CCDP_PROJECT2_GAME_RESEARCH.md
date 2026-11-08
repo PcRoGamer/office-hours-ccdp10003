@@ -1,4 +1,4 @@
-> **REBUID V3 SCOPE NOTE (2026-11-08):** Academic references and previous-feedback findings here remain evidence and quality constraints, but any historical First Shift or Codex-only scope language is superseded. Full [Night Shift v3 GDD](NIGHT_SHIFT_GDD_V3.md) governs game content; do not reinstate the eight-card abridgement. Research must live in play, not in mandatory explanations.
+> **REBUILD V3 SCOPE NOTE (2026-11-08):** Academic references and previous-feedback findings here remain evidence and quality constraints, but any historical First Shift or Codex-only scope language is superseded. Full [Night Shift v3 GDD](NIGHT_SHIFT_GDD_V3.md) governs game content; do not reinstate the eight-card abridgement. Research must live in play, not in mandatory explanations.
 
 # CCDP10003 Project 2 | Game research and rubric implementation contract
 Date: 8 November 2026. Applies to Quota Panic: First Shift candidate, not the archived editions.
