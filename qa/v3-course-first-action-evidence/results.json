@@ -1,0 +1,252 @@
+{
+  "scope": "REAL INPUT SMOKE ONLY, no human playtime or integrated full v3 claim",
+  "time": "2026-11-08T11:16:17.997Z",
+  "root": "C:\\Users\\Admin\\work\\nightshift-v3-intake-for-course-review",
+  "views": [
+    {
+      "viewport": "1440x900",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "status": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "EDGE_TO_EDGE",
+          "status": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "key": "CLOCK_IN_VISIBLE",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "key": "CARD_I1",
+          "status": "PASS",
+          "detail": "I1"
+        },
+        {
+          "key": "STAMP_TARGET_ONSCREEN",
+          "status": "PASS",
+          "detail": {
+            "x": 1123.5124999999998,
+            "y": 476.25,
+            "form": "form-0"
+          }
+        },
+        {
+          "key": "REAL_MOUSE_STAMP",
+          "status": "PASS",
+          "detail": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "key": "AUTOMATED_FIRST_ACTION_LT15S",
+          "status": "PASS",
+          "detail": {
+            "elapsedMs": 462
+          }
+        },
+        {
+          "key": "NO_PAGEERRORS",
+          "status": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "screenshot": "first-stamp-1440x900.png"
+    },
+    {
+      "viewport": "1920x1080",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "status": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "EDGE_TO_EDGE",
+          "status": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080
+          }
+        },
+        {
+          "key": "CLOCK_IN_VISIBLE",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "key": "CARD_I1",
+          "status": "PASS",
+          "detail": "I1"
+        },
+        {
+          "key": "STAMP_TARGET_ONSCREEN",
+          "status": "PASS",
+          "detail": {
+            "x": 1424.43,
+            "y": 571.5,
+            "form": "form-0"
+          }
+        },
+        {
+          "key": "REAL_MOUSE_STAMP",
+          "status": "PASS",
+          "detail": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "key": "AUTOMATED_FIRST_ACTION_LT15S",
+          "status": "PASS",
+          "detail": {
+            "elapsedMs": 403
+          }
+        },
+        {
+          "key": "NO_PAGEERRORS",
+          "status": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "screenshot": "first-stamp-1920x1080.png"
+    },
+    {
+      "viewport": "3840x2160",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "status": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "EDGE_TO_EDGE",
+          "status": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 3840,
+            "height": 2160
+          }
+        },
+        {
+          "key": "CLOCK_IN_VISIBLE",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "key": "CARD_I1",
+          "status": "PASS",
+          "detail": "I1"
+        },
+        {
+          "key": "STAMP_TARGET_ONSCREEN",
+          "status": "PASS",
+          "detail": {
+            "x": 2848.89,
+            "y": 1143,
+            "form": "form-0"
+          }
+        },
+        {
+          "key": "REAL_MOUSE_STAMP",
+          "status": "PASS",
+          "detail": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "key": "AUTOMATED_FIRST_ACTION_LT15S",
+          "status": "PASS",
+          "detail": {
+            "elapsedMs": 432
+          }
+        },
+        {
+          "key": "NO_PAGEERRORS",
+          "status": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "screenshot": "first-stamp-3840x2160.png"
+    },
+    {
+      "viewport": "650x800",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "status": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "EDGE_TO_EDGE",
+          "status": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 650,
+            "height": 800
+          }
+        },
+        {
+          "key": "CLOCK_IN_VISIBLE",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "key": "CARD_I1",
+          "status": "PASS",
+          "detail": "I1"
+        },
+        {
+          "key": "STAMP_TARGET_ONSCREEN",
+          "status": "PASS",
+          "detail": {
+            "x": 505.80740234375,
+            "y": 438.830859375,
+            "form": "form-0"
+          }
+        },
+        {
+          "key": "REAL_MOUSE_STAMP",
+          "status": "PASS",
+          "detail": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "key": "AUTOMATED_FIRST_ACTION_LT15S",
+          "status": "PASS",
+          "detail": {
+            "elapsedMs": 404
+          }
+        },
+        {
+          "key": "NO_PAGEERRORS",
+          "status": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "screenshot": "first-stamp-650x800.png"
+    }
+  ],
+  "status": "FIRST_ACTION_SMOKE_PASS_ONLY"
+}
