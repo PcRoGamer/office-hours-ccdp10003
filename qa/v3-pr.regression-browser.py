@@ -71,7 +71,17 @@ with sync_playwright() as p:
         page.mouse.click(*at(c,630))
         assert done()[0]['evidence']['authoredReferenceMs']==14000
         assert not errs,errs
-        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','runtimeErrors':errs})
+        # P2 authentic projectile beam-crossing earns precisely one displayed 0.8s shutter extension.
+        page.evaluate("window.__pr.switchTo('P2')")
+        start=(c-375,230) if width>1000 else (60,230)
+        end=(c+150,245) if width>1000 else (380,245)
+        drag(start,end)
+        cover=snap()
+        assert cover['coverBeats']==1 and cover['graceSeconds']==.8,cover
+        assert len(page.evaluate('window.__pr.events.filter(e=>e.type==="popup-cover")'))==1
+        page.screenshot(path=str(OUT/f'P2-cover-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        assert not errs,errs
+        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','popupCover':'real 0.8s bonus','runtimeErrors':errs})
         page.close()
     browser.close()
 (OUT/'regression-audit.json').write_text(json.dumps(results,indent=2))
