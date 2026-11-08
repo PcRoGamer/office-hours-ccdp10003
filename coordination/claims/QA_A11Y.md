@@ -14,8 +14,16 @@
 
 - **Status:** done on independent branch; draft PR opened for LEAD quality review. This lane has NOT certified the integrated game.
 - **Draft PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/18
-- **Code commit:** `dd66cacda70449e6b267696dc874fe61f545df5a`
+- **Code commits:** `dd66cacda70449e6b267696dc874fe61f545df5a` (initial) and `795211fb7b8db40a44e4107079faf1f32c394552` (actual Windows verification and corrected harness)
 - **Shipped:** `qa/v3-a11y-audit.py`, `qa/v3-a11y-selftest.py`, `previews/v3-a11y-fixture.html`, three source-proven real Chromium screenshot thumbnails in `qa/v3-a11y-fixture-*.webp`, and `coordination/reports/a11y-evidence.md`.
 - **Actual tests:** `python -m py_compile qa/v3-a11y-audit.py qa/v3-a11y-selftest.py` PASS; `python qa/v3-a11y-selftest.py` PASS (4 Chromium viewports, 9 checks/case plus strict/absent-route safety); fixture audit 52 PASS, 0 FAIL, 4 REVIEW, 0 UNAVAILABLE.
-- **Explicit verification limit:** Chromium navigation was blocked by administrator URL policy, so real HTML was injected ONLY for the local mock fixture. No live HD/v3 game visual or audio acceptance is claimed. Offline Windows workstation cannot supply live browser. LEAD must execute production-URL audit from a permitted browser.
-- **Integration:** inspect PR #18 and its report, then run the documented live target + HD commands. No merging/overwriting of other branches, HD release, or shared contract.
+- **Original verification limit superseded:** the local mock fixture was initially used because isolated Chromium URL navigation was blocked, but **UniSync's Windows host is available**. Actual HTTP-served Night Shift HD was subsequently tested in Windows Chromium. Complete v3 and audio/manual accessibility acceptance are still unverified.
+- **Integration:** inspect PR #18 and updated reports, then run the same audit against integrated v3. No merging/overwriting of other branches, HD release, or shared contract.
+
+## Windows re-verification (8 November 2026 ~22:12 AEDT)
+
+- **Workstation:** UniSync Windows host bridge `enabled=true`, persistent read/write/run, no new tunnel required. Previous Desktop Commander "offline" status was misleading.
+- **Actual real browser:** Night Shift HD loaded over Windows localhost with Playwright Chromium at 1440×900, 650×800, 1920×1080, and 1920×1080 @ DPR 2. **36 PASS, 0 FAIL, 20 REVIEW** across four real viewport scenarios; recorded in `qa/v3-a11y-hd-real-browser-results.json`.
+- **Test-tool repairs:** proper CDP touch cancellation (eliminates synthetic event `setPointerCapture` false positives), delayed live gameplay screenshots, explicit UTF-8 report encoding on Windows. Windows self-test now PASS.
+- **Evidence report:** `coordination/reports/a11y-windows-hd-verified-2026-11-08.md`, real screenshots `qa/v3-a11y-hd-real-*.webp`. New source commit `795211fb7b8db40a44e4107079faf1f32c394552`.
+- **Truth boundary:** this verifies HD baseline and the audit harness, **not** a full v3 release or full manual accessibility/audio pass. PR #18 remains draft for LEAD review.
