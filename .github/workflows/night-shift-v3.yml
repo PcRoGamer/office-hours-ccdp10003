@@ -255,3 +255,53 @@ jobs:
       - name: Native tests are mandatory, after screenshots have been captured
         if: ${{ always() && steps.native-unit.outcome == 'failure' }}
         run: exit 1
+
+
+  cross-branch-composition:
+    name: Compose existing v3 scene contracts in isolated CI (not a release)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rebuild/night-shift-v3-hd
+          path: staging
+      - uses: actions/checkout@v4
+        with:
+          path: release-harness
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Fetch original owner branches without mutating them
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p staging/qa-artifacts/v3-release-composition
+          while IFS='|' read -r lane ref owned; do
+            [ -z "$lane" ] && continue
+            printf '%s: %s (%s)\n' "$lane" "$ref" "$owned"
+            git -C staging fetch --no-tags --depth=1 origin "refs/heads/$ref"
+            sha=$(git -C staging rev-parse FETCH_HEAD)
+            printf '%s %s %s\n' "$lane" "$sha" "$ref" | tee -a staging/qa-artifacts/v3-release-composition/owners.txt
+            git -C staging archive FETCH_HEAD "$owned" | tar -x -C staging
+          done <<'SOURCES'
+          intake|agents/v3-intake-81d47|night-shift-v3/scenes/intake
+          services|agents/v3-services-n8-7c42|night-shift-v3/scenes/services
+          pr|agents/v3-pr-g6-1108c|night-shift-v3/scenes/pr
+          printer|agents/v3-printer-r8c2|night-shift-v3/bosses/printer
+          quota|agents/v3-quota-q7n482|night-shift-v3/bosses/quota
+          systems|agents/v3-systems-g6-0811b|night-shift-v3/systems
+          physics|agents/v3-physics-261108-soundlab|night-shift-v3/physics
+          story|agents/v3-story-k7m29|night-shift-v3/story
+          SOURCES
+          git -C staging status --short >staging/qa-artifacts/v3-release-composition/worktree-status.txt
+      - name: Exercise imported scene lifecycles, stable IDs and no-auto-score invariants
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-composition.test.mjs
+      - name: Upload source SHAs, integration contract report and defect evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-composition-${{ github.run_id }}
+          path: staging/qa-artifacts/v3-release-composition/
+          retention-days: 21
