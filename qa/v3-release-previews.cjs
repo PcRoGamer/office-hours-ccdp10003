@@ -64,9 +64,8 @@ async function test(){
       const snap=await page.evaluate(()=>({b:window.__v3SystemsLab?.buttons?.length,stage:window.__v3SystemsLab?.snapshot?.stage}));
       check(snap.b>0,'systems preview has real interactive targets',{snap});
       await page.keyboard.press('Space');
-      const paused=await page.evaluate('window.__v3SystemsLab?.run?.paused');
-      // Different engine versions can store pause in a state snapshot.
-      check(paused===true || await page.evaluate('window.__v3SystemsLab?.run?.snapshot?.paused===true'),'systems engine pauses from keyboard');
+      const paused=await page.evaluate('window.__v3SystemsLab?.run?._paused');
+      check(paused===true,'systems engine pauses from keyboard');
       await page.keyboard.press('Space');
      }else if(lane==='story'){
       await page.locator('#launch').click();
