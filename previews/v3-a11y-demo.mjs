@@ -11,8 +11,8 @@ const pos=()=>{const c=cx(),r=vp.worldWidth<750?125:235;return {good:{x:c+Math.m
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 function resize(){const rect=canvas.getBoundingClientRect();vp.cssWidth=rect.width;vp.cssHeight=rect.height;vp.dpr=devicePixelRatio||1;vp.worldWidth=WHEIGHT*rect.width/rect.height;vp.safeRect={left:Math.min(32,vp.worldWidth*.04),right:vp.worldWidth-Math.min(32,vp.worldWidth*.04),top:115,bottom:707};canvas.width=Math.round(rect.width*vp.dpr);canvas.height=Math.round(rect.height*vp.dpr);g.setTransform(canvas.width/vp.worldWidth,0,0,canvas.height/WHEIGHT,0,0);a11y?.refresh();}
 function resetStage(){state.remaining=state.practice?30:18;state.transition=0;state.feedback='';state.hold=0;state.grab=null;state.folder={...pos().folder};updateHUD();a11y?.refresh();}
-function begin(){state.status='play';state.stage=0;state.hearts=3;state.failed=0;state.completed=[];state.practice=!!state.settings.preferPractice;$('#launch').hidden=true;hud.classList.add('show');resetStage();}
-function finish(){state.status='victory';state.feedback='CLOCKED OUT!';state.feedbackT=6;updateHUD();a11y?.refresh();}
+function begin(){state.status='play';state.stage=0;state.hearts=3;state.failed=0;state.completed=[];state.pts=0;state.pointer=null;state.grab=null;state.manualPaused=false;state.accessibilityPaused=false;state.paused=false;state.practice=!!state.settings.preferPractice;$('#launch').hidden=true;$('#replay').hidden=true;heartsUI.hidden=false;timeUI.hidden=false;hud.classList.add('show');resetStage();}
+function finish(){state.status='victory';state.feedback='CLOCKED OUT!';state.feedbackT=6;heartsUI.hidden=true;timeUI.hidden=true;$('#replay').hidden=false;updateHUD();a11y?.refresh();}
 function advance(){if(state.transition || state.status!=='play')return;state.completed.push(stageNames[state.stage]);state.feedback=['APPROVED!','EVIDENCE SAVED!','YOU MAY LEAVE!'][state.stage];state.feedbackT=1.2;state.transition=1.2;a11y?.refresh();}
 function mistake(text){if(state.transition || state.status!=='play')return;state.failed++;state.hearts=Math.max(0,state.hearts-1);state.feedback=text;state.feedbackT=.9;if(!state.hearts){state.status='gameover';state.feedback='TRY A NEW SHIFT';state.feedbackT=999;$('#start').textContent='TRY AGAIN';$('#launch').hidden=false;hud.classList.remove('show');}else resetTimerWithoutReward();updateHUD();}
 function resetTimerWithoutReward(){state.remaining=state.practice?30:18;state.grab=null;state.hold=0;state.folder={...pos().folder};}
@@ -37,8 +37,9 @@ const a11y=createAssistiveControls({root:document.body,getViewport:()=>vp,getTar
  onSettingsChange:settings=>{state.settings=settings;$('#mode').textContent=settings.preferPractice?'PRACTICE SHIFT SELECTED FOR NEXT CLOCK-IN':'STANDARD SHIFT · PRACTICE AVAILABLE IN OPTIONS';},
 });
 $('#start').addEventListener('click',begin);
+$('#replay').addEventListener('click',begin);
 window.addEventListener('resize',resize);
-window.addEventListener('blur',()=>cancel());
+window.addEventListener('blur',()=>{a11y.cancelHeld();cancel();});
 canvas.addEventListener('pointerdown',e=>{if(state.status!=='play')return;canvas.setPointerCapture(e.pointerId);const b=canvas.getBoundingClientRect();const p=vp.screenToWorld(e.clientX-b.left,e.clientY-b.top);const near=assistedHitPoint(p,targets(),{enabled:state.settings.largeTargets,radius:18});scene.pointerDown({...near,id:e.pointerId,kind:e.pointerType});});
 canvas.addEventListener('pointermove',e=>{if(!state.grab)return;const b=canvas.getBoundingClientRect();scene.pointerMove({...vp.screenToWorld(e.clientX-b.left,e.clientY-b.top),id:e.pointerId,kind:e.pointerType});});
 canvas.addEventListener('pointerup',e=>{const b=canvas.getBoundingClientRect();scene.pointerUp({...vp.screenToWorld(e.clientX-b.left,e.clientY-b.top),id:e.pointerId,kind:e.pointerType});});

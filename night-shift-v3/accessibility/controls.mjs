@@ -88,6 +88,7 @@ export function createAssistiveControls({
   let settings = {...DEFAULT_PREFS};
   try { settings = normalizePreferences(JSON.parse(storage?.getItem(PREF_KEY) || '{}')); } catch { /* blocked storage */ }
   let open = false, selectedId = null, held = null, gone = false, announcement = '';
+  let focusBeforeOptions = null;
   const pointerId = -7021;
   const style = document.createElement('style');
   style.setAttribute('data-qp-a11y-style', '');
@@ -99,7 +100,7 @@ export function createAssistiveControls({
     <section class="qp-a11y-panel" id="qp-a11y-dialog" role="dialog" aria-modal="false" aria-label="Accessibility options" hidden>
       <h2 class="qp-a11y-head">MAKE SPACE TO PLAY</h2><p class="qp-a11y-intro">Optional accessibility tools. Standard Shift scores and win conditions stay unchanged.</p>
       <div class="qp-a11y-checks"></div>
-      <p class="qp-a11y-hint">F6 cycles reachable objects; Enter taps, grabs or releases. During a grab, arrow keys move the object. When switch-step is enabled, Space cycles choices and Enter acts. Dragging and holding still require deliberate player inputs. Escape cancels.</p>
+      <p class="qp-a11y-hint">F6 cycles reachable objects; Enter taps, grabs or releases. During a grab, arrow keys move the object; Shift + arrows moves five steps. With switch-step enabled, Space cycles choices and Enter acts. Every action still uses the game's real mechanics. Escape cancels.</p>
       <button class="qp-a11y-close">RETURN TO THE SHIFT</button>
     </section>
     <div class="qp-a11y-dock" role="toolbar" aria-label="Keyboard-target controls" hidden></div>
@@ -148,20 +149,34 @@ export function createAssistiveControls({
     onSettingsChange({...settings});
     return {...settings};
   };
-  const cancelHeld = () => {
+  const cancelHeld = (quiet = false) => {
     if (!held) return;
+    // Cancellation must flow into the scene so an in-progress drag cannot
+    // survive an options dialog, blur or inaccessible target change.
     dispatch({phase:'cancelPointer',id:pointerId,kind:'assistive-keyboard'});
     held = null;
-    announce('Movement cancelled');
+    if (!quiet) announce('Movement cancelled');
   };
   const setOpen = (next) => {
     if (gone || open === !!next) return;
     open = !!next;
+    if (open) focusBeforeOptions = document.activeElement;
     if (open && held) cancelHeld();
     panel.hidden = !open;
     launch.setAttribute('aria-expanded',String(open));
     onPause(open);
-    if (open) panel.querySelector('input')?.focus(); else launch.focus();
+    if (open) panel.querySelector('input')?.focus();
+    else {
+      // A11Y switch players must not be stranded on the OPTIONS button.
+      // Restore normal focus before play, but focus the game canvas when
+      // semantic actions are available so Space scans instead of reopening.
+      const canvas = root.querySelector('canvas[tabindex]');
+      const restore = settings.keyboardControls && usable().length && canvas
+        ? canvas : focusBeforeOptions;
+      if (restore?.isConnected && typeof restore.focus === 'function') restore.focus();
+      else launch.focus();
+      focusBeforeOptions = null;
+    }
     refresh();
   };
   const choose = (step = 1) => {
@@ -189,12 +204,14 @@ export function createAssistiveControls({
     else { held={id:target.id,kind:target.kind,point}; announce(target.kind === 'drag' ? 'Grabbed: use arrow keys, then Enter to release' : 'Holding: Enter to release'); }
     refresh();
   };
-  const move = (dx,dy) => {
+  const move = (dx,dy,{fast=false} = {}) => {
     if (!held || held.kind !== 'drag') return;
     const vp=getViewport();
-    // World step represents a readable movement independent of CSS/DPR scale.
-    const sx=24 * (vp.worldWidth || vp.cssWidth || 1200) / Math.max(1,vp.cssWidth || 1200);
-    const sy=24 * (vp.worldHeight || vp.cssHeight || 760) / Math.max(1,vp.cssHeight || 760);
+    // 24 CSS pixels per step, or 120 with Shift. This preserves target scale
+    // across ultrawide/portrait/DPR and keeps physical pointerMove checks.
+    const step=24*(fast ? 5 : 1);
+    const sx=step * (vp.worldWidth || vp.cssWidth || 1200) / Math.max(1,vp.cssWidth || 1200);
+    const sy=step * (vp.worldHeight || vp.cssHeight || 760) / Math.max(1,vp.cssHeight || 760);
     const p={x:held.point.x+dx*sx,y:held.point.y+dy*sy};
     if (vp.safeRect) {
       p.x=Math.max(vp.safeRect.left,Math.min(vp.safeRect.right,p.x));
@@ -209,6 +226,15 @@ export function createAssistiveControls({
     const enabled=settings.keyboardControls && !open;
     dock.hidden=!enabled;
     const targets=usable();
+    if (held && !targets.some(t=>t.id===held.id)) {
+      // A timed hold may complete during update() with no pointerUp. Clear
+      // its virtual pointer before the next scene; never send a stale release
+      // that could hit a newly spawned object.
+      cancelHeld(true);
+      // The finished scene owns the success banner. Do not leave a stale
+      // keyboard-hold instruction obscuring the end-of-run replay button.
+      announce('');
+    }
     if (!targets.some(t=>t.id===selectedId)) selectedId=targets[0]?.id ?? null;
     dock.replaceChildren();
     if (enabled) {
@@ -234,17 +260,17 @@ export function createAssistiveControls({
   };
   const onKey=(e)=>{
     if (gone) return;
-    if (open && e.key === 'Escape') { e.preventDefault(); setOpen(false); return; }
+    if (open && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation?.(); setOpen(false); return; }
     if(open || e.altKey || e.ctrlKey || e.metaKey || !settings.keyboardControls) return;
     if(e.target instanceof HTMLElement && e.target.closest('button, a, input, textarea, select, [role=button]') && e.key !== 'F6' && e.key !== ' ') return;
     const k=e.key;
     if(k==='F6' || (settings.switchStep && (k===' ' || k==='Spacebar') && !held)){
-      e.preventDefault();choose(e.shiftKey?-1:1);return;
+      e.preventDefault();e.stopImmediatePropagation?.();choose(e.shiftKey?-1:1);return;
     }
-    if(k==='Enter' && !e.repeat){e.preventDefault();activate();return;}
-    if(k==='Escape' && held){e.preventDefault();cancelHeld();refresh();return;}
+    if(k==='Enter' && !e.repeat){e.preventDefault();e.stopImmediatePropagation?.();activate();return;}
+    if(k==='Escape' && held){e.preventDefault();e.stopImmediatePropagation?.();cancelHeld();refresh();return;}
     if(held?.kind==='drag' && /^Arrow(Left|Right|Up|Down)$/.test(k)){
-      e.preventDefault();move(k==='ArrowLeft'?-1:k==='ArrowRight'?1:0,k==='ArrowUp'?-1:k==='ArrowDown'?1:0);
+      e.preventDefault();e.stopImmediatePropagation?.();move(k==='ArrowLeft'?-1:k==='ArrowRight'?1:0,k==='ArrowUp'?-1:k==='ArrowDown'?1:0,{fast:e.shiftKey});
     }
   };
   launch.addEventListener('click',()=>setOpen(!open));
