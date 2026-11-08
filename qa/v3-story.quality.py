@@ -87,6 +87,7 @@ async def main():
                 assert await page.locator('.ns-receipt-title').inner_text()=='PEOPLE & QUALITY'
                 await page.locator('[data-details]').click()
                 assert await page.locator('.ns-breakdown').count()==1
+                await page.wait_for_timeout(550) # capture settled paper after print animation
                 await page.screenshot(path=str(OUT/'receipt-people-1920x1080.png'))
                 report['interactions']={'fiveSelections':True,'visibleMachineInstall':True,'clickReceipt':True,'keyboardReceipt':True,'scoreUnmodified':official,'breakdown':True}
             if w==650:
