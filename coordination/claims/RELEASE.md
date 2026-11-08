@@ -12,3 +12,9 @@
 - Preview command: `python3 -m http.server 4173` and open `arcade-office-hd.html` (known HD fallback), then `night-shift-v3.html` after lead integration. Audit commands: `node qa/v3-release.audit.cjs --source`, `--incumbent`, `--candidate`.
 - Dependencies: LEAD full v3 scene integration, complete QA_GAME/QA_VISUAL/AUDIO human signoff, default-branch workflow activation and explicit human authorization for Pages.
 - No actual public V3 deploy, course submission or complete campaign pass claimed. Preserve HD as fallback.
+
+
+## Additional independent branch verification
+- [Read-only 5-lane CI run 42468384330](https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42468384330): INTAKE, SERVICES, SYSTEMS and STORY native/browser smoke PASS. PHYSICS FAIL (native invalid-shape validation mismatch, browser world not initialized before first step). These are actual test results, not conceptual audit.
+- [Exact defects and real screenshot artifacts](https://github.com/PcRoGamer/office-hours-ccdp10003/blob/agents/v3-release-nova0811/coordination/reports/release-peer-readiness-2026-11-08.md).
+- The RELEASE branch now additionally owns `qa/v3-release-previews.cjs` and a five-lane read-only preview matrix in its Actions workflow. It does not edit or merge another owner's source. Full integrated V3 still unverified and unpublishable.
