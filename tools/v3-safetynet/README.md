@@ -46,3 +46,5 @@ The `preview-matrix` opens the **actual independent preview HTML via its own tem
 - Visual inspection revealed uneven art/staging across separately authored previews; **HD-v3 integrated superiority remains unverified**.
 
 **Do not interpret any green structural test or preview capture as release authorisation.** The LEAD must still integrate into `night-shift-v3.html`, prove all 16 actual microgames and two complete boss paths, validate musical/audio and physics interactions, and compare actual HD-v3 scene states at matching viewports.
+
+The browser matrix also supports **custom stress viewports**, e.g. `--only printer --viewports 3440x1440,3840x2160`. Its status now requires a canvas rectangle that covers the entire actual CSS viewport (within 2 px), in addition to existing asset/error/overflow checks. This does not prove internal camera staging or GPU performance; inspect the rendered frames.
