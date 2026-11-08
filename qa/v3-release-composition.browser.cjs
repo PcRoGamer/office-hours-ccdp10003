@@ -103,6 +103,27 @@ async function main(){
      await page.evaluate(()=>document.body.classList.remove('capture'));
     }
    }catch(e){fail('End-to-end shared-canvas printer counter '+w+'x'+h,{error:String(e.stack||e)})}
+   // THE QUOTA must make both choices physically reachable through the SAME
+   // canvas adapter, with a real exactly-five corporate-points difference.
+   for(const choice of ['file','cool']){
+    try{
+     await page.evaluate(()=>window.__swarmComposition.choose('B2'));
+     await page.waitForFunction(()=>window.__swarmComposition.scene?.snapshot?.().mode==='bonus',null,{timeout:10000});
+     const state=await page.evaluate(()=>window.__swarmComposition.scene.snapshot());
+     const a=await page.evaluate(p=>window.__swarmComposition.viewport.worldToScreen(p.x,p.y),state.targets.bonus);
+     const z=await page.evaluate(p=>window.__swarmComposition.viewport.worldToScreen(p.x,p.y),state.targets[choice]);
+     await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(z.x,z.y,{steps:16});await page.mouse.up();
+     const after=await page.evaluate(()=>window.__swarmComposition.scene.snapshot());
+     const outcomes=Object.values(after.bonusOutcomes||{});
+     const expect=choice==='file'?5:0;
+     if(outcomes.length===1&&outcomes[0]===choice&&after.bonusCorporatePoints===expect)
+      pass('Real QUOTA '+choice.toUpperCase()+' decision yields exactly '+expect+' corporate points '+w+'x'+h);
+     else fail('QUOTA packet outcome or points mismatch '+w+'x'+h,{choice,outcomes,points:after.bonusCorporatePoints,expect});
+     await page.evaluate(()=>document.body.classList.add('capture'));
+     await page.screenshot({path:path.join(out,'B2-physical-'+choice+'-'+w+'x'+h+'.png')});
+     await page.evaluate(()=>document.body.classList.remove('capture'));
+    }catch(e){fail('Physical QUOTA '+choice+' route regression '+w+'x'+h,{error:String(e.stack||e)})}
+   }
    if(w===1920){
     try{
      const before=await page.evaluate(()=>window.__swarmComposition.viewport.cssWidth);
