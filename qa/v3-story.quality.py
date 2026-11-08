@@ -3,7 +3,7 @@ import asyncio,functools,http.server,json,pathlib,re,threading,urllib.request
 from playwright.async_api import async_playwright
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 OUT=ROOT/'qa'/'v3-story-evidence';OUT.mkdir(exist_ok=True)
-SIZES=[(1920,1080),(2560,1440),(3840,2160),(3440,1440),(650,800),(390,844)]
+SIZES=[(1440,900),(1920,1080),(2560,1440),(3840,2160),(3440,1440),(650,800),(390,844)]
 def served_assets():
     handler=functools.partial(http.server.SimpleHTTPRequestHandler,directory=str(ROOT))
     server=http.server.ThreadingHTTPServer(('127.0.0.1',0),handler)
@@ -50,13 +50,15 @@ async def main():
                    cast:document.querySelector('.ns-cast').getBoundingClientRect().height,
                    upgradeBoxes:[...document.querySelectorAll('[data-pick]')].map(b),
                    previews:[...document.querySelectorAll('[data-demo]')].map(b),
-                   scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth};}""")
+                   scrollWidth:document.documentElement.scrollWidth,dialogScrollHeight:document.querySelector('.ns-panel').scrollHeight,dialogClientHeight:document.querySelector('.ns-panel').clientHeight,viewport:innerWidth};}""")
             assert layout['world']['width']==w,('world',w,layout)
             assert layout['scrollWidth']<=w,('horizontal overflow',w,layout)
             assert len(layout['upgradeBoxes'])==3
             for i,box in enumerate(layout['upgradeBoxes']):
                 assert box['width']>=100 and box['height']>=100,(w,'small upgrade',i,box)
                 assert box['left']>=-1 and box['right']<=w+1,(w,'offscreen upgrade',i,box)
+            if w==1440:
+                assert layout['dialogScrollHeight']<=layout['dialogClientHeight']+1,('clipped laptop intermission',layout)
             if w==1920:
                 assert layout['panel']['width']/w>.80,('desktop insufficient coverage',layout)
                 assert min(x['width'] for x in layout['previews'])>=220,('tiny previews',layout)
