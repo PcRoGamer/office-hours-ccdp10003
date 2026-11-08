@@ -1,0 +1,527 @@
+{
+  "provenance": "Actual Windows Chromium HTTP local LEAD preview; not integrated public release",
+  "snapshot_sha256": {
+    "night-shift-v3.html": "81da23bed3bb724da458e659314a554b0d9c5b162470d34a7dd8ee5d19a9d3cd",
+    "night-shift-v3/app.js": "4387a914051131161ff0db166a303359567562e818f72fb6eadf1d976e3a4fa4",
+    "night-shift-v3/runtime/director.js": "469c5ef3426e992d5599a54066a3ee0ca61fc53f03c7076bd6effc211e1c1e79",
+    "night-shift-v3/runtime/transitions.js": "b7403dc16686772ba6c47c4b568cca9cfc1937c3da70682be492c63442a0929d"
+  },
+  "counts": {
+    "PASS": 72,
+    "FAIL": 0,
+    "REVIEW": 24,
+    "UNAVAILABLE": 0
+  },
+  "cases": [
+    {
+      "tag": "target-1440x900-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1440, 'h': 900, 'pw': 1440, 'ph': 900, 'label': 'Quota Panic Night Shift v3, pointer-controlled office arcade', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "1440x900"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Quota Panic Night Shift v3, pointer-controlled office arcade"
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Quota Panic Night Shift v3, pointer-controlled office arcade', 'CLOCK IN \\xa0 ▶']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=card"
+        },
+        {
+          "name": "mute",
+          "status": "PASS",
+          "detail": "state=None->None; accessible control=Mute game->Unmute"
+        },
+        {
+          "name": "audio-output",
+          "status": "REVIEW",
+          "detail": "Audible mute and musical quality require listening; a button toggle is not audio proof"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 16.0168->16.0168"
+        },
+        {
+          "name": "touch-cancel-lifecycle",
+          "status": "PASS",
+          "detail": "events={'down': 1, 'cancel': 1}; no heart/scoring change=True"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authenticated touch cancel; drag reset state=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "PASS",
+          "detail": "authored target=0:0 removed=True; css=(426.3,493.8)"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-650x800-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 650, 'h': 800, 'pw': 650, 'ph': 800, 'label': 'Quota Panic Night Shift v3, pointer-controlled office arcade', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "650x800"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Quota Panic Night Shift v3, pointer-controlled office arcade"
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Quota Panic Night Shift v3, pointer-controlled office arcade', 'CLOCK IN \\xa0 ▶']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=card"
+        },
+        {
+          "name": "mute",
+          "status": "PASS",
+          "detail": "state=None->None; accessible control=Mute game->Unmute"
+        },
+        {
+          "name": "audio-output",
+          "status": "REVIEW",
+          "detail": "Audible mute and musical quality require listening; a button toggle is not audio proof"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 16.1001->16.1001"
+        },
+        {
+          "name": "touch-cancel-lifecycle",
+          "status": "PASS",
+          "detail": "events={'down': 1, 'cancel': 1}; no heart/scoring change=True"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authenticated touch cancel; drag reset state=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "PASS",
+          "detail": "authored target=0:0 removed=True; css=(162.5,335.8)"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-1920x1080-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1920, 'h': 1080, 'pw': 1920, 'ph': 1080, 'label': 'Quota Panic Night Shift v3, pointer-controlled office arcade', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "1920x1080"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Quota Panic Night Shift v3, pointer-controlled office arcade"
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Quota Panic Night Shift v3, pointer-controlled office arcade', 'CLOCK IN \\xa0 ▶']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=card"
+        },
+        {
+          "name": "mute",
+          "status": "PASS",
+          "detail": "state=None->None; accessible control=Mute game->Unmute"
+        },
+        {
+          "name": "audio-output",
+          "status": "REVIEW",
+          "detail": "Audible mute and musical quality require listening; a button toggle is not audio proof"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 15.917100000000001->15.917100000000001"
+        },
+        {
+          "name": "touch-cancel-lifecycle",
+          "status": "PASS",
+          "detail": "events={'down': 1, 'cancel': 1}; no heart/scoring change=True"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authenticated touch cancel; drag reset state=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "PASS",
+          "detail": "authored target=0:0 removed=True; css=(607.6,592.6)"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-1920x1080-dpr2",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1920, 'h': 1080, 'pw': 3840, 'ph': 2160, 'label': 'Quota Panic Night Shift v3, pointer-controlled office arcade', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "3840x2160"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Quota Panic Night Shift v3, pointer-controlled office arcade"
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Quota Panic Night Shift v3, pointer-controlled office arcade', 'CLOCK IN \\xa0 ▶']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=card"
+        },
+        {
+          "name": "mute",
+          "status": "PASS",
+          "detail": "state=None->None; accessible control=Mute game->Unmute"
+        },
+        {
+          "name": "audio-output",
+          "status": "REVIEW",
+          "detail": "Audible mute and musical quality require listening; a button toggle is not audio proof"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 16.5->16.5"
+        },
+        {
+          "name": "touch-cancel-lifecycle",
+          "status": "PASS",
+          "detail": "events={'down': 1, 'cancel': 1}; no heart/scoring change=True"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authenticated touch cancel; drag reset state=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "PASS",
+          "detail": "authored target=0:0 removed=True; css=(607.6,592.6)"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-1024x600-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 1024, 'h': 600, 'pw': 1024, 'ph': 600, 'label': 'Quota Panic Night Shift v3, pointer-controlled office arcade', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "1024x600"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Quota Panic Night Shift v3, pointer-controlled office arcade"
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Quota Panic Night Shift v3, pointer-controlled office arcade', 'CLOCK IN \\xa0 ▶']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=card"
+        },
+        {
+          "name": "mute",
+          "status": "PASS",
+          "detail": "state=None->None; accessible control=Mute game->Unmute"
+        },
+        {
+          "name": "audio-output",
+          "status": "REVIEW",
+          "detail": "Audible mute and musical quality require listening; a button toggle is not audio proof"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 16.1835->16.1835"
+        },
+        {
+          "name": "touch-cancel-lifecycle",
+          "status": "PASS",
+          "detail": "events={'down': 1, 'cancel': 1}; no heart/scoring change=True"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authenticated touch cancel; drag reset state=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "PASS",
+          "detail": "authored target=0:0 removed=True; css=(316.2,329.2)"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    },
+    {
+      "tag": "target-3440x1440-dpr1",
+      "checks": [
+        {
+          "name": "document",
+          "status": "PASS",
+          "detail": "HTTP 200"
+        },
+        {
+          "name": "fullscreen",
+          "status": "PASS",
+          "detail": "{'x': 0, 'y': 0, 'w': 3440, 'h': 1440, 'pw': 3440, 'ph': 1440, 'label': 'Quota Panic Night Shift v3, pointer-controlled office arcade', 'touch': 'none'}"
+        },
+        {
+          "name": "backing",
+          "status": "PASS",
+          "detail": "3440x1440"
+        },
+        {
+          "name": "accessible-name",
+          "status": "PASS",
+          "detail": "Quota Panic Night Shift v3, pointer-controlled office arcade"
+        },
+        {
+          "name": "touch-action",
+          "status": "PASS",
+          "detail": "none"
+        },
+        {
+          "name": "keyboard-focus",
+          "status": "PASS",
+          "detail": "['Quota Panic Night Shift v3, pointer-controlled office arcade', 'CLOCK IN \\xa0 ▶']"
+        },
+        {
+          "name": "start",
+          "status": "PASS",
+          "detail": "control=True state=card"
+        },
+        {
+          "name": "mute",
+          "status": "PASS",
+          "detail": "state=None->None; accessible control=Mute game->Unmute"
+        },
+        {
+          "name": "audio-output",
+          "status": "REVIEW",
+          "detail": "Audible mute and musical quality require listening; a button toggle is not audio proof"
+        },
+        {
+          "name": "pause-clock",
+          "status": "PASS",
+          "detail": "True 16.049999999999997->16.049999999999997"
+        },
+        {
+          "name": "touch-cancel-lifecycle",
+          "status": "PASS",
+          "detail": "events={'down': 1, 'cancel': 1}; no heart/scoring change=True"
+        },
+        {
+          "name": "pointer-cancel",
+          "status": "REVIEW",
+          "detail": "authenticated touch cancel; drag reset state=None"
+        },
+        {
+          "name": "primary-pointer",
+          "status": "PASS",
+          "detail": "authored target=0:0 removed=True; css=(1250.1,790.1)"
+        },
+        {
+          "name": "reduced-motion",
+          "status": "REVIEW",
+          "detail": "Visual shake suppression still needs manual comparison"
+        },
+        {
+          "name": "high-contrast",
+          "status": "REVIEW",
+          "detail": "Must inspect shape/icon patterns; never infer from browser emulation"
+        },
+        {
+          "name": "page-errors",
+          "status": "PASS",
+          "detail": "[]"
+        }
+      ]
+    }
+  ]
+}

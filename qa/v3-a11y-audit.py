@@ -71,9 +71,18 @@ def probe(browser,url,label,w,h,dpr,args,out):
             # action scene settle before capturing evidence. Gameplay clock keeps running.
             p.wait_for_timeout(1200)
             p.screenshot(path=str(out/f'{tag}-play.png'),animations='disabled')
-            before=val(s,'muted','isMuted');p.keyboard.press('m');p.wait_for_timeout(30)
+            before=val(s,'muted','isMuted')
+            sound=p.locator('#sound')
+            label_before=sound.get_attribute('aria-label') if sound.count()==1 else None
+            p.keyboard.press('m');p.wait_for_timeout(30)
             after=val(snapshot(p),'muted','isMuted')
-            report(checks,'mute','PASS' if isinstance(before,bool) and isinstance(after,bool) and before!=after else 'REVIEW',f'{before}->{after}; audio output unverified')
+            label_after=sound.get_attribute('aria-label') if sound.count()==1 else None
+            state_changed=(isinstance(before,bool) and isinstance(after,bool) and before!=after)
+            control_changed=(bool(label_before) and bool(label_after) and label_before!=label_after)
+            report(checks,'mute','PASS' if state_changed or control_changed else 'REVIEW',
+                   f'state={before}->{after}; accessible control={label_before}->{label_after}')
+            report(checks,'audio-output','REVIEW',
+                   'Audible mute and musical quality require listening; a button toggle is not audio proof')
             p.keyboard.press('Escape');p.wait_for_timeout(60);s=snapshot(p)
             t0=val(s,'clock','time');paused=val(s,'paused') is True or val(s,'screen') in ('pause','paused')
             p.wait_for_timeout(300);t1=val(snapshot(p),'clock','time')
@@ -83,16 +92,33 @@ def probe(browser,url,label,w,h,dpr,args,out):
             # Use the browser's real touch pipeline, not synthetic DOM pointerdown.
             # Synthetic pointerdown has no active pointer and breaks setPointerCapture.
             try:
+                before_cancel=snapshot(p)
+                # Neutral corner: a centre press could accidentally resolve a paper.
+                sx,sy=max(12,w*.045),h*.87
+                p.evaluate('''() => {
+                    window.__qaTouchLifecycle={down:0,cancel:0};
+                    const canvas=document.querySelector('canvas');
+                    canvas.addEventListener('pointerdown',()=>window.__qaTouchLifecycle.down++,{once:true});
+                    canvas.addEventListener('pointercancel',()=>window.__qaTouchLifecycle.cancel++,{once:true});
+                }''')
                 cdp=ctx.new_cdp_session(p)
                 cdp.send('Input.dispatchTouchEvent',{'type':'touchStart',
-                    'touchPoints':[{'x':w/2,'y':h/2,'id':9}]})
+                    'touchPoints':[{'x':sx,'y':sy,'id':9}]})
                 p.wait_for_timeout(30)
                 cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]})
                 p.wait_for_timeout(30)
-                dragging=val(snapshot(p),'dragging')
+                after_cancel=snapshot(p);lifecycle=p.evaluate('window.__qaTouchLifecycle')
+                dragging=val(after_cancel,'dragging')
+                unscored=(val(before_cancel,'hearts')==val(after_cancel,'hearts') and
+                          val(before_cancel,'evidence','actions')==val(after_cancel,'evidence','actions'))
+                report(checks,'touch-cancel-lifecycle',
+                       'PASS' if lifecycle['down']==1 and lifecycle['cancel']==1 and unscored else 'FAIL',
+                       f'events={lifecycle}; no heart/scoring change={unscored}')
                 report(checks,'pointer-cancel','PASS' if dragging is False else 'REVIEW',
-                       f'authentic touchStart/touchCancel; dragging={dragging}')
+                       f'authenticated touch cancel; drag reset state={dragging}')
             except Exception as e:
+                report(checks,'touch-cancel-lifecycle','REVIEW',
+                       'Browser touch event probe unsupported: '+str(e).splitlines()[0])
                 report(checks,'pointer-cancel','REVIEW',
                        'Browser touch cancellation probe unsupported: '+str(e).splitlines()[0])
             target=val(snapshot(p),'qaTargets');old=val(snapshot(p),'actions')
@@ -110,10 +136,20 @@ def probe(browser,url,label,w,h,dpr,args,out):
                 eligible=next((t for t in world if isinstance(t,dict) and
                                t.get('kind')=='good' and all(k in t for k in ('id','x','y'))),
                               None) if isinstance(world,list) else None
-                if eligible and isinstance(vp,dict) and all(vp.get(k) for k in
-                           ('cssWidth','cssHeight','worldWidth','worldHeight')):
-                    x=eligible['x']*vp['cssWidth']/vp['worldWidth']
-                    y=eligible['y']*vp['cssHeight']/vp['worldHeight']
+                # LEAD's current fallback snapshot uses worldToScreen before
+                # exporting targets; these coordinates are ALREADY CSS pixels.
+                # Applying the world transform again caused false misses at 1080p.
+                coordinate=(eligible.get('coordinate') if eligible else None)
+                if not coordinate and isinstance(st,dict) and st.get('hdAtlas')=='hd-original-2048' and st.get('deck')==['I1'] and not st.get('completeCampaign'):
+                    coordinate='css'  # verified against the fallback scene source
+                if eligible and isinstance(vp,dict) and coordinate in ('css','world'):
+                    if coordinate=='css':
+                        x,y=eligible['x'],eligible['y']
+                    elif all(vp.get(k) for k in ('cssWidth','cssHeight','worldWidth','worldHeight')):
+                        x=eligible['x']*vp['cssWidth']/vp['worldWidth']
+                        y=eligible['y']*vp['cssHeight']/vp['worldHeight']
+                    else:
+                        raise ValueError('Missing dimensions for authored world-space target')
                     if 0 <= x <= w and 0 <= y <= h:
                         if w==650:p.touchscreen.tap(x,y)
                         else:p.mouse.click(x,y)
@@ -131,7 +167,7 @@ def probe(browser,url,label,w,h,dpr,args,out):
                            'No safe authored QA target; do not guess')
 
         else:
-            for n in ('mute','pause-clock','pointer-cancel','primary-pointer'):report(checks,n,'REVIEW','No safe active-play entry')
+            for n in ('mute','audio-output','pause-clock','touch-cancel-lifecycle','pointer-cancel','primary-pointer'):report(checks,n,'REVIEW','No safe active-play entry')
         motion=p.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
         report(checks,'reduced-motion','PASS' if motion and val(snapshot(p),'reducedMotion') is True else 'REVIEW','Visual shake suppression still needs manual comparison')
         report(checks,'high-contrast','REVIEW','Must inspect shape/icon patterns; never infer from browser emulation')
