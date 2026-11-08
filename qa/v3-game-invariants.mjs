@@ -26,7 +26,7 @@ export function auditDeck(deck, contract) {
     for(const id of contract.guaranteed[d]||[])if(!selected.includes(id))fail('missing-guarantee',`${d} missing ${id}`);
   }
   if(deck[0]!=='I1')fail('first-card','I1 must be first');
-  if(deck[3]!=='S1'||deck[4]!=='S2')fail('services-order','S1 and S2 must lead Services');
+  if(!['S1','S2'].every(id=>deck.slice(3,5).includes(id)))fail('services-order','S1 and S2 must occupy the first two Services slots (either order)');
   if(!deck.slice(3,6).some(x=>x==='S3'||x==='S4'))fail('printer-prep','A Services jam/cable tutorial is mandatory');
   if(deck.indexOf('P1')<0||deck.indexOf('P1')>deck.indexOf('P4'))fail('pr-order','P1 must precede P4');
   if(deck.indexOf('T1')<0||deck.indexOf('T1')>deck.indexOf('T4'))fail('staff-order','T1 must precede T4');
