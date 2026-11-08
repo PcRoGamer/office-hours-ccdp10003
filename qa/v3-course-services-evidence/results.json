@@ -34,11 +34,11 @@
           "detail": {
             "snapshot": {
               "id": "S3",
-              "t": 0,
-              "remaining": 23,
+              "t": 0.029,
+              "remaining": 22.971,
               "done": false,
               "emitted": false,
-              "safe": false,
+              "safe": true,
               "grab": false,
               "grabSafe": false,
               "adVisible": true,
@@ -81,11 +81,37 @@
           "name": "NO_PAGE_EXCEPTIONS",
           "status": "PASS",
           "detail": []
+        },
+        {
+          "name": "NON_SPONSORED_AD_VISUALLY_ABSENT",
+          "status": "PASS",
+          "detail": {
+            "sponsored": {
+              "redDominantPixels": 1265,
+              "totalPixels": 1444,
+              "at": {
+                "x": 720,
+                "y": 565
+              }
+            },
+            "default": {
+              "redDominantPixels": 188,
+              "totalPixels": 1444,
+              "at": {
+                "x": 720,
+                "y": 565
+              }
+            },
+            "storedAdState": true,
+            "note": "Hidden backing state is legitimate; UI must not render inert sponsored ad"
+          }
         }
       ],
       "errors": [],
       "before": "services-s3-sponsored-before-1440x900.png",
-      "after": "services-s3-sponsored-after-1440x900.png"
+      "after": "services-s3-sponsored-after-1440x900.png",
+      "defaultBefore": "services-s3-default-before-1440x900.png",
+      "defaultAfter": "services-s3-default-after-1440x900.png"
     },
     {
       "viewport": "650x800",
@@ -120,8 +146,8 @@
           "detail": {
             "snapshot": {
               "id": "S3",
-              "t": 0.217,
-              "remaining": 22.783,
+              "t": 0.208,
+              "remaining": 22.792,
               "done": false,
               "emitted": false,
               "safe": true,
@@ -167,13 +193,39 @@
           "name": "NO_PAGE_EXCEPTIONS",
           "status": "PASS",
           "detail": []
+        },
+        {
+          "name": "NON_SPONSORED_AD_VISUALLY_ABSENT",
+          "status": "PASS",
+          "detail": {
+            "sponsored": {
+              "redDominantPixels": 1189,
+              "totalPixels": 1444,
+              "at": {
+                "x": 325,
+                "y": 502
+              }
+            },
+            "default": {
+              "redDominantPixels": 192,
+              "totalPixels": 1444,
+              "at": {
+                "x": 325,
+                "y": 502
+              }
+            },
+            "storedAdState": true,
+            "note": "Hidden backing state is legitimate; UI must not render inert sponsored ad"
+          }
         }
       ],
       "errors": [],
       "before": "services-s3-sponsored-before-650x800.png",
-      "after": "services-s3-sponsored-after-650x800.png"
+      "after": "services-s3-sponsored-after-650x800.png",
+      "defaultBefore": "services-s3-default-before-650x800.png",
+      "defaultAfter": "services-s3-default-after-650x800.png"
     }
   ],
   "status": "SERVICES_S3_SPONSORED_POINTER_SMOKE_PASS",
-  "checkedAt": "2026-11-08T11:25:27.767Z"
+  "checkedAt": "2026-11-08T11:34:20.402Z"
 }
