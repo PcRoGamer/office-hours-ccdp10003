@@ -1,0 +1,79 @@
+{
+  "base": "origin/rebuild/night-shift-v3-hd",
+  "lanes": [
+    {
+      "name": "intake",
+      "ref": "origin/agents/v3-intake-81d47",
+      "paths": [
+        "night-shift-v3/scenes/intake",
+        "previews/v3-intake.html"
+      ]
+    },
+    {
+      "name": "services",
+      "ref": "origin/agents/v3-services-n8-7c42",
+      "paths": [
+        "night-shift-v3/scenes/services",
+        "previews/v3-services.html"
+      ]
+    },
+    {
+      "name": "pr",
+      "ref": "origin/agents/v3-pr-g6-1108c",
+      "paths": [
+        "night-shift-v3/scenes/pr",
+        "previews/v3-pr.html"
+      ]
+    },
+    {
+      "name": "staff",
+      "ref": "origin/agents/v3-staff-copperfox-2021",
+      "paths": [
+        "night-shift-v3/scenes/staff",
+        "previews/v3-staff.html"
+      ]
+    },
+    {
+      "name": "printer",
+      "ref": "origin/agents/v3-printer-r8c2",
+      "paths": [
+        "night-shift-v3/bosses/printer",
+        "previews/v3-printer.html"
+      ]
+    },
+    {
+      "name": "quota",
+      "ref": "origin/agents/v3-quota-q7n482",
+      "paths": [
+        "night-shift-v3/bosses/quota",
+        "previews/v3-quota.html"
+      ]
+    },
+    {
+      "name": "systems",
+      "ref": "origin/agents/v3-systems-g6-0811b",
+      "paths": [
+        "night-shift-v3/systems",
+        "previews/v3-systems.html"
+      ]
+    },
+    {
+      "name": "physics",
+      "ref": "origin/agents/v3-physics-261108-soundlab",
+      "paths": [
+        "night-shift-v3/physics",
+        "assets/night-shift-v3/vendor",
+        "previews/v3-physics.html",
+        "previews/v3-physics.js"
+      ]
+    },
+    {
+      "name": "story",
+      "ref": "origin/agents/v3-story-k7m29",
+      "paths": [
+        "night-shift-v3/story",
+        "previews/v3-story.html"
+      ]
+    }
+  ]
+}
