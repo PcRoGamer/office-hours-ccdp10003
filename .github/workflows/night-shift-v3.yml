@@ -301,7 +301,9 @@ jobs:
         working-directory: staging
         run: node ../release-harness/qa/v3-release-composition.test.mjs
       - name: Build a single-canvas interactive visual rehearsal, not a product release
-        run: cp release-harness/previews/v3-release-composition.html staging/previews/v3-release-composition.html
+        run: |
+          mkdir -p staging/previews
+          cp release-harness/previews/v3-release-composition.html staging/previews/v3-release-composition.html
       - name: Install Chromium for real source-composed visual QA
         run: |
           npm --prefix release-harness install --no-save playwright@1.58.2
