@@ -31,3 +31,21 @@ Inspected actual screenshots, not generated art. First narrow build overlapped B
 **Not yet the HD artistic acceptance floor:** this standalone procedural robot has dramatic composition and correct real gestures, but HD's character performance and authored audio may exceed it. LEAD/ART/AUDIO should review side by side in their integrated shell. This PR does not claim score composition, final receipt, licensed full soundtrack, actual Planck contact impulses or public Pages QA. Integration should use PHYSICS's Planck.js body/contact adapter for packet trajectories if it improves feel, preserving manual ID semantics; current self-contained preview uses authored pointer/kinematic delivery, not a fake claim of Planck integration. Time Bank and staff/perk inputs require the director's authoritative ledger validation before release. Boss timings are designed for human interaction but only automated pointer-perfect timings were measured, so 75–110s first-human-clear target needs human playtesting.
 
 **Merge/accept only** after running the actual HD side-by-side boss screenshots, completing all director/SYSTEMS ledger integration and audio/physics review, checking a full campaign, and verifying the five required viewport sizes. Keep HD public fallback untouched.
+
+
+## Continuation: save-state recovery, provenance and screenshot state (8 Nov 2026)
+
+A resumed game may pass existing `quotaBonusPacketOutcomes`, `quotaBoltsRemoved` and `quotaPressure` on `context.run`. The boss now hydrates existing packet outcomes, resumes the correct remaining counter phase, skips already resolved optional choices and refuses input after completion. Previously, reconstructing phase I with an already committed packet could re-offer a spent packet or strand a player in a missing bonus state. These paths are now independently regression-tested.
+
+Events now include a unique deterministic `id` based on the run/encounter/event/object, plus `runId`, `encounterId`, `attemptId`, `committed:false` and immutable per-action evidence. **SYSTEMS still owns idempotent commits**; this scene never directly updates shared corporate or people scores. Restored bonus points in `snapshot()` are derived from committed bonus outcomes, not newly emitted credits. The host must validate restore snapshots and ledger IDs across reload and tampering boundaries.
+
+The renderer now exposes an on-screen drag trajectory, pressurised face deformation and background details. Centered header typography was reduced and the phase label shifted upward after inspecting the 650×800 screenshot.
+
+Re-verified in local checkout:
+- `node qa/v3-quota.test.mjs`: **15/15 PASS**, including restored phase I and phase III, restored three-bolt CLOCK OUT, stable event IDs and old 0–4-filed full boss routes.
+- `python qa/v3-quota.e2e.py`: Chromium mouse-driven mixed FILE/COOL/FILE/COOL full boss, **3 bolts, 4 uniquely resolved packets, exactly +10 Corporate, pressure 0, one boss-complete, zero uncaught JS exceptions**.
+- `python qa/v3-quota.browser.py`: actual Chromium 1080p, 3440×1440 ultrawide, 650×800 narrow and DPR2 3840×2160 canvas captures. Each screenshot is taken after the actual `bonus` state starts, instead of a brittle fixed wait. All **4/4** correctly show bonus state and **0** page exceptions.
+
+The browser scripts use in-memory injection of the same exact ES module text because ordinary local URL navigation is restricted here. No ordinary HTTP production-path verification was claimed. The HTML preview remains an actual runnable native ES module entry point. Full HD visual side-by-side acceptance, shared Planck contact physics, AUDIO music, SYSTEMS ledger integration and first-time human playtime remain outstanding release gates. Do not merge this draft as release-ready based on smoke tests alone.
+
+Latest relevant commits: `a281b8f5c94e2e57ccaa8b156e1c26b0cf7831f5` (game logic and visuals), `9e4cc2cb7a41a0fd46bd3560782f1bcfd2f0949c` (recovery tests), `04f2665e325327a2f6cf1e98b7974f12999c3d3a` (portable synchronized browser captures).
