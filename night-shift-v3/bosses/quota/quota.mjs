@@ -46,6 +46,10 @@ export function createQuotaBoss(context={}){
   const sheetAt=()=>pt(.21,.8);
   const gearAt=()=>pt(.5+targetOffset,.39);
   const stripAt=()=>pt(.25,.70);
+  function fly(kind,from,to){
+    packetFlights.push({kind,from:{...from},to:{...to},life:.72,duration:.72});
+    if(packetFlights.length>12)packetFlights.shift();
+  }
   const stripTo=()=>pt(.25,.55);
   const popupAt=()=>pt(adsRemaining>1?.53:.66,adsRemaining>1?.51:.47);
   const popupTo=()=>pt(.84,.70);
@@ -71,7 +75,11 @@ export function createQuotaBoss(context={}){
     // Only the currently offered packet may be resolved. No hidden fifth packet.
     if(key!==currentBonus())return false;
     bonus[key]=choice;
-    if(choice==='file')pressure=CLAMP(pressure+1,0,2);
+    if(choice==='file'){
+      pressure=CLAMP(pressure+1,0,2);
+      fly('file',packetAt(),pt(.5,.32));
+    }
+    if(choice==='cool')fly('cool',packetAt(),pt(.78,.42));
     if(choice==='cool'){pressure=CLAMP(pressure-1,0,2);coolWindow+=.75;}
     emit('quota-bonus-resolved',{objectId:key,outcome:choice,delta:choice==='file'?5:0,synthetic:false});
     tell(REACTIONS[choice],2.1);shake=choice==='file'?.42:.12;
@@ -178,10 +186,10 @@ export function createQuotaBoss(context={}){
       if(gateSeconds>0){if(perkLevel(context,'safety-net')&&!safetyUsed){safetyUsed=true;gateSeconds=0;tell('SAFETY NET DEPLOYED! RE-THROW YOUR PACKET.');}else tell('PRESSURE GATE! WAIT FOR THE BARRIER TO RETRACT.');return false;}
       const radius=directive==='FAST OR SAFE'?(openElapsed<1.15?42:100):Math.max(62,Math.min(W()*.08,100));
       const landing=near(p,t.gear,radius);
-      if(landing){packetFlights.push({life:.7,x:t.counter.x,y:t.counter.y});return counterHit();}
+      if(landing){fly('counter',t.counter,t.gear);return counterHit();}
       // Bank Shot gives an alternate right-bumper ricochet route with a physically indicated target.
       const bumper=pt(.82,.47);
-      if(perkLevel(context,'bank-shot')&&near(p,bumper,80)){packetFlights.push({life:.7,x:bumper.x,y:bumper.y});return counterHit();}
+      if(perkLevel(context,'bank-shot')&&near(p,bumper,80)){fly('bank',t.counter,bumper);fly('counter',bumper,t.gear);return counterHit();}
       counterMiss();return false;
     }
     if(key==='stamp'&&mode==='clockout'&&near(p,t.stampTo,130)){
@@ -286,6 +294,25 @@ export function renderQuota(c,v,s,fx){
   }
   if(s.mode==='counter-hit'){
     const p=Math.min(60,fx.beam*40%80);c.strokeStyle='#f5cc6d';c.lineWidth=7;c.beginPath();c.arc(x,H*.39,65+p,0,Math.PI*2);c.stroke();
+    // A shower of jagged paper-and-bolt fragments radiates from the damaged gear.
+    c.save();for(let n=0;n<14;n++){
+      const a=n*2.3999632297,rad=20+(1-Math.min(1,s.timer/1.2))*110;
+      c.save();c.translate(x+Math.cos(a)*rad,H*.39+Math.sin(a)*rad*.65);
+      c.rotate(a+fx.beam*4);c.fillStyle=n%3?'#f8d68f':'#e77b64';c.fillRect(-5,-3,12,6);c.restore();
+    }c.restore();
+  }
+  // Explicit packet travel: work enters the machine, while COOL goes into its pipes.
+  // Physics contact scoring stays external; this is bounded impact-followthrough animation.
+  for(const f of fx.packetFlights){
+    const alpha=Math.max(0,1-f.life/f.duration),ease=1-Math.pow(1-alpha,2);
+    const px=f.from.x+(f.to.x-f.from.x)*ease,py=f.from.y+(f.to.y-f.from.y)*ease-Math.sin(alpha*Math.PI)*H*.095;
+    c.save();c.globalAlpha=Math.min(1,f.life*3);c.translate(px,py);c.rotate(alpha*2.3);
+    round(c,-24,-18,48,36,5,f.kind==='cool'?'#91e5c9':'#f8e0a5','#263d43',3);
+    c.fillStyle=f.kind==='cool'?'#1b6e68':'#cb5b42';c.fillRect(-14,-12,9,24);
+    c.restore();
+    if(f.kind==='cool'){
+      for(let j=0;j<3;j++){c.fillStyle='#9deacf77';c.beginPath();c.arc(px+(j-1)*13,py-24-j*11,5+j*2,0,Math.PI*2);c.fill();}
+    }
   }
   if(fx.context?.run?.licences?.jules||s.directive==='MANDATORY COLLABORATION'){round(c,W*.865,H*.15,W*.095,H*.09,10,'#1b5454','#a9d3a8',2);label(c,'JULES',W*.912,H*.187,Math.min(W*.018,16),'#e9f5d7');}
   // Boss body pressure meter with actual outcome, no global score mutation.
