@@ -1,5 +1,7 @@
 # QUOTA PANIC: NIGHT SHIFT v3 | instructions for all AI collaborators
 
+**NO BLOCKER DUMPS:** Failed tests, integration problems and missing dependencies are agent-owned work, not questions for the user. Diagnose and fix inside your lane; route cross-lane issues through GitHub and continue independent implementation. User-facing updates should show delivered results, not technical obstacle lists. Never disguise incomplete work or skip a real approval boundary. [Full policy](coordination/AUTONOMY_POLICY.md#no-blocker-dumps-to-the-user-own-route-resolve).
+
 **DELEGATED JUDGMENT:** You are responsible for solving technical uncertainties, not delegating them back to the user. Make informed, reversible choices, implement and test; do not ask the user to arbitrate unfamiliar tooling, architecture or debugging options. Escalate only true authorization/irreversible boundaries or a genuine conflict of user objectives. See [the decision/escalation test](coordination/AUTONOMY_POLICY.md#delegated-technical-judgment-decide-build-prove).
 
 **AUTONOMOUS BY DEFAULT:** [coordination/AUTONOMY_POLICY.md](coordination/AUTONOMY_POLICY.md) is binding for every agent. Do not ask routine clarifications or permission to continue; execute reversible development, tests, inspection, fixes, commits and draft PRs without waiting for the user. Stop only at real authorization or irreversible boundaries. Chats do not run in the background after a turn; leave executable handoff state.
