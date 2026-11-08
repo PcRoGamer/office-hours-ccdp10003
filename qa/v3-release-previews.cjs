@@ -12,7 +12,7 @@ const lane=process.env.PREVIEW_LANE||'unknown';
 const preview=process.env.PREVIEW_PATH;
 const base=process.env.TEST_BASE_URL||'http://127.0.0.1:4173/';
 assert(/^[a-z][a-z0-9-]*$/.test(lane),'Unsafe lane name');
-assert(/^previews\/v3-[a-z-]+\.html$/.test(preview||''),'Preview path missing');
+assert(/^previews\/v3-[a-z0-9-]+\.html$/.test(preview||''),'Preview path missing');
 assert(fs.existsSync(preview),'Actual candidate preview file is missing');
 const evidence=path.resolve(process.env.PREVIEW_OUT||'qa-artifacts/v3-release-previews');
 fs.mkdirSync(evidence,{recursive:true});
