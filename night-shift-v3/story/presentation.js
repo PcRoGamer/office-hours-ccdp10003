@@ -39,9 +39,9 @@ function drawDemo(canvas,id,t,level=1){
 
 export function createStoryExperience({host,audio,reduceMotion=false}={}){
  if(!(host instanceof HTMLElement))throw new TypeError('Story host must be an HTMLElement');
- host.classList.add('ns-story');let frame=0,continueTimer=0,mode=null,closing=false;
+ host.classList.add('ns-story');let frame=0,continueTimer=0,visibilityResume=null,mode=null,closing=false;
  function stop(){if(frame)cancelAnimationFrame(frame);frame=0}
- function clear(){stop();if(continueTimer){window.clearTimeout(continueTimer);continueTimer=0}host.replaceChildren();host.hidden=true;mode=null;closing=false}
+ function clear(){stop();if(continueTimer){window.clearTimeout(continueTimer);continueTimer=0}if(visibilityResume){document.removeEventListener('visibilitychange',visibilityResume);visibilityResume=null}host.replaceChildren();host.hidden=true;mode=null;closing=false}
  function startDemo(){if(reduceMotion||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){host.querySelectorAll('[data-demo]').forEach(x=>drawDemo(x,x.dataset.demo,0,Number(x.dataset.demoLevel)||1));host.querySelectorAll('[data-promotion-cast]').forEach(x=>drawPromotionCast(x,Number(x.dataset.promotionCast),0));host.querySelectorAll('[data-clockout-cast]').forEach(x=>drawClockoutScene(x,0,true));return}const tick=now=>{host.querySelectorAll('[data-demo]').forEach(x=>drawDemo(x,x.dataset.demo,now/1000,Number(x.dataset.demoLevel)||1));host.querySelectorAll('[data-promotion-cast]').forEach(x=>drawPromotionCast(x,Number(x.dataset.promotionCast),now/1000));host.querySelectorAll('[data-clockout-cast]').forEach(x=>drawClockoutScene(x,now/1000,false));if((mode==='promotion'&&!closing)||mode==='receipt')frame=requestAnimationFrame(tick)};frame=requestAnimationFrame(tick)}
  function renderPromotion({index,run={},offers,directive,onPick=()=>{},onContinue=()=>{}}){
   const ids=validateOffers(offers);const m=promotionNarrative({index,run,directive});clear();mode='promotion';host.hidden=false;
@@ -54,7 +54,7 @@ export function createStoryExperience({host,audio,reduceMotion=false}={}){
    audio?.play?.('promotion-choose',{perkId,index});
    try{onPick({perkId,index,directive});}catch(error){closing=false;buttons.forEach(btn=>{btn.disabled=false;btn.classList.remove('ns-chosen')});throw error}
    stop();const notice=$('div','ns-announcement');notice.setAttribute('role','status');notice.innerHTML=`<span>BOARD RESOLUTION ${String(index).padStart(2,'0')}</span><strong>${escapeHtml(m.directive?.headline??'UPGRADE APPROVED')}</strong><p>${escapeHtml(m.directive?.hint??'Your new equipment has been allocated.')}</p><div class="ns-machine-install" aria-hidden="true"><span class="ns-install-module">▤</span><span class="ns-install-impact">✸</span><span class="ns-install-rig">▥ QUOTA PART ${String(index).padStart(2,'0')} / 05</span></div><div class="ns-announcement-bar"></div>`;article.append(notice);
-   const done=()=>{if(mode!=='promotion'||host.firstElementChild!==article||!closing)return;clear();onContinue({index,perkId,directive})};
+   const done=()=>{if(mode!=='promotion'||host.firstElementChild!==article||!closing)return;if(document.hidden){if(!visibilityResume){visibilityResume=()=>{if(!document.hidden){document.removeEventListener('visibilitychange',visibilityResume);visibilityResume=null;done()}};document.addEventListener('visibilitychange',visibilityResume)}return}clear();onContinue({index,perkId,directive})};
    notice.addEventListener('click',done,{once:true});continueTimer=window.setTimeout(done,(reduceMotion||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)?350:1650);
   }));startDemo();return article;
  }
