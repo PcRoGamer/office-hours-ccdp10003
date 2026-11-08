@@ -1,19 +1,19 @@
 """Fast real-Chromium regression: scoring evidence, false-chart reversion, fullscreen.
 Run from the repository root: python qa/v3-pr.regression-browser.py
-Uses the exact local scene source in an inline browser document when policy blocks URLs.
+Uses real native browser ES modules with data: import URLs, not a flattened script.
 """
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-import re, os, json
+import os, json, base64
 ROOT=Path(__file__).resolve().parent.parent
 OUT=ROOT/'qa'/'v3-pr-screenshots'
 OUT.mkdir(exist_ok=True)
 html=(ROOT/'previews'/'v3-pr.html').read_text()
-drawing=(ROOT/'night-shift-v3/scenes/pr/drawing.js').read_text().replace('export const C','const C').replace('export function ','function ')
+def uri(source):return 'data:text/javascript;base64,'+base64.b64encode(source.encode('utf-8')).decode('ascii')
+drawing=(ROOT/'night-shift-v3/scenes/pr/drawing.js').read_text()
 scenes=(ROOT/'night-shift-v3/scenes/pr/index.js').read_text()
-scenes=re.sub(r'^import .*?;\n','',scenes,flags=re.M).replace('export const definitions','const definitions').replace('export default definitions;','')
-html=re.sub(r"import \{definitions\} from '../night-shift-v3/scenes/pr/index.js';",'',html)
-html=html.replace('<script type="module">','<script type="module">\n'+drawing+'\n'+scenes+'\n')
+scenes=scenes.replace("from './drawing.js'", "from '"+uri(drawing)+"'")
+html=html.replace("from '../night-shift-v3/scenes/pr/index.js'", "from '"+uri(scenes)+"'")
 results=[]
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,executable_path=os.getenv('CHROMIUM_BIN','/usr/bin/chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
