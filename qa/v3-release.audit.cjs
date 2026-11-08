@@ -124,7 +124,9 @@ async function browser(candidate){
      const vp=first.viewport;
      const point={x:220*vp.scale+vp.ox,y:605*vp.scale+vp.oy};
      await page.mouse.click(point.x,point.y);
-     await page.waitForTimeout(300);
+     // Let the first conveyor actually introduce its tactile targets.
+     // 300ms captured a misleading, near-empty transition frame.
+     await page.waitForTimeout(1800);
      const after=await page.evaluate(()=>window.__officeArcade.snapshot());
      test(after.screen==='play','HD CLOCK IN reaches live playable card',{screen:after.screen});
      await page.screenshot({path:path.join(DIR,'incumbent-first-card-1440x900.png'),fullPage:false});
