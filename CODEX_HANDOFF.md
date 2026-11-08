@@ -16,6 +16,15 @@ Authoritative target: a polished, self-contained CCDP10003 Project 2 vertical sl
 
 **Lore preservation QA gate:** Finch's promotions and directives are visibly causal; the machine gains actual parts; both Mira and Jules are distinct and materially responsive; playful corporate manipulation remains clear; filed boss packets strengthen the machine and increase Corporate score while coolant opens a safer route; final two accurately computed scoring lenses retain the established witty responses. QA must separately measure fun, clarity, source-link access, rubric criteria, narrative continuity and toy-like feel of at least three distinct interactable props before score/upgrade feedback. Full Game Design Canvas submission is a playable URL, not ZIP. Due 9 November 2026 11:59pm Melbourne, per synced Canvas; verify current status before submission.
 
+## FINAL COURSE-MATERIAL PREFLIGHT, SOURCE FILES AND ORIGINAL DNA
+Read **all five exact in-repo files** before coding: [design/COURSE_ALIGNMENT_PREFLIGHT.md](design/COURSE_ALIGNMENT_PREFLIGHT.md), [design/CCDP_P2_GAME_RESEARCH.md](design/CCDP_P2_GAME_RESEARCH.md), [design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md](design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md), [design/first-shift/contract.json](design/first-shift/contract.json), and [design/NIGHT_SHIFT_GDD_V3_REFERENCE.md](design/NIGHT_SHIFT_GDD_V3_REFERENCE.md). Run `python3 design/first-shift/validate_scope.py` as the initial DESIGN-SCOPE-only check. These are **NOW PRESENT IN THIS BRANCH**. The GDDs are annotated with precedence; **First Shift beats full Night Shift on content scope, and Course Alignment/Research override older GDD essay/gamification framing**.
+
+The actual earlier Project 1.1/1.2 instructor feedback identifies the game's original successful core: **precise mouse control while live on-screen interruptions create chaos**; direct participation that makes the viewer experience the game; and a warning that explanatory endings broke the experience. Retain that as the signature alongside Dumb Ways to Die × Brotato × Job Simulator. **A popup-only microgame I3 is not enough:** integrate fair, clearly legible interruptions during at least two separate physical task departments, with genuine signed help and scam distractions and no input stealing. These must be proven using actual game input and recorded frames. Preserve the cast, Promotion Trap and corporate satire, not merely the visual backdrop.
+
+The 22 Oct CCDP Project 2 lecture stresses playable *form*, pacing contrast, novelty, foreshadowing, meaningful rewards, player agency and experimentation. Cross-check these in actual runs. **Why this game / why now / why it matters** and a concise sourced creator position must be naturally demonstrated during the early interactive tutorial. A sources drawer alone is insufficient. Keep text brief and credible, using the actual user's expressed design aim rather than inventing biography. The game must stay rewarding and fun with scores hidden. The marking criteria are equally weighted 25/25/25/25, and the public playable URL must be submitted to Canvas Project 2 by 9 Nov 2026 11:59 pm AEDT unless current Canvas says otherwise.
+
+**Important evidence boundary:** UniSync had cached course text/transcripts and instructor feedback, but some guest-lecture slides were unavailable. Do not claim exhaustive viewing of inaccessible slides or videos. The current First Shift docs are SPECIFICATIONS, not gameplay builds. A passing design validator does not prove actual art, interaction, play, assignment submission, rubric mark or browser tests.
+
 ## DO THIS, DON'T ASK FOR ANOTHER PLAN
 You are the producer, technical director and accountable integrator. Execute end to end: read actual source; preserve baseline; implement game; run Playwright; visually inspect screenshots/video; correct defects; rerun QA; verify public candidate URL; report real results. Do not offload testing or obvious decisions to the user. If subagents are available, delegate safely; otherwise do separated independent reviews yourself. No false agent runs, file edits, builds, browser results or submission receipts. Ask only for credentials/permission or irreversible actions.
 
@@ -70,16 +79,16 @@ Read https://github.com/Donchitos/Claude-Code-Game-Studios as actual source. Ado
 
 ## BUILD ORDER AND EVIDENCE GATES
 T00 Baseline: record HEAD, dirty worktree, original URLs, snapshot/rollback, verify old QA.
-T01 Read-source archaeology + official Canvas rubric + TWO primary-game case studies in design/CCDP_P2_GAME_RESEARCH.md + CCGS roles + asset rights. In parallel read-only.
+T01 Read-source archaeology + official Canvas Project 2 and previous Project 1.1/1.2 qualitative feedback in design/COURSE_ALIGNMENT_PREFLIGHT.md + THREE direct game case studies (DWTD/Brotato/Job Simulator) and Papers, Please as lore in design/CCDP_P2_GAME_RESEARCH.md + CCGS roles + asset rights. In parallel read-only.
 T02 Isolated boot: first-shift.html working, high-DPI pointer mapping, sound/pause, **real I1 pointer-play** + screenshots.
 T03 Deterministic ledger/scoring/perks/directive data model, idempotent commit. Unit/property tests.
-T04 Intake I1/I3 and honest real/scam notifications.
+T04 Intake I1/I3 and honest real/scam notifications. Establish a reusable fair interruption mechanic, not merely a separate popup minigame; demonstrate it during actual precision play in at least two departments.
 T05 Four promotion screens, six perk effects, three build families, all four directive adapters.
 T06 Services S1/S2 and meaningful route/coffee consequences, initial draft perk activation.
 T07 PR P1/P4, corrected scale and verified headline/context downstream branching.
 T08 Staff T1/T4, rescue count, $80 conservation and identity-based technical assistance.
 T09 Three-phase final boss + all 16 packet patterns, fair countershot, mandatory player actions.
-T10 Clock Out physical finale, two real score lenses, credited DWTD/Brotato source drawer, contemporary gamification sources and real replay.
+T10 Clock Out physical finale, two real score lenses, credited Dumb Ways to Die, Brotato and Job Simulator gameplay research with Papers, Please narrative credit and optional social-context sources, plus real replay. Avoid a compulsory explanatory ending.
 T11 Art/audio/UX ongoing concurrently, but visual QA each integration, not after all cards.
 T12 Independent adversarial functional, rubric, art and gameplay red-team; fix and rerun.
 T13 Public candidate link, GitHub Pages subpath asset verification, preserved all older routes, rollback.
@@ -92,7 +101,7 @@ Do not call T00–T14 complete from prose. Record commands, exits, source SHA, s
 - Use real mouse/touch interaction for a complete clean-storage first-clear from title through final replay. State seeding acceptable only in independent targeted edge tests, never as sole full-campaign proof.
 - E2E verifies all eight cards and all three boss bolts, all four directives, actual perks triggered, three synergy builds, all 3 licence-count outcomes (and identities), 16 packet masks, pause/resume/reload/retry idempotence, no JS errors, realistic clock behavior.
 - Capture and *look at* title, four departments, draft, all directive versions, all boss phases, ending at four viewports, with before/after evidence. Fix legibility, sprite size, spacing, clipped controls, click transforms, animation clarity. Record measured time/fps/interaction and no invented human playtest feedback.
-- Validate directly against university rubric's four equally weighted 25-point criteria (engagement with topics/game strategies; critical gaming culture; inventiveness; clarity) with TWO OR MORE real playable examples each. If sourced course rubric differs, use actual rubric. Research is three short genuine links and optional in-context intermission notes; no mandatory lecture, final quiz or AI declaration. Never invent student biography.
+- Validate directly against university rubric's four equally weighted 25-point criteria (engagement with topics/game strategies; critical gaming culture; inventiveness; clarity) with TWO OR MORE real playable examples each. If sourced course rubric differs, use actual rubric. Research includes three direct gameplay case studies (Dumb Ways to Die, Brotato, Job Simulator) plus optional Papers, Please narrative/philosophy credit. Sources and the *why* appear as a tiny natural part of actual early tutorial play, not a forced lecture, final quiz or AI declaration. Never invent student biography.
 - The final build must be **more enjoyable and polished** than V3/Night Shift HD, not merely longer. Compare real frames and mechanics against those incumbents; reject cosmetic improvements that harm clarity.
 - Automated design contract check is NOT gameplay QA. A Playwright green result without screenshot inspection is NOT visual QA. A simulated input without a rendered game is NOT playtesting.
 
