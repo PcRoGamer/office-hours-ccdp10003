@@ -28,7 +28,7 @@ export function createQuotaBoss(context={}){
   let msg='CONGRATULATIONS. YOUR PRODUCTIVITY HAS BECOME SELF-SUSTAINING.';
   let result='', introShown=false, counterReady=false, doubleVerified=false;
   let phase3Second=false, routeDone=false, latchDone=false, aidUsed={};
-  let targetOffset=0, gateSeconds=0, openElapsed=0, adsRemaining=1, safetyUsed=false, timeBankSpent=0;
+  let targetOffset=0, gateSeconds=0, openElapsed=0, adsRemaining=1, safetyUsed=false, timeBankSpent=0, timeBankActivated=false;
   const id=context.run?.runId||`quota-preview-${context.run?.seed??0}`;
   const directive=normalizeDirective(context.run?.currentDirective?.id||context.run?.currentDirective||context.options?.directive||'DOUBLE ENTRY');
   const prefs={motion:context.options?.reducedMotion||false};
@@ -121,7 +121,9 @@ export function createQuotaBoss(context={}){
     else if(phase===3){mode='latch';timer=0;}
     tell('MISSED THE GEAR. RE-OPEN THE FEEDER.',1.6);
   }
-  function applyAid(kind){if(supportUsed)return false;
+  function applyAid(kind){
+    // Assistance is a visible rescue action, not a free event during bonus, intro or victory.
+    if(supportUsed||(kind==='mira'&&!['ads','opening'].includes(mode))||(kind==='jules'&&mode!=='opening'))return false;
     if(kind==='mira'&&!(context.run?.licences?.mira||perkLevel(context,'mira-backup')))return false;
     if(kind==='jules'&&!(context.run?.licences?.jules||directive==='MANDATORY COLLABORATION'))return false;
     supportUsed=true;if(mode==='opening')timer+=kind==='jules'?.75:.45;
@@ -129,7 +131,7 @@ export function createQuotaBoss(context={}){
     tell(`${kind.toUpperCase()} ACTUALLY HELPED!`,1.8);
     emit('boss-assist',{objectId:`quota:${kind}:phase${phase}`,outcome:'activated',synthetic:false});return true;
   }
-  function scan(){if(!perkLevel(context,'focus-lens')||scanUsed)return false;scanUsed=true;tell(`FOCUS LENS: ${mode==='ads'?'RIGHT-HAND NOTICE IS FAKE':'GEAR OPENS AFTER THE STRIPE'}`,2.3);return true;}
+  function scan(){if(!perkLevel(context,'focus-lens')||scanUsed||!['ads','telegraph','recovery','route','latch','opening'].includes(mode))return false;scanUsed=true;tell(`FOCUS LENS: ${mode==='ads'?'RIGHT-HAND NOTICE IS FAKE':'GEAR OPENS AFTER THE STRIPE'}`,2.3);return true;}
   function update(dt){
     if(!Number.isFinite(dt)||dt<=0||mode==='complete'||mode==='paused')return;
     dt=CLAMP(dt,0,.05);activeTime+=dt;clock+=dt;slash=Math.max(0,slash-dt);shake=Math.max(0,shake-dt);beam+=dt;
@@ -202,7 +204,16 @@ export function createQuotaBoss(context={}){
   function cancelPointer(){drag=null;}
   function snapshot(){return Object.freeze({bossId:'B2',runId:id,phase:Math.min(phase,3),mode,phaseName:PHASES[Math.min(phase,3)-1].name,pressure,bonusOutcomes:{...bonus},gateSeconds,openElapsed,adsRemaining,bonusFiled:Object.values(bonus).filter(x=>x==='file').length,bonusCorporatePoints:Object.values(bonus).filter(x=>x==='file').length*5,boltsRemoved:bolts,activeTimeMs:Math.round(activeTime*1000),clockSeconds:clock,timer:Math.max(0,timer),directive,routeDone,latchDone,doubleVerified,counterReady,printed,dragged:drag?.key||null,targets:targets(),events:events.slice()});}
   function draw(c,v=context.viewport){renderQuota(c,v,snapshot(),{drag,msg,slash,shake,beam,hearts,packetFlights,phase3Second,prefs,context});}
-  return {enter(){},update,draw,pointerDown,pointerMove,pointerUp,cancelPointer,snapshot,dispose(){drag=null;packetFlights=[];},activateAssist:applyAid,scan,useTimeBank(seconds){if(mode!=='opening'||timeBankSpent>=3)return false;const take=Math.min(3-timeBankSpent,3,Math.max(0,Number(seconds)||0));if(!take)return false;timeBankSpent+=take;timer+=take;emit('time-bank-spent',{objectId:`quota:time-bank:${phase}`,delta:take,synthetic:false});tell('TIME BANK SPENT. OPENING HELD!',1);return true;}};
+  return {enter(){},update,draw,pointerDown,pointerMove,pointerUp,cancelPointer,snapshot,dispose(){drag=null;packetFlights=[];},activateAssist:applyAid,scan,useTimeBank(seconds){
+    const level=perkLevel(context,'time-bank'),cap=level>=2?3:2;
+    const reserve=Number(context.run?.timeBankReserve??context.run?.timeBankSeconds??0);
+    if(mode!=='opening'||!level||timeBankActivated||!Number.isFinite(reserve)||reserve<=timeBankSpent||timeBankSpent>=cap)return false;
+    const take=Math.min(cap-timeBankSpent,Math.max(0,reserve-timeBankSpent),Math.max(0,Number(seconds)||0));
+    if(!Number.isFinite(take)||take<=0)return false;
+    timeBankSpent+=take;timeBankActivated=true;timer+=take;
+    emit('time-bank-spent',{objectId:`quota:time-bank:${phase}`,delta:take,synthetic:false});
+    tell('TIME BANK SPENT. OPENING HELD!',1);return true;
+  }};
 }
 export const definitions=[{id:'B2',department:'boss',imperative:'BREAK THE QUOTA!',create:createQuotaBoss}];
 
