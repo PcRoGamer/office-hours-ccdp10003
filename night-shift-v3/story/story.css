@@ -149,3 +149,31 @@
  .ns-copy{margin:13px 0 7px}
  .ns-attachment{min-height:58px}
 }
+
+
+/* Clock-out quality pass: let the characters and fallen machine carry the visual punchline. */
+.ns-end-theatre{position:relative;display:flex;align-items:center;justify-content:center;min-height:470px;width:100%;overflow:hidden}
+.ns-end-theatre canvas{display:block;width:100%;height:auto;max-height:490px;aspect-ratio:500/490;object-fit:contain}
+.ns-end-theatre .ns-big-stamp{position:absolute;bottom:28px;left:50%;transform:translateX(-50%) rotate(-9deg);font-size:clamp(29px,3.2vw,46px);padding:11px 25px;border-width:6px;background:#142d2bed;box-shadow:4px 8px 0 #0a2222;animation:ns-stamp-over-scene .55s cubic-bezier(.22,1.15,.33,1) both;white-space:nowrap;z-index:2}
+.ns-end-theatre .ns-big-stamp span{font-size:23px;right:-17px;bottom:-12px;padding:2px 7px}
+@keyframes ns-stamp-over-scene{0%{opacity:0;transform:translate(-50%,-185px) rotate(-25deg) scale(1.18)}65%{opacity:1;transform:translate(-50%,11px) rotate(-8deg) scale(.96)}100%{transform:translate(-50%,0) rotate(-9deg) scale(1)}}
+@media(max-width:800px){.ns-end-theatre{min-height:290px}.ns-end-theatre canvas{max-height:360px}.ns-end-theatre .ns-big-stamp{font-size:30px;bottom:12px;padding:8px 22px}}
+@media(max-width:520px){.ns-end-theatre{height:175px;min-height:175px;max-height:175px}.ns-end-theatre canvas{height:175px;width:auto;max-width:100%}.ns-end-theatre .ns-big-stamp{font-size:22px;padding:6px 19px;bottom:2px}}
+@media(prefers-reduced-motion:reduce){.ns-end-theatre .ns-big-stamp{animation:none;transform:translateX(-50%) rotate(-9deg)}}
+
+/* First-frame phone usability: keep flip/details/replay visible while receipt scrolls independently. */
+@media(max-width:800px){
+ .ns-panel.ns-end{display:flex;flex-direction:column;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden}
+ .ns-end-top{flex:0 0 auto;order:0}
+ .ns-end-center{flex:1 1 auto;order:1;min-height:0;overflow:auto;overscroll-behavior:contain;align-content:start;align-items:start}
+ .ns-end-source{order:2;flex:0 0 auto;padding:5px 12px 6px;border-top:1px solid #5e897c}
+ .ns-end-source .ns-source{margin:0}
+ .ns-end-actions{order:3;flex:0 0 auto;z-index:3;padding:9px 12px;gap:6px;background:#1d4640;border-top:2px solid #a8aa74;box-shadow:0 -8px 18px #06171680}
+ .ns-end-actions button{min-height:46px}
+}
+@media(max-width:520px){
+ .ns-end-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ .ns-end-actions button{min-width:0;padding:8px 5px;line-height:1.25;font-size:10px}
+ .ns-end-actions button[data-replay]{grid-column:1/-1;min-height:48px;background:#e9b762;font-size:13px}
+ .ns-receipt{margin-bottom:10px}
+}
