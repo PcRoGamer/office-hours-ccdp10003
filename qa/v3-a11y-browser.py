@@ -3,6 +3,7 @@
 Run: python qa/v3-a11y-browser.py [base_url]
 """
 import json
+import os
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -30,7 +31,7 @@ def check(condition, text):
     print('PASS '+text,flush=True)
 
 def capture(page, name):
-    page.screenshot(path=str(OUT / name), animations='disabled', full_page=True)
+    page.screenshot(path=str(OUT / name), animations='disabled', full_page=True, timeout=12000)
 
 def browser_run(browser, width, height, dpr, label, smoke=False):
     ctx = browser.new_context(viewport={'width':width,'height':height}, device_scale_factor=dpr,has_touch=True)
@@ -106,12 +107,71 @@ def browser_run(browser, width, height, dpr, label, smoke=False):
     check(snap(page)['status']=='victory',f'{label}: produces end state after 3 actual actions')
     capture(page,f'{label}-victory.png')
     check(not errors and not failed,f'{label}: no JS exceptions or failed resources; errors={errors}; requests={failed}')
+    check(snap(page)['a11y']['held'] is None, f'{label}: timed hold leaves no stale virtual pointer')
+    # Replay must reset all run state and retain settings without re-awarding.
+    btn.click()
+    page.get_by_label('Prefer Practice Shift on next clock-in').uncheck()
+    page.get_by_role('button',name='RETURN TO THE SHIFT').click()
+    page.get_by_role('button',name='CLOCK IN AGAIN').click()
+    s=snap(page)
+    check(s['status']=='play' and s['stage']==0 and s['completed']==[] and s['pts']==0 and not s['practice'] and s['remaining']<=18,
+          f'{label}: replay resets committed progress and honors explicitly changed Standard mode')
+    # A dialog must pause the same gameplay timer, not silently use wall-clock.
+    btn.click()
+    t=snap(page)['remaining']
+    page.wait_for_timeout(550)
+    check(snap(page)['paused'] and abs(snap(page)['remaining']-t)<0.08, f'{label}: options freeze the gameplay clock')
+    page.get_by_label('Switch-step choices (Space / Enter)').check()
+    page.get_by_role('button',name='RETURN TO THE SHIFT').click()
+    check(not snap(page)['paused'] and page.evaluate('document.activeElement.id')=='stage',
+          f'{label}: closing dialog resumes and focuses game instead of trapping switch users on OPTIONS')
+    before=snap(page)['a11y']['selectedId']
+    page.keyboard.press('Space')
+    after=snap(page)['a11y']['selectedId']
+    check(before != after and snap(page)['completed']==[], f'{label}: Space changes switch selection without auto-completing a target')
+    page.keyboard.press('Space')
+    page.keyboard.press('Enter')
+    check(snap(page)['completed']==['STAMP GOOD!'],f'{label}: switch controls manually stamp the selected form')
+    page.wait_for_function("window.__nightShiftA11yPreview.snapshot().stage===1",timeout=6000)
+    # Drag entirely by keyboard, with a genuine cancel then a deliberate drop.
+    page.keyboard.press('Enter')
+    check(snap(page)['a11y']['held']['kind']=='drag',f'{label}: keyboard picks up filing object through scene pointerDown')
+    page.keyboard.press('Shift+ArrowRight')
+    page.keyboard.press('Escape')
+    s=snap(page)
+    check(s['a11y']['held'] is None and s['grab'] is None and not s['paused'] and s['completed']==['STAMP GOOD!'],
+          f'{label}: Escape cancels drag without accidentally pausing or awarding progress')
+    page.keyboard.press('Enter')
+    vp=snap(page)['viewport']
+    import math
+    spread=125 if vp['worldWidth']<750 else 235
+    step=120*vp['worldWidth']/vp['cssWidth']
+    for _ in range(math.ceil(2*spread/step)):
+        page.keyboard.press('Shift+ArrowRight')
+    check(snap(page)['completed']==['STAMP GOOD!'],f'{label}: moved folder is not rewarded before manual release')
+    page.keyboard.press('Enter')
+    check('FILE THE EVIDENCE!' in snap(page)['completed'], f'{label}: Shift+Arrow keyboard drag reaches tray and scores only on release')
+    capture(page,f'{label}-keyboard-file-hit.png')
+    print(f'{label}: keyboard file screenshot complete; awaiting timed scene change', flush=True)
+    page.wait_for_function("window.__nightShiftA11yPreview.snapshot().stage===2",timeout=6000)
+    page.keyboard.press('Enter')
+    page.wait_for_function("window.__nightShiftA11yPreview.snapshot().status==='victory'",timeout=6000)
+    check(snap(page)['status']=='victory' and snap(page)['a11y']['held'] is None,
+          f'{label}: second full run completes by keyboard without a stuck hold')
+    check(page.get_by_role('button',name='CLOCK IN AGAIN').is_visible()
+          and page.locator('.qp-a11y-alert').get_attribute('data-visible')=='false'
+          and not page.locator('#timer').is_visible(),
+          f'{label}: end screen has unobstructed replay without stale hold instructions or active HUD timer')
+    capture(page,f'{label}-keyboard-victory.png')
+    check(not errors and not failed,f'{label}: extended keyboard/replay run has zero browser errors')
     ctx.close()
 
 with sync_playwright() as pw:
     browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
+    selected=os.environ.get('A11Y_VIEWPORT', 'all')
     for w,h,dpr,label,smoke in [(1920,1080,1,'1080p',False),(650,800,1,'portrait',False),(1920,1080,2,'4k-dpr2',True),(3440,1440,1,'ultrawide',True)]:
-        browser_run(browser,w,h,dpr,label,smoke)
+        if selected=='all' or selected==label:
+            browser_run(browser,w,h,dpr,label,smoke)
     browser.close()
 for x in EVIDENCE:print(x)
 print('TOTAL',len(EVIDENCE),'assertions; real screenshots:',OUT)
