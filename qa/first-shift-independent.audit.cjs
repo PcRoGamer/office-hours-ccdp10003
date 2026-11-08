@@ -65,7 +65,16 @@ async function main() {
         page.on('pageerror', error => sample.errors.push('pageerror: ' + error.message));
         page.on('crash', () => sample.errors.push('page crashed'));
         page.on('console', message => {
-          if (message.type() === 'error') sample.errors.push('console: ' + message.text().slice(0, 450));
+          if (message.type() !== 'error') return;
+          const source = message.location()?.url || '';
+          // Browser's implicit favicon lookup is not a game asset. Report real resource errors.
+          if (/\/favicon\.ico(?:\?|$)/i.test(source) &&
+              /Failed to load resource:.*404/i.test(message.text())) {
+            sample.warnings.push('Nonessential browser favicon missing: ' + source);
+            return;
+          }
+          sample.errors.push('console: ' + message.text().slice(0, 450) +
+            (source ? ' [' + source + ']' : ''));
         });
         page.on('requestfailed', req => {
           sample.requestsFailed.push(req.url() + ': ' + (req.failure()?.errorText || 'failed'));
