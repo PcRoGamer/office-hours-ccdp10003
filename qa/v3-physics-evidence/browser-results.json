@@ -3,20 +3,29 @@
     "viewport": "1920x1080",
     "shot": "desk-1920x1080.png",
     "drag_score": 1,
-    "pause_tick": 212,
+    "after_resize_score": 1,
+    "after_reflow_score": 2,
+    "resize_pause_tick": 727,
     "errors": [],
     "dpr": 1
   },
   {
-    "viewport": "2560x1440",
-    "shot": "desk-2560x1440.png",
+    "viewport": "1920x1080",
+    "shot": "desk-1920x1080-dpr2.png",
+    "errors": [],
+    "dpr": 2,
+    "drag_score": "not exercised"
+  },
+  {
+    "viewport": "650x800",
+    "shot": "desk-650x800.png",
     "errors": [],
     "dpr": 1,
     "drag_score": "not exercised"
   },
   {
-    "viewport": "3840x2160",
-    "shot": "desk-3840x2160.png",
+    "viewport": "2560x1440",
+    "shot": "desk-2560x1440.png",
     "errors": [],
     "dpr": 1,
     "drag_score": "not exercised"
@@ -29,8 +38,8 @@
     "drag_score": "not exercised"
   },
   {
-    "viewport": "650x800",
-    "shot": "desk-650x800.png",
+    "viewport": "3840x2160",
+    "shot": "desk-3840x2160.png",
     "errors": [],
     "dpr": 1,
     "drag_score": "not exercised"
