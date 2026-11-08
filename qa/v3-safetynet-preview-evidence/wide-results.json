@@ -1,0 +1,71 @@
+{
+  "source": "Actual staged specialist Chrome CDP stress captures; not integrated v3 release",
+  "viewports": [
+    "3840x2160",
+    "3440x1440"
+  ],
+  "counts": {
+    "pass": 2,
+    "fail": 0
+  },
+  "records": [
+    {
+      "lane": "intake",
+      "width": 3840,
+      "height": 2160,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 3840,
+          "height": 2160,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE",
+        "SOUND OFF",
+        "RETRY ↻",
+        "I1 STAMP",
+        "I2 SHRED",
+        "I3 SCAMS",
+        "I4 COPY",
+        "CLOCK IN"
+      ],
+      "clicked": "CLOCK IN",
+      "coversViewport": true,
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-intake-3840x2160.png",
+      "sha256": "992e372770ba9a80f24595d7438474d111efb3b69b3d41ce213a65d240488888"
+    },
+    {
+      "lane": "printer",
+      "width": 3440,
+      "height": 1440,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 3440,
+          "height": 1440,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE",
+        "MUTE",
+        "RETRY BOSS",
+        "CLOCK IN →"
+      ],
+      "clicked": "CLOCK IN →",
+      "coversViewport": true,
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-printer-3440x1440.png",
+      "sha256": "8b1fe790c23d1435dc5f0d71f3e88400a467bd69e170de9de150fe882910c113"
+    }
+  ]
+}
