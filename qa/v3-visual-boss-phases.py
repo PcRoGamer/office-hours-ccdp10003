@@ -20,8 +20,39 @@ def sha(src):
  p=subprocess.run(['git','rev-parse','HEAD'],cwd=src,capture_output=True,text=True)
  return p.stdout.strip() if p.returncode==0 else None
 def png_size(data):
- if not data.startswith(b'\x89PNG\r\n\x1a\n') or len(data)<24:raise ValueError('Invalid PNG signature/header')
- return list(struct.unpack('>II',data[16:24]))
+ # Verify CRC, chunk ordering, decompression and dimensions. Magic bytes
+ # alone cannot prove that a browser produced an intact PNG screenshot.
+ if not data.startswith(b'\x89PNG\r\n\x1a\n') or len(data)<57:
+  raise ValueError('Invalid or truncated PNG')
+ pos=8;width=height=0;seen_header=seen_end=False;idat=[]
+ while pos+12<=len(data):
+  size=struct.unpack('>I',data[pos:pos+4])[0]
+  if size > 30_000_000 or pos+12+size>len(data):raise ValueError('Truncated or oversize PNG chunk')
+  kind=data[pos+4:pos+8];payload=data[pos+8:pos+8+size]
+  crc=struct.unpack('>I',data[pos+8+size:pos+12+size])[0]
+  if zlib.crc32(kind+payload)&0xffffffff!=crc:raise ValueError('PNG CRC mismatch')
+  if kind==b'IHDR':
+   if seen_header or pos!=8 or size!=13:raise ValueError('Invalid PNG header order')
+   width,height,depth,ctype,comp,flt,interlace=struct.unpack('>IIBBBBB',payload)
+   if width<=0 or height<=0 or width>12000 or height>12000 or depth!=8 or ctype not in (2,6) or comp or flt or interlace:
+    raise ValueError('Unsupported or invalid PNG dimensions/format')
+   seen_header=True
+  elif kind==b'IDAT':
+   if not seen_header:raise ValueError('PNG pixel data before header')
+   idat.append(payload)
+  elif kind==b'IEND':
+   if not idat or size!=0 or pos+12!=len(data):raise ValueError('Missing PNG data or trailing bytes')
+   seen_end=True;break
+  pos+=12+size
+ if not (seen_header and seen_end):raise ValueError('PNG missing required chunks')
+ expected=height*(1+width*(3 if ctype==2 else 4))
+ if expected>600_000_000:raise ValueError('PNG decoded size too large')
+ d=zlib.decompressobj()
+ raw=d.decompress(b''.join(idat),expected+1)
+ if len(raw)!=expected or not d.eof or d.unused_data:
+  raise ValueError('PNG decompressed pixels incomplete or unexpected')
+ return [width,height]
+
 def capture(src,lane,out,source_sha=None):
  conf=TASKS[lane];root=Path(src);rows=[]
  source_sha=source_sha or sha(root)
@@ -76,7 +107,11 @@ def main():
  ap.add_argument('--source',action='append',default=[],help='printer=/abs/path or quota=/abs/path')
  ap.add_argument('--out',type=Path,default=Path('qa-artifacts/v3-visual/branch-matrix'))
  ap.add_argument('--selftest',action='store_true',help='Fixture-only test of importer, NOT a real boss')
- args=ap.parse_args();args.out.mkdir(parents=True,exist_ok=True);sources={}
+ args=ap.parse_args()
+ # Never let synthetic importer tests replace real browser reports.
+ if args.selftest and args.out == Path('qa-artifacts/v3-visual/branch-matrix'):
+  args.out = Path('qa-artifacts/v3-visual/_boss-selftest')
+ args.out.mkdir(parents=True,exist_ok=True);sources={}
  for item in args.source:
   key,sep,val=item.partition('=')
   if not sep or key not in TASKS:ap.error('Use --source printer=/path or quota=/path')
