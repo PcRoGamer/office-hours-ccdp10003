@@ -1,0 +1,272 @@
+{
+  "title": "QUOTA PANIC: NIGHT SHIFT",
+  "version": "3.0.0-rebuild-contract",
+  "status": "CONTRACT ONLY; NO IMPLEMENTATION CLAIM",
+  "sourceGdd": "design/NIGHT_SHIFT_GDD_V3.md",
+  "sourceDescription": "Machine-readable core model derived from the full v3 GDD. Preserve narrative and edge-case specifications in the full GDD.",
+  "scenesPerRun": 12,
+  "cardsPerDepartment": 3,
+  "departments": [
+    "intake",
+    "services",
+    "pr",
+    "staff"
+  ],
+  "card_pool": [
+    {
+      "id": "I1",
+      "department": "intake",
+      "imperative": "STAMP GOOD!",
+      "authoredReferenceMs": 18000
+    },
+    {
+      "id": "I2",
+      "department": "intake",
+      "imperative": "SHRED THE SPAM!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "I3",
+      "department": "intake",
+      "imperative": "CLOSE THE SCAMS!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "I4",
+      "department": "intake",
+      "imperative": "COPY THAT!",
+      "authoredReferenceMs": 13000
+    },
+    {
+      "id": "S1",
+      "department": "services",
+      "imperative": "FILE FRENZY!",
+      "authoredReferenceMs": 14000
+    },
+    {
+      "id": "S2",
+      "department": "services",
+      "imperative": "SAVE THE COFFEE!",
+      "authoredReferenceMs": 14000
+    },
+    {
+      "id": "S3",
+      "department": "services",
+      "imperative": "UNJAM IT!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "S4",
+      "department": "services",
+      "imperative": "FIX THE CABLE!",
+      "authoredReferenceMs": 13000
+    },
+    {
+      "id": "P1",
+      "department": "pr",
+      "imperative": "RESET THE SCALE!",
+      "authoredReferenceMs": 14000
+    },
+    {
+      "id": "P2",
+      "department": "pr",
+      "imperative": "POP-UP PURGE!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "P3",
+      "department": "pr",
+      "imperative": "HOLD THE SLIDE!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "P4",
+      "department": "pr",
+      "imperative": "HEADLINE OR CONTEXT?",
+      "authoredReferenceMs": 14000
+    },
+    {
+      "id": "T1",
+      "department": "staff",
+      "imperative": "GET THEM OUT!",
+      "authoredReferenceMs": 14000
+    },
+    {
+      "id": "T2",
+      "department": "staff",
+      "imperative": "CLEAR THE EXIT!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "T3",
+      "department": "staff",
+      "imperative": "CLOCK OUT!",
+      "authoredReferenceMs": 12000
+    },
+    {
+      "id": "T4",
+      "department": "staff",
+      "imperative": "PASS THE TOOLS!",
+      "authoredReferenceMs": 14000
+    }
+  ],
+  "guaranteed": {
+    "intake": [
+      "I1"
+    ],
+    "services": [
+      "S1",
+      "S2"
+    ],
+    "pr": [
+      "P1",
+      "P4"
+    ],
+    "staff": [
+      "T1",
+      "T4"
+    ]
+  },
+  "additional_guarantees": {
+    "firstCard": "I1",
+    "servicesFirstTwo": [
+      "S1",
+      "S2"
+    ],
+    "servicesAnyOf": [
+      "S3",
+      "S4"
+    ],
+    "prOrder": [
+      "P1",
+      "P4"
+    ],
+    "staffOrder": [
+      "T1",
+      "T4"
+    ]
+  },
+  "curatedFirstRun": [
+    "I1",
+    "I2",
+    "I3",
+    "S1",
+    "S2",
+    "S3",
+    "P1",
+    "P2",
+    "P4",
+    "T1",
+    "T4",
+    "T3"
+  ],
+  "promotionPicks": 5,
+  "promotionSlots": [
+    "after-intake-for-services",
+    "after-services-for-printer",
+    "after-printer-for-pr",
+    "after-pr-for-staff",
+    "after-staff-for-quota"
+  ],
+  "perkIds": [
+    "carbon-copy",
+    "chain-stamp",
+    "bank-shot",
+    "magnet-grip",
+    "mira-backup",
+    "safety-net",
+    "time-bank",
+    "focus-lens"
+  ],
+  "perkMaxLevel": 2,
+  "synergies": [
+    [
+      "carbon-copy",
+      "chain-stamp"
+    ],
+    [
+      "carbon-copy",
+      "time-bank"
+    ],
+    [
+      "bank-shot",
+      "magnet-grip"
+    ],
+    [
+      "bank-shot",
+      "chain-stamp"
+    ],
+    [
+      "mira-backup",
+      "safety-net"
+    ],
+    [
+      "mira-backup",
+      "time-bank"
+    ],
+    [
+      "focus-lens",
+      "time-bank"
+    ],
+    [
+      "focus-lens",
+      "safety-net"
+    ]
+  ],
+  "firstPerkOffer": [
+    "carbon-copy",
+    "bank-shot",
+    "mira-backup"
+  ],
+  "directives": [
+    "fast-or-safe",
+    "moving-goalposts",
+    "sponsored-workflow",
+    "mandatory-collaboration",
+    "double-entry"
+  ],
+  "curatedFirstDirectives": [
+    "fast-or-safe",
+    "moving-goalposts",
+    "sponsored-workflow",
+    "mandatory-collaboration",
+    "double-entry"
+  ],
+  "bosses": {
+    "printer": {
+      "requiredCounters": 3
+    },
+    "quota": {
+      "requiredCounters": 3,
+      "bonusPacketIds": [
+        "quota:p1:b1",
+        "quota:p2:b1",
+        "quota:p3:b1",
+        "quota:p3:b2"
+      ],
+      "fileBonusPoints": 5,
+      "maxPressure": 2,
+      "coolOpeningExtensionMs": 750
+    }
+  },
+  "licences": {
+    "tokens": 2,
+    "dollarsPerToken": 40
+  },
+  "corporateScoreWeights": {
+    "completedWork": 40,
+    "pace": 15,
+    "cleanStreak": 15,
+    "budgetSavings": 10,
+    "bossFileBonus": 20
+  },
+  "peopleScoreWeights": {
+    "coworkerSupport": 35,
+    "toolAccess": 30,
+    "carefulActions": 20,
+    "attentionToHelp": 15
+  },
+  "fullRunWorkerOpportunities": 4,
+  "normalRunStartingHearts": 3,
+  "normalRunContinueCount": 1
+}
