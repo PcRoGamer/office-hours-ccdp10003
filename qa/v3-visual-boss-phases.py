@@ -88,13 +88,13 @@ def main():
   def chunk(tag,data):return struct.pack('>I',len(data))+tag+data+struct.pack('>I',zlib.crc32(tag+data)&0xffffffff)
   ihdr=struct.pack('>IIBBBBB',8,8,8,2,0,0,0)
   pix=bytes([0]+[230,180,110]*8)*8
-  png=b'\\x89PNG\\r\\n\\x1a\\n'+chunk(b'IHDR',ihdr)+chunk(b'IDAT',zlib.compress(pix))+chunk(b'IEND',b'')
+  png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',ihdr)+chunk(b'IDAT',zlib.compress(pix))+chunk(b'IEND',b'')
   (source/'OLD-committed.png').write_bytes(png)
-  (selected/'qa/v3-printer-browser.py').write_text('from pathlib import Path\\n'
-    'out=Path(__file__).resolve().parent/"v3-printer-evidence"\\n'
-    'f=out/"1080p-telegraph.png"\\n'
-    'f.write_bytes((out/"OLD-committed.png").read_bytes())\\n'
-    'print("FAKE FIXTURE TEST: import validation only")\\n')
+  (selected/'qa/v3-printer-browser.py').write_text('from pathlib import Path\n'
+    'out=Path(__file__).resolve().parent/"v3-printer-evidence"\n'
+    'f=out/"1080p-telegraph.png"\n'
+    'f.write_bytes((out/"OLD-committed.png").read_bytes())\n'
+    'print("FAKE FIXTURE TEST: import validation only")\n')
   TASKS['printer']['branch']='SELFTEST-FIXTURE-NOT-GAME';sources['printer']=selected
   args.lane='printer'
  try:
