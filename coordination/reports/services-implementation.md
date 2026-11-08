@@ -60,3 +60,23 @@ Working preview has edge-to-edge office world, large prop silhouettes, readable 
 5. Run native HTTP module smoke, cross-check actor art with HD at same viewport/state, wire music+FX+Planck and run integrated progression/replay before promotion from draft. Do not overwrite legacy paths or count the full v3 GDD complete from this departmental PR.
 
 **Bottom line:** production-ready *behavioral proposal* with independent browser evidence and full eligible adapter coverage; visual/media/integration acceptance remains the responsibility of the combined rebuild.
+
+
+## Post-PR #16 regression and game-feel iteration (same agent branch, 8 November 2026)
+
+**Actual fixes shipped:** 
+1. **S3 fair hold-to-release:** the safe indicator is now latched on page grab. A legitimately green-started gesture remains valid through a light-cycle transition; an unsafe red-started gesture cannot be laundered by waiting for green. On cancelled pointer, latch resets. UI explicitly reads “SAFE • KEEP PULLING” while a valid gesture is active. This closes a real reproducible fairness defect.
+2. **S4 truly continuous stabilisation:** releasing/cancelling early clears socket hold charge. Three 0.4-second taps can no longer replace one 0.85-second uninterrupted hold. Jules still reduces the genuine time requirement.
+3. **S4 moving port directive now acts before an error:** the live port telegraphs a position shift while the player is planning a trace, not solely on the failure/restart pulse; the port cannot move while a drag is active. The relocated port can be connected successfully on the first attempt.
+4. **S2 terminal freeze:** pointerDown after card-failed/card-complete cannot mutate the caught/spilled/goal state.
+5. **Visible text collision fixed:** measured memo text width determines banner footprint/font, and the moving-port helper label is placed below gameplay action instead of inside the feedback banner.
+
+**New tests actually executed locally:**
+- Original independent Chromium card/directive test: **53/53 PASS** after changes.
+- New real Chromium pointer-and-clock regression file `qa/v3-services-regressions.py`: **21/21 PASS**, including S3 safe-window timing both ways, cancelled pointer, repeated short S4 holds, visible moving-port completion without failure, frozen S2 input, console cleanliness.
+- Portable repository regression file `qa/v3-services-timing.test.mjs`: **9/9 PASS** with `node --test qa/v3-services-timing.test.mjs`. This file lives on the GitHub branch and exercises actual scene FSM exports.
+- Native ES-module loader verified **inside Chromium** via `await import('data:text/javascript;base64,...')` yielding `S1,S2,S3,S4`. Local web-server HTTP navigation still returns `ERR_BLOCKED_BY_ADMINISTRATOR`, so this proves actual browser ESM syntax but not network URL resolution.
+- **74/74 actual browser checks total**, plus 9 Node tests. No known regressions in existing 53.
+- New real Chromium screenshots: `qa/v3-services-s3-latched-safe.png`, `qa/v3-services-s4-moving-port.png`, `qa/v3-services-s4-moving-success.png` are included in the chat archive for inspection. Source/control tests and these real rendered frames were inspected. HD visual comparison is **not** falsely marked passed.
+
+**Integration effect:** no API signature changes. Existing `definitions`/scene contract, event names, directive handling and owned path restrictions remain stable. Old releases, `main` and the shared integration branch remain untouched.
