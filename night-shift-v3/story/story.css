@@ -46,3 +46,89 @@
 .ns-message{padding:10px 18px 8px}.ns-promotion-tag{margin-top:4px;font-size:11px}.ns-message h1{font-size:24px;margin:2px 0 6px;max-width:none}.ns-copy{font-size:12px;margin:6px 0;line-height:1.25}.ns-source{margin-top:2px;font-size:10px}.ns-incident{font-size:10px;padding:3px 6px}
 .ns-sheet-heading{padding:7px 13px;font-size:10px}.ns-upgrade-row{min-height:105px;grid-template-columns:24px 65px minmax(0,1fr)}.ns-upgrade{grid-template-columns:114px 1fr;padding:7px 12px;column-gap:9px}.ns-upgrade-top{font-size:17px}.ns-upgrade canvas{height:47px}.ns-upgrade-effect{font-size:11px}.ns-upgrade-pick{font-size:9px;margin-top:3px}.ns-cell-id{font-size:8px}.ns-schedule{margin:6px 10px 0;padding:8px 13px}.ns-schedule-main strong{font-size:20px;margin:1px 0}.ns-schedule-main p{font-size:10px}.ns-book footer{padding:6px 12px;margin-top:4px;font-size:9px}
 }
+
+/* Post-render quality pass: tactile intermission, genuinely legible demonstrations, and mobile composition. */
+@media(min-width:801px){
+ .ns-promote{width:min(1900px,94vw);min-height:min(870px,calc(100dvh - 38px));grid-template-columns:minmax(340px,.79fr) minmax(620px,1.31fr)}
+ .ns-upgrade{grid-template-columns:minmax(190px,.57fr) minmax(220px,1fr);column-gap:20px;padding:12px 20px}
+ .ns-upgrade canvas{height:95px;image-rendering:auto;border:3px solid #476258;box-shadow:3px 4px 0 #132b2780}
+ .ns-upgrade-row{min-height:164px}
+ .ns-upgrade-effect{font-size:clamp(13px,1.12vw,17px);max-width:40ch}
+ .ns-upgrade-top{font-size:clamp(23px,1.9vw,31px)}
+ .ns-mail .ns-message{padding:clamp(24px,2.4vw,40px)}
+ .ns-message h1{font-size:clamp(40px,3vw,67px);margin:7px 0 14px;max-width:17ch}
+ .ns-promotion-tag{margin-top:13px}
+ .ns-copy{font-size:clamp(17px,1.2vw,20px);margin:18px 0 10px}
+ .ns-attachment{min-height:66px}
+}
+.ns-cast{position:relative;margin:17px 0 12px;aspect-ratio:600 / 230;min-height:150px;background:#183d3b;border:3px solid #c6a66e;box-shadow:5px 6px 0 #1238314d;overflow:hidden;flex-shrink:0}
+.ns-cast canvas{width:100%;height:100%;display:block}
+.ns-cast::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#ffffff07 0,#ffffff07 1px,transparent 2px,transparent 5px);mix-blend-mode:screen}
+.ns-message .ns-incident{font-size:12px}
+.ns-upgrade{overflow:hidden}.ns-upgrade:hover canvas,.ns-upgrade:focus-visible canvas{box-shadow:0 0 0 3px #188858,5px 6px 0 #14352e}
+.ns-upgrade-top b{box-shadow:2px 2px 0 #0b5a36}.ns-upgrade-pick{font-size:12px}
+.ns-announcement{background:radial-gradient(circle at 50% 56%,#2b544be8,#0f2728f4 80%);overflow:hidden}
+.ns-announcement::before{content:'';position:absolute;inset:-70%;background:repeating-conic-gradient(from 0deg,#e8bc7144 0 2deg,transparent 2deg 24deg);animation:ns-halo 13s linear infinite;pointer-events:none}
+.ns-announcement>span,.ns-announcement>strong,.ns-announcement>p,.ns-machine-install,.ns-announcement-bar{position:relative;z-index:1}
+.ns-announcement strong{font-size:clamp(38px,5.3vw,94px);text-shadow:5px 6px 0 #092125}
+.ns-machine-install{width:min(480px,80vw);height:96px;margin:5px auto 0;position:relative}
+.ns-install-module{position:absolute;left:calc(50% - 43px);top:-90px;width:88px;height:74px;font-size:60px;line-height:74px;background:#f4b95c;border:6px solid #162f2d;color:#163c36;box-shadow:6px 5px 0 #091c1d;animation:ns-module-drop .75s cubic-bezier(.25,1.3,.34,1) forwards}
+.ns-install-impact{position:absolute;left:calc(50% - 85px);top:6px;font-size:120px;color:#f8d789;animation:ns-impact-pop .74s ease both}
+.ns-install-rig{position:absolute;bottom:0;left:0;right:0;border:4px solid #d7a46a;border-bottom-width:13px;background:#183a37;color:#e8d6a7;padding:10px;font-size:12px;letter-spacing:.2em;font-weight:900;box-shadow:6px 6px 0 #07191c}
+@keyframes ns-halo{to{transform:rotate(360deg)}}
+@keyframes ns-module-drop{0%{transform:translateY(-70px) rotate(-23deg);opacity:.3}70%{transform:translateY(102px) rotate(4deg)}85%{transform:translateY(78px) rotate(-2deg)}100%{transform:translateY(90px) rotate(0);opacity:1}}
+@keyframes ns-impact-pop{0%,62%{opacity:0;transform:scale(.3)}72%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.55)}}
+.ns-end{width:min(1330px,92vw);background:radial-gradient(ellipse at 46% 38%,#244d43,#102929 75%)}
+.ns-end-center{grid-template-columns:minmax(280px,.85fr) minmax(400px,1.2fr)}
+.ns-big-stamp{animation:ns-stamp-hit .6s cubic-bezier(.13,.8,.28,1.3) both}
+.ns-receipt{max-width:580px;cursor:pointer;transform-origin:50% 18%;animation:ns-print-ticket .42s cubic-bezier(.24,.67,.2,1) both}
+.ns-receipt:hover{filter:brightness(1.025);outline:2px dashed #b89b68;outline-offset:5px}
+.ns-receipt:focus-visible{outline:5px solid #eac473;outline-offset:6px}
+.ns-receipt::before{content:'FLIP PAPER ↻';position:absolute;right:23px;top:90px;font-size:9px;letter-spacing:.08em;font-weight:900;color:#ab8251}
+@keyframes ns-stamp-hit{from{opacity:0;transform:rotate(-28deg) translateY(-160px) scale(1.15)}60%{opacity:1;transform:rotate(-8deg) translateY(9px) scale(.9)}to{transform:rotate(-10deg) translateY(0) scale(1)}}
+@keyframes ns-print-ticket{from{opacity:.3;transform:translateY(-38px) rotateY(55deg)}to{opacity:1;transform:translateY(0) rotateY(0)}}
+/* Ultra-wide: the diegetic interface must still be large enough to read and touch. */
+@media(min-width:2300px){.ns-promote{width:min(2250px,88vw);min-height:min(1010px,88vh)}.ns-upgrade-row{min-height:195px}.ns-upgrade canvas{height:116px}.ns-message h1{font-size:clamp(56px,2.3vw,76px)}.ns-copy{font-size:22px}.ns-cast{max-height:265px}.ns-message{padding:45px}}
+@media(min-width:521px) and (max-width:800px){
+ .ns-story{overflow:auto}
+ .ns-panel{min-height:100dvh}
+ .ns-mail,.ns-message{flex:0 0 auto!important}
+ .ns-message{padding:12px 18px 9px}
+ .ns-mail{border-bottom-width:3px}
+ .ns-promotion-tag{margin-top:3px}
+ .ns-message h1{font-size:clamp(23px,4.4vw,29px);margin:3px 0 6px;line-height:1.02}
+ .ns-copy{font-size:13px;margin:5px 0 6px}
+ .ns-cast{display:none}
+ .ns-book{flex:0 0 auto}
+ .ns-upgrade-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex:none;border-bottom:2px solid #c7d5c7}
+ .ns-upgrade-row{min-height:224px;display:block;border-right:1px solid #bcd4c7}
+ .ns-row-num,.ns-cell-id{display:none}
+ .ns-upgrade{display:flex;flex-direction:column;gap:5px;height:100%;padding:9px 9px 8px;min-height:222px;border-left-width:4px}
+ .ns-upgrade-top{font-size:17px;flex-wrap:wrap;min-height:34px}
+ .ns-upgrade canvas{width:100%;height:auto;aspect-ratio:330/126;flex:0 0 auto}
+ .ns-upgrade-effect{font-size:11px;line-height:1.2;flex:1}
+ .ns-upgrade-pick{font-size:10px;letter-spacing:0;text-align:left;margin-top:auto}
+ .ns-schedule{margin:9px 10px 0;padding:8px 12px}
+ .ns-announcement strong{font-size:48px}
+ .ns-end{width:100%}
+ .ns-end-center{grid-template-columns:minmax(120px,.45fr) minmax(0,1fr)}
+}
+@media(max-width:520px){
+ .ns-story{overflow:auto}.ns-panel{min-height:100dvh}.ns-mail,.ns-message{flex:0 0 auto!important}
+ .ns-message{padding:12px 15px}.ns-message h1{line-height:1.02}
+ .ns-cast{display:none}.ns-upgrade canvas{height:73px}.ns-upgrade-row{min-height:149px}
+ .ns-upgrade{grid-template-columns:minmax(125px,.5fr) minmax(0,1fr)}
+ .ns-upgrade-effect{font-size:12px}
+ .ns-end{width:100%}.ns-end-center{display:flex;flex-direction:column}
+ .ns-big-stamp{font-size:33px;padding:8px 25px}.ns-receipt{width:100%;max-width:none}
+}
+@media(prefers-reduced-motion:reduce){.ns-announcement::before,.ns-install-module,.ns-install-impact,.ns-big-stamp,.ns-receipt{animation:none!important}.ns-install-module{transform:translateY(90px)}.ns-install-impact{opacity:0}}
+
+/* QA round two: narrow workbooks are fitted to their content instead of allocating a dead grid row. */
+@media(min-width:521px) and (max-width:800px){
+.ns-story{align-items:center;padding:0 12px}
+.ns-panel.ns-promote{min-height:0;max-height:100dvh;grid-template-rows:max-content max-content;overflow:auto;border:3px solid #c4ab75}
+.ns-message{flex:0 0 auto;min-height:0}
+.ns-mail{flex:0 0 auto}
+.ns-book{flex:0 0 auto}
+}
