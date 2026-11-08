@@ -9,7 +9,8 @@ const cards=[
   {id:'P4', imperative:'HEADLINE OR CONTEXT?',title:'SAME FACTS. DIFFERENT STORY.',seconds:35,referenceMs:14000}
 ];
 const noop=()=>{};
-// Directives are injected by SYSTEMS/LEAD. Missing services retain a fair standalone route.
+// Directives are injected by SYSTEMS/LEAD. Missing services must remain a fair
+// independent play route, and no scene is permitted to mutate the run itself.
 function directiveId(context){
   const d=context?.run?.activeDirective??context?.run?.directive??context?.effects?.activeDirective??context?.effects?.directive??context?.options?.directive;
   return typeof d==='string'?d:(d?.id??d?.type??null);
@@ -87,7 +88,8 @@ function createP1(context,meta){
     tx(ctx,`BASELINE ${Math.round(s.baseline).toLocaleString('en-US')}     ↓ DRAG`,p.x+p.w/2,handleY+1,l.portrait?13:18,C.ink);
     if(s.corrected&&s.baseline===0)sticker(ctx,'+40  /  +3.2%',g.x+g.w-85,g.chart.y+5,{col:C.mint,size:l.portrait?11:15});
     else sticker(ctx,'MISLEADING!',g.x+g.w-85,g.chart.y+5,{size:l.portrait?11:15});
-    // Sponsored Workflow: genuine signed help and cosmetic ad coexist; no automatic axis change.
+    // Sponsored Workflow: a real signed scale tip and a self-interested cosmetic ad
+    // share the field. The tip teaches the motion, but never auto-corrects the chart.
     if(s.sponsored){
       for(const kind of ['tip','fake']){
         if(kind==='fake'&&s.fakeDismissed)continue;
@@ -122,6 +124,7 @@ function createP1(context,meta){
     }
     if(s.collaboration){
       button(ctx,s.miraHelped?'MIRA ✓':'MIRA HELP',g.helper.x,g.helper.y,g.helper.w,g.helper.h,{fill:C.mint,small:l.portrait});
+
     }
     if(s.awaitCopy){
       rr(ctx,g.copy.x+4,g.copy.y-38,g.copy.w-8,31,9,C.mint,C.ink,3);
@@ -221,7 +224,8 @@ function createP2(context,meta){
     for(const f of s.flight){
       ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);rr(ctx,-f.w/2,-f.h/2,f.w,f.h,9,C.red,C.ink,5);tx(ctx,'SPONSORED',0,0,l.portrait?10:16,C.ink);ctx.restore();
     }
-    // Earned impact toast stays legible OVER flying paper.
+    // Impact toast is rendered over flying paper so its earned defensive effect
+    // remains legible even when the projectile obscures the projector.
     if(s.coverShield>0){
       const w=Math.min(g.w-36,l.portrait?320:430);rr(ctx,l.cx-w/2,g.y+23,w,48,12,C.mint,C.ink,4);
       tx(ctx,'AD BLOCK!  +0.8s SHUTTER',l.cx,g.y+49,l.portrait?13:19,C.ink);
@@ -262,7 +266,8 @@ function createP2(context,meta){
       const r=cardsGeo(v).find(entry=>entry.o.id===o.id)?.rect;
       const flying={id:o.id,x:p.x,y:p.y,w:r?.w||220,h:r?.h||120,vx:dx*3,vy:dy*3,angle:o.rotation,spin:dx*.004,ttl:1.25,cover:false};
       s.flight.push(flying);
-      // Detect cover swept across the projector DURING the drag, not only after release.
+      // Crossing the projected beam DURING a throw counts as physical cover, not
+      // merely crossing it after release (the latter could never trigger often).
       if(((d.startX<g.cx&&p.x>=g.cx)||(d.startX>g.cx&&p.x<=g.cx))&&p.y>=g.y&&p.y<=g.y+g.h)creditCover(flying);
       b.act(true,'flick-hostile-overlay',{objectId:o.id,manualDistance:Math.round(distance)});check();
     }else b.act(false,'uncommitted-flick',{objectId:o.id});
@@ -334,7 +339,7 @@ function createP3(context,meta){
 function createP4(context,meta){
   const b=base(context,meta),s=b.state;
   // The committed event ledger outranks any cached scene-level incident summary.
-  // The preview also has a convenience 'events' array; never let its empty array
+  // The preview also has a convenience `events` array; never let its empty array
   // hide the authoritative run.eventLedger.
   const committed=Array.isArray(context?.run?.eventLedger)?context.run.eventLedger:
     (Array.isArray(context?.run?.snapshot?.eventLedger)?context.run.snapshot.eventLedger:[]);
@@ -348,7 +353,8 @@ function createP4(context,meta){
     incident==='spill'||incident?.outcome==='not-helped'||incident?.type==='mira-spill'||incident?.outcome==='mira-spill'?'interrupted':'recorded');
   Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident,miraOutcome,goalposts:directiveId(context)==='moving-goalposts',doubleEntry:directiveId(context)==='double-entry',fastOrSafe:directiveId(context)==='fast-or-safe',collaboration:directiveId(context)==='mandatory-collaboration',miraHelped:false,safeWait:0,routeShift:0,pendingCopy:null,shiftAnnounced:false});
   const geo=v=>{const l=vw(v),width=l.width,routeW=Math.min(360,(width-50)/2),routeY=l.H-268;return {...l,cardW:Math.min(360,width*.62),cardH:132,restX:l.cx,restY:402,helper:{x:l.cx+Math.min(360,width*.62)/2+12,y:402-46,w:l.portrait?94:138,h:52},routeY,routeW,leftRoute:{x:l.cx-routeW-11,y:routeY,w:routeW,h:154},rightRoute:{x:l.cx+11,y:routeY,w:routeW,h:154}};};
-  // A route changes physical position only between gestures; art and collision use the same geometry.
+  // A route changes physical position on its rail ONLY between active gestures.
+  // Visual label, hit area and scored effect use this same transformed route.
   const routes=v=>{const g=geo(v),travel=g.rightRoute.x-g.leftRoute.x,t=s.routeShift;
     const headline={...g.leftRoute,x:g.leftRoute.x+travel*t};
     if(s.fastOrSafe){const w=headline.w*.64;headline.x+=(headline.w-w)/2;headline.w=w;}
@@ -369,6 +375,7 @@ function createP4(context,meta){
       rr(ctx,r.x+3,r.y+6,r.w,r.h,17,C.shadow,null);rr(ctx,r.x,r.y,r.w,r.h,17,col,C.ink,5);
       tx(ctx,s.fastOrSafe?name+(name==='HEADLINE'?' / FAST':' / SAFE'):name,r.x+r.w/2,r.y+40,l.portrait?17:26,C.ink);
       const words=subtitle.split(':');tx(ctx,words[0],r.x+r.w/2,r.y+79,l.portrait?11:13,C.ink);tx(ctx,words[1]||'',r.x+r.w/2,r.y+100,l.portrait?12:17,C.ink);
+      if(s.collaboration&&s.miraHelped&&name==='CONTEXT')tx(ctx,'MIRA ASSIST +',r.x+r.w/2,r.y+r.h-17,l.portrait?11:14,C.ink);
     }
     const x=(s.dragging?s.cardX:g.restX),y=(s.dragging?s.cardY:g.restY),w=g.cardW,h=g.cardH;
     ctx.save();ctx.translate(x,y);ctx.rotate(s.dragging?clamp((x-l.cx)/l.width*.23,-.22,.22):Math.sin(s.time*2)*.023);
@@ -379,7 +386,7 @@ function createP4(context,meta){
     tx(ctx,s.pendingCopy?'MATCH '+s.pendingCopy.toUpperCase():'DRAG TO A ROUTE',0,34,l.portrait?12:15,C.slate);ctx.restore();
     if(s.collaboration){
       button(ctx,s.miraHelped?'MIRA ✓':'MIRA TIP',g.helper.x,g.helper.y,g.helper.w,g.helper.h,{fill:C.mint,small:l.portrait});
-      if(s.miraHelped)tx(ctx,'MIRA WIDENED CONTEXT ROUTE',l.cx,g.routeY-19,l.portrait?10:15,C.mint);
+
     }
     if(!l.portrait)tx(ctx,'ONE PHYSICAL CHOICE, TWO HONEST BENEFITS',l.cx,l.H-28,l.portrait?12:16,C.cream);
     drawResult(ctx,l,s,s.selected?`${s.selected} SELECTED`:'DOCUMENT NOT SENT');
