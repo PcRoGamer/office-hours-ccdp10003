@@ -30,7 +30,7 @@ export function createPrinterMutiny(context={}){
   const initial=()=>({
     state:'telegraph',time:0,cycle:0,bolts:[true,true,true],removed:0,
     attempts:0,manualHits:0,failedCounters:0,completed:false,
-    feederX:0,feederWidth:142,open:false,shutter:false,
+    feederX:0,feederFromX:0,feederTargetX:0,feederWidth:142,open:false,shutter:false,
     sheetHits:0,adX:105,adMoved:false,miraUsed:false,
     pointer:null,pagePull:0,packet:packetSpawn(),projectile:null,
     particles:[],waves:[],shake:0,flash:0,emotion:'defiant',
@@ -44,7 +44,7 @@ export function createPrinterMutiny(context={}){
     context.events?.emit?.(evt);
     context.audio?.play?.(type,evt);
   };
-  const frame=()=>({phase:s.state,cycle:s.cycle+1,boltsRemaining:3-s.removed,removed:s.removed,attempts:s.attempts,failedCounters:s.failedCounters,directive,feederX:s.feederX,feederWidth:s.feederWidth,open:s.open,packet:s.packet&&{...s.packet},projectile:s.projectile&&{...s.projectile},manualHits:s.manualHits,completed:s.completed,knowsCable,hasMira,adMoved:s.adMoved,hint:s.hint,elapsed:s.totalTime,jamTime:s.state==='jam'?s.time:null,safePull:canPull(),shutter:s.shutter});
+  const frame=()=>({phase:s.state,cycle:s.cycle+1,boltsRemaining:3-s.removed,removed:s.removed,attempts:s.attempts,failedCounters:s.failedCounters,directive,feederX:s.feederX,feederTargetX:s.feederTargetX,feederWidth:s.feederWidth,open:s.open,packet:s.packet&&{...s.packet},projectile:s.projectile&&{...s.projectile},manualHits:s.manualHits,completed:s.completed,knowsCable,hasMira,adMoved:s.adMoved,hint:s.hint,elapsed:s.totalTime,jamTime:s.state==='jam'?s.time:null,safePull:canPull(),shutter:s.shutter});
   function packetSpawn(){return {x:-235,y:265,w:124,h:72,held:false};}
   function worldWidth(){return context.viewport?.worldWidth||1350;}
   function respawn(){s.packet=packetSpawn(); if(worldWidth()<780) s.packet.x=-Math.min(190,worldWidth()*.24);}
@@ -54,9 +54,13 @@ export function createPrinterMutiny(context={}){
   function canPull(){return s.state==='jam'&&s.time>=.4&&((s.time-.4)%4)<3.35;}
   function moveTo(state){s.state=state;s.time=0;s.pointer=null;s.projectile=null;if(s.packet)s.packet.held=false;s.flash=0;s.warning=0;}
   function beginCycle(){
-    s.feederX=s.cycle===0?0:(s.cycle===1?100:-105);
-    if(directive==='MOVING_GOALPOSTS')s.feederX+=s.cycle===0?70:s.cycle===1?-160:155;
-    s.feederX=clamp(s.feederX,-135,135);
+    // Travel on a visibly animated rail ONLY in the telegraph lull.
+    // Never teleport the feeder beneath an active packet drag.
+    s.feederFromX=s.cycle===0?0:s.feederX;
+    let target=s.cycle===0?0:(s.cycle===1?100:-105);
+    if(directive==='MOVING_GOALPOSTS')target+=s.cycle===0?70:s.cycle===1?-160:155;
+    s.feederTargetX=clamp(target,-135,135);
+    s.feederX=s.feederFromX;
     s.feederWidth=s.cycle===0?172:136;
     s.shutter=directive==='DOUBLE_ENTRY';s.adMoved=directive!=='SPONSORED_WORKFLOW';
     s.miraUsed=false;s.adX=45;s.relief=0;s.open=false;s.emotion='smug';s.pagePull=0;
@@ -94,6 +98,9 @@ export function createPrinterMutiny(context={}){
     s.warning=Math.max(0,s.warning-dt);s.relief=Math.max(0,s.relief-dt);
     s.particles=s.particles.filter(p=>p.life>0);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=230*dt;p.life-=dt;}
     if(s.state==='telegraph'){
+      const travel=clamp(s.time/1.65,0,1);
+      const smooth=travel*travel*(3-2*travel);
+      s.feederX=s.feederFromX+(s.feederTargetX-s.feederFromX)*smooth;
       for(const p of s.waves){if(!p.hit){p.x+=p.vx*dt;p.angle+=dt*2.8;}}
       if(s.time>=3.2)jam();
     }else if(s.state==='counter'){
@@ -131,7 +138,8 @@ export function createPrinterMutiny(context={}){
       if(!s.adMoved&&isIn(p,{x:s.adX,y:65,w:200,h:135})){
         s.pointer={id,type:'ad',start:p,last:p,origin:{x:s.adX,y:65}};return;
       }
-      if(hasMira&&!s.miraUsed&&isIn(p,{x:Math.min(260,worldWidth()*.35),y:153,w:105,h:110})){
+      // Face AND its visible HOLD? label are both actual hit targets.
+      if(hasMira&&!s.miraUsed&&(isIn(p,{x:Math.min(260,worldWidth()*.35),y:153,w:105,h:110})||isIn(p,{x:Math.min(260,worldWidth()*.35),y:220,w:174,h:46}))){
         s.miraUsed=true;s.feederWidth+=78;s.relief=1.2;emit('printer-mira-assist',{manual:true});s.hint='MIRA HELD THE FEEDER. NICE SHOT!';return;
       }
       if(s.packet&&isIn(p,{x:s.packet.x,y:s.packet.y,w:s.packet.w+35,h:s.packet.h+35})){
