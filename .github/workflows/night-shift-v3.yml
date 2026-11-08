@@ -1,0 +1,156 @@
+name: Night Shift v3 | release evidence and gated Pages publish
+
+on:
+  push:
+    branches: [rebuild/night-shift-v3-hd, agents/v3-release-nova0811]
+    paths:
+      - 'night-shift-v3.html'
+      - 'night-shift-v3/**'
+      - 'assets/night-shift-v3/**'
+      - 'qa/v3-release*'
+      - 'coordination/reports/release-*'
+      - '.github/workflows/night-shift-v3.yml'
+  pull_request:
+    branches: [rebuild/night-shift-v3-hd]
+    paths:
+      - 'night-shift-v3.html'
+      - 'night-shift-v3/**'
+      - 'assets/night-shift-v3/**'
+      - 'qa/v3-release*'
+      - 'coordination/reports/release-*'
+      - '.github/workflows/night-shift-v3.yml'
+  workflow_dispatch:
+    inputs:
+      publish_candidate:
+        description: 'Manually publish rebuilt branch to EXISTING Pages site (false by default)'
+        type: boolean
+        required: true
+        default: false
+      approval_phrase:
+        description: 'To publish type PUBLISH_NIGHT_SHIFT_V3 after full signoff'
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: night-shift-v3-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  protected-incumbent:
+    name: Verify HD fallback and capture actual reference frames
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Source and subpath-safety checks
+        run: node qa/v3-release.audit.cjs --source
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Serve same-origin website
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/night-shift-v3-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/arcade-office-hd.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/night-shift-v3-http.log
+          exit 1
+      - name: Real HD screenshots and runtime exceptions
+        run: node qa/v3-release.audit.cjs --incumbent
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-incumbent-${{ github.run_id }}
+          path: qa-artifacts/v3-release/
+          retention-days: 14
+
+  candidate-smoke:
+    name: Candidate browser gate (RED until game exists)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Serve same-origin website
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/night-shift-v3-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/arcade-office-hd.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/night-shift-v3-http.log
+          exit 1
+      - name: Actual full-bleed V3 1080p/1440p/4K/ultrawide/portrait/DPR2
+        run: node qa/v3-release.audit.cjs --candidate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-candidate-${{ github.run_id }}
+          path: qa-artifacts/v3-release/
+          retention-days: 14
+
+  publish:
+    name: MANUAL ONLY | accepted v3 Pages publication
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/rebuild/night-shift-v3-hd' &&
+      inputs.publish_candidate == true &&
+      inputs.approval_phrase == 'PUBLISH_NIGHT_SHIFT_V3'
+    needs: [protected-incumbent, candidate-smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 2}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Hard gate on accepted 16-card campaign, boss and visual evidence
+        run: node qa/v3-release.audit.cjs --release
+      - name: Publish all tracked existing routes without overwriting any game files
+        run: |
+          mkdir -p _site
+          git archive HEAD | tar -x -C _site
+          touch _site/.nojekyll
+          test -f _site/index.html
+          test -f _site/arcade-office-hd.html
+          test -f _site/night-shift-v3.html
+          sha256sum _site/arcade-office-hd.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site}
+      - name: Publish to existing GitHub Pages (explicitly approved only)
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Fresh Chromium verification of actual public site
+        env:
+          TEST_BASE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+          node qa/v3-release.audit.cjs --candidate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-public-${{ github.run_id }}
+          path: qa-artifacts/v3-release/
+          retention-days: 30
