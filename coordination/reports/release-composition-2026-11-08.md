@@ -3,7 +3,7 @@
 **Execution:** Sunday 8 Nov 2026 AEDT.  
 **PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/10  
 **Authoring branch:** `agents/v3-release-nova0811`  
-**Actual test:** https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474616806
+**Latest audited build:** https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42475176429
 
 ## Implemented, not hypothetical
 
@@ -22,24 +22,25 @@ These are 12 individually authored microgames plus both bosses. **Not a full 12-
 
 - `qa/v3-release-composition.test.mjs`: actually imports, constructs, enters, ticks, snapshots, cancels and disposes the 14 original scenes using a shared injectable context; asserts event idempotency and no completion awarded without manual actions.
 - `previews/v3-release-composition.html`: full-viewport interactive source rehearsal, select any of 14 real modules, drag/click, no fictional score commits. Includes one consistent viewport/input adapter with intact viewport object across live resize.
-- `qa/v3-release-composition.browser.cjs`: real Chromium rendering and error/missing-asset checks, 19 clean scene screenshots across 1920×1080 and 650×800, two physical-input captures, on-the-fly desktop-to-portrait resize.
+- `qa/v3-release-composition.browser.cjs`: real Chromium rendering and error/missing-asset checks, 19 clean scene screenshots across 1920×1080 and 650×800, multiple physical-input captures (stamp, printer counter, bonus FILE/COOL), on-the-fly desktop-to-portrait resize.
 - `.github/workflows/night-shift-v3.yml`: read-only nine-lane browser + unit matrix, isolated scene composition, published HD fallback QA, manually gated Pages deployment, and a downloadable standalone `playable` source bundle with a README and pinned source SHAs.
 - `qa/v3-release-previews.cjs`: expanded to cover PR, both bosses and accessibility.
+- `qa/v3-release-offline-bundle.cjs` + `qa/v3-release-offline.test.cjs`: use esbuild on genuine owned modules to emit one self-contained double-click HTML, then validate with real Chromium using a `file://` URL and **no network**.
 
 ### Actual testing evidence
 
-Run [42474195185](https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474195185) yielded:
+Run [42475176429](https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42475176429) yielded:
 
 - **266/266 source composition checks passed; 0 failures; 5 explicit missing-production warnings.**
-- **47/47 Chromium composition checks passed; 19 scene screenshots plus two actual physical-input captures; 0 runtime/network failures.** The shared canvas pointer transform was tested via a real click on a moving approved I1 paper, exactly one manual approval at both **1920×1080** and **650×800**. Also tested desktop→portrait resize without stale hit-test dimensions.
+- **55/55 real Chromium composition checks passed; 19 clean scene captures plus actual pointer tests. I1 accepted exactly one manual moving-paper stamp at desktop and portrait. Printer Mutiny jam pull advanced to the counter phase, then a real packet fling removed exactly one bolt at both sizes. THE QUOTA accepted two separately replayed **FILE** and **COOL** physical packet drags: FILE awarded exactly **+5** Corporate points, COOL **0**, at both sizes. Desktop→portrait live resize did not stale the shared input transform.
 - **9/9 independently contributed module preview jobs passed** their own native unit/browser smoke stages.
 - **HD fallback browser regression passed**; existing releases remain unchanged.
 - **Candidate production route gate FAILED** because `night-shift-v3.html` genuinely does not exist on integration branch; **publish SKIPPED**. This is expected and correct, not a passing release.
 
-Download genuine evidence: https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474616806  
-Standalone runnable source bundle: https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42474195185/artifacts/13614033443
+**Direct Chromium evidence and reports:** https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42475176429/artifacts/13615331208  
+**Portable, independently validated bundle:** https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42475176429/artifacts/13615261433
 
-**Bundle run:** Unzip, `cd` into extracted directory, `python3 -m http.server 4173`, open `http://localhost:4173/previews/v3-release-composition.html`. This is a real playable **rehearsal**, not a finished/university-ready game.
+**Play immediately:** Extract and open **`index.html`** in a desktop browser. The genuine source modules are bundled into a single **135,603-byte HTML file** through esbuild; no webserver, internet or software installation is required to play this independent rehearsal. It passed **10/10 real offline Chromium tests** across 1920×1080 and 650×800, including all 14 module imports, switching to B2, fullscreen canvas, zero HTTP requests, and zero browser exceptions. For unbundled/inspectable source, extract the ZIP then run `python3 -m http.server 4173` from the archive root and open `http://localhost:4173/previews/v3-release-composition.html`. Source SHA manifest is inside the ZIP. Not a finished course release.
 
 ## Visual inspection and corrective cycle
 
