@@ -27,3 +27,9 @@ The authoritative Corporate pace/scoring references are **P1 14,000ms; P2 12,000
 P1 SEND now requires a zero axis at the moment of submission, even after a player corrects the chart and drags the baseline back up. The Y-axis tick labels reflect the actual current baseline; bars are centered for better legibility. A correct axis action is not farmable with repeated drags.
 
 Run `node --test qa/v3-pr.test.mjs` for the canonical-contract, axis-reversal, P2 help-recovery and invalid-time-step tests. Run `python qa/v3-pr.regression-browser.py` for the fast 1920×1080 and 650×800 real Chromium/ES-module gameplay checks. The existing `qa/v3-pr.browser.py` remains the full viewport/playthrough suite. Both browser scripts load the **unmodified native ES module graph** via data-URL imports when Chromium administrator policy blocks localhost navigation: this still tests actual exports/imports, not a flattened JS facsimile.
+
+### Physical directive adapter (P4)
+
+`context.run.activeDirective`, `context.run.directive`, `context.effects.activeDirective`, `context.effects.directive` or `context.options.directive` may provide a string ID or an `{id}` object. Without it the original fair standalone card remains unchanged.
+
+With **`moving-goalposts`**, P4's HEADLINE and CONTEXT exits visibly trade places along a continuous 0.7-second rail at 1.6 seconds of unpaused action. The motion freezes during active report dragging. Hit-testing uses the same moving geometry as rendering, and final completion evidence retains the *chosen framing*, not the original left/right position. A synthetic `directive-shift` event is emitted once for animation/audio notification, never for scoring. Both benefits remain valid, with the exact same recorded report facts. Unit tests check simultaneous label/effect/hitbox correctness and drag freeze; real mouse-driven Chromium tests run at 1920×1080 and 650×800.
