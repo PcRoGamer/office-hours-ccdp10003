@@ -10,6 +10,7 @@ const args=process.argv.slice(2),val=(key,fallback)=>{const i=args.indexOf(key);
 const root=resolve(val('--root',process.cwd())),out=resolve(val('--out',join(root,'qa/v3-safetynet-preview-evidence')));
 const lanes=['intake','services','pr','printer','quota','systems','physics','story'];
 const selected=val('--only','').split(',').filter(Boolean),chosen=selected.length?lanes.filter(x=>selected.includes(x)):lanes;
+const viewports=val('--viewports','1440x900,650x800').split(',').map(v=>{const m=/^([1-9]\d{1,4})x([1-9]\d{1,4})$/.exec(v.trim());if(!m)throw Error('Invalid viewport '+v);return [Number(m[1]),Number(m[2])];});
 const chrome=process.env.CHROME_PATH||(process.platform==='win32'?
  ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe','C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe']:
  ['/usr/bin/chromium','/usr/bin/google-chrome']).find(existsSync);
@@ -54,7 +55,7 @@ try{
  for(const lane of chosen){
   const rel='previews/v3-'+lane+'.html';
   if(!existsSync(join(root,rel))){records.push({lane,status:'pending',reason:'Missing specialist preview'});continue}
-  for(const [width,height] of [[1440,900],[650,800]]){
+  for(const [width,height] of viewports){
    client.errors.length=0;client.missing.length=0;
    await client.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
    await client.send('Page.navigate',{url:origin+'/'+rel});
@@ -68,8 +69,9 @@ try{
    const shot=await client.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const buffer=Buffer.from(shot.data,'base64');
    const filename='v3-'+lane+'-'+width+'x'+height+'.png';writeFileSync(join(out,filename),buffer);
    const errors=client.errors.slice(),missingAssets=client.missing.slice();
-   const status=(!before.canvases.length||before.overflow||after.overflow||errors.length||missingAssets.length)?'fail':'pass';
-   records.push({lane,width,height,status,canvasBoxes:before.canvases,buttons:before.buttons.map(b=>b.name),clicked:target?.name||null,horizontalOverflow:before.overflow||after.overflow,errors,missingAssets,filename,sha256:createHash('sha256').update(buffer).digest('hex')});
+   const coversViewport=before.canvases.some(c=>c.x<=2&&c.y<=2&&c.width>=width-2&&c.height>=height-2);
+   const status=(!coversViewport||before.overflow||after.overflow||errors.length||missingAssets.length)?'fail':'pass';
+   records.push({lane,width,height,status,canvasBoxes:before.canvases,buttons:before.buttons.map(b=>b.name),clicked:target?.name||null,coversViewport,horizontalOverflow:before.overflow||after.overflow,errors,missingAssets,filename,sha256:createHash('sha256').update(buffer).digest('hex')});
    console.log(lane+' '+width+'x'+height+' '+status+': '+before.canvases.length+' canvas, '+errors.length+' JS errors, '+missingAssets.length+' missing assets');
   }
  }
