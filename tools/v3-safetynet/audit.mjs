@@ -35,6 +35,17 @@ export function gitBlobSha(buffer) {
   const bytes = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
   return createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
 }
+/** Hash working content after Git clean filters to avoid false Windows CRLF edits.
+ * This still checks actual working files, rather than trusting the Git index.
+ * Outside a Git checkout, raw-byte hashing fails closed.
+ */
+export function workingBlobSha(root, filename, filepath) {
+  const result = spawnSync('git', ['hash-object', '--path', filename, filepath], {
+    cwd: root, encoding: 'utf8', timeout: 10000
+  });
+  const sha = result.status === 0 ? result.stdout.trim() : '';
+  return /^[a-f0-9]{40}$/.test(sha) ? sha : gitBlobSha(readFileSync(filepath));
+}
 export function idsInSource(source) {
   const ids = new Set();
   const re = /\bid\s*:\s*(['"`])([ISPT][1-4])\1/g;
@@ -94,7 +105,7 @@ export function audit(root, { release = false, syntax = true } = {}) {
   for (const [filename, expected] of Object.entries(LEGACY_BLOBS)) {
     const filepath = join(root, filename);
     if (!existsSync(filepath)) { add('legacy',filename,'fail','Legacy release missing'); continue; }
-    const actual = gitBlobSha(readFileSync(filepath));
+    const actual = workingBlobSha(root, filename, filepath);
     add('legacy',filename,actual === expected ? 'pass' : 'fail',actual === expected ? 'Byte-identical to pinned main release' : `Legacy release changed: expected ${expected}, got ${actual}`);
   }
   const contractFile = join(root,'design/v3/contract.json');
