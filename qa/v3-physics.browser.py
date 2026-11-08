@@ -5,7 +5,6 @@ Requires the MIT-licensed vendored Planck bundle and Python Playwright.
 import json
 import subprocess
 import socket
-import socket
 import sys
 import time
 from pathlib import Path
@@ -21,7 +20,7 @@ try:
     time.sleep(1.3)
     all_results=[]
     with sync_playwright() as p:
-        for width,height,dpr in [(1920,1080,1),(2560,1440,1),(3840,2160,1),(3440,1440,1),(650,800,1)]:
+        for width,height,dpr in [(1920,1080,1),(1920,1080,2),(2560,1440,1),(3840,2160,1),(3440,1440,1),(650,800,1)]:
             browser=p.chromium.launch(headless=True)
             page=browser.new_page(viewport={'width':width,'height':height},device_scale_factor=dpr)
             errs=[]
@@ -33,14 +32,15 @@ try:
                 print('BROWSER DEBUG',width,height,'PAGE ERRORS',errs,'PLANCK',page.evaluate('typeof window.planck'),'STATE',page.evaluate('JSON.stringify(window.__physicsPreview?.snapshot())?.slice(0,500)'),flush=True)
                 raise
             page.wait_for_timeout(250)
-            shot=OUT/f'desk-{width}x{height}.png'
+            shot=OUT/f'desk-{width}x{height}' + ('.png' if dpr==1 else f'-dpr{dpr}.png')
             page.screenshot(path=str(shot),full_page=True)
             s=page.evaluate('window.__physicsPreview.snapshot()')
             assert not errs,f'{width}x{height} errors: {errs}'
             assert s['viewport']['width']==width and s['viewport']['height']==height, s
             assert s['sim']['tick']>0
+            assert abs(s['viewport']['dpr']-dpr)<.01, f'DPR mismatch: {s}'
             assert len(s['sim']['bodies'])>=6
-            if (width,height)!=(1920,1080):
+            if (width,height,dpr)!=(1920,1080,1):
                 all_results.append({'viewport':f'{width}x{height}','shot':shot.name,'errors':errs,'dpr':dpr,'drag_score':'not exercised'})
                 print('PASS VISUAL',f'{width}x{height}',flush=True)
                 page.close()
@@ -62,12 +62,57 @@ try:
             page.wait_for_timeout(350)
             after=page.evaluate('window.__physicsPreview.snapshot()')
             assert after['score']>=1, f'pointer drag did not register: {width}x{height} {after}'
+            # Resize after a real scored physical gesture. This used to erase the run.
+            saved_score=after['score']
+            saved_unscored={body['id'] for body in after['sim']['bodies'] if body['id'].startswith('form-')}
+            page.set_viewport_size({'width':650,'height':800})
+            page.wait_for_timeout(280)
+            narrow=page.evaluate('window.__physicsPreview.snapshot()')
+            assert narrow['score']==saved_score, f'RESIZE LOST SCORE: {narrow}'
+            assert {body['id'] for body in narrow['sim']['bodies'] if body['id'].startswith('form-')}==saved_unscored, 'RESIZE LOST LIVE FORMS'
+            assert narrow['viewport']['width']==650 and narrow['viewport']['height']==800
+            chute=next(body for body in narrow['sim']['bodies'] if body['id']=='chute')
+            assert abs(chute['x']-(narrow['worldWidth']-115))<.1, 'BIN NOT ANCHORED AFTER RESIZE'
+            assert narrow['sim']['tick']>after['sim']['tick'], 'PHYSICS STOPPED ON RESIZE'
+            page.screenshot(path=str(OUT/'desk-resized-live-650x800.png'))
+            # Changing dimensions during pause must not unpause, step or wipe progress.
             page.keyboard.press('Space')
             frozen=page.evaluate('window.__physicsPreview.snapshot()')
-            page.wait_for_timeout(180)
-            assert page.evaluate('window.__physicsPreview.snapshot().sim.tick')==frozen['sim']['tick']
+            assert frozen['paused']
+            page.set_viewport_size({'width':1920,'height':1080})
+            page.wait_for_timeout(250)
+            reflow=page.evaluate('window.__physicsPreview.snapshot()')
+            assert reflow['score']==saved_score and reflow['paused']
+            assert reflow['sim']['tick']==frozen['sim']['tick'], 'PHYSICS STEPPED WHILE PAUSED AND RESIZING'
+            page.keyboard.press('Space')
+            page.wait_for_timeout(100)
+            resumed=page.evaluate('window.__physicsPreview.snapshot()')
+            assert not resumed['paused'] and resumed['sim']['tick']>frozen['sim']['tick']
+            # The remaining forms must remain physically interactable after reflow.
+            form=next(body for body in resumed['sim']['bodies'] if body['id'] in saved_unscored)
+            scale=1080/760
+            page.mouse.move(form['x']*scale,form['y']*scale)
+            page.mouse.down()
+            for j in range(18):
+                a=(j+1)/18
+                page.mouse.move((form['x']*(1-a)+(resumed['worldWidth']-115)*a)*scale,
+                                (form['y']*(1-a)+630*a)*scale,steps=1)
+                page.wait_for_timeout(24)
+            page.mouse.up()
+            page.wait_for_timeout(420)
+            after_reflow=page.evaluate('window.__physicsPreview.snapshot()')
+            assert after_reflow['score']>=saved_score+1, f'REFLOWED DESK NOT PLAYABLE: {after_reflow}'
+            page.screenshot(path=str(OUT/'desk-reflow-continued-1920x1080.png'))
+            # Losing focus should release the active pointer and pause without score edits.
+            page.evaluate("window.dispatchEvent(new Event('blur'))")
+            blurred=page.evaluate('window.__physicsPreview.snapshot()')
+            page.wait_for_timeout(170)
+            assert blurred['paused'] and page.evaluate('window.__physicsPreview.snapshot().sim.tick')==blurred['sim']['tick']
+            assert blurred['score']==after_reflow['score'], 'BLUR ALTERED SCORE'
             result={'viewport':f'{width}x{height}','shot':shot.name,'drag_score':after['score'],
-                    'pause_tick':frozen['sim']['tick'],'errors':errs,'dpr':dpr}
+                    'after_resize_score':narrow['score'],
+                    'after_reflow_score':after_reflow['score'],
+                    'resize_pause_tick':frozen['sim']['tick'],'errors':errs,'dpr':dpr}
             print('PASS',json.dumps(result));all_results.append(result)
             page.close()
             browser.close()
