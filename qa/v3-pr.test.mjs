@@ -104,3 +104,60 @@ test('P2 thrown ad physically shields projector and extends only shutter, not sc
  assert.equal(x.done()[0].outcome,'failure');
  assert.equal(x.done()[0].evidence.authoredReferenceMs,12000);
 });
+
+
+test('every resolved PR action is compatible with SYSTEMS immutable manual-action contract',()=>{
+  const paths=[];
+  {
+    const x=setup('P1',{directive:'sponsored-workflow'});
+    x.scene.pointerDown(p(930,300),viewport);x.scene.pointerUp(p(930,300),viewport);
+    x.scene.pointerDown(p(930,415),viewport);x.scene.pointerMove(p(1100,250),viewport);x.scene.pointerUp(p(1100,250),viewport);
+    x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
+    x.scene.pointerDown(p(600,630),viewport);paths.push(x);
+  }
+  {
+    const x=setup('P2');
+    x.scene.pointerDown(p(300,280),viewport);x.scene.pointerMove(p(30,80),viewport);x.scene.pointerUp(p(30,80),viewport);
+    x.scene.pointerDown(p(750,450),viewport);x.scene.pointerMove(p(1080,600),viewport);x.scene.pointerUp(p(1080,600),viewport);
+    x.scene.pointerDown(p(550,360),viewport);x.scene.pointerUp(p(550,360),viewport);paths.push(x);
+  }
+  {
+    const x=setup('P3');x.scene.pointerDown(p(600,528),viewport);
+    for(let i=0;i<400&&!x.done().length;i++){const s=x.scene.snapshot(),t=Math.sin(s.time*(s.locked===2?2.5:1.5)+s.locked*.8)*.67;x.scene.pointerMove(p(600+t*190,528),viewport);x.scene.update(.04);}paths.push(x);
+  }
+  {
+    const x=setup('P4',{directive:'moving-goalposts'});for(let i=0;i<26;i++)x.scene.update(.1);
+    x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(390,565),viewport);x.scene.pointerUp(p(390,565),viewport);paths.push(x);
+  }
+  const required={P1:2,P2:2,P3:1,P4:1};
+  for(const x of paths){
+    assert.equal(x.done().length,1);const id=x.done()[0].cardId;
+    const resolved=new Set(),correct=x.actions().filter(a=>a.correct);
+    assert.ok(correct.length>=required[id],id+' insufficient real actions');
+    for(const action of x.actions()){
+      assert.equal(action.cardId,id);assert.equal(action.synthetic,false);
+      assert.equal(typeof action.objectId,'string');assert.ok(action.objectId.length>0);
+      assert.equal(action.outcome,action.correct?'correct':'wrong');
+      assert.equal(action.gesture,'pointer');assert.ok(Number.isSafeInteger(action.actionSerial));
+      if(action.correct){assert.ok(!resolved.has(action.objectId),id+' duplicate reward');resolved.add(action.objectId);}
+    }
+  }
+});
+test('invalid timestep never poisons animations or game logic while P2/P3 are in motion',()=>{
+  const x=setup('P2');
+  x.scene.pointerDown(p(220,230),viewport);x.scene.pointerMove(p(720,245),viewport);x.scene.pointerUp(p(720,245),viewport);
+  const before=x.scene.snapshot();
+  for(const dt of [NaN,Infinity,-100,undefined])x.scene.update(dt);
+  const after=x.scene.snapshot();
+  assert.deepEqual(after.flight,before.flight);assert.equal(after.coverShield,before.coverShield);assert.equal(after.time,before.time);
+  const y=setup('P3');y.scene.pointerDown(p(600,528),viewport);
+  for(const dt of [NaN,Infinity,-100,undefined])y.scene.update(dt);
+  assert.equal(y.scene.snapshot().charge,0);assert.equal(y.scene.snapshot().time,0);assert.equal(y.scene.snapshot().sideways,0);
+});
+test('scene cannot reward after completion even with stray pointer releases',()=>{
+  const x=setup('P4');x.scene.pointerDown(p(600,402),viewport);
+  x.scene.pointerMove(p(380,565),viewport);x.scene.pointerUp(p(380,565),viewport);
+  const count=x.actions().length;x.scene.pointerDown(p(600,402),viewport);
+  x.scene.pointerMove(p(805,565),viewport);x.scene.pointerUp(p(805,565),viewport);
+  assert.equal(x.actions().length,count);assert.equal(x.done().length,1);
+});
