@@ -9,6 +9,6 @@
 - **Dependencies:** other roles develop in parallel; use mock interface and respect read-only integration code.
 - **Intended tests:** executable state/unit tests, browser rendering and real screenshot/interaction QA wherever available, explicit report.
 
-- **Delivered:** draft PR [#14](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/14) from `agents/v3-story-k7m29`, head commit `560204a1da374e6e28eececfefbe591c66f98c75`.
+- **Delivered:** draft PR [#14](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/14) from `agents/v3-story-k7m29`, head commit `8399a768655f741295ab4d957794195103e6b88f`.
 - **Evidence:** 12/12 narrative checks; five Chromium viewport captures (three real screenshot files committed in PR); five promotion selections, receipt flip and breakdown; zero browser page exceptions. `coordination/reports/story-delivery-k7m29.md` in PR.
 - **Remaining gates:** HTTP-served asset-loading smoke and HD browser side-by-side, integration with SYSTEMS and LEAD, live deployed route. No standalone release claimed.
