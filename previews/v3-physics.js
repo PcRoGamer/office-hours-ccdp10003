@@ -9,10 +9,26 @@ let dpr=1,cssW=1,cssH=1,S=1,W=1300,H=760,sim,files=[],time=0,score=0,
   curtains=0,won=false;
 const r=(x,a,b)=>Math.max(a,Math.min(b,x));
 const cx=()=>W/2;
-function resize(){const box=canvas.getBoundingClientRect();cssW=box.width;cssH=box.height;
-  dpr=Math.max(1,Math.min(devicePixelRatio||1,2));canvas.width=Math.round(cssW*dpr);canvas.height=Math.round(cssH*dpr);
+function resize(){
+  const oldW=W,box=canvas.getBoundingClientRect();
+  cssW=box.width;cssH=box.height;
+  dpr=Math.max(1,Math.min(devicePixelRatio||1,2));
+  canvas.width=Math.round(cssW*dpr);canvas.height=Math.round(cssH*dpr);
   S=cssH/H;W=cssW/S;
-  reset();}
+  if(!sim){reset();return;}
+  if(Math.abs(W-oldW)<.25)return; // DPR or height-only change: no physics disturbance.
+  // Reflow the static stage, never reset scored props, time, perks or attempt state.
+  sim.release({flick:false});
+  const active=pointerId;pointerId=null;
+  if(active!==null&&canvas.hasPointerCapture(active))canvas.releasePointerCapture(active);
+  for(const f of files){
+    if(!sim.objects.has(f.id))continue;
+    const pos=sim.state(f),left=f.width/2+14,right=Math.max(left,W-195);
+    const nextX=r(pos.x/Math.max(1,oldW-200)*(W-200),left,right);
+    sim.setTransform(f,nextX,pos.y,pos.angle);
+  }
+  rebuildFurniture();
+}
 function shadeRect(x,y,w,h,c,b=12){g.fillStyle=c;g.beginPath();g.roundRect(x,y,w,h,b);g.fill();}
 function line(x1,y1,x2,y2,color='#234044',wide=3){g.strokeStyle=color;g.lineWidth=wide;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
 function txt(s,x,y,size=24,col='#1f3a3a',align='center',weight=900){g.textAlign=align;g.textBaseline='middle';g.fillStyle=col;g.font=`${weight} ${size}px Impact,'Arial Narrow',Arial,sans-serif`;g.fillText(s,x,y);}
@@ -32,16 +48,20 @@ function contact(e){if(e.type!=='contact-begin')return;
   if(e.speed>140&&!e.sensor){const id=sim.objects.get(e.a)?.kind==='form'?e.a:e.b,p=sim.state(id);
     if(p&&fx.length<90)burst(p.x,p.y,'#f5af66');}
 }
-function reset(){if(sim)sim.dispose();files=[];score=0;time=0;won=false;paused=false;fx=[];pointerId=null;
-  feedback='';feedbackAge=0;pauseButton.textContent='PAUSE [SPACE]';
-  sim=createPhysics({planck:window.planck,gravity:{x:0,y:930},onEvent:contact});
+function rebuildFurniture(){
+  for(const id of ['floor','right-wall','chute-base','chute','bumper','bumper-small'])sim.remove(id);
   sim.box({id:'floor',x:cx(),y:735,width:Math.max(250,W+100),height:90,restitution:0.15,friction:0.85});
-  sim.box({id:'left-wall',x:0,y:370,width:18,height:800});
   sim.box({id:'right-wall',x:W,y:370,width:18,height:800});
   sim.box({id:'chute-base',x:W-115,y:684,width:170,height:16,friction:0.8});
   sim.box({id:'chute',kind:'chute',x:W-115,y:648,width:146,height:73,sensor:true});
   sim.circle({id:'bumper',kind:'bumper',x:W*.59,y:487,radius:r(W*.032,24,40),restitution:1.17,friction:0.2});
   if(W>720)sim.circle({id:'bumper-small',kind:'bumper',x:W*.7,y:547,radius:24,restitution:1.1});
+}
+function reset(){if(sim)sim.dispose();files=[];score=0;time=0;won=false;paused=false;fx=[];pointerId=null;
+  feedback='';feedbackAge=0;pauseButton.textContent='PAUSE [SPACE]';
+  sim=createPhysics({planck:window.planck,gravity:{x:0,y:930},onEvent:contact});
+  sim.box({id:'left-wall',x:0,y:370,width:18,height:800});
+  rebuildFurniture();
   for(let i=0;i<5;i++){
     let x=r(W*.17+i*Math.min(W*.09,72),78,W-225),y=165+(i%3)*71;
     files.push(sim.box({id:`form-${i}`,kind:'form',data:{label:['INVOICE','OVERTIME','PAY SLIP','EXPENSES','APPROVAL'][i],order:i},
@@ -154,7 +174,13 @@ function end(e, cancelled=false){if(e.pointerId!==pointerId)return;
   sim.release({flick:!cancelled});pointerId=null;
   if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}
 canvas.addEventListener('pointerup',e=>end(e));canvas.addEventListener('pointercancel',e=>end(e,true));
-window.addEventListener('blur',()=>{paused=true;sim?.release({flick:false});pointerId=null;pauseButton.textContent='RESUME [SPACE]';});
+function autoPause(){
+  if(paused)return;
+  paused=true;sim?.release({flick:false});pointerId=null;
+  pauseButton.textContent='RESUME [SPACE]';
+}
+window.addEventListener('blur',autoPause);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)autoPause();});
 function togglePause(){paused=!paused;sim?.release({flick:false});pointerId=null;
   pauseButton.textContent=paused?'RESUME [SPACE]':'PAUSE [SPACE]';}
 pauseButton.addEventListener('click',togglePause);
