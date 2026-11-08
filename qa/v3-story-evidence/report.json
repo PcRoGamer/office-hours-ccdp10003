@@ -1,0 +1,54 @@
+{
+  "url": "bundled in-memory preview (sandbox blocks browser navigation)",
+  "viewports": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "worldWidth": 1920,
+      "offers": 3,
+      "screenshot": "promotion-1920x1080.png"
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "worldWidth": 2560,
+      "offers": 3,
+      "screenshot": "promotion-2560x1440.png"
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "worldWidth": 3840,
+      "offers": 3,
+      "screenshot": "promotion-3840x2160.png"
+    },
+    {
+      "width": 3440,
+      "height": 1440,
+      "worldWidth": 3440,
+      "offers": 3,
+      "screenshot": "promotion-3440x1440.png"
+    },
+    {
+      "width": 650,
+      "height": 800,
+      "worldWidth": 650,
+      "offers": 3,
+      "screenshot": "promotion-650x800.png"
+    }
+  ],
+  "interaction": {
+    "fivePromotionsSelected": true,
+    "firstLens": "OFFICIAL QUOTA",
+    "secondLens": "PEOPLE & QUALITY",
+    "breakdownVisible": true,
+    "picks": [
+      "perk:carbon-copy",
+      "perk:chain-stamp",
+      "perk:focus-lens",
+      "perk:mira-backup",
+      "perk:carbon-copy"
+    ]
+  },
+  "errors": []
+}
