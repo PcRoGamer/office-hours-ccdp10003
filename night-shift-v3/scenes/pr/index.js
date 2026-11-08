@@ -3,10 +3,10 @@ import {C, clamp, rr, tx, line, circle, layout, sceneBackdrop, theatrePanel, but
 // All interactions consume scene WORLD coordinates from the shared viewport.
 // Game logic is deterministic, dt-driven and completely independent of the preview.
 const cards=[
-  {id:'P1', imperative:'RESET THE SCALE!',title:'THE TRUTH IS IN THE AXIS',seconds:30,referenceMs:28000},
-  {id:'P2', imperative:'POP-UP PURGE!',title:'THE PROJECTOR IS SPONSORED',seconds:32,referenceMs:30000},
-  {id:'P3', imperative:'HOLD THE SLIDE!',title:'FOCUS IS A TEAM SPORT',seconds:31,referenceMs:28500},
-  {id:'P4', imperative:'HEADLINE OR CONTEXT?',title:'SAME FACTS. DIFFERENT STORY.',seconds:35,referenceMs:32000}
+  {id:'P1', imperative:'RESET THE SCALE!',title:'THE TRUTH IS IN THE AXIS',seconds:30,referenceMs:14000},
+  {id:'P2', imperative:'POP-UP PURGE!',title:'THE PROJECTOR IS SPONSORED',seconds:32,referenceMs:12000},
+  {id:'P3', imperative:'HOLD THE SLIDE!',title:'FOCUS IS A TEAM SPORT',seconds:31,referenceMs:12000},
+  {id:'P4', imperative:'HEADLINE OR CONTEXT?',title:'SAME FACTS. DIFFERENT STORY.',seconds:35,referenceMs:14000}
 ];
 const noop=()=>{};
 function base(context,meta){
@@ -25,7 +25,7 @@ function base(context,meta){
     emit({type:'card-action',kind,correct,synthetic:false,...details});
     context?.audio?.play?.(correct?'hit':'miss');
   };
-  const update=(dt)=>{if(state.finished)return;state.time+=clamp(Number.isFinite(dt)?dt:0,0,.1);state.flash=Math.max(0,state.flash-dt);if(state.time>=meta.seconds)complete('failure',{cause:'shutter',progress:state.scene});};
+  const update=(dt)=>{if(state.finished)return;const step=clamp(Number.isFinite(dt)?dt:0,0,.1);state.time+=step;state.flash=Math.max(0,state.flash-step);if(state.time>=meta.seconds)complete('failure',{cause:'shutter',progress:state.scene});};
   const snapshot=()=>JSON.parse(JSON.stringify(state));
   return {state,emit,complete,act,update,snapshot,meta};
 }
@@ -49,11 +49,11 @@ function createP1(context,meta){
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
     theatrePanel(ctx,g.x,170,g.w,l.H-292,C.paper);
     tx(ctx,'QUARTERLY CLICKS',g.x+g.w/2,194,l.portrait?22:31,C.ink);
-    const p=g.chart;const bx=p.x+Math.min(68,p.w*.14),barW=Math.min(115,p.w*.25),barGap=Math.min(150,p.w*.32);
-    const ground=p.y+p.h-33,top=p.y+37,available=ground-top;
+    const p=g.chart;const barW=Math.min(115,p.w*.25),barGap=Math.min(185,p.w*.36),bx=p.x+Math.max(48,(p.w-barGap-barW)/2);
+    const ground=p.y+p.h-33,top=p.y+37,available=ground-top,max=1280;
     // Always draw the exact same figures. Only the axis scale can change.
-    for(let i=0;i<5;i++){const y=top+i*available/4;line(ctx,bx-16,y,p.x+p.w-17,y,'#cad6c8',2)}
-    const max=1280,range=Math.max(80,max-s.baseline),h1=clamp((1240-s.baseline)/range,0,1)*available,h2=clamp((1280-s.baseline)/range,0,1)*available;
+    for(let i=0;i<5;i++){const y=top+i*available/4;line(ctx,p.x+21,y,p.x+p.w-17,y,'#cad6c8',2);tx(ctx,Math.round(max-(max-s.baseline)*i/4).toLocaleString('en-US'),p.x+27,y-13,l.portrait?11:15,C.slate,'left',800)}
+    const range=Math.max(80,max-s.baseline),h1=clamp((1240-s.baseline)/range,0,1)*available,h2=clamp((1280-s.baseline)/range,0,1)*available;
     rr(ctx,bx,ground-h1,barW,Math.max(2,h1),5,C.blue,C.ink,3);
     rr(ctx,bx+barGap,ground-h2,barW,Math.max(2,h2),5,C.red,C.ink,3);
     tx(ctx,'1,240',bx+barW/2,ground-h1-18,l.portrait?16:23,C.ink);tx(ctx,'1,280',bx+barGap+barW/2,ground-h2-18,l.portrait?16:23,C.ink);
@@ -61,7 +61,7 @@ function createP1(context,meta){
     const handleY=clamp(p.y+p.h-9+((1200-s.baseline)/1200)*5,p.y,p.y+p.h);
     rr(ctx,p.x-4,handleY-12,p.w+8,27,9,C.red,C.ink,4);
     tx(ctx,`BASELINE ${Math.round(s.baseline).toLocaleString('en-US')}     ↓ DRAG`,p.x+p.w/2,handleY+1,l.portrait?13:18,C.ink);
-    if(s.corrected){rr(ctx,g.x+25,g.chart.y-7,g.w-50,37,9,C.mint,C.ink,3);tx(ctx,'+40 CLICKS   /   +3.2%   /   ZERO BASELINE',l.cx,g.chart.y+12,l.portrait?13:19,C.ink);}
+    if(s.corrected&&s.baseline===0){rr(ctx,g.x+25,g.chart.y-7,g.w-50,37,9,C.mint,C.ink,3);tx(ctx,'+40 CLICKS   /   +3.2%   /   ZERO BASELINE',l.cx,g.chart.y+12,l.portrait?13:19,C.ink);}
     else sticker(ctx,'MISLEADING!',g.x+g.w-85,g.chart.y+5,{size:l.portrait?11:15});
     button(ctx,s.corrected?'STAMP  SEND':'SHOW  ZERO',g.send.x,g.send.y,g.send.w,g.send.h,{disabled:!s.corrected,small:l.portrait});
     if(!l.portrait)tx(ctx,s.corrected?'CORRECT SCALE. ORIGINAL DATA.':'PULL THE RED BASELINE DOWN TO ZERO',l.cx,l.H-28,l.portrait?13:17,C.cream);
@@ -69,11 +69,11 @@ function createP1(context,meta){
     drawResult(ctx,l,s,s.sent?'SENT WITH THE REAL SCALE':'SHUTTER CLOSED');
   }
   function pointerDown(p,v){if(s.finished)return;const g=geo(v);
-    if(pointIn(p,g.send)){if(s.corrected){s.sent=true;b.act(true,'send-real-chart',{base:0,from:1240,to:1280});b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40});}else b.act(false,'premature-send');return;}
+    if(pointIn(p,g.send)){if(s.corrected&&s.baseline===0){s.sent=true;b.act(true,'send-real-chart',{base:0,from:1240,to:1280});b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40});}else b.act(false,'premature-send');return;}
     if(pointIn(p,{...g.handle,y:g.handle.y-28,h:94})){s.dragging=true;s.gesture={id:p.id,startY:p.y,startBaseline:s.baseline};return;}
   }
-  function pointerMove(p){if(!s.dragging||s.gesture?.id!==p.id||s.finished)return;const dy=p.y-s.gesture.startY;s.baseline=clamp(s.gesture.startBaseline-dy*8,0,1200);if(s.baseline<45){s.baseline=0;s.corrected=true;}}
-  function pointerUp(p){if(s.dragging&&s.gesture?.id===p.id){s.dragging=false;s.gesture=null;if(s.baseline===0&&!s.corrected)s.corrected=true;if(s.corrected&&!s.axisScored){s.axisScored=true;b.act(true,'correct-chart-axis',{before:1200,after:0});}}}
+  function pointerMove(p){if(!s.dragging||s.gesture?.id!==p.id||s.finished)return;const dy=p.y-s.gesture.startY;s.baseline=clamp(s.gesture.startBaseline-dy*8,0,1200);if(s.baseline<45)s.baseline=0;s.corrected=s.baseline===0;}
+  function pointerUp(p){if(s.dragging&&s.gesture?.id===p.id){s.dragging=false;s.gesture=null;s.corrected=s.baseline===0;if(s.corrected&&!s.axisScored){s.axisScored=true;b.act(true,'correct-chart-axis',{before:1200,after:0});}}}
   return {enter,update:b.update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=false;s.gesture=null},snapshot:b.snapshot,dispose:noop};
 }
 
