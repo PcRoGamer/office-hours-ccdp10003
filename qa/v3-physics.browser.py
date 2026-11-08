@@ -45,7 +45,13 @@ try:
     time.sleep(1.3)
     all_results=[]
     with sync_playwright() as p:
-        for width,height,dpr in [(1920,1080,1),(1920,1080,2),(2560,1440,1),(3840,2160,1),(3440,1440,1),(650,800,1)]:
+        cases=[(1920,1080,1),(1920,1080,2),(2560,1440,1),(3840,2160,1),(3440,1440,1),(650,800,1)]
+        if len(sys.argv)>1:
+            case=sys.argv[1]
+            cases=[v for v in cases if f'{v[0]}x{v[1]}@{v[2]}'==case]
+            assert cases, f'Unknown viewport {case}'
+        for width,height,dpr in cases:
+            print('BEGIN CHROMIUM',width,height,dpr,flush=True)
             browser=p.chromium.launch(headless=True)
             page=browser.new_page(viewport={'width':width,'height':height},device_scale_factor=dpr)
             errs=[]
