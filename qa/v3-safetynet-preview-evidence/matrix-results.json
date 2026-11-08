@@ -1,0 +1,421 @@
+{
+  "source": "Real Chrome CDP specialist previews in isolated assembly, not integrated v3 release",
+  "device": "Windows Chrome",
+  "counts": {
+    "pass": 16,
+    "fail": 0,
+    "pending": 0
+  },
+  "records": [
+    {
+      "lane": "intake",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE",
+        "SOUND OFF",
+        "RETRY ↻",
+        "I1 STAMP",
+        "I2 SHRED",
+        "I3 SCAMS",
+        "I4 COPY",
+        "CLOCK IN"
+      ],
+      "clicked": "CLOCK IN",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-intake-1440x900.png",
+      "sha256": "4f54a3b3df3046d5252e469329feae718987bece2256c6aad02925b2ccccbaa7"
+    },
+    {
+      "lane": "intake",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE",
+        "SOUND OFF",
+        "RETRY ↻",
+        "I1 STAMP",
+        "I2 SHRED",
+        "I3 SCAMS",
+        "I4 COPY",
+        "CLOCK IN"
+      ],
+      "clicked": "CLOCK IN",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-intake-650x800.png",
+      "sha256": "b884546c02ff8ec1d6e5e2ba1574800d14eb8cb773fbbcb2eee0b252f4f29784"
+    },
+    {
+      "lane": "services",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "◀",
+        "↺ RETRY",
+        "NEXT ▶",
+        "PAUSE",
+        "MUTE"
+      ],
+      "clicked": "NEXT ▶",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-services-1440x900.png",
+      "sha256": "4f3c6c9e3fd3bb816d8bd6a5b0441570994f0b412baa0dbe1f2e1dc680fba63c"
+    },
+    {
+      "lane": "services",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "◀",
+        "↺ RETRY",
+        "NEXT ▶",
+        "PAUSE",
+        "MUTE"
+      ],
+      "clicked": "NEXT ▶",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-services-650x800.png",
+      "sha256": "90a266914b9848ee25d7aae84fc2f24e25fba5527c375d43ca1c328c763a82cb"
+    },
+    {
+      "lane": "pr",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "↻",
+        "Ⅱ"
+      ],
+      "clicked": "P1",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-pr-1440x900.png",
+      "sha256": "8f36f426dc480b72e7b51cdfb2f3c12d5ee137f5d13e509a052e0e7bb7bb9b0e"
+    },
+    {
+      "lane": "pr",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "↻",
+        "Ⅱ"
+      ],
+      "clicked": "P1",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-pr-650x800.png",
+      "sha256": "83e03c19205571202355b1362712e1f34da61f086dd9ef9cc4421d0eed5df463"
+    },
+    {
+      "lane": "printer",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE",
+        "MUTE",
+        "RETRY BOSS",
+        "CLOCK IN →"
+      ],
+      "clicked": "CLOCK IN →",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-printer-1440x900.png",
+      "sha256": "90ce31ed09b3171a1fa9b57d4d3399b8b8d807f3c893cfd255e3fdaaf9f96385"
+    },
+    {
+      "lane": "printer",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE",
+        "MUTE",
+        "RETRY BOSS",
+        "CLOCK IN →"
+      ],
+      "clicked": "CLOCK IN →",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-printer-650x800.png",
+      "sha256": "fd0a48fac8aea1d1624b8466ecbef2dcdbf7b7482357736ef3078441e69cca26"
+    },
+    {
+      "lane": "quota",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "RESTART",
+        "PAUSE",
+        "MUTE",
+        "?"
+      ],
+      "clicked": "RESTART",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-quota-1440x900.png",
+      "sha256": "4890b719d4b8caf741fa7e600273900f1093ce00b05c812da0c35fe0f1703e6b"
+    },
+    {
+      "lane": "quota",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "RESTART",
+        "PAUSE",
+        "MUTE",
+        "?"
+      ],
+      "clicked": "RESTART",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-quota-650x800.png",
+      "sha256": "66690b77dd9b9a27200bbb88a76f41608cc4d83eb5451028295619f82e413f11"
+    },
+    {
+      "lane": "systems",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [],
+      "clicked": "canvas",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-systems-1440x900.png",
+      "sha256": "c9a1b42f314d00ce34283a966a357d10a3400c93ee145c869f028529f15737bc"
+    },
+    {
+      "lane": "systems",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [],
+      "clicked": "canvas",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-systems-650x800.png",
+      "sha256": "ee0a962226d65095bcf22b73960a281f26142a039fd1699dba3602f8e5d8ccce"
+    },
+    {
+      "lane": "physics",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE [SPACE]",
+        "NEW DESK [R]"
+      ],
+      "clicked": "canvas",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-physics-1440x900.png",
+      "sha256": "d2e43c87e6f928a636aff2762edef7472192aab4eb038472c7ffb264a0e3b30f"
+    },
+    {
+      "lane": "physics",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "PAUSE [SPACE]",
+        "NEW DESK [R]"
+      ],
+      "clicked": "canvas",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-physics-650x800.png",
+      "sha256": "4378a349f389c9b552869b3f82695c984a06811177f92932d6272ee829cd5217"
+    },
+    {
+      "lane": "story",
+      "width": 1440,
+      "height": 900,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 1440,
+          "height": 900,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "OPEN YOUR PROMOTION EMAIL →"
+      ],
+      "clicked": "OPEN YOUR PROMOTION EMAIL →",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-story-1440x900.png",
+      "sha256": "72d0ed6e59707bf04bfcb1555e35101aec38e6b6fd52aad029aa34a39ea17fe3"
+    },
+    {
+      "lane": "story",
+      "width": 650,
+      "height": 800,
+      "status": "pass",
+      "canvasBoxes": [
+        {
+          "width": 650,
+          "height": 800,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "buttons": [
+        "OPEN YOUR PROMOTION EMAIL →"
+      ],
+      "clicked": "OPEN YOUR PROMOTION EMAIL →",
+      "horizontalOverflow": false,
+      "errors": [],
+      "missingAssets": [],
+      "filename": "v3-story-650x800.png",
+      "sha256": "7c40a5bc48b251bd3e16a19b78dc1fd689a4e8411e1c9a51dc9c6d7895ef17d2"
+    }
+  ]
+}
