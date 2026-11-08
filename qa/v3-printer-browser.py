@@ -57,12 +57,26 @@ with sync_playwright() as pw:
     if name in ('1920x1080','650x800'):page.screenshot(path=str(EVIDENCE/f'{name}-poster.png'))
     page.locator('#go').click()
     page.wait_for_timeout(120)
+    if name=='1920x1080':
+      page.keyboard.press('Escape')
+      stopped=state(page)['elapsed']
+      page.wait_for_timeout(180)
+      assert state(page)['elapsed']==stopped,'pause must freeze the gameplay clock'
+      page.keyboard.press('Escape')
     if name in ('1920x1080','650x800'):page.screenshot(path=str(EVIDENCE/f'{name}-telegraph.png'))
     advance(page,3.35)
     if name in ('1920x1080','650x800','3840x2160'):page.screenshot(path=str(EVIDENCE/f'{name}-jam.png'))
     advance(page,.65)
     drag(page,(-104,105),(-104,239));phase(page,'counter')
     page.screenshot(path=str(EVIDENCE/f'{name}-counter.png'))
+    if name=='1920x1080':
+      start_packet=state(page)['packet']
+      pickup=world(page,start_packet['x'],start_packet['y'])
+      page.mouse.move(pickup['x'],pickup['y']);page.mouse.down()
+      page.mouse.move(pickup['x']+75,pickup['y']-20,steps=6)
+      page.keyboard.press('Escape')
+      assert state(page)['packet']['x']==start_packet['x'],'pause must cancel drag and restore packet'
+      page.mouse.up();page.keyboard.press('Escape')
     s=state(page)
     if directive=='DOUBLE_ENTRY':click(page,(s['feederX'],-28))
     if directive=='SPONSORED_WORKFLOW':drag(page,(45,65),(228,65))
@@ -76,7 +90,12 @@ with sync_playwright() as pw:
     assert state(page)['manualHits']==3,(name,state(page))
     page.wait_for_timeout(150)
     if state(page)['completed']:page.screenshot(path=str(EVIDENCE/f'{name}-victory.png'))
-    r={'viewport':name,'css':[w,h],'dpr':dpr,'directive':directive,'screenshots':len(list(EVIDENCE.glob(f'{name}-*.png'))),'bolts':state(page)['removed'],'manualHits':state(page)['manualHits'],'pageErrors':errors,'backing':[page.locator('canvas').evaluate('e=>e.width'),page.locator('canvas').evaluate('e=>e.height')]}
+    final_state=state(page)
+    if name=='1920x1080':
+      assert len(page.evaluate("window.__printerEvents.filter(e=>e.type==='boss-complete')"))==1
+      page.locator('#again').click()
+      assert state(page)['phase']=='telegraph' and state(page)['removed']==0,'replay must restart without retaining bolts'
+    r={'viewport':name,'css':[w,h],'dpr':dpr,'directive':directive,'screenshots':len(list(EVIDENCE.glob(f'{name}-*.png'))),'bolts':final_state['removed'],'manualHits':final_state['manualHits'],'pageErrors':errors,'backing':[page.locator('canvas').evaluate('e=>e.width'),page.locator('canvas').evaluate('e=>e.height')]}
     assert r['backing']==[round(w*dpr),round(h*dpr)],('NATIVE_DPR_BACKING_FAIL',r)
     assert not errors,r
     assert r['bolts']==3 and r['manualHits']==3,r
