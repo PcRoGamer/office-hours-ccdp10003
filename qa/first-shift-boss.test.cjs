@@ -13,17 +13,18 @@ const path = require('node:path');
     page.on('pageerror', e => errors.push(e.message));
     await page.setContent('<style>*{margin:0}canvas{display:block}</style><canvas width="1200" height="760"></canvas>');
     for (const script of ['assets/first-shift/planck-1.5.1.min.js','first-shift/physics.js','first-shift/boss.js']) await page.addScriptTag({path:path.resolve(script)});
-    await page.evaluate(() => {
+    await page.evaluate((selectedPerks) => {
       const canvas = document.querySelector('canvas');
       window.events = [];
-      window.boss = FSCreateBoss({ctx:canvas.getContext('2d'),perks:[],onPacket:(n,c)=>events.push(['packet',n,c]),onBolt:n=>events.push(['bolt',n]),onComplete:()=>{events.push(['complete']);window.bossComplete=true}});
+      window.gearContactSeen = false;
+      window.boss = FSCreateBoss({ctx:canvas.getContext('2d'),perks:selectedPerks,onPacket:(n,c)=>events.push(['packet',n,c]),onBolt:n=>events.push(['bolt',n]),onComplete:()=>{events.push(['complete']);window.bossComplete=true}});
       canvas.onpointerdown=e=>boss.pointerDown(e.clientX,e.clientY);
       canvas.onpointermove=e=>boss.pointerMove(e.clientX,e.clientY);
       canvas.onpointerup=e=>boss.pointerUp(e.clientX,e.clientY);
       let last = 0;
-      const frame = now => {if(last&&!window.bossComplete)boss.update(Math.min(.05,(now-last)/1000));last=now;boss.draw();requestAnimationFrame(frame)};
+      const frame = now => {if(last&&!window.bossComplete)boss.update(Math.min(.05,(now-last)/1000));if(boss.snapshot().phase===1&&boss.snapshot().gearTouched)window.gearContactSeen=true;last=now;boss.draw();requestAnimationFrame(frame)};
       requestAnimationFrame(frame);
-    });
+    }, process.env.FIRST_SHIFT_PERKS ? process.env.FIRST_SHIFT_PERKS.split(',') : []);
     for (let phase=0; phase<3; phase++) {
       for (let i=0;i<(phase===2?2:1);i++) await page.mouse.click(760,600);
       if (phase===2) await page.mouse.click(600,586);
@@ -60,6 +61,7 @@ const path = require('node:path');
       assert(succeeded,`Phase ${phase+1} could not be completed via released pointer shots; events=${JSON.stringify(await page.evaluate(()=>events))}`);
     }
     assert.deepEqual(await page.evaluate(()=>events.filter(e=>e[0]==='bolt').map(e=>e[1])),[1,2,3]);
+    assert.equal(await page.evaluate(()=>window.gearContactSeen),true,'Phase 2 must register a physical gear contact');
     assert.equal((await page.evaluate(()=>events)).filter(e=>e[0]==='complete').length,1);
     assert.deepEqual(errors,[]);
     console.log('BOSS_RELEASED_POINTER_THREE_PHASE_PASS');

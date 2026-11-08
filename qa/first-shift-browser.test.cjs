@@ -3,6 +3,21 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const url=process.env.TEST_BASE_URL||'http://127.0.0.1:4173/first-shift.html';
 fs.mkdirSync('qa-artifacts/first-shift',{recursive:true});
+// Stamps are Planck projectiles, not instantaneous click counters. Wait for
+// each collision before aiming at the next current paper position; otherwise
+// several concurrent projectiles can hit the same moving body on a slow runner.
+async function stampApproved(page,label){
+ for(let i=0;i<5;i++){
+  const id=`paper${i}`,s=await page.evaluate(()=>window.__firstShift.snapshot());
+  assert.equal(s.card,'I1',`${label}: left I1 before stamping ${id}`);
+  const paper=s.scene.items.find(item=>item.id===id),box=await page.locator('canvas').boundingBox();
+  assert(paper,`${label}: ${id} was already removed before its own pointer action`);
+  await page.mouse.click(box.x+s.viewport.ox+paper.x*s.viewport.scale,box.y+s.viewport.oy+paper.y*s.viewport.scale);
+  try{await page.waitForFunction(id=>{const s=window.__firstShift.snapshot();return s.card!=='I1'||!s.scene.items.some(item=>item.id===id)},id,{timeout:5000})}
+  catch(e){await page.screenshot({path:`qa-artifacts/first-shift/${label}-stamp-failure.png`});throw new Error(`${label}: ${id} did not resolve after pointer input; snapshot=${JSON.stringify(await page.evaluate(()=>window.__firstShift.snapshot()))}`,{cause:e})}
+ }
+ await page.waitForFunction(()=>window.__firstShift.snapshot().card==='I3',null,{timeout:5000});
+}
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try {
@@ -15,13 +30,13 @@ fs.mkdirSync('qa-artifacts/first-shift',{recursive:true});
    await narrow.locator('#mobileinfo button').click();await narrow.waitForFunction(()=>window.__firstShift.snapshot().card==='I1');
    await narrow.screenshot({path:'qa-artifacts/first-shift/I1-650.png'});
    await narrow.keyboard.press('Escape');const paused=await narrow.evaluate(()=>window.__firstShift.snapshot());assert.equal(paused.screen,'pause');await narrow.waitForTimeout(350);assert.equal((await narrow.evaluate(()=>window.__firstShift.snapshot())).clock,paused.clock);await narrow.keyboard.press('Escape');assert.equal((await narrow.evaluate(()=>window.__firstShift.snapshot())).screen,'play');assert.deepEqual(errors,[]);
-   const ns=await narrow.evaluate(()=>window.__firstShift.snapshot()),nr=await narrow.locator('canvas').boundingBox();for(const item of ns.scene.items.filter(i=>i.kind==='paper'&&i.id!=='paper5'))await narrow.mouse.click(nr.x+ns.viewport.ox+item.x*ns.viewport.scale,nr.y+ns.viewport.oy+item.y*ns.viewport.scale);await narrow.waitForFunction(()=>window.__firstShift.snapshot().card==='I3',null,{timeout:5000});
+   await stampApproved(narrow,'narrow');
    console.log('FIRST_SHIFT_NARROW_PAUSE_POINTER_PASS');await narrow.close();
   }
   for(const [w,h] of [[1366,768],[1024,600]]){
    const p=await browser.newPage({viewport:{width:w,height:h}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(url);await p.waitForFunction(()=>window.__firstShift?.snapshot);await p.screenshot({path:`qa-artifacts/first-shift/title-${w}.png`});
    let s=await p.evaluate(()=>window.__firstShift.snapshot()),r=await p.locator('canvas').boundingBox();await p.mouse.click(r.x+s.viewport.ox+240*s.viewport.scale,r.y+s.viewport.oy+600*s.viewport.scale);await p.waitForFunction(()=>window.__firstShift.snapshot().card==='I1');s=await p.evaluate(()=>window.__firstShift.snapshot());r=await p.locator('canvas').boundingBox();await p.screenshot({path:`qa-artifacts/first-shift/I1-${w}.png`});
-   for(const item of s.scene.items.filter(i=>i.kind==='paper'&&i.id!=='paper5'))await p.mouse.click(r.x+s.viewport.ox+item.x*s.viewport.scale,r.y+s.viewport.oy+item.y*s.viewport.scale);await p.waitForFunction(()=>window.__firstShift.snapshot().card==='I3',null,{timeout:5000});assert.deepEqual(errors,[]);await p.close();
+   await stampApproved(p,`viewport-${w}`);assert.deepEqual(errors,[]);await p.close();
   }
   console.log('FIRST_SHIFT_DESKTOP_VIEWPORT_POINTER_PASS');
   if(process.env.FIRST_SHIFT_FAILURE==='1'){
@@ -46,7 +61,7 @@ fs.mkdirSync('qa-artifacts/first-shift',{recursive:true});
   await page.waitForTimeout(700);
   await page.screenshot({path:'qa-artifacts/first-shift/i1.png'});
   const before=await snap();
-  for(const p of before.scene.items.filter(i=>i.kind==='paper'&&i.id!=='paper5')) await click(p.x,p.y);
+  await stampApproved(page,'campaign');
   await page.waitForTimeout(2000);
   const after=await snap();
   await page.screenshot({path:'qa-artifacts/first-shift/i1-after-input.png'});

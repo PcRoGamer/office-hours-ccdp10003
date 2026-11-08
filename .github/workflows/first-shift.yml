@@ -47,6 +47,12 @@ jobs:
         run: node qa/first-shift-passive-catch.test.cjs
       - name: Physical scene interaction regressions
         run: node qa/first-shift-physical-scenes.test.cjs
+      - name: Build family pointer regressions
+        run: node qa/first-shift-builds-pointer.test.cjs
+      - name: Precision build boss interaction
+        run: node qa/first-shift-boss.test.cjs
+        env:
+          FIRST_SHIFT_PERKS: bank-shot,magnet-grip
       - name: Licence allocation pointer regressions
         run: node qa/first-shift-licences-pointer.test.cjs
       - name: Boss packet masks with real pointer input
