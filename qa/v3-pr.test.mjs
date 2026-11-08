@@ -18,19 +18,20 @@ for(const route of ['headline','context'])test(`P4 ${route} physically dispatche
 test('all four scenes timeout exactly once and do not progress while not updated',()=>{for(const d of definitions){const x=setup(d.id);x.scene.update(0);assert.equal(x.scene.snapshot().time,0);for(let i=0;i<1000&&!x.done().length;i++)x.scene.update(.1);assert.equal(x.done().length,1,`${d.id} times out`);assert.equal(x.done()[0].outcome,'failure');x.scene.update(.1);assert.equal(x.done().length,1);}});
 test('snapshot is immutable to outsiders',()=>{const x=setup('P2');const snap=x.scene.snapshot();snap.overlays[0].removed=true;assert.equal(x.scene.snapshot().overlays[0].removed,false);});
 
- 
-// Regression from independent QA_GAME PR #12: scoring reference times must never
-// silently inherit a longer introductory shutter allowance.
-test('scoring references match authoritative v3 contract, independent of shutters',async()=>{
+// Regression from independent QA_GAME PR #12: published scoring references must NOT
+// silently inherit longer introductory scene shutters.
+test('scoring references match the authoritative v3 card contract (independent of shutters)',async()=>{
  const fs=await import('node:fs');
  const contract=JSON.parse(fs.readFileSync(new URL('../design/v3/contract.json',import.meta.url),'utf8'));
  for(const d of definitions){
-  const canonical=contract.card_pool.find(c=>c.id===d.id);
-  assert.ok(canonical,`missing canonical ${d.id}`);
-  assert.equal(d.authoredReferenceMs,canonical.authoredReferenceMs,`${d.id} scoring reference`);
-  assert.ok(d.seconds*1000>d.authoredReferenceMs,`${d.id} accessible play window`);
-  const x=setup(d.id);for(let i=0;i<600&&!x.done().length;i++)x.scene.update(.1);
-  assert.equal(x.done()[0].evidence.authoredReferenceMs,canonical.authoredReferenceMs);
+   const canonical=contract.card_pool.find(c=>c.id===d.id);
+   assert.ok(canonical,`missing canonical ${d.id}`);
+   assert.equal(d.authoredReferenceMs,canonical.authoredReferenceMs,`${d.id} reference mismatch`);
+   assert.ok(d.seconds*1000>d.authoredReferenceMs,`${d.id} scene grace must be distinct`);
+   const x=setup(d.id);
+   x.scene.update(.1);
+   for(let i=0;i<600&&!x.done().length;i++)x.scene.update(.1);
+   assert.equal(x.done()[0].evidence.authoredReferenceMs,canonical.authoredReferenceMs);
  }
 });
 test('P1 cannot submit misleading chart after correcting then undoing zero baseline',()=>{
@@ -38,24 +39,31 @@ test('P1 cannot submit misleading chart after correcting then undoing zero basel
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,705),viewport);x.scene.pointerUp(p(400,705),viewport);
  assert.equal(x.scene.snapshot().corrected,true);
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,465),viewport);x.scene.pointerUp(p(400,465),viewport);
- assert.ok(x.scene.snapshot().baseline>0);assert.equal(x.scene.snapshot().corrected,false);
- x.scene.pointerDown(p(600,630),viewport);assert.equal(x.done().length,0);assert.equal(x.actions().at(-1).correct,false);
+ assert.ok(x.scene.snapshot().baseline>0);
+ assert.equal(x.scene.snapshot().corrected,false);
+ x.scene.pointerDown(p(600,630),viewport);
+ assert.equal(x.done().length,0);
+ assert.equal(x.actions().at(-1).correct,false);
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,720),viewport);x.scene.pointerUp(p(400,720),viewport);
  x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
 });
-test('P2 genuine-help dismissal penalised, reversible and never awards success',()=>{
+test('P2 genuine-help dismissal is penalised, visibly reversible and never awards success',()=>{
  const x=setup('P2');
  x.scene.pointerDown(p(550,360),viewport);x.scene.pointerMove(p(780,100),viewport);x.scene.pointerUp(p(780,100),viewport);
- assert.equal(x.done().length,0);assert.ok(x.actions().some(e=>e.kind==='dismiss-genuine-help'&&!e.correct));
+ assert.equal(x.done().length,0);
+ assert.ok(x.actions().some(e=>e.kind==='dismiss-genuine-help'&&!e.correct));
  assert.ok(x.scene.snapshot().overlays.find(o=>o.id==='real').removed);
  for(let i=0;i<10;i++)x.scene.update(.1);
  assert.equal(x.scene.snapshot().overlays.find(o=>o.id==='real').removed,false);
 });
 test('invalid/negative time steps never advance or poison scene clock',()=>{
  for(const d of definitions){
-  const x=setup(d.id);x.scene.update(NaN);x.scene.update(-500);x.scene.update(Infinity);
-  assert.equal(x.scene.snapshot().time,0,`${d.id} invalid time`);
-  x.scene.update(.06);assert.equal(x.scene.snapshot().time,.06);assert.ok(Number.isFinite(x.scene.snapshot().flash));
+   const x=setup(d.id);
+   x.scene.update(NaN);x.scene.update(-500);x.scene.update(Infinity);
+   assert.equal(x.scene.snapshot().time,0,`${d.id} ignored invalid time`);
+   x.scene.update(.06);
+   assert.equal(x.scene.snapshot().time,.06);
+   assert.ok(Number.isFinite(x.scene.snapshot().flash));
  }
 });
 
@@ -78,9 +86,10 @@ test('P4 moving-goalposts rail freezes while carrying a report',()=>{
  assert.equal(x.scene.snapshot().routeShift,1);
 });
 
-test('P1 Sponsored Workflow exposes signed help and dismissible fraudulent cosmetic ad without bypassing manual scale',()=>{
+test('P1 Sponsored Workflow exposes signed help and a dismissible fraudulent cosmetic ad without bypassing manual scale',()=>{
  const x=setup('P1',{directive:'sponsored-workflow'});
  assert.equal(x.scene.snapshot().sponsored,true);
+ // Desktop P1 sponsor window positions are in the right-hand chart margin.
  x.scene.pointerDown(p(930,300),viewport);x.scene.pointerUp(p(930,300),viewport);
  assert.equal(x.scene.snapshot().tipOpened,true);
  assert.equal(x.scene.snapshot().baseline,1200);assert.equal(x.done().length,0);
@@ -91,20 +100,19 @@ test('P1 Sponsored Workflow exposes signed help and dismissible fraudulent cosme
  x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
 });
 
-test('P2 thrown ad physically shields projector and extends only shutter, not scoring reference',()=>{
+test('P2 thrown ad physically shields the projector and extends only the visible shutter, not pace reference',()=>{
  const x=setup('P2');
  x.scene.pointerDown(p(220,230),viewport);x.scene.pointerMove(p(720,245),viewport);x.scene.pointerUp(p(720,245),viewport);
  const st=x.scene.snapshot();assert.equal(st.coverBeats,1);assert.equal(st.graceSeconds,.8);
  assert.equal(x.events.filter(e=>e.type==='popup-cover').length,1);
  assert.equal(x.events.filter(e=>e.type==='popup-cover')[0].bonusWindowSeconds,.8);
  assert.equal(x.done().length,0);
- for(let i=0;i<322;i++)x.scene.update(.1);
+ for(let i=0;i<322;i++)x.scene.update(.1); // 32.2s: extended shutter still open.
  assert.equal(x.done().length,0);
  for(let i=0;i<10;i++)x.scene.update(.1);
  assert.equal(x.done()[0].outcome,'failure');
  assert.equal(x.done()[0].evidence.authoredReferenceMs,12000);
 });
-
 
 test('every resolved PR action is compatible with SYSTEMS immutable manual-action contract',()=>{
   const paths=[];
@@ -133,37 +141,45 @@ test('every resolved PR action is compatible with SYSTEMS immutable manual-actio
   for(const x of paths){
     assert.equal(x.done().length,1);const id=x.done()[0].cardId;
     const resolved=new Set(),correct=x.actions().filter(a=>a.correct);
-    assert.ok(correct.length>=required[id],id+' insufficient real actions');
+    assert.ok(correct.length>=required[id],`${id}: insufficient correct actions`);
     for(const action of x.actions()){
-      assert.equal(action.cardId,id);assert.equal(action.synthetic,false);
+      assert.equal(action.cardId,id);
+      assert.equal(action.synthetic,false);
       assert.equal(typeof action.objectId,'string');assert.ok(action.objectId.length>0);
       assert.equal(action.outcome,action.correct?'correct':'wrong');
-      assert.equal(action.gesture,'pointer');assert.ok(Number.isSafeInteger(action.actionSerial));
-      if(action.correct){assert.ok(!resolved.has(action.objectId),id+' duplicate reward');resolved.add(action.objectId);}
+      assert.equal(action.gesture,'pointer');
+      assert.ok(Number.isSafeInteger(action.actionSerial));
+      if(action.correct){assert.ok(!resolved.has(action.objectId),`${id}: same object rewarded twice`);resolved.add(action.objectId);}
     }
   }
 });
+
 test('invalid timestep never poisons animations or game logic while P2/P3 are in motion',()=>{
   const x=setup('P2');
   x.scene.pointerDown(p(220,230),viewport);x.scene.pointerMove(p(720,245),viewport);x.scene.pointerUp(p(720,245),viewport);
   const before=x.scene.snapshot();
   for(const dt of [NaN,Infinity,-100,undefined])x.scene.update(dt);
   const after=x.scene.snapshot();
-  assert.deepEqual(after.flight,before.flight);assert.equal(after.coverShield,before.coverShield);assert.equal(after.time,before.time);
-  const y=setup('P3');y.scene.pointerDown(p(600,528),viewport);
+  assert.deepEqual(after.flight,before.flight);
+  assert.equal(after.coverShield,before.coverShield);
+  assert.equal(after.time,before.time);
+  const y=setup('P3');
+  y.scene.pointerDown(p(600,528),viewport);
   for(const dt of [NaN,Infinity,-100,undefined])y.scene.update(dt);
-  assert.equal(y.scene.snapshot().charge,0);assert.equal(y.scene.snapshot().time,0);assert.equal(y.scene.snapshot().sideways,0);
+  assert.equal(y.scene.snapshot().charge,0);
+  assert.equal(y.scene.snapshot().time,0);
+  assert.equal(y.scene.snapshot().sideways,0);
 });
-test('scene cannot reward after completion even with stray pointer releases',()=>{
+
+test('scene action emission cannot reward after completed card, even with stray pointer releases',()=>{
   const x=setup('P4');x.scene.pointerDown(p(600,402),viewport);
   x.scene.pointerMove(p(380,565),viewport);x.scene.pointerUp(p(380,565),viewport);
-  const count=x.actions().length;x.scene.pointerDown(p(600,402),viewport);
+  const actions=x.actions().length;x.scene.pointerDown(p(600,402),viewport);
   x.scene.pointerMove(p(805,565),viewport);x.scene.pointerUp(p(805,565),viewport);
-  assert.equal(x.actions().length,count);assert.equal(x.done().length,1);
+  assert.equal(x.actions().length,actions);assert.equal(x.done().length,1);
 });
 
-
-test('Moving Goalposts changes BOTH guaranteed PR cards P1/P4 with truthful hitboxes',()=>{
+test('Moving Goalposts changes BOTH guaranteed PR cards P1 and P4, with truthful target hitboxes',()=>{
  const x=setup('P1',{directive:'moving-goalposts'});
  assert.equal(x.scene.snapshot().sendShift,0);
  for(let i=0;i<24;i++)x.scene.update(.1);
@@ -171,11 +187,13 @@ test('Moving Goalposts changes BOTH guaranteed PR cards P1/P4 with truthful hitb
  assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
  x.scene.pointerDown(p(600,630),viewport);
- assert.equal(x.done().length,0,'old hitbox invalid after visible target move');
- x.scene.pointerDown(p(720,630),viewport);assertWin(x,'P1');
+ assert.equal(x.done().length,0,'old send hitbox invalid after visible move');
+ x.scene.pointerDown(p(720,630),viewport);
+ assertWin(x,'P1');
 });
-test('P1 goalpost freezes during chart drag and announces once',()=>{
- const x=setup('P1',{directive:'moving-goalposts'});x.scene.pointerDown(p(400,520),viewport);
+test('P1 goalpost movement freezes during chart drag and announces once',()=>{
+ const x=setup('P1',{directive:'moving-goalposts'});
+ x.scene.pointerDown(p(400,520),viewport);
  for(let i=0;i<26;i++)x.scene.update(.1);
  assert.equal(x.scene.snapshot().sendShift,0);
  x.scene.pointerUp(p(400,520),viewport);
@@ -183,7 +201,7 @@ test('P1 goalpost freezes during chart drag and announces once',()=>{
  assert.equal(x.scene.snapshot().sendShift,1);
  assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
 });
-test('P4 shows actual worker ledger outcome saved/interrupted/unobserved',()=>{
+test('P4 real worker ledger outcome displays and reports saved, interrupted or unobserved',()=>{
  for(const [worker,outcome] of [['helped','saved'],['not-helped','interrupted']]){
   const x=setup('P4',{eventLedger:[{kind:'worker',objectId:'mira-workstation',outcome:worker,committed:true}]});
   assert.equal(x.scene.snapshot().miraOutcome,outcome);
@@ -192,17 +210,18 @@ test('P4 shows actual worker ledger outcome saved/interrupted/unobserved',()=>{
  }
  const x=setup('P4',{eventLedger:[]});assert.equal(x.scene.snapshot().miraOutcome,'unobserved');
 });
-test('Double Entry P1 requires a second physical linked carbon confirmation',()=>{
+
+test('Double Entry P1 physically requires separate linked-carbon confirmation',()=>{
  const x=setup('P1',{directive:'double-entry'});
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
  x.scene.pointerDown(p(600,630),viewport);
  assert.equal(x.done().length,0);assert.equal(x.scene.snapshot().awaitCopy,true);
  x.scene.pointerDown(p(600,630),viewport);assert.equal(x.done().length,0);
- x.scene.pointerDown(p(405,630),viewport);assertWin(x,'P1');
- assert.equal(x.done()[0].evidence.linkedCopy,true);
+ x.scene.pointerDown(p(405,630),viewport);
+ assertWin(x,'P1');assert.equal(x.done()[0].evidence.linkedCopy,true);
  assert(x.actions().some(a=>a.kind==='stamp-linked-copy'&&a.correct));
 });
-test('Double Entry P4 requires matching copy route before effect is committed',()=>{
+test('Double Entry P4 requires matching copy in chosen route before committing benefit',()=>{
  const x=setup('P4',{directive:'double-entry'});
  x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(385,565),viewport);x.scene.pointerUp(p(385,565),viewport);
  assert.equal(x.done().length,0);assert.equal(x.scene.snapshot().pendingCopy,'headline');
@@ -210,7 +229,8 @@ test('Double Entry P4 requires matching copy route before effect is committed',(
  assert.equal(x.done().length,0);assert.equal(x.actions().at(-1).correct,false);
  x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(385,565),viewport);x.scene.pointerUp(p(385,565),viewport);
  assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'headline');
- assert.equal(x.done()[0].evidence.linkedCopy,true);assert.equal(x.actions().filter(a=>a.correct).length,2);
+ assert.equal(x.done()[0].evidence.linkedCopy,true);
+ assert.equal(x.actions().filter(a=>a.correct).length,2);
 });
 
 test('Fast or Safe P1 provides simultaneous narrow fast and broad deliberate safe physical routes',()=>{
@@ -218,7 +238,10 @@ test('Fast or Safe P1 provides simultaneous narrow fast and broad deliberate saf
   const x=setup('P1',{directive:'fast-or-safe'});
   x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
   if(route==='fast')x.scene.pointerDown(p(645,630),viewport);
-  else{ x.scene.pointerDown(p(405,630),viewport);for(let i=0;i<6;i++)x.scene.update(.1);x.scene.pointerUp(p(405,630),viewport); }
+  else{ x.scene.pointerDown(p(405,630),viewport);
+    for(let i=0;i<6;i++)x.scene.update(.1);
+    x.scene.pointerUp(p(405,630),viewport);
+  }
   assertWin(x,'P1');assert.equal(x.done()[0].evidence.route,route);
  }
 });
@@ -237,31 +260,39 @@ test('Fast or Safe P4 presents narrow HEADLINE and wider delayed CONTEXT paths',
  for(let i=0;i<8;i++)x.scene.update(.1);
  assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'context');
 });
+
 test('Mandatory Collaboration P1 Mira visibly steadies chart but cannot finish it for player',()=>{
- const x=setup('P1',{directive:'mandatory-collaboration'});x.scene.pointerDown(p(770,630),viewport);
- assert.equal(x.scene.snapshot().miraHelped,true);assert.equal(x.scene.snapshot().baseline,750);assert.equal(x.done().length,0);
+ const x=setup('P1',{directive:'mandatory-collaboration'});
+ x.scene.pointerDown(p(770,630),viewport);
+ assert.equal(x.scene.snapshot().miraHelped,true);
+ assert.equal(x.scene.snapshot().baseline,750);
+ assert.equal(x.done().length,0);
  assert.equal(x.events.filter(e=>e.type==='coworker-assist').length,1);
  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
  x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
 });
-test('Mandatory Collaboration P4 Mira expands physically reachable context zone, solo remains viable',()=>{
+test('Mandatory Collaboration P4 Mira expands a physically reachable context zone, solo route remains viable',()=>{
  const normal=setup('P4',{directive:'mandatory-collaboration'});
  normal.scene.pointerDown(p(600,402),viewport);normal.scene.pointerMove(p(805,660),viewport);normal.scene.pointerUp(p(805,660),viewport);
- assert.equal(normal.done().length,0,'unassisted context must not accept out-of-zone release');
- const x=setup('P4',{directive:'mandatory-collaboration'});x.scene.pointerDown(p(865,376),viewport);
- assert.equal(x.scene.snapshot().miraHelped,true);assert.equal(x.events.filter(e=>e.type==='coworker-assist').length,1);
+ assert.equal(normal.done().length,0,'unassisted context cannot accept out-of-zone release');
+ const x=setup('P4',{directive:'mandatory-collaboration'});
+ x.scene.pointerDown(p(865,376),viewport);
+ assert.equal(x.scene.snapshot().miraHelped,true);
+ assert.equal(x.events.filter(e=>e.type==='coworker-assist').length,1);
  x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(805,660),viewport);x.scene.pointerUp(p(805,660),viewport);
  assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'context');
 });
-test('Sponsored Workflow P2 masks signed help behind hostile overlays until fake removed',()=>{
+
+test('Sponsored Workflow P2 masks signed help behind hostile overlays until real physical removal',()=>{
  const x=setup('P2',{directive:'sponsored-workflow'});
  assert.equal(x.scene.snapshot().sponsored,true);
  x.scene.pointerDown(p(550,360),viewport);x.scene.pointerUp(p(550,360),viewport);
- assert.equal(x.scene.snapshot().opened,false,'signed help must not be tappable through an ad');
+ assert.equal(x.scene.snapshot().opened,false,'masked signed help cannot be pre-opened through an ad');
  x.scene.pointerDown(p(300,280),viewport);x.scene.pointerMove(p(30,80),viewport);x.scene.pointerUp(p(30,80),viewport);
- assert.equal(x.scene.snapshot().sponsorUnlocked,true);assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
+ assert.equal(x.scene.snapshot().sponsorUnlocked,true);
+ assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
  x.scene.pointerDown(p(550,360),viewport);x.scene.pointerUp(p(550,360),viewport);
- assert.equal(x.scene.snapshot().opened,true,'real help reachable after fake removed');
+ assert.equal(x.scene.snapshot().opened,true,'real help becomes reachable when fake is removed');
  x.scene.pointerDown(p(750,450),viewport);x.scene.pointerMove(p(1080,600),viewport);x.scene.pointerUp(p(1080,600),viewport);
  assertWin(x,'P2');
 });
