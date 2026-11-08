@@ -7,14 +7,14 @@ export const STORY_SOURCES = Object.freeze({
 });
 
 export const PERK_STORY = Object.freeze({
-  'perk:carbon-copy':{name:'CARBON COPY',object:'Duplicator',effect:'Produce a visible spare legitimate paper after a clean action.',before:'ONE PAPER',after:'GHOST COPY'},
-  'perk:chain-stamp':{name:'CHAIN STAMP',object:'Stamp assembly',effect:'Link nearby valid targets after clean hits.',before:'SINGLE HIT',after:'INK CHAIN'},
-  'perk:bank-shot':{name:'BANK SHOT',object:'Desk bumper',effect:'Ricochet a fling into a target around an obstacle.',before:'BLOCKED ROUTE',after:'BANK ROUTE'},
-  'perk:magnet-grip':{name:'MAGNET GRIP',object:'Magnetic glove',effect:'Catch wider and visibly correct a near-miss release.',before:'MISS',after:'SNAP TO TARGET'},
-  'perk:mira-backup':{name:'MIRA BACKUP',object:'Walkie-talkie',effect:'Mira visibly rescues an item or shields a mistake.',before:'DROPPED',after:'MIRA CATCH'},
-  'perk:safety-net':{name:'SAFETY NET',object:'Desk umbrella',effect:'Deploy a real cushion to catch a hazard.',before:'IMPACT',after:'BOUNCE SAFE'},
-  'perk:time-bank':{name:'TIME BANK',object:'Overtime clock',effect:'Store unused card seconds; tap the clock to spend them.',before:'TIME LOST',after:'RESERVE TIME'},
-  'perk:focus-lens':{name:'FOCUS LENS',object:'Inspector loupe',effect:'Scan a hazard or scam to reveal its real behaviour.',before:'UNKNOWN',after:'TARGET REVEALED'}
+  'perk:carbon-copy':{name:'CARBON COPY',object:'Duplicator',effect:'Produce a visible spare legitimate paper after a clean action.',levelTwoEffect:'Make up to two ghost papers per card, on the first and third clean actions.',before:'ONE PAPER',after:'GHOST COPY'},
+  'perk:chain-stamp':{name:'CHAIN STAMP',object:'Stamp assembly',effect:'Link nearby valid targets after clean hits.',levelTwoEffect:'Arm after one clean hit, and trigger a second ink chain on this card.',before:'SINGLE HIT',after:'INK CHAIN'},
+  'perk:bank-shot':{name:'BANK SHOT',object:'Desk bumper',effect:'Ricochet a fling into a target around an obstacle.',levelTwoEffect:'Bank the same object twice, with a clear two-bumper trajectory.',before:'BLOCKED ROUTE',after:'BANK ROUTE'},
+  'perk:magnet-grip':{name:'MAGNET GRIP',object:'Magnetic glove',effect:'Catch wider and visibly correct a near-miss release.',levelTwoEffect:'Catch within a 35% larger radius and correct stronger near-miss releases.',before:'MISS',after:'SNAP TO TARGET'},
+  'perk:mira-backup':{name:'MIRA BACKUP',object:'Walkie-talkie',effect:'Mira visibly rescues an item or shields a mistake.',levelTwoEffect:'Mira helps twice per department, at most once each boss phase.',before:'DROPPED',after:'MIRA CATCH'},
+  'perk:safety-net':{name:'SAFETY NET',object:'Desk umbrella',effect:'Deploy a real cushion to catch a hazard.',levelTwoEffect:'Deploy up to two visible cushions each department or boss phase.',before:'IMPACT',after:'BOUNCE SAFE'},
+  'perk:time-bank':{name:'TIME BANK',object:'Overtime clock',effect:'Store unused card seconds; tap the clock to spend them.',levelTwoEffect:'Bank up to 10 seconds; spend up to 3 with the clock button per card.',before:'TIME LOST',after:'RESERVE TIME'},
+  'perk:focus-lens':{name:'FOCUS LENS',object:'Inspector loupe',effect:'Scan a hazard or scam to reveal its real behaviour.',levelTwoEffect:'Make two scans per card, with a longer revealed danger window.',before:'UNKNOWN',after:'TARGET REVEALED'}
 });
 
 export const DIRECTIVE_STORY = Object.freeze({
