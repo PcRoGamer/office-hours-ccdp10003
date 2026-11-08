@@ -13,7 +13,7 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const isIn=(p,box)=>p.x>=box.x-box.w/2&&p.x<=box.x+box.w/2&&p.y>=box.y-box.h/2&&p.y<=box.y+box.h/2;
 const point=(x,y)=>({x,y});
 const PHASES=['telegraph','jam','counter','impact','victory'];
-const WIN_IMPERATIVES={telegraph:'DUCK THE PAPER!',jam:'PULL WHEN GREEN!',counter:'FLICK INTO FEEDER!',impact:'BOLT REMOVED!',victory:'PRINTER DEFEATED!'};
+const WIN_IMPERATIVES={telegraph:'STAMP A SHEET!',jam:'PULL WHEN GREEN!',counter:'FLICK INTO FEEDER!',impact:'BOLT REMOVED!',victory:'PRINTER DEFEATED!'};
 
 /** A single entry in definitions; id is not a health-bar based card. */
 export const definitions=[{
@@ -31,7 +31,7 @@ export function createPrinterMutiny(context={}){
     state:'telegraph',time:0,cycle:0,bolts:[true,true,true],removed:0,
     attempts:0,manualHits:0,failedCounters:0,completed:false,
     feederX:0,feederFromX:0,feederTargetX:0,feederWidth:142,open:false,shutter:false,
-    sheetHits:0,adX:105,adMoved:false,miraUsed:false,
+    sheetHits:0,cycleParries:0,adX:105,adMoved:false,miraUsed:false,
     pointer:null,pagePull:0,packet:packetSpawn(),projectile:null,
     particles:[],waves:[],shake:0,flash:0,emotion:'defiant',
     hint:'THREE BOLTS. NO HEALTH BAR.',lastEvent:'',totalTime:0,
@@ -44,7 +44,7 @@ export function createPrinterMutiny(context={}){
     context.events?.emit?.(evt);
     context.audio?.play?.(type,evt);
   };
-  const frame=()=>({phase:s.state,cycle:s.cycle+1,boltsRemaining:3-s.removed,removed:s.removed,attempts:s.attempts,failedCounters:s.failedCounters,directive,feederX:s.feederX,feederTargetX:s.feederTargetX,feederWidth:s.feederWidth,open:s.open,packet:s.packet&&{...s.packet},projectile:s.projectile&&{...s.projectile},manualHits:s.manualHits,completed:s.completed,knowsCable,hasMira,adMoved:s.adMoved,hint:s.hint,elapsed:s.totalTime,jamTime:s.state==='jam'?s.time:null,safePull:canPull(),shutter:s.shutter});
+  const frame=()=>({phase:s.state,cycle:s.cycle+1,boltsRemaining:3-s.removed,removed:s.removed,attempts:s.attempts,failedCounters:s.failedCounters,directive,feederX:s.feederX,feederTargetX:s.feederTargetX,feederWidth:s.feederWidth,open:s.open,packet:s.packet&&{...s.packet},projectile:s.projectile&&{...s.projectile},manualHits:s.manualHits,parries:s.cycleParries,totalParries:s.sheetHits,completed:s.completed,knowsCable,hasMira,adMoved:s.adMoved,hint:s.hint,elapsed:s.totalTime,jamTime:s.state==='jam'?s.time:null,safePull:canPull(),shutter:s.shutter});
   function packetSpawn(){return {x:-235,y:265,w:124,h:72,held:false};}
   function worldWidth(){return context.viewport?.worldWidth||1350;}
   function respawn(){s.packet=packetSpawn(); if(worldWidth()<780) s.packet.x=-Math.min(190,worldWidth()*.24);}
@@ -63,7 +63,7 @@ export function createPrinterMutiny(context={}){
     s.feederX=s.feederFromX;
     s.feederWidth=s.cycle===0?172:136;
     s.shutter=directive==='DOUBLE_ENTRY';s.adMoved=directive!=='SPONSORED_WORKFLOW';
-    s.miraUsed=false;s.adX=45;s.relief=0;s.open=false;s.emotion='smug';s.pagePull=0;
+    s.miraUsed=false;s.adX=45;s.relief=0;s.open=false;s.cycleParries=0;s.emotion='smug';s.pagePull=0;
     s.hint=['THE FEEDER LOOKS HUNGRY.','IT LEARNED TO USE RAILS.','YOUR INBOX IS NOW A WEAPON.'][s.cycle];
     s.waves=Array.from({length:4+s.cycle},(_,i)=>({x:(i*170)-390,y:-130+(i%3)*50,vx:150+i*30,angle:i*.7,hit:false}));
     respawn();moveTo('telegraph');emit('printer-telegraph',{directive,boltsRemaining:3-s.removed});
@@ -71,7 +71,10 @@ export function createPrinterMutiny(context={}){
   function jam(){moveTo('jam');s.emotion='jammed';s.hint=knowsCable?'WAIT FOR GREEN. PULL PAGE OR CABLE.':'WAIT FOR GREEN. DRAG THE PROTRUDING PAGE DOWN.';emit('printer-jam');}
   function opening(){
     moveTo('counter');s.open=true;s.emotion='alarmed';s.hint=directive==='DOUBLE_ENTRY'?'STAMP THE VERIFICATION SEAL FIRST.':'DRAG OR FLICK YOUR PACKET INTO THE LIT FEEDER.';
-    respawn();emit('printer-feeder-open',{feederX:s.feederX});
+    // Optional skill from the tell: each manually parried sheet earns a
+    // larger later shot without replacing the zero-parry guaranteed route.
+    s.feederWidth+=Math.min(3,s.cycleParries)*15;
+    respawn();emit('printer-feeder-open',{feederX:s.feederX,parries:s.cycleParries});
   }
   function collision(x,y){
     if(s.state!=='counter'||!s.open||s.shutter||!s.adMoved)return false;
@@ -104,7 +107,7 @@ export function createPrinterMutiny(context={}){
       for(const p of s.waves){if(!p.hit){p.x+=p.vx*dt;p.angle+=dt*2.8;}}
       if(s.time>=3.2)jam();
     }else if(s.state==='counter'){
-      if(directive==='FAST_OR_SAFE')s.feederWidth=s.time<1.7?90:192;
+      if(directive==='FAST_OR_SAFE')s.feederWidth=(s.time<1.7?90:192)+Math.min(3,s.cycleParries)*15;
       if(directive==='MANDATORY_COLLABORATION'&&!s.miraUsed&&s.time>4.5) s.hint='MIRA CAN STABILISE THE FEEDER. OR GO SOLO!';
       if(s.projectile){
         const p=s.projectile;p.prevX=p.x;p.prevY=p.y;
@@ -127,7 +130,7 @@ export function createPrinterMutiny(context={}){
     if(s.pointer) return;
     if(s.state==='telegraph'){
       const wave=s.waves.find(w=>!w.hit&&distance(p,w)<66);
-      if(wave){wave.hit=true;s.sheetHits++;emit('printer-page-parry',{manual:true});s.particles.push({x:wave.x,y:wave.y,vx:0,vy:-110,life:.55,r:9});}
+      if(wave){wave.hit=true;s.sheetHits++;s.cycleParries++;s.hint='PAPER PARRIED. NEXT FEEDER OPENS WIDER!';emit('printer-page-parry',{manual:true,parries:s.cycleParries});s.particles.push({x:wave.x,y:wave.y,vx:0,vy:-110,life:.55,r:9});}
     }else if(s.state==='jam'){
       const page=isIn(p,pageArea())?'page':knowsCable&&isIn(p,cableArea())?'cable':null;
       if(page){s.pointer={id,type:page,start:p,last:p,origin:p,safeAtGrab:canPull()};emit('printer-grab',{object:page});}
