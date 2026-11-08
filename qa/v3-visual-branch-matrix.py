@@ -103,6 +103,8 @@ def violations(d):
  if d['scroll'][0]>w+5 or d['scroll'][1]>h+5:warnings.append('Unexpected page overflow')
  paint=d.get('detail') or {}
  if paint.get('bottom',{}).get('range',999)<6 and paint.get('center',{}).get('range',0)>50:warnings.append('Flat bottom band: inspect stage occupancy')
+ if paint.get('center',{}).get('variance',0)>250 and paint.get('bottom',{}).get('variance',999999)<paint['center']['variance']*.12:
+  warnings.append('Bottom scene variance below 12% of center: inspect large unused region')
  if paint.get('top',{}).get('range',999)<6 and paint.get('center',{}).get('range',0)>50:warnings.append('Flat top band: inspect stage occupancy')
  return failures,warnings
 def select(page,lane,state):
