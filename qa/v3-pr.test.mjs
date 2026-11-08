@@ -161,3 +161,54 @@ test('scene cannot reward after completion even with stray pointer releases',()=
   x.scene.pointerMove(p(805,565),viewport);x.scene.pointerUp(p(805,565),viewport);
   assert.equal(x.actions().length,count);assert.equal(x.done().length,1);
 });
+
+
+test('Moving Goalposts changes BOTH guaranteed PR cards P1/P4 with truthful hitboxes',()=>{
+ const x=setup('P1',{directive:'moving-goalposts'});
+ assert.equal(x.scene.snapshot().sendShift,0);
+ for(let i=0;i<24;i++)x.scene.update(.1);
+ assert.equal(x.scene.snapshot().sendShift,1);
+ assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
+ x.scene.pointerDown(p(600,630),viewport);
+ assert.equal(x.done().length,0,'old hitbox invalid after visible target move');
+ x.scene.pointerDown(p(720,630),viewport);assertWin(x,'P1');
+});
+test('P1 goalpost freezes during chart drag and announces once',()=>{
+ const x=setup('P1',{directive:'moving-goalposts'});x.scene.pointerDown(p(400,520),viewport);
+ for(let i=0;i<26;i++)x.scene.update(.1);
+ assert.equal(x.scene.snapshot().sendShift,0);
+ x.scene.pointerUp(p(400,520),viewport);
+ for(let i=0;i<10;i++)x.scene.update(.1);
+ assert.equal(x.scene.snapshot().sendShift,1);
+ assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
+});
+test('P4 shows actual worker ledger outcome saved/interrupted/unobserved',()=>{
+ for(const [worker,outcome] of [['helped','saved'],['not-helped','interrupted']]){
+  const x=setup('P4',{eventLedger:[{kind:'worker',objectId:'mira-workstation',outcome:worker,committed:true}]});
+  assert.equal(x.scene.snapshot().miraOutcome,outcome);
+  x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(805,565),viewport);x.scene.pointerUp(p(805,565),viewport);
+  assertWin(x,'P4');assert.equal(x.done()[0].evidence.facts.miraOutcome,outcome);
+ }
+ const x=setup('P4',{eventLedger:[]});assert.equal(x.scene.snapshot().miraOutcome,'unobserved');
+});
+test('Double Entry P1 requires a second physical linked carbon confirmation',()=>{
+ const x=setup('P1',{directive:'double-entry'});
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
+ x.scene.pointerDown(p(600,630),viewport);
+ assert.equal(x.done().length,0);assert.equal(x.scene.snapshot().awaitCopy,true);
+ x.scene.pointerDown(p(600,630),viewport);assert.equal(x.done().length,0);
+ x.scene.pointerDown(p(405,630),viewport);assertWin(x,'P1');
+ assert.equal(x.done()[0].evidence.linkedCopy,true);
+ assert(x.actions().some(a=>a.kind==='stamp-linked-copy'&&a.correct));
+});
+test('Double Entry P4 requires matching copy route before effect is committed',()=>{
+ const x=setup('P4',{directive:'double-entry'});
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(385,565),viewport);x.scene.pointerUp(p(385,565),viewport);
+ assert.equal(x.done().length,0);assert.equal(x.scene.snapshot().pendingCopy,'headline');
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(805,565),viewport);x.scene.pointerUp(p(805,565),viewport);
+ assert.equal(x.done().length,0);assert.equal(x.actions().at(-1).correct,false);
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(385,565),viewport);x.scene.pointerUp(p(385,565),viewport);
+ assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'headline');
+ assert.equal(x.done()[0].evidence.linkedCopy,true);assert.equal(x.actions().filter(a=>a.correct).length,2);
+});
