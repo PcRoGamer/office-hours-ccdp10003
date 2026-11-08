@@ -52,9 +52,23 @@ async function main(){
      if(!state.scene||typeof state.scene!=='object')fail('Missing actual scene state '+id);
      else pass('Inspectable real scene snapshot '+id+' '+w+'x'+h);
      const name=id+'-'+w+'x'+h+'.png';
+     // Capture actual scene pixels without the QA selector/HUD hiding the set.
+     await page.evaluate(()=>document.body.classList.add('capture'));
      await page.screenshot({path:path.join(out,name),fullPage:false});
+     await page.evaluate(()=>document.body.classList.remove('capture'));
      report.screens.push({id,viewport:[w,h],name,snapshotKeys:Object.keys(state.scene||{}).slice(0,15)});
     }catch(e){fail('Switch and render '+id+' '+w+'x'+h,{error:String(e.stack||e)})}
+   }
+   if(w===1920){
+    try{
+     const before=await page.evaluate(()=>window.__swarmComposition.viewport.cssWidth);
+     await page.setViewportSize({width:650,height:800});
+     await page.waitForTimeout(140);
+     const after=await page.evaluate(()=>window.__swarmComposition.viewport.cssWidth);
+     if(before===1920&&after===650)pass('Live scene viewport object updates across desktop→portrait resize');
+     else fail('Stale viewport on live resize',{before,after});
+     await page.setViewportSize({width:1920,height:1080});
+    }catch(e){fail('Live resize regression',{error:String(e)})}
    }
    if(broken.length)fail('Network missing assets '+w+'x'+h,{broken});
    else pass('No missing same-origin assets '+w+'x'+h);
