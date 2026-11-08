@@ -127,6 +127,23 @@ async function browserCheck(report,url) {
         text:(a.textContent||a.getAttribute('aria-label')||'').trim().slice(0,120),href:a.href
       })).filter(x=>/^https?:\/\//i.test(x.href)).slice(0,80)
     }));
+    // Inspect optional research drawer when a clear in-page trigger exists.
+    // This does not prove the player sees the research at first promotion.
+    const researchTrigger=page.locator('a, button').filter({hasText:/THE REAL RESEARCH/i}).first();
+    if(await researchTrigger.count()){
+      try {
+        await researchTrigger.click({timeout:2500});
+        await page.waitForTimeout(250);
+        data.researchDrawer=await page.evaluate(()=>({
+          visibleText:(document.body?.innerText||'').slice(-1400),
+          externalLinks:Array.from(document.querySelectorAll('a[href]')).filter(a=>{
+            const r=a.getBoundingClientRect(),s=getComputedStyle(a);
+            return r.width>0 && r.height>0 && s.visibility!=='hidden' &&
+              /^https?:\/\//i.test(a.href) && new URL(a.href).host!==location.host;
+          }).map(a=>({text:(a.textContent||'').trim().slice(0,90),href:a.href})).slice(0,25)
+        }));
+      } catch(e) {data.researchDrawer={status:'UNINSPECTED',reason:String(e.message||e).slice(0,180)};}
+    }
     report.browser={status:resp.status()===200 && data.canvasVisible && errors.length===0?'SMOKE_ONLY':'BLOCKED',
       http:resp.status(),errors,...data,url,
       limitations:'Only startup DOM/visible canvas and currently exposed source anchors; does NOT establish first-promotion visibility, 15-second comprehension, actual full campaign or enjoyment'};
