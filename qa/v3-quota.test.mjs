@@ -70,5 +70,35 @@ test('all emitted events have stable ledger IDs and no in-place score mutation',
   assert.equal(new Set(ids).size,ids.length);
   assert.ok(emitted.every(e=>e.runId==='test-run'&&e.encounterId==='B2'&&e.committed===false&&Object.isFrozen(e)));
 });
+
+
+test('perks cannot mint unearned Time Bank seconds',()=>{
+  function opening(perks={},reserve=0){
+    const ctx={run:{runId:'perk-audit',perkLevels:perks,timeBankReserve:reserve,currentDirective:'DOUBLE ENTRY'},viewport:{worldWidth:1200,worldHeight:760},events:{emit(){}}};
+    const b=createQuotaBoss(ctx);advance(b,1.9);let s=b.snapshot();drag(b,s.targets.bonus,s.targets.cool);advance(b,2.1);
+    s=b.snapshot();drag(b,s.targets.strip,s.targets.stripTo);s=b.snapshot();click(b,s.targets.seal);
+    assert.equal(b.snapshot().mode,'opening');return b;
+  }
+  assert.equal(opening({},10).useTimeBank(3),false);
+  assert.equal(opening({'perk:time-bank':1},0).useTimeBank(2),false);
+  let b=opening({'perk:time-bank':1},5);assert.equal(b.useTimeBank(5),true);
+  assert.equal(b.useTimeBank(1),false);
+  assert.equal(b.snapshot().timer>3.35,true);
+  b=opening({'perk:time-bank':2},1.5);assert.equal(b.useTimeBank(10),true);
+  assert.equal(b.useTimeBank(.1),false);
+});
+test('assistance and focus only activate during relevant live action',()=>{
+  const ctx={run:{runId:'assist-audit',licences:{mira:true,jules:true},perkLevels:{'perk:focus-lens':1}},viewport:{worldWidth:1200,worldHeight:760},events:{emit(){}}};
+  const b=createQuotaBoss(ctx);
+  assert.equal(b.activateAssist('jules'),false);
+  assert.equal(b.activateAssist('mira'),false);
+  assert.equal(b.scan(),false);
+  advance(b,1.9);
+  assert.equal(b.activateAssist('jules'),false);
+  assert.equal(b.scan(),false);
+  let s=b.snapshot();drag(b,s.targets.bonus,s.targets.cool);
+  assert.equal(b.activateAssist('mira'),false);
+  assert.equal(b.scan(),true);
+});
 console.log(tests.map(t=>`${t.status}: ${t.name}${t.error?'\n'+t.error:''}`).join('\n'));
 console.log(`${count}/${tests.length} total assertions passed`);
