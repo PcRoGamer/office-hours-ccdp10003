@@ -171,7 +171,11 @@ def main():
  ap.add_argument('--source',action='append',default=[],help='lane=/path/to/existing/checkout')
  ap.add_argument('--out',type=Path,default=Path('qa-artifacts/v3-visual/branch-matrix'))
  ap.add_argument('--selftest',action='store_true');ap.add_argument('--quick',action='store_true')
- args=ap.parse_args();args.out.mkdir(parents=True,exist_ok=True)
+ args=ap.parse_args()
+ # Synthetic self-tests must not overwrite actual game screenshot evidence.
+ if args.selftest and args.out == Path('qa-artifacts/v3-visual/branch-matrix'):
+  args.out = Path('qa-artifacts/v3-visual/_matrix-selftest')
+ args.out.mkdir(parents=True,exist_ok=True)
  selected=list(LANES) if args.lane=='all' else [args.lane];sources={}
  for item in args.source:
   lane,sep,src=item.partition('=')
