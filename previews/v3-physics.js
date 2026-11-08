@@ -24,16 +24,27 @@ function resize(){
   const live=files.filter(f=>sim.objects.has(f.id))
     .map(f=>({file:f,pos:sim.state(f)})).sort((a,b)=>a.pos.x-b.pos.x);
   // Folders must remain individually readable and grabbable on portrait reflow.
-  const minX=Math.max(42,...live.map(x=>x.file.width/2+16));
-  const maxX=Math.max(minX,W-215);
+  const minX=Math.max(42,...live.map(x=>x.file.width/2+18));
+  const farthestCorner=Math.max(0,...live.map(x=>Math.hypot(x.file.width,x.file.height)/2));
+  // Sensor begins at W-188: keep even a rotated page wholly clear on reflow.
+  const maxX=Math.max(minX,W-188-farthestCorner-34);
+  const narrow=W<850 && live.length>2;
   const gap=live.length>1?Math.min(
-    Math.max(...live.map(x=>x.file.width))+12,(maxX-minX)/(live.length-1)):0;
+    Math.max(...live.map(x=>x.file.width))+14,(maxX-minX)/(live.length-1)):0;
   let previous=minX-gap;
   for(let i=0;i<live.length;i++){
     const {file:f,pos}=live[i];
-    const desired=r(pos.x/Math.max(1,oldW-200)*(W-200),minX,maxX);
-    const x=r(Math.max(desired,previous+gap),minX,maxX-(live.length-i-1)*gap);
-    sim.setTransform(f,x,pos.y,pos.angle);
+    let x,y=pos.y;
+    if(narrow){
+      // Two staggered lanes keep full-size landscape papers legible in portrait.
+      x=minX+(i%2)*(maxX-minX);
+      y=475+Math.floor(i/2)*150;
+      sim.setVelocity(f,0,0,0); // no accidental scoring from teleported momentum
+    }else{
+      const desired=r(pos.x/Math.max(1,oldW-200)*(W-200),minX,maxX);
+      x=r(Math.max(desired,previous+gap),minX,maxX-(live.length-i-1)*gap);
+    }
+    sim.setTransform(f,x,y,pos.angle);
     previous=x;
   }
   rebuildFurniture();
