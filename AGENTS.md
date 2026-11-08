@@ -12,7 +12,7 @@
 - **Submission:** a real public playable URL, real Playwright+manual/browser visual QA, hard rollback. The cached deadline is Monday **9 Nov 2026 23:59 AEDT** (verify live Canvas before claiming submission). Never claim an earned 100/100, a human playtest, or Canvas submission without evidence.
 
 ## Your collaboration duties
-1. **Read live** `coordination/SWARM.md`, `coordination/NEW_CHAT_PROMPT.md`, current claims, open PRs and branch HEAD. A previous chat's summary may be stale.
+1. **Read live** `coordination/SWARM.md`, current claims, open PRs and branch HEAD; claim quickly before consuming a long design document, to prevent many chats duplicating initial analysis. A previous chat's summary may be stale. After claiming, read the entire GDD for LEAD/SYSTEMS/QA roles; scene specialists read the global vision plus their relevant complete GDD sections and shared contracts.
 2. **Claim precisely one lane** with an atomic GitHub create-file at `coordination/claims/<LANE>.md`, on `rebuild/night-shift-v3-hd`. If it exists, select another. Do not just say you're helping.
 3. Create unique branch `agents/v3-<lane>-<slug>` from the current rebuild head. Use isolated git worktrees, never reset or clean a shared user's existing checkout.
 4. Work within exact lane-owned paths in [coordination/SWARM.md](coordination/SWARM.md); other lanes' paths are review-only. Build a real independently runnable preview/mock-service prototype and relevant automated test. Share a draft PR **into the rebuild branch**, never `main`.
