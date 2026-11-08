@@ -31,6 +31,8 @@ check('gravity accelerates real dynamic fixtures',()=>{
 check('unique stable IDs and invalid body rejection',()=>{
   assert.throws(()=>sim.box({id:'paper',x:0,y:0,width:5,height:5}),/Unique/);
   assert.throws(()=>sim.create({id:'bad',shape:'potato'}),/Shape/);
+  assert.throws(()=>sim.box({id:42,x:0,y:0,width:10,height:10}),/nonempty string/);
+  assert.throws(()=>sim.box({id:' ',x:0,y:0,width:10,height:10}),/nonempty string/);
 });
 check('contacts delivered once per continuous overlap, no duplicate scoring',()=>{
   for(let i=0;i<60;i++)sim.step(1/60);
@@ -45,6 +47,17 @@ check('mouse joint picks actual fixture, follows, and releases',()=>{
   for(let i=0;i<12;i++){sim.move(s.x+80+i*8,s.y-40,1/60);sim.step(1/60);}
   const before=sim.state(file);sim.release();assert.equal(sim.dragging,null);
   assert.ok(sim.state(file).vx!==before.vx || Math.abs(before.vx)>0);
+});
+check('fixture reflow preserves live body ID, velocity and simulation clock',()=>{
+  const start=sim.state(file),count=sim.objects.size,tick=sim.tick;
+  assert.equal(sim.setTransform('paper',start.x+55,start.y-55,start.angle+.1),true);
+  const next=sim.state('paper');
+  assert.ok(Math.abs(next.x-start.x-55)<.001);
+  assert.ok(Math.abs(next.y-start.y+55)<.001);
+  assert.ok(Math.abs(next.angle-start.angle-.1)<.001);
+  assert.equal(sim.tick,tick);assert.equal(sim.objects.size,count);
+  assert.equal(sim.setTransform('paper',NaN,1),false);
+  assert.equal(sim.setTransform('missing',0,0),false);
 });
 check('static/sensor fixtures are not grabbable',()=>{
   assert.equal(sim.grab(250,400),null);
@@ -64,4 +77,4 @@ check('body removal and disposal are idempotent',()=>{
   sim.dispose();sim.dispose();assert.equal(sim.objects.size,0);
   assert.throws(()=>sim.step(1/60),/Disposed/);
 });
-console.log(`PHYSICS PASS ${checks}/11 real Planck assertions`);
+console.log(`PHYSICS PASS ${checks}/${checks} real Planck assertions`);
