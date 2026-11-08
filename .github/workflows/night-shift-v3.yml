@@ -154,3 +154,82 @@ jobs:
           name: night-shift-v3-public-${{ github.run_id }}
           path: qa-artifacts/v3-release/
           retention-days: 30
+
+
+  independently-shipped-previews:
+    name: Independent ${{ matrix.lane }} prototype | real browser + native unit tests
+    # Read-only validation of each owned contributor branch. Never merge source
+    # or import isolated prototypes into the game without LEAD inspection.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: intake
+            branch: agents/v3-intake-81d47
+            preview: previews/v3-intake.html
+            unit: qa/v3-intake-test.mjs
+          - lane: services
+            branch: agents/v3-services-n8-7c42
+            preview: previews/v3-services.html
+            unit: ''
+          - lane: physics
+            branch: agents/v3-physics-261108-soundlab
+            preview: previews/v3-physics.html
+            unit: qa/v3-physics.test.mjs
+          - lane: systems
+            branch: agents/v3-systems-g6-0811b
+            preview: previews/v3-systems.html
+            unit: qa/v3-systems.test.mjs
+          - lane: story
+            branch: agents/v3-story-k7m29
+            preview: previews/v3-story.html
+            unit: qa/v3-story.test.mjs
+    steps:
+      - name: Read latest original agent branch without changing it
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          path: candidate
+          persist-credentials: false
+      - name: Read release audit script from this PR/commit
+        uses: actions/checkout@v4
+        with:
+          path: release-harness
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Run original lane's native invariant tests
+        if: ${{ matrix.unit != '' }}
+        working-directory: candidate
+        run: node "${{ matrix.unit }}"
+      - name: Install headless Chromium
+        run: |
+          npm --prefix release-harness install --no-save playwright@1.58.2
+          ./release-harness/node_modules/.bin/playwright install --with-deps chromium
+      - name: Serve actual agent-owned preview and its original relative assets
+        working-directory: candidate
+        env:
+          PREVIEW_PATH: ${{ matrix.preview }}
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/v3-peer-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:4173/$PREVIEW_PATH" >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/v3-peer-preview.log
+          exit 1
+      - name: Observe real viewport pixels, runtime errors and a live interaction
+        working-directory: candidate
+        env:
+          PREVIEW_LANE: ${{ matrix.lane }}
+          PREVIEW_PATH: ${{ matrix.preview }}
+        run: node ../release-harness/qa/v3-release-previews.cjs
+      - name: Upload actual browser frames and machine-readable QA
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-peer-${{ matrix.lane }}-${{ github.run_id }}
+          path: candidate/qa-artifacts/v3-release-previews/
+          retention-days: 14
