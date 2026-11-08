@@ -1,0 +1,228 @@
+{
+  "title": "QUOTA PANIC: FIRST SHIFT",
+  "scope": "eight-card-ccdp-vertical-slice",
+  "status": "specification_not_implemented",
+  "sourceRefs": {
+    "handoff": "CODEX_HANDOFF.md",
+    "sliceGdd": "design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md",
+    "fullGdd": "design/NIGHT_SHIFT_GDD_V3_REFERENCE.md",
+    "research": "design/CCDP_P2_GAME_RESEARCH.md",
+    "course": "design/COURSE_ALIGNMENT_PREFLIGHT.md"
+  },
+  "researchPillars": [
+    {
+      "game": "Dumb Ways to Die",
+      "role": "microgames"
+    },
+    {
+      "game": "Brotato",
+      "role": "roguelite"
+    },
+    {
+      "game": "Job Simulator",
+      "role": "tactile-job-toy"
+    }
+  ],
+  "narrativeReference": {
+    "game": "Papers, Please",
+    "role": "philosophy-lore-only"
+  },
+  "cards": [
+    {
+      "id": "I1",
+      "department": "intake",
+      "imperative": "STAMP GOOD!",
+      "referenceMs": 18000,
+      "primaryInput": "tap-stamp"
+    },
+    {
+      "id": "I3",
+      "department": "intake",
+      "imperative": "CLOSE THE SCAMS!",
+      "referenceMs": 12000,
+      "primaryInput": "tap-dismiss"
+    },
+    {
+      "id": "S1",
+      "department": "services",
+      "imperative": "FILE FRENZY!",
+      "referenceMs": 14000,
+      "primaryInput": "drag-release"
+    },
+    {
+      "id": "S2",
+      "department": "services",
+      "imperative": "SAVE THE COFFEE!",
+      "referenceMs": 14000,
+      "primaryInput": "drag-catch"
+    },
+    {
+      "id": "P1",
+      "department": "pr",
+      "imperative": "RESET THE SCALE!",
+      "referenceMs": 14000,
+      "primaryInput": "drag-axis"
+    },
+    {
+      "id": "P4",
+      "department": "pr",
+      "imperative": "HEADLINE OR CONTEXT?",
+      "referenceMs": 14000,
+      "primaryInput": "drag-route"
+    },
+    {
+      "id": "T1",
+      "department": "staff",
+      "imperative": "GET THEM OUT!",
+      "referenceMs": 14000,
+      "primaryInput": "draw-route"
+    },
+    {
+      "id": "T4",
+      "department": "staff",
+      "imperative": "PASS THE TOOLS!",
+      "referenceMs": 14000,
+      "primaryInput": "drag-assign"
+    }
+  ],
+  "promotions": [
+    {
+      "after": "I3",
+      "directive": "fast-or-safe",
+      "offers": [
+        "carbon-copy",
+        "bank-shot",
+        "mira-backup"
+      ]
+    },
+    {
+      "after": "S2",
+      "directive": "sponsored-workflow",
+      "offers": [
+        "chain-stamp",
+        "magnet-grip",
+        "safety-net"
+      ]
+    },
+    {
+      "after": "P4",
+      "directive": "mandatory-collaboration",
+      "offers": "seeded_eligible_three"
+    },
+    {
+      "after": "T4",
+      "directive": "double-entry",
+      "offers": "seeded_boss_eligible_three"
+    }
+  ],
+  "perks": [
+    "carbon-copy",
+    "chain-stamp",
+    "bank-shot",
+    "magnet-grip",
+    "mira-backup",
+    "safety-net"
+  ],
+  "maxPerkLevel": 2,
+  "synergies": [
+    [
+      "carbon-copy",
+      "chain-stamp"
+    ],
+    [
+      "bank-shot",
+      "magnet-grip"
+    ],
+    [
+      "mira-backup",
+      "safety-net"
+    ]
+  ],
+  "directives": {
+    "fast-or-safe": [
+      "S1",
+      "S2"
+    ],
+    "sponsored-workflow": [
+      "P1",
+      "P4"
+    ],
+    "mandatory-collaboration": [
+      "T1",
+      "T4"
+    ],
+    "double-entry": [
+      "quota"
+    ]
+  },
+  "boss": {
+    "name": "THE QUOTA",
+    "phases": 3,
+    "requiredCounterBolts": 3,
+    "packetIds": [
+      "qpacket-1",
+      "qpacket-2",
+      "qpacket-3",
+      "qpacket-4"
+    ],
+    "packetPhases": [
+      1,
+      2,
+      3,
+      3
+    ],
+    "filePoints": 5,
+    "filePressureIncrement": 1,
+    "pressureCap": 2,
+    "coolOpeningExtensionMs": 750
+  },
+  "licences": {
+    "count": 2,
+    "costPerToken": 40,
+    "baseBudget": 80,
+    "targets": [
+      "mira",
+      "jules",
+      "save"
+    ],
+    "mustConserve": true
+  },
+  "supportOpportunities": {
+    "miraCoffee": 1,
+    "staffWorkers": 3,
+    "total": 4
+  },
+  "scoreWeights": {
+    "corporate": {
+      "completedWork": 40,
+      "pace": 15,
+      "cleanStreak": 15,
+      "savings": 10,
+      "bossFiles": 20
+    },
+    "people": {
+      "support": 35,
+      "access": 30,
+      "accuracy": 20,
+      "realNoticeHandling": 15
+    }
+  },
+  "scoringNotes": [
+    "round exactly once at end",
+    "clamp every ratio to [0,1]",
+    "unique committed run/card/packet IDs",
+    "zero encountered notices earns 0 for notice component; guarantee at least one real notice in intended play",
+    "savedDollars + 40*licenceTokensAssigned = 80"
+  ],
+  "requiredChecks": [
+    "genuine mouse precision while distractions recur across >=2 departments",
+    "all eight first-run cards and all directives",
+    "three distinct usable builds",
+    "same immutable ledger for two final lenses",
+    "fourteen mixed masks plus all FILE/all COOL",
+    "all routes and sources work as browser links",
+    "full ending and replay",
+    "QA 1440x900,1366x768,1024x600,650x800",
+    "lecture priorities novelty, pacing, agency, audio and in-game research"
+  ]
+}
