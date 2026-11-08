@@ -66,8 +66,8 @@ function drawResult(ctx,l,s,msg){
 
 function createP1(context,meta){
   const b=base(context,meta),s=b.state;
-  Object.assign(s,{baseline:1200,dragging:false,sent:false,corrected:false,axisHint:true,sponsored:directiveId(context)==='sponsored-workflow',tipOpened:false,fakeDismissed:false,promoDrag:null,promoFlight:null,cosmeticPulse:0});
-  const geo=v=>{const l=vw(v),x=l.cx-l.width*.44,w=l.width*.88;return {...l,x,w,chart:{x:x+25,y:207,w:w-50,h:326},handle:{x:x+25,y:510,w:w-50,h:60},send:{x:l.cx-84,y:l.H-159,w:168,h:66}}};
+  Object.assign(s,{baseline:1200,dragging:false,sent:false,corrected:false,axisHint:true,sponsored:directiveId(context)==='sponsored-workflow',goalposts:directiveId(context)==='moving-goalposts',doubleEntry:directiveId(context)==='double-entry',awaitCopy:false,copyStamped:false,sendShift:0,sendShiftAnnounced:false,tipOpened:false,fakeDismissed:false,promoDrag:null,promoFlight:null,cosmeticPulse:0});
+  const geo=v=>{const l=vw(v),x=l.cx-l.width*.44,w=l.width*.88;return {...l,x,w,chart:{x:x+25,y:207,w:w-50,h:326},handle:{x:x+25,y:510,w:w-50,h:60},send:{x:l.cx-84+s.sendShift*Math.min(125,l.width*.17),y:l.H-159,w:168,h:66},copy:{x:l.cx-84-Math.min(205,l.width*.29),y:l.H-159,w:168,h:66}}};
   const promoRect=(g,kind)=>{const w=g.portrait?130:208,h=g.portrait?61:76;return {x:g.x+g.w-w-24,y:g.chart.y+(kind==='tip'?54:155),w,h};};
   function enter(){};
   function draw(ctx,v){const g=geo(v),l=g;sceneBackdrop(ctx,v,s.time,meta.id,meta.imperative,'',context?.options);timerRail(ctx,l,s,meta.seconds);
@@ -85,7 +85,7 @@ function createP1(context,meta){
     const handleY=clamp(p.y+p.h-9+((1200-s.baseline)/1200)*5,p.y,p.y+p.h);
     rr(ctx,p.x-4,handleY-12,p.w+8,27,9,C.red,C.ink,4);
     tx(ctx,`BASELINE ${Math.round(s.baseline).toLocaleString('en-US')}     ↓ DRAG`,p.x+p.w/2,handleY+1,l.portrait?13:18,C.ink);
-    if(s.corrected&&s.baseline===0){rr(ctx,g.x+25,g.chart.y-7,g.w-50,37,9,C.mint,C.ink,3);tx(ctx,'+40 CLICKS   /   +3.2%   /   ZERO BASELINE',l.cx,g.chart.y+12,l.portrait?13:19,C.ink);}
+    if(s.corrected&&s.baseline===0)sticker(ctx,'+40  /  +3.2%',g.x+g.w-85,g.chart.y+5,{col:C.mint,size:l.portrait?11:15});
     else sticker(ctx,'MISLEADING!',g.x+g.w-85,g.chart.y+5,{size:l.portrait?11:15});
     // Sponsored Workflow: genuine signed help and cosmetic ad coexist; no automatic axis change.
     if(s.sponsored){
@@ -107,7 +107,18 @@ function createP1(context,meta){
       }
       if(s.promoFlight){const f=s.promoFlight;ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);rr(ctx,-56,-22,112,44,7,C.red,C.ink,3);tx(ctx,'SPONSORED',0,0,12,C.ink);ctx.restore();}
     }
-    button(ctx,s.corrected?'STAMP  SEND':'SHOW  ZERO',g.send.x,g.send.y,g.send.w,g.send.h,{disabled:!s.corrected,small:l.portrait});
+    if(s.goalposts){
+      const tx0=l.cx-84,travel=Math.min(125,l.width*.17),railY=g.send.y+g.send.h+6;
+      line(ctx,tx0+84,railY,tx0+84+travel,railY,C.gold,4);
+      circle(ctx,tx0+84+travel,railY,8,C.gold,C.ink,2);
+      tx(ctx,s.sendShift<1?'SEND CHUTE MOVING!':'GOALPOST MOVED',l.cx,railY+15,l.portrait?11:15,C.cream);
+    }
+    if(s.awaitCopy){
+      rr(ctx,g.copy.x+4,g.copy.y-38,g.copy.w-8,31,9,C.mint,C.ink,3);
+      tx(ctx,'LINKED CARBON COPY',g.copy.x+g.copy.w/2,g.copy.y-22,l.portrait?11:15,C.ink);
+      button(ctx,'STAMP COPY',g.copy.x,g.copy.y,g.copy.w,g.copy.h,{small:l.portrait});
+    }
+    button(ctx,s.awaitCopy?'ORIGINAL SENT':s.corrected?'STAMP  SEND':'SHOW  ZERO',g.send.x,g.send.y,g.send.w,g.send.h,{disabled:!s.corrected||s.awaitCopy,small:l.portrait});
     if(!l.portrait)tx(ctx,s.corrected?'CORRECT SCALE. ORIGINAL DATA.':'PULL THE RED BASELINE DOWN TO ZERO',l.cx,l.H-28,l.portrait?13:17,C.cream);
     if(s.flash>0)stars(ctx,l.cx+g.w*.31,195,s.time*6,15,context?.options?.reducedMotion);
     drawResult(ctx,l,s,s.sent?'SENT WITH THE REAL SCALE':'SHUTTER CLOSED');
@@ -117,7 +128,15 @@ function createP1(context,meta){
       if(kind==='fake'&&s.fakeDismissed)continue;
       if(pointIn(p,promoRect(g,kind))){s.promoDrag={id:p.id,kind,startX:p.x,startY:p.y,dx:0,dy:0};return;}
     }}
-    if(pointIn(p,g.send)){if(s.corrected&&s.baseline===0){s.sent=true;b.act(true,'send-real-chart',{base:0,from:1240,to:1280});b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40});}else b.act(false,'premature-send');return;}
+    if(s.awaitCopy&&pointIn(p,g.copy)){
+      s.copyStamped=true;s.awaitCopy=false;b.act(true,'stamp-linked-copy',{objectId:'pr:p1:linked-copy'});
+      b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40,linkedCopy:true});return;
+    }
+    if(pointIn(p,g.send)){if(s.awaitCopy)return;
+      if(s.corrected&&s.baseline===0){s.sent=true;b.act(true,'send-real-chart',{base:0,from:1240,to:1280});
+        if(s.doubleEntry)s.awaitCopy=true;
+        else b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40});
+      }else b.act(false,'premature-send');return;}
     if(pointIn(p,{...g.handle,y:g.handle.y-28,h:94})){s.dragging=true;s.gesture={id:p.id,startY:p.y,startBaseline:s.baseline};return;}
   }
   function pointerMove(p){
@@ -137,6 +156,10 @@ function createP1(context,meta){
   function update(dt){b.update(dt);const step=clamp(Number.isFinite(dt)?dt:0,0,.1);
     s.cosmeticPulse=Math.max(0,s.cosmeticPulse-step);
     const f=s.promoFlight;if(f){f.x+=f.vx*step;f.y+=f.vy*step;f.vy+=560*step;f.angle+=step*3;f.ttl-=step;if(f.ttl<=0)s.promoFlight=null;}
+    if(!s.finished&&s.goalposts&&s.time>=1.6&&!s.dragging&&!s.promoDrag){
+      if(!s.sendShiftAnnounced){s.sendShiftAnnounced=true;b.emit({type:'directive-shift',directive:'moving-goalposts',objectId:'pr:p1:send',synthetic:true});}
+      s.sendShift=clamp(s.sendShift+step/.7,0,1);
+    }
   }
   return {enter,update,draw,pointerDown,pointerMove,pointerUp,cancelPointer(){s.dragging=false;s.gesture=null;s.promoDrag=null},snapshot:b.snapshot,dispose:noop};
 }
@@ -277,9 +300,20 @@ function createP3(context,meta){
 
 function createP4(context,meta){
   const b=base(context,meta),s=b.state;
-  const events=Array.isArray(context?.run?.events)?context.run.events:[];
-  const incident=context?.run?.miraIncident ?? events.find(e=>e?.type==='mira-spill' || e?.type==='mira-saved');
-  Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident,goalposts:directiveId(context)==='moving-goalposts',routeShift:0,shiftAnnounced:false});
+  // The committed event ledger outranks any cached scene-level incident summary.
+  // The preview also has a convenience 'events' array; never let its empty array
+  // hide the authoritative run.eventLedger.
+  const committed=Array.isArray(context?.run?.eventLedger)?context.run.eventLedger:
+    (Array.isArray(context?.run?.snapshot?.eventLedger)?context.run.snapshot.eventLedger:[]);
+  const events=committed.length?committed:(Array.isArray(context?.run?.events)?context.run.events:[]);
+  const incident=events.find(e=>e?.committed!==false&&(
+    e?.type==='mira-spill'||e?.type==='mira-saved'||
+    (e?.kind==='worker'&&e?.objectId==='mira-workstation')||
+    (e?.kind==='incident'&&String(e?.outcome||'').startsWith('mira-')))) ?? context?.run?.miraIncident;
+  const miraOutcome=incident==null?'unobserved':(
+    incident==='saved'||incident?.outcome==='helped'||incident?.type==='mira-saved'||incident?.outcome==='mira-saved'?'saved':
+    incident==='spill'||incident?.outcome==='not-helped'||incident?.type==='mira-spill'||incident?.outcome==='mira-spill'?'interrupted':'recorded');
+  Object.assign(s,{cardX:0,cardY:0,dragging:null,selected:null,incidentObserved:!!incident,miraOutcome,goalposts:directiveId(context)==='moving-goalposts',doubleEntry:directiveId(context)==='double-entry',pendingCopy:null,routeShift:0,shiftAnnounced:false});
   const geo=v=>{const l=vw(v),width=l.width,routeW=Math.min(360,(width-50)/2),routeY=l.H-268;return {...l,cardW:Math.min(360,width*.62),cardH:132,restX:l.cx,restY:402,routeY,routeW,leftRoute:{x:l.cx-routeW-11,y:routeY,w:routeW,h:154},rightRoute:{x:l.cx+11,y:routeY,w:routeW,h:154}};};
   // A route changes physical position only between gestures; art and collision use the same geometry.
   const routes=v=>{const g=geo(v),travel=g.rightRoute.x-g.leftRoute.x,t=s.routeShift;
@@ -289,7 +323,7 @@ function createP4(context,meta){
     theatrePanel(ctx,l.cx-Math.min(l.width*.45,480),171,Math.min(l.width*.9,960),238,'#eed9ba');
     tx(ctx,'MONTHLY REPORT',l.cx,197,l.portrait?22:30,C.ink);
     tx(ctx,'1,240  →  1,280 CLICKS  /  +3.2%',l.cx,238,l.portrait?16:25,C.ink);
-    tx(ctx,s.incidentObserved?'WORKSTATION INTERRUPTION RECORDED':'MIRA INCIDENT: NOT OBSERVED',l.cx,272,l.portrait?13:18,C.slate);
+    tx(ctx,miraOutcome==='saved'?'MIRA WORKSTATION: ASSISTED':miraOutcome==='interrupted'?'MIRA WORKSTATION: INTERRUPTED':s.incidentObserved?'MIRA WORKSTATION: EVENT RECORDED':'MIRA INCIDENT: NOT OBSERVED',l.cx,272,l.portrait?13:18,C.slate);
     tx(ctx,'THE FACTS DO NOT CHANGE. THE EMPHASIS DOES.',l.cx,307,l.portrait?11:16,C.slate);
     if(s.goalposts){
        const y=g.routeY+g.leftRoute.h+13;line(ctx,g.leftRoute.x+18,y,g.rightRoute.x+g.rightRoute.w-18,y,C.gold,4);
@@ -304,8 +338,10 @@ function createP4(context,meta){
     const x=(s.dragging?s.cardX:g.restX),y=(s.dragging?s.cardY:g.restY),w=g.cardW,h=g.cardH;
     ctx.save();ctx.translate(x,y);ctx.rotate(s.dragging?clamp((x-l.cx)/l.width*.23,-.22,.22):Math.sin(s.time*2)*.023);
     rr(ctx,-w/2+7,-h/2+9,w,h,13,'#0c1a1d',null);rr(ctx,-w/2,-h/2,w,h,13,C.cream,C.ink,5);
-    rr(ctx,-w/2, -h/2,w,29,9,C.red,C.ink,3);tx(ctx,'APPROVED CONTENT',0,-h/2+15,l.portrait?12:16,C.ink);
-    tx(ctx,'REPORT →',0,-12,l.portrait?22:31,C.ink);tx(ctx,'DRAG TO A ROUTE',0,34,l.portrait?12:15,C.slate);ctx.restore();
+    rr(ctx,-w/2, -h/2,w,29,9,s.pendingCopy?C.mint:C.red,C.ink,3);
+    tx(ctx,s.pendingCopy?'LINKED APPROVAL COPY':'APPROVED CONTENT',0,-h/2+15,l.portrait?12:16,C.ink);
+    tx(ctx,s.pendingCopy?'COPY  →':'REPORT →',0,-12,l.portrait?22:31,C.ink);
+    tx(ctx,s.pendingCopy?'MATCH '+s.pendingCopy.toUpperCase():'DRAG TO A ROUTE',0,34,l.portrait?12:15,C.slate);ctx.restore();
     if(!l.portrait)tx(ctx,'ONE PHYSICAL CHOICE, TWO HONEST BENEFITS',l.cx,l.H-28,l.portrait?12:16,C.cream);
     drawResult(ctx,l,s,s.selected?`${s.selected} SELECTED`:'DOCUMENT NOT SENT');
   }
@@ -313,8 +349,12 @@ function createP4(context,meta){
   function pointerMove(p){if(s.dragging?.id!==p.id)return;s.cardX=p.x;s.cardY=p.y;}
   function pointerUp(p,v){if(s.dragging?.id!==p.id)return;const g=routes(v),route=pointIn(p,g.headline)?'headline':pointIn(p,g.context)?'context':null;s.dragging=null;
     if(!route){b.act(false,'unrouted-report');s.cardX=0;s.cardY=0;return;}
-    s.selected=route;b.act(true,'route-report',{route});const effect=route==='headline'?{type:'priority-pass',uses:1,target:'next-staff-card'}:{type:'quota-warning-card',leadSeconds:.6,uses:1,target:'the-quota'};
-    b.complete('success',{facts:{before:1240,after:1280,percentageIncrease:40/1240*100,miraIncidentObserved:!!incident},framing:route,effect});
+    if(s.pendingCopy&&route!==s.pendingCopy){b.act(false,'misroute-approval-copy',{route});return;}
+    if(!s.pendingCopy){s.selected=route;b.act(true,'route-report',{route});
+      if(s.doubleEntry){s.pendingCopy=route;return;}
+    }else b.act(true,'confirm-linked-copy',{route,objectId:'pr:p4:linked-copy'});
+    const effect=route==='headline'?{type:'priority-pass',uses:1,target:'next-staff-card'}:{type:'quota-warning-card',leadSeconds:.6,uses:1,target:'the-quota'};
+    b.complete('success',{facts:{before:1240,after:1280,percentageIncrease:40/1240*100,miraIncidentObserved:!!incident,miraOutcome},framing:route,effect,linkedCopy:s.doubleEntry});
   }
   function update(dt){
      b.update(dt);
