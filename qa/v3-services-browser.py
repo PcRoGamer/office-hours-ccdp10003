@@ -120,6 +120,11 @@ with sync_playwright() as p:
             check(state(page)['mode']=='trace','S4 moving-goalposts holds before restart test')
             page.evaluate('''() => {for(let i=0;i<165;i++)window.__services.state.scene.update(.05)}''')
             check(abs(state(page)['goalShift'])>.01 and state(page)['mode']=='hold','S4 timed restart visibly moves target port for next physical try')
+            # Automatic timeout is never misrepresented as a manual successful action.
+            page.select_option('#directive','');page.evaluate('window.__services.load(0)')
+            page.evaluate("() => {for(let i=0;i<550;i++)window.__services.state.scene.update(.05)}")
+            ev=page.evaluate('window.__lastCardEvent')
+            check(ev['type']=='card-failed' and ev['evidence']['manual'] is False,'Timer expiry emits failure without false manual-action provenance')
             # Sponsored-workflow popups are physical movable obstructions, never free progression.
             page.select_option('#directive','sponsored-workflow')
             page.evaluate('window.__services.load(1)')
