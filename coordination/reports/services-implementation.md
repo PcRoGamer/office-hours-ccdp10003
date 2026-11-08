@@ -80,3 +80,12 @@ Working preview has edge-to-edge office world, large prop silhouettes, readable 
 - New real Chromium screenshots: `qa/v3-services-s3-latched-safe.png`, `qa/v3-services-s4-moving-port.png`, `qa/v3-services-s4-moving-success.png` are included in the chat archive for inspection. Source/control tests and these real rendered frames were inspected. HD visual comparison is **not** falsely marked passed.
 
 **Integration effect:** no API signature changes. Existing `definitions`/scene contract, event names, directive handling and owned path restrictions remain stable. Old releases, `main` and the shared integration branch remain untouched.
+
+
+## Player-facing coffee outcome polish and terminal-state evidence (8 November 2026)
+
+The previous success frame removed caught mugs, so even with a correct counter it did not visually show what had been rescued. The result now leaves each caught mug on the broad tray, uses settling/bounce animation from actual catch time, preserves spilled-cup markers on the workstation, and displays Mira's expressive reaction. The debug JSON below the playable preview was replaced by concise success/failure consequence text. The persistent spill state is included in the scene snapshot for objective QA, and failed coffee attempts now explicitly emit `miraWorkstation: 'disrupted'` in their uncommitted failure evidence.
+
+**Verified**: reran independent Chromium pointer/viewport tests **53/53**, focused Chromium timing/input tests **21/21**, and native `node --test qa/v3-services-timing.test.mjs` **11/11**, now including saved-cup persistence, spilled-cup persistence and disruption metadata. Visually inspected a real 1440×900 success frame (three mugs retained) and a real failure frame (spill stain, distressed Mira and missed workstation). Archive `night-shift-v3-services-revised-74-11.zip` contains latest source/preview, executed test logs, and real screenshots.
+
+The shared ledger remains untouched: the scene only emits actual `card-complete` and `card-failed` events. No replacement of HD, no claimed campaign acceptance.
