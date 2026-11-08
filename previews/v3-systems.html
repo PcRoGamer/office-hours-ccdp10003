@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Quota Panic v3 | Systems Lab</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080c1d}canvas{display:block;width:100vw;height:100dvh;touch-action:none;cursor:pointer}button{font:inherit}#hint{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);pointer-events:none;color:#efeddc;font:12px system-ui;opacity:.7;white-space:nowrap} </style></head><body><canvas id="screen" aria-label="Night Shift systems-only interactive preview"></canvas><div id="hint">SYSTEMS LAB • Mechanic/score preview, not integrated HD artwork • SPACE pause</div><script type="module">
+import {newRun} from '../night-shift-v3/systems/engine.js';
+import {BONUS_PACKETS,CARD_BY_ID} from '../night-shift-v3/systems/core.js';
+const el=document.getElementById('screen'),ctx=el.getContext('2d');
+let seed=20261108,firstRun=true,run=newRun({seed,firstRun}),dirty=true,showPeople=false,paused=false,slide=0;
+const done=new Set(),notes=new Set(),choices={};let buttons=[],particles=[],vw=0,vh=0,dpr=1,time=0,last=0;
+function resize(){vw=innerWidth;vh=innerHeight;dpr=Math.min(2,devicePixelRatio||1);el.width=Math.floor(vw*dpr);el.height=Math.floor(vh*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);dirty=true;}addEventListener('resize',resize);resize();
+const ink='#151c35',paper='#fff5df',yellow='#ffe179',pink='#fc7d91',teal='#83e6d7';
+function roundrect(x,y,w,h,r,fill,stroke,line=1){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.lineWidth=line;ctx.strokeStyle=stroke;ctx.stroke();}}
+function text(s,x,y,size=20,color=paper,weight=700,align='left'){ctx.font=`${weight} ${size}px system-ui, sans-serif`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillStyle=color;ctx.fillText(String(s),x,y);}
+function burst(x,y,color){for(let i=0;i<17;i++){const a=Math.random()*Math.PI*2,v=2+Math.random()*6;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,ttl:50+Math.random()*30,color})}}
+function button(label,x,y,w,h,handler,{accent=yellow,small=false}={}){roundrect(x+3,y+6,w,h,14,'#090c20');roundrect(x,y,w,h,14,paper,ink,3);roundrect(x+7,y+7,w-14,h-14,10,accent);text(label,x+w/2,y+h/2,Math.min(small?16:22,Math.max(13,w/Math.max(8,label.length*.67))),ink,900,'center');buttons.push({x,y,w,h,handler});}
+function stageAdvance(){done.clear();notes.clear();for(const k of Object.keys(choices))delete choices[k];burst(vw/2,vh/2,teal);slide=38;dirty=true;}
+function act(id){if(!run.recordAction({objectId:`${run.stage.id}:${id}`,outcome:'correct'}))return;done.add(id);burst(vw/2+(Math.random()-.5)*200,vh*.55,yellow);}
+function finishCard(){try{run.completeCard();stageAdvance()}catch(e){console.warn(e.message);burst(vw/2,vh/2,pink)}}
+function draw(){buttons=[];const w=vw,h=vh,cx=w/2,portrait=w<760;const sx=Math.max(0.64,Math.min(1.25,w/1200));
+  const gradient=ctx.createLinearGradient(0,0,w,h);gradient.addColorStop(0,'#101a35');gradient.addColorStop(.54,'#251d37');gradient.addColorStop(1,'#090d1f');ctx.fillStyle=gradient;ctx.fillRect(0,0,w,h);
+  // Full-bleed paper-theatre office, with overscan outside the action region.
+  ctx.fillStyle='#1b2543';for(let i=0;i<9;i++){let x=((i*197+time*0.02)% (w+300))-150;roundrect(x,-80,110,h*.45,8,'#26304c');roundrect(x+13,20,84,Math.max(40,h*.28),5,'#1b2442');}
+  ctx.fillStyle='#d7a966';ctx.fillRect(0,h*.79,w,h*.21);ctx.fillStyle='#edc784';ctx.fillRect(0,h*.79,w,8);
+  ctx.strokeStyle='#8b604b';ctx.lineWidth=2;for(let i=0;i<Math.ceil(w/95);i++){ctx.beginPath();ctx.moveTo(i*95,h*.81);ctx.lineTo(i*95+45,h);ctx.stroke()}
+  // Diegetic background equipment
+  roundrect(w*.03,h*.26,Math.min(190,w*.16),h*.38,18,'#47516b','#101626',5);roundrect(w*.05,h*.31,Math.min(150,w*.12),h*.12,8,'#9cbed0');
+  roundrect(w*.85,h*.30,Math.max(100,w*.13),h*.3,20,'#62748c','#202239',5);text('QUOTA',w*.916,h*.35,Math.min(20,w*.02),yellow,900,'center');
+  // Pinned viewport HUD, never a centered game frame
+  roundrect(18,16,portrait?120:222,47,14,'#101629dd','#ffe4ab',2);text('♥ '.repeat(run.hearts).trim()||'♡',32,39,portrait?20:26,pink,900);
+  roundrect(w-(portrait?145:235),16,portrait?129:217,47,14,'#101629dd','#ffe4ab',2);text(`${String(run.deck.filter(id=>run.snapshot.completedCardIds.includes(id)).length).padStart(2,'0')}/12  CARDS`,w-(portrait?133:220),40,portrait?14:18,paper,850);
+  if(!portrait){text('QUOTA PANIC  /  SYSTEMS LAB',cx,42,17,yellow,850,'center')}
+  const stage=run.stage;const maxWidth=Math.min(w-26,890),boxX=(w-maxWidth)/2,boxY=Math.max(94,h*.16),boxH=Math.min(h*.57,490);
+  roundrect(boxX+9,boxY+12,maxWidth,boxH,26,'#070d1fbb');roundrect(boxX,boxY,maxWidth,boxH,26,'#fff3d6','#1d2439',5);
+  roundrect(boxX+12,boxY+12,maxWidth-24,59,14,'#20294b');
+  text(stage.type==='victory'?'THE RECEIPT':stage.type==='promotion'?'SURVIVAL_KIT.xlsx':stage.type==='boss'?stage.id==='printer'?'PRINTER MUTINY':'THE QUOTA':CARD_BY_ID[stage.id].imperative,cx,boxY+42,Math.min(portrait?20:34,maxWidth/19),yellow,900,'center');
+  text(stage.type==='boss'?`PHASE ${run.phase} / 3   ·   PRESSURE ${run.quotaPressure}`:stage.type==='card'?`${stage.id}  ·  ${CARD_BY_ID[stage.id].department.toUpperCase()}  ·  ${run.activeDirective?.toUpperCase().replaceAll('-',' ')||'STANDARD PROCEDURE'}`:stage.type==='promotion'?`PROMOTION ${stage.slot+1} OF 5`:'YOUR SHIFT IS DOCUMENTED',cx,boxY+97,Math.min(16,maxWidth/32),ink,850,'center');
+  const top=boxY+141,usable=maxWidth-44,cardX=boxX+22;
+  if(stage.type==='card'){
+    const id=stage.id,cap=id==='I1'?5:id==='I2'?2:id==='I3'?3:id==='I4'?3:id==='S1'?3:id==='S2'?3:id==='P2'?2:id==='P1'?2:id==='T1'?3:id==='T4'?2:1;
+    const width=Math.min(portrait?110:156,(usable-20)/Math.min(4,cap)-12),gap=12,columns=Math.min(portrait?2:4,cap),rows=Math.ceil(cap/columns),rowH=portrait?73:82;
+    for(let i=0;i<cap;i++){
+      const x=cx-(columns*width+(columns-1)*gap)/2+(i%columns)*(width+gap),y=top+Math.floor(i/columns)*rowH;
+      const key=String(i);const finished=done.has(key);const label=id==='S2'?`MUG ${i+1}`:id==='T1'?`WORKER ${i+1}`:id==='I1'?`FORM ${i+1}`:id==='T4'?['MIRA $40','JULES $40'][i]:id==='P4'?'CHOOSE':id==='P1'?'BASELINE':id==='S1'?`FOLDER ${i+1}`:id==='I2'?`SPAM ${i+1}`:id==='I3'?`POPUP ${i+1}`:`TARGET ${i+1}`;
+      if(finished){roundrect(x,y,width,56,11,'#c5ead8','#6a9f85',2);text('✓  '+label,x+width/2,y+28,Math.min(17,width/11),ink,800,'center');}
+      else button(label,x,y,width,56,()=>{act(key);if(id==='T4'){const worker=i===0?'mira':'jules';run.allocateLicence(worker,choices[worker]||'give');}if(id==='P4')run.recordFrame('context');if(id==='S2'&&done.size===3)run.recordWorker('mira-workstation',true);if(id==='T1'&&done.size===3){for(let j=1;j<=3;j++)run.recordWorker(`worker-${j}`,true);}if(id==='I1'&&done.size===5){notes.clear();}if(done.size>=cap&&id!=='I1'&&id!=='T1'&&id!=='S2')finishCard();},{accent:i%2?teal:yellow,small:true});
+    }
+    const footerY=Math.min(boxY+boxH-59,top+Math.ceil(cap/columns)*(portrait?73:82)+14);
+    if(id==='I1'&&done.size===5){text('SORT THE NOTICES',cx,footerY-12,portrait?14:19,ink,900,'center');const bw=Math.min(156,(usable-25)/2);for(const [j,label] of ['OPEN MIRA','REJECT SPAM'].entries()){const k=j?'fake':'real',x=cx+(j?8:-bw-8);if(notes.has(k))text('✓ '+label,x+bw/2,footerY+32,15,ink,900,'center');else button(label,x,footerY,bw,58,()=>{run.recordNotice(k,{genuine:!j,safelyHandled:true});notes.add(k);if(notes.size===2)finishCard()},{accent:j?pink:teal,small:true});}}
+    if(id==='S2'&&done.size>=2&&done.size<3)button('SAVE 2 · FINISH',cx-108,footerY,216,52,()=>{run.recordWorker('mira-workstation',false);finishCard()},{accent:teal,small:true});
+    if(id==='T1'&&done.size>=2&&done.size<3)button('EXIT WITH 2',cx-105,footerY,210,52,()=>{for(let j=1;j<=3;j++)run.recordWorker(`worker-${j}`,done.has(String(j-1)));finishCard()},{accent:teal,small:true});
+    if(id==='T4'&&done.size<2){const worker=done.has('0')?'jules':'mira';button('SET NEXT: '+(choices[worker]==='save'?'GIVE':'SAVE $40'),cx-120,footerY,240,42,()=>{choices[worker]=choices[worker]==='save'?'give':'save';},{accent:pink,small:true});}
+    if(id==='P4'&&!done.has('0'))button('SEND HEADLINE',cx-108,footerY,216,47,()=>{act('0');run.recordFrame('headline');finishCard()},{accent:pink,small:true});
+    text(`${done.size} target actions registered  ·  ${Math.round(run.activeMs/1000)}s active`,cx,boxY+boxH-22,portrait?12:15,'#57607b',700,'center');
+  } else if(stage.type==='promotion'){
+    text('CHOOSE A REAL UPGRADE',cx,top-18,portrait?15:21,ink,850,'center');
+    const offers=run.availableDraft,columns=portrait?1:3,bw=portrait?Math.min(usable,285):Math.min(248,(usable-32)/3),bh=portrait?57:118;
+    offers.forEach((perk,i)=>{let x=cx-(columns*bw+(columns-1)*14)/2+(i%columns)*(bw+14),y=top+Math.floor(i/columns)*(bh+12);button(perk.toUpperCase().replaceAll('-',' '),x,y,bw,bh,()=>{run.choosePerk(perk);stageAdvance()},{accent:[yellow,teal,pink][i],small:portrait});});
+    text(`NEXT RULE: ${run.schedule[stage.slot].toUpperCase().replaceAll('-',' ')}`,cx,boxY+boxH-41,portrait?13:18,ink,850,'center');
+  }else if(stage.type==='boss'){
+    const quota=stage.id==='quota';let packets=quota?BONUS_PACKETS.filter(id=>id.startsWith(`quota:p${run.phase}:`)&&!run.snapshot.eventLedger.some(e=>e.kind==='quota-packet'&&e.objectId===id)):[];
+    text(quota?'FILE FOR +5 AND MORE PRESSURE, OR COOL':'SAFE PULL → COUNTER → BOLT',cx,top-13,portrait?13:18,ink,850,'center');
+    packets.forEach((p,i)=>{let pw=portrait?Math.min(usable,260):Math.min(350,usable*.46),x=portrait?cx-pw/2:cx-(packets.length*pw+(packets.length-1)*18)/2+i*(pw+18),y=top+i*(portrait?112:0);roundrect(x,y,pw,portrait?98:109,10,'#e6e3cf','#a5a48d',2);text(`BONUS PACKET ${p.split(':').at(-1)}`,x+pw/2,y+19,13,ink,850,'center');button('FILE +5',x+9,y+38,pw/2-13,49,()=>{run.resolveBonusPacket(p,'file');burst(x+pw*.5,y,pink)},{accent:pink,small:true});button('COOL',x+pw/2+4,y+38,pw/2-13,49,()=>{run.resolveBonusPacket(p,'cool');burst(x+pw*.5,y,teal)},{accent:teal,small:true})});
+    const y=quota?Math.min(boxY+boxH-94,top+(portrait?packets.length*112:144)):top+85;
+    button('PULL → FLICK COUNTER',cx-Math.min(250,usable*.45),y,Math.min(500,usable*.9),65,()=>{run.recordBossAction('counter',{kind:'counter'});run.resolveBossCounter();stageAdvance();},{accent:yellow,small:portrait});
+  }else if(stage.type==='victory'){
+    const score=run.endingSnapshot;roundrect(cx-Math.min(220,usable*.46),top,Math.min(440,usable*.92),Math.min(170,boxH*.42),14,'#fdfbf2',ink,3);
+    text(showPeople?'PEOPLE & QUALITY':'OFFICIAL QUOTA',cx,top+32,portrait?16:24,ink,900,'center');text(showPeople?score.peopleScore:score.officialScore,cx,top+91,portrait?58:78,showPeople?'#148e82':'#db5c64',900,'center');
+    text(score.title,cx,top+151,portrait?13:17,ink,850,'center');
+    let y=top+190;button('FLIP RECEIPT',cx-130,y,260,48,()=>showPeople=!showPeople,{accent:teal,small:true});button('NEW SHIFT',cx-130,y+59,260,48,()=>{run=newRun({seed:++seed,mode:'standard'});firstRun=false;showPeople=false;stageAdvance()},{accent:yellow,small:true});
+  }
+  const baseY=Math.max(boxY+boxH+18,h*.78);text('NO AUTO-CLEARS  ·  16 AUTHORED / 12 IN RUN  ·  5 PROMOTIONS  ·  2 BOSSES',cx,Math.min(h-33,baseY),portrait?10:14,paper,750,'center');
+  if(paused){roundrect(0,0,w,h,0,'#040817d8');text('PAUSED',cx,h/2,Math.min(50,w/7),yellow,900,'center');text('SPACE TO RESUME',cx,h/2+58,16,paper,750,'center');}
+  if(slide>0){ctx.fillStyle=`rgba(255,223,136,${slide/220})`;ctx.fillRect(0,0,w,h);slide*=.81;if(slide<.1)slide=0;}
+  particles=particles.filter(p=>p.ttl-->0);for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.13;ctx.globalAlpha=Math.min(1,p.ttl/24);roundrect(p.x,p.y,7,9,2,p.color)}ctx.globalAlpha=1;
+}
+function loop(t){const dt=Math.min((t-last)||16,100);last=t;time+=dt;if(!paused){if(['card','printer','quota'].includes(run.status)&&!run.endingSnapshot)run.tickActive(dt)}draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);
+el.addEventListener('pointerdown',e=>{if(paused)return;const rect=el.getBoundingClientRect(),x=(e.clientX-rect.left)*vw/rect.width,y=(e.clientY-rect.top)*vh/rect.height;for(let i=buttons.length-1;i>=0;i--){const b=buttons[i];if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){try{b.handler()}catch(err){console.error(err)}break}}});
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();paused=!paused;run.pause(paused)}});
+window.__v3SystemsLab={get run(){return run},get snapshot(){return run.snapshot},get buttons(){return buttons.map(({x,y,w,h})=>({x,y,w,h}))},get viewport(){return {vw,vh,dpr,backing:[el.width,el.height]}},reset(){run=newRun({seed:seed++,firstRun:false});stageAdvance();}};
+</script></body></html>
