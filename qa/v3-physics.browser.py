@@ -32,7 +32,7 @@ try:
                 print('BROWSER DEBUG',width,height,'PAGE ERRORS',errs,'PLANCK',page.evaluate('typeof window.planck'),'STATE',page.evaluate('JSON.stringify(window.__physicsPreview?.snapshot())?.slice(0,500)'),flush=True)
                 raise
             page.wait_for_timeout(250)
-            shot=OUT/f'desk-{width}x{height}' + ('.png' if dpr==1 else f'-dpr{dpr}.png')
+            shot=OUT/(f'desk-{width}x{height}' + ('.png' if dpr==1 else f'-dpr{dpr}.png'))
             page.screenshot(path=str(shot),full_page=True)
             s=page.evaluate('window.__physicsPreview.snapshot()')
             assert not errs,f'{width}x{height} errors: {errs}'
