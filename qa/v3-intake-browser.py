@@ -105,6 +105,20 @@ def main():
             page.screenshot(path=str(EVIDENCE/f'intake-{label}.png'))
             results['viewports'].append({'label':label,'width':w,'height':h,'canvas':state['canvas'],'mode':mode,'pageerrors':len(errors)})
             context.close()
+        # Windows 200% scaling: CSS 1920x1080 must back at physical 3840x2160 exactly once.
+        dpi_page=browser.new_page(viewport={'width':1920,'height':1080},device_scale_factor=2)
+        dpi_errors=[];dpi_page.on('pageerror',lambda e:dpi_errors.append(str(e)))
+        load(dpi_page)
+        dpi_page.get_by_role('button',name='CLOCK IN').click()
+        dpi_page.evaluate("window.__intakeDebug.startCard('I2')")
+        dpi_page.wait_for_timeout(170)
+        dpi_state=assert_page(dpi_page,dpi_errors,'4k-DPR2')
+        assert dpi_state['canvas']=={'width':3840,'height':2160},dpi_state['canvas']
+        dpi_page.screenshot(path=str(EVIDENCE/'intake-4k-dpr2.png'))
+        results['viewports'].append({'label':'4k-DPR2','width':1920,'height':1080,'dpr':2,
+                                     'canvas':dpi_state['canvas'],'mode':'in-memory-real-Chromium',
+                                     'pageerrors':len(dpi_errors)})
+        dpi_page.close()
         page=browser.new_page(viewport={'width':1280,'height':720},device_scale_factor=1)
         errors=[];page.on('pageerror',lambda e:errors.append(str(e)));load(page)
         page.get_by_role('button',name='CLOCK IN').click()
@@ -161,7 +175,7 @@ def main():
         assert_page(page,errors,'final')
         browser.close()
     (EVIDENCE/'results.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
-    print('BROWSER PASS:', len(results['viewports']), 'actual Chromium viewport captures; I1-I4 real mouse completions')
+    print('BROWSER PASS:', len(results['viewports']), 'actual Chromium viewport captures including 4K DPR2; I1-I4 real mouse completions')
     print('Evidence:',EVIDENCE)
     print(json.dumps({k:v for k,v in results.items() if k!='cards'},indent=2))
 
