@@ -50,7 +50,15 @@ with sync_playwright() as p:
             page.wait_for_timeout(30)
             assert not errs,(id,errs)
             assert page.evaluate('window.__pr.scene.snapshot().finished') is False
-        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','runtimeErrors':errs})
+        # Directive routes swap on a visible rail; real mouse input must hit the moved CONTEXT target.
+        page.evaluate("window.__pr.context.run.directive='moving-goalposts';window.__pr.switchTo('P4')")
+        page.wait_for_timeout(2500)
+        assert snap()['routeShift']==1,snap()
+        page.screenshot(path=str(OUT/f'P4-goalposts-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        drag((c,402),(c-210,565))
+        assert done()[0]['evidence']['framing']=='context',done()
+        assert not errs,errs
+        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','runtimeErrors':errs})
         page.close()
     browser.close()
 (OUT/'regression-audit.json').write_text(json.dumps(results,indent=2))
