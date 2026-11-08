@@ -226,9 +226,11 @@ class IntakeScene{
  draw(g){
   stage(g,this.time,this.id==='I1'?'conveyor':'desk');
   // Large in-world stage title: not HUD; actual HUD remains LEAD/RENDER-owned.
-  txt(g,'DEPT. 01 / INTAKE',96,88,25,C.gold);
-  txt(g,({I1:'STAMP GOOD!',I2:'SHRED THE SPAM!',I3:'CLOSE THE SCAMS!',I4:'COPY THAT!'})[this.id],96,146,59,C.cream);
-  txt(g,({I1:'STAMP 5 GOOD FORMS. IGNORE THE SPAM.',I2:'FEED 2 JUNK ENVELOPES. SAVE THE PAY SLIP.',I3:'CLOSE 3 FAKE POP-UPS. MIRA IS REAL.',I4:'TRACE THE GLOWING ROUTE IN ONE GESTURE.'})[this.id],99,199,20,'#cbddd2');
+  const narrowSafe=this.context?.viewport?.safeRect;
+  const titleX=narrowSafe&&narrowSafe.w<1250?Math.max(96,narrowSafe.x+28):96;
+  txt(g,'DEPT. 01 / INTAKE',titleX,88,25,C.gold);
+  txt(g,({I1:'STAMP GOOD!',I2:'SHRED THE SPAM!',I3:'CLOSE THE SCAMS!',I4:'COPY THAT!'})[this.id],titleX,146,59,C.cream);
+  txt(g,({I1:'STAMP 5 GOOD FORMS. IGNORE THE SPAM.',I2:'FEED 2 JUNK ENVELOPES. SAVE THE PAY SLIP.',I3:'CLOSE 3 FAKE POP-UPS. MIRA IS REAL.',I4:'TRACE THE GLOWING ROUTE IN ONE GESTURE.'})[this.id],titleX+3,199,20,'#cbddd2');
   timerBand(g,this.timeLeft,this.total);
   if(this.id==='I1')this.drawStamp(g);else if(this.id==='I2')this.drawShred(g);else if(this.id==='I3')this.drawScam(g);else this.drawCopy(g);
   for(const e of this.sparks)effect(g,e);
@@ -251,7 +253,8 @@ class IntakeScene{
    g.fillStyle='#aa7e4a';g.beginPath();g.moveTo(2,4);g.lineTo(e.w/2,48);g.lineTo(e.w-2,4);g.strokeStyle='#bc9162';g.lineWidth=4;g.stroke();
    txt(g,e.kind==='junk'?'SPAM / BIN':'MIRA / PAY',e.w/2,62,e.kind==='junk'?22:19,e.kind==='junk'?'#914539':'#155d56','center');if(e.kind==='real'){txt(g,'✓',e.w-17,18,27,'#2ba077','center');}
    g.restore();}
-  txt(g,`JUNK SHREDDED ${this.shredded}/2`,895,280,26,C.gold);
+  const right=this.context?.viewport?.safeRect;
+  txt(g,`JUNK SHREDDED ${this.shredded}/2`,Math.min(1190,right?right.x+right.w-30:1190),280,26,C.gold,'right');
   txt(g,'DRAG THE ENVELOPES INTO THE SLOT',640,679,20,C.paper,'center');
  }
  drawScam(g){
