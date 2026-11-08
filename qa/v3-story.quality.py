@@ -107,6 +107,9 @@ async def main():
         result=await page.evaluate("getComputedStyle(document.querySelector('.ns-upgrade')).transitionDuration")
         assert result in ['0s','1e-06s'],('reduced motion still transitions',result)
         report['interactions']['reducedMotion']=True
+        await page.locator('[data-pick]').first.click()
+        await page.wait_for_function('window.__storyPreview.phase===2',timeout=900)
+        report['interactions']['reducedMotionQuickTransition']=True
         await page.close()
         # Narrow receipt: actual visible controls and usable scroll, never a hidden replay button.
         for w,h in [(390,844),(650,800)]:
