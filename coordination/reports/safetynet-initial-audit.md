@@ -8,6 +8,7 @@
 
 - `tools/v3-safetynet/audit.mjs`: zero-dependency Node 20+ source-stage verifier with JSON/Markdown output and two modes, integration and `--release`.
 - `qa/v3-safetynet.test.mjs`: six deterministic tests, all passing.
+- `qa/v3-safetynet.browser.py`: reproducible Playwright browser QA with actual local screenshots and JSON upload assertions.
 - `previews/v3-safetynet.html`: live, responsive evidence viewer, JSON file upload, status filtering, deliberately distinct from a game screenshot.
 - `tools/v3-safetynet/README.md`: instructions and limitations.
 
