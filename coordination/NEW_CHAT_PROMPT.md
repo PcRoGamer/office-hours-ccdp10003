@@ -1,5 +1,7 @@
 # Paste this exact prompt into each NEW ChatGPT Astra chat
 
+> **AUTONOMY OVERRIDE:** Read and obey [coordination/AUTONOMY_POLICY.md](AUTONOMY_POLICY.md) on the integration branch. **Do not ask routine questions or ask the user to continue.** Choose sensible defaults, implement, test, diagnose, fix, commit, push and open a draft PR within this active turn. Only ask for actual credentials/permission, irreversible changes, payment or a genuine unresolved conflict. If blocked, continue independent work and leave a precise handoff. Chats cannot keep executing after their turns end.
+
 > All chats should run this SAME prompt. The first successfully claimed lane will be LEAD; the next get other lanes. A claim means GitHub create-file succeeded, not that a model stated a preference.
 
 ---
