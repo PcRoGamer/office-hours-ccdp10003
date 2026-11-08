@@ -1,5 +1,7 @@
 # NIGHT SHIFT v3 | Astra-led HD-first rebuild and parallel production handoff
 
+**NO-ROUTINE-QUESTIONS DIRECTIVE:** Agents operate under [coordination/AUTONOMY_POLICY.md](coordination/AUTONOMY_POLICY.md). Make grounded defaults, implement and verify until a useful PR or genuine blocker exists; do not ask the user to say “continue,” choose routine options or approve ordinary fixes. No false promise of work after the turn ends.
+
 **Date:** Sunday 8 Nov 2026 AEDT
 **Target repo:** https://github.com/PcRoGamer/office-hours-ccdp10003
 **Integration base branch:** `rebuild/night-shift-v3-hd` (branched from `main` at the working HD/AI arcades).
