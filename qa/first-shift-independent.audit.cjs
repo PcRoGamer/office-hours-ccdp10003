@@ -43,6 +43,12 @@ async function main() {
   try {
     const options = { headless: true, args: ['--no-sandbox'] };
     if (fs.existsSync('/usr/bin/google-chrome')) options.executablePath = '/usr/bin/google-chrome';
+    else if (process.platform === 'win32') {
+      const edge = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+      const edge64 = 'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe';
+      if (fs.existsSync(edge)) options.executablePath = edge;
+      else if (fs.existsSync(edge64)) options.executablePath = edge64;
+    }
     browser = await chromium.launch(options);
     for (const { w, h, dpr } of screenshots) {
       const name = w + 'x' + h + '-dpr' + dpr;
