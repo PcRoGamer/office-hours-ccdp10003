@@ -1,10 +1,13 @@
 # QA_VISUAL lane claim
 
-- **Role:** Independent Night Shift v3 QA_VISUAL contributor.
-- **Claimed at:** 2026-11-08 20:21 AEDT.
-- **Planned branch:** `agents/v3-qa-visual-1108-7c39`.
-- **Exclusive owned paths:** `qa/v3-visual*`, `previews/v3-qa-visual*`, `coordination/reports/qa-visual-*`, lane-specific `qa` paths as specified in SWARM.
-- **Deliverable:** 1080/1440/4K/ultrawide/portrait visual comparisons, independently testable and suitable for integration.
-- **Dependencies:** GDD/integration contract, mock interfaces if other lanes pending.
-- **Tests:** Node or Playwright scenario checks, browser-playable preview, screenshot review and retest.
-- **Status:** claimed; implementation in progress.
+- **Role:** Independent Night Shift HD v3 QA_VISUAL contributor.
+- **Claimed:** 2026-11-08 20:21 AEDT (atomic GitHub create-file; no other lane displaced).
+- **Branch:** `agents/v3-qa-visual-1108-7c39`.
+- **Exclusive paths (SWARM exact):** `qa/v3-visual*`, `previews/v3-visual*`, `coordination/reports/visual-*`.
+- **Deliverable:** Browser screenshot/geometry audit across eight viewport-DPR targets, HD↔v3 interactive screenshot reviewer, documented release gates and scene-driver seam.
+- **Status:** Tooling implemented and draft PR opened. Real HD↔v3 comparison **blocked/unverified** pending integrated v3 route and browser runner access; never labelled visual pass.
+- **Draft PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/15
+- **Evidence:** 16 browser-rendered **synthetic fixture** viewport runs, 18 fixture screenshots, zero page errors and geometry failures; viewer at 1440×900 inspected with 73% split; a reviewer aspect defect was fixed and test rerun successfully. Committed script syntax parse passed. **No actual v3 game capture yet.**
+- **Report:** `coordination/reports/visual-audit-2026-11-08.md` on the PR branch.
+- **Blockers:** Integration branch had no `night-shift-v3.html` at last inspection; local browser has URL-navigation restrictions; connected Windows device offline. LEAD/QA_GAME must supply genuine v3 scene states for boss/ending captures.
+- **Release gate:** HOLD. Never replace Night Shift HD based only on fixture/browser geometry success.
