@@ -16,3 +16,40 @@ test('flick projectile step clamp and thin target cannot tunnel',()=>{const b=cr
 test('cable route is accessible only when S4 was completed',()=>{const a=createPrinterMutiny({run:{completedCards:['S3','S4']}});reachJam(a);tick(a,.5);drag(a,[205,80],[205,220]);assert.equal(a.snapshot().phase,'counter');const b=createPrinterMutiny({run:{completedCards:['S3']}});reachJam(b);tick(b,.5);drag(b,[205,80],[205,220]);assert.equal(b.snapshot().phase,'jam');});
 test('Mira option does not gate zero-perk victory',()=>{const b=createPrinterMutiny({run:{miraAssist:true},options:{directive:'MANDATORY_COLLABORATION'}});open(b);const s=b.snapshot();ptr(b,'pointerDown',260,153);assert.equal(b.snapshot().feederWidth,s.feederWidth+78);feed(b);assert.equal(b.snapshot().removed,1);});
 test('definition follows scene contract',()=>{assert.equal(definitions.length,1);assert.equal(definitions[0].id,'B1');for(const meth of ['enter','update','draw','pointerDown','pointerMove','pointerUp','cancelPointer','snapshot','dispose'])assert.equal(typeof definitions[0].create({})[meth],'function');});
+
+test('moving goalposts travels on rail during telegraph, then stays fixed throughout manipulation',()=>{
+ const b=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
+ const initial=b.snapshot();assert.notEqual(initial.feederX,initial.feederTargetX);
+ tick(b,.65);const mid=b.snapshot();
+ assert.ok(mid.feederX>initial.feederX&&mid.feederX<mid.feederTargetX,'must visibly tween, not teleport');
+ tick(b,2.7);const jam=b.snapshot();assert.equal(jam.phase,'jam');
+ assert.equal(jam.feederX,jam.feederTargetX);
+ tick(b,.55);drag(b,[-104,105],[-104,239]);
+ const counter=b.snapshot();assert.equal(counter.feederX,jam.feederX);
+ tick(b,2.3);assert.equal(b.snapshot().feederX,counter.feederX);
+});
+test('Mira HOLD label activates same actual assist as face',()=>{
+ const b=createPrinterMutiny({run:{miraAssist:true},options:{directive:'MANDATORY_COLLABORATION'}});
+ open(b);const before=b.snapshot();ptr(b,'pointerDown',260,220);
+ assert.equal(b.snapshot().feederWidth,before.feederWidth+78);
+ ptr(b,'pointerDown',260,220);assert.equal(b.snapshot().feederWidth,before.feederWidth+78,'assist single use');
+});
+test('cancelled packet drag does not consume an opportunity, regrabs can complete',()=>{
+ const b=createPrinterMutiny({options:{directive:'DOUBLE_ENTRY'}});open(b);
+ const q=b.snapshot();ptr(b,'pointerDown',q.feederX,-28);
+ const p=b.snapshot().packet;
+ ptr(b,'pointerDown',p.x,p.y);ptr(b,'pointerMove',p.x+70,p.y-20);b.cancelPointer();
+ assert.equal(b.snapshot().failedCounters,0);
+ assert.equal(b.snapshot().packet.held,false);
+ feed(b);assert.equal(b.snapshot().removed,1);
+});
+test('one completed boss result per entry; restart intentionally starts fresh',()=>{
+ const events=[],b=createPrinterMutiny({events:{emit:e=>events.push(e)}});
+ for(let i=0;i<3;i++)cycle(b,'MOVING_GOALPOSTS');
+ assert.equal(events.filter(e=>e.type==='boss-complete').length,1);
+ b.enter();assert.equal(b.snapshot().removed,0);
+ assert.equal(b.snapshot().phase,'telegraph');
+ for(let i=0;i<3;i++)cycle(b,'MOVING_GOALPOSTS');
+ assert.equal(events.filter(e=>e.type==='boss-complete').length,2);
+});
+
