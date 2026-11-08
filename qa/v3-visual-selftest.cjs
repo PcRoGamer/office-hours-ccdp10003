@@ -5,7 +5,7 @@ const {chromium}=require('playwright'),{spawn}=require('node:child_process');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'qa-artifacts/v3-visual');
 (async()=>{
- const chrome=process.env.CHROME_BIN||'/usr/bin/chromium',env={...process.env,VISUAL_OUT:out,CHROME_BIN:chrome};
+ const chrome=process.env.CHROME_BIN||(fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined),env={...process.env,VISUAL_OUT:out,CHROME_BIN:chrome};
  const code=await new Promise((resolve,reject)=>{
   const p=spawn(process.execPath,[path.join(__dirname,'v3-visual-audit.cjs'),'--fixture-test'],{env,stdio:'inherit'});
   p.on('error',reject);p.on('exit',resolve);
@@ -22,7 +22,7 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'qa-artifacts/v3-visu
   run.captures=run.captures.filter(c=>c.scene==='title'&&c.viewport==='1080p');
   for(const capture of run.captures)capture.image='data:image/png;base64,'+fs.readFileSync(path.join(out,capture.image)).toString('base64');
  }
- const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox']});
+ const browser=await chromium.launch({headless:true,executablePath:chrome||undefined,args:['--no-sandbox']});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
