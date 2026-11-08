@@ -111,3 +111,18 @@ node qa/v3-safetynet-preview-matrix.mjs --root /tmp/nightshift-v3-rehearsal --ou
 Use fresh Windows `%TEMP%` paths for outputs; the assembler refuses existing worktree destinations. No external LLM calls were made.
 
 **The remaining release gate is a full HD-superior integrated v3 gameplay build**. This lane has now replaced untested assertions with reproducible real-browser and real-module evidence, but full boss routes, Staff gameplay, actual audio/music, all perk interactions, human timing and a fresh-public-URL run still require end-to-end integration and acceptance. The incumbent HD stays untouched.
+
+
+### Additional full-screen stress inspection
+
+After the 16 default preview captures, I upgraded the browser matrix with `--viewports` and a **measured canvas-edge coverage check** rather than treating any canvas as full-screen. On the isolated staged source, real Chrome captures passed **Intake at 3840×2160** and **Printer Mutiny at 3440×1440**, with canvases covering the CSS viewport, no horizontal overflow, no uncaught JS and no missing assets. I inspected the actual rendered frames: both stages extend authored world scenery to the edges rather than showing permanent solid black gutters in these specific states. This remains a **two-scene stress sample**, not proof of all 16 cards at every monitor scaling level or a measured GPU frame-rate pass.
+
+- [Actual 4K/ultrawide comparison](../../qa/v3-safetynet-preview-evidence/wide-stress.jpg)
+- [Machine-readable wide test details](../../qa/v3-safetynet-preview-evidence/wide-results.json)
+
+Re-run directly:
+
+```sh
+node qa/v3-safetynet-preview-matrix.mjs --root /tmp/nightshift-v3-rehearsal --only intake --viewports 3840x2160 --out /tmp/intake-4k
+node qa/v3-safetynet-preview-matrix.mjs --root /tmp/nightshift-v3-rehearsal --only printer --viewports 3440x1440 --out /tmp/printer-ultrawide
+```
