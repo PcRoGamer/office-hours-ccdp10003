@@ -201,7 +201,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - name: Run original lane's native invariant tests
+        id: native-unit
         if: ${{ matrix.unit != '' }}
+        # Preserve browser evidence even if a developer's own unit suite fails.
+        continue-on-error: true
         working-directory: candidate
         run: node "${{ matrix.unit }}"
       - name: Install headless Chromium
@@ -233,3 +236,6 @@ jobs:
           name: night-shift-v3-peer-${{ matrix.lane }}-${{ github.run_id }}
           path: candidate/qa-artifacts/v3-release-previews/
           retention-days: 14
+      - name: Native tests are mandatory, after screenshots have been captured
+        if: ${{ always() && steps.native-unit.outcome == 'failure' }}
+        run: exit 1
