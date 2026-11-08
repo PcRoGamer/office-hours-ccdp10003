@@ -149,6 +149,20 @@ async def main():
         assert await page.evaluate('window.__storyPreview.phase')==1,'stale promotion continuation ran'
         report['interactions']['cancelledPromotionTimerSafe']=True
         await page.close()
+        # Tab backgrounding must never launch the next task unseen.
+        page=await browser.new_page(viewport={'width':1280,'height':800})
+        page.on('pageerror',lambda e:report['errors'].append(str(e)))
+        await page.set_content(html,wait_until='load')
+        await page.get_by_role('button',name='OPEN YOUR PROMOTION EMAIL').click()
+        await page.locator('[data-pick]').first.click()
+        await page.evaluate("Object.defineProperty(document,'hidden',{configurable:true,value:true})")
+        await page.wait_for_timeout(1800)
+        assert await page.evaluate('window.__storyPreview.phase')==1,'promotion advanced while page hidden'
+        await page.evaluate("Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'))")
+        await page.wait_for_timeout(120)
+        assert await page.evaluate('window.__storyPreview.phase')==2,'handoff did not resume on visibility'
+        report['interactions']['hiddenTabFreezesHandoff']=True
+        await page.close()
         # Directly exercise the real SYSTEMS draft and readScores report schemas.
         page=await browser.new_page(viewport={'width':1440,'height':900})
         page.on('pageerror',lambda e:report['errors'].append(str(e)))
