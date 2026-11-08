@@ -17,3 +17,44 @@ test('P3 requires genuine tracked moving focus hold and three locks',()=>{const 
 for(const route of ['headline','context'])test(`P4 ${route} physically dispatches truthful report and real one-use effect`,()=>{const x=setup('P4',{events:[],miraIncident:null});x.scene.pointerDown(p(600,402),viewport);const dst=route==='headline'?p(385,565):p(805,565);x.scene.pointerMove(dst,viewport);x.scene.pointerUp(dst,viewport);assertWin(x,'P4');const e=x.done()[0].evidence;assert.equal(e.framing,route);assert.equal(e.facts.miraIncidentObserved,false);assert.equal(e.facts.before,1240);assert.equal(e.facts.after,1280);assert.equal(e.effect.type,route==='headline'?'priority-pass':'quota-warning-card');assert.equal(e.effect.uses,1);});
 test('all four scenes timeout exactly once and do not progress while not updated',()=>{for(const d of definitions){const x=setup(d.id);x.scene.update(0);assert.equal(x.scene.snapshot().time,0);for(let i=0;i<1000&&!x.done().length;i++)x.scene.update(.1);assert.equal(x.done().length,1,`${d.id} times out`);assert.equal(x.done()[0].outcome,'failure');x.scene.update(.1);assert.equal(x.done().length,1);}});
 test('snapshot is immutable to outsiders',()=>{const x=setup('P2');const snap=x.scene.snapshot();snap.overlays[0].removed=true;assert.equal(x.scene.snapshot().overlays[0].removed,false);});
+
+ 
+// Regression from independent QA_GAME PR #12: scoring reference times must never
+// silently inherit a longer introductory shutter allowance.
+test('scoring references match authoritative v3 contract, independent of shutters',async()=>{
+ const fs=await import('node:fs');
+ const contract=JSON.parse(fs.readFileSync(new URL('../design/v3/contract.json',import.meta.url),'utf8'));
+ for(const d of definitions){
+  const canonical=contract.card_pool.find(c=>c.id===d.id);
+  assert.ok(canonical,`missing canonical ${d.id}`);
+  assert.equal(d.authoredReferenceMs,canonical.authoredReferenceMs,`${d.id} scoring reference`);
+  assert.ok(d.seconds*1000>d.authoredReferenceMs,`${d.id} accessible play window`);
+  const x=setup(d.id);for(let i=0;i<600&&!x.done().length;i++)x.scene.update(.1);
+  assert.equal(x.done()[0].evidence.authoredReferenceMs,canonical.authoredReferenceMs);
+ }
+});
+test('P1 cannot submit misleading chart after correcting then undoing zero baseline',()=>{
+ const x=setup('P1');
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,705),viewport);x.scene.pointerUp(p(400,705),viewport);
+ assert.equal(x.scene.snapshot().corrected,true);
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,465),viewport);x.scene.pointerUp(p(400,465),viewport);
+ assert.ok(x.scene.snapshot().baseline>0);assert.equal(x.scene.snapshot().corrected,false);
+ x.scene.pointerDown(p(600,630),viewport);assert.equal(x.done().length,0);assert.equal(x.actions().at(-1).correct,false);
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,720),viewport);x.scene.pointerUp(p(400,720),viewport);
+ x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
+});
+test('P2 genuine-help dismissal penalised, reversible and never awards success',()=>{
+ const x=setup('P2');
+ x.scene.pointerDown(p(550,360),viewport);x.scene.pointerMove(p(780,100),viewport);x.scene.pointerUp(p(780,100),viewport);
+ assert.equal(x.done().length,0);assert.ok(x.actions().some(e=>e.kind==='dismiss-genuine-help'&&!e.correct));
+ assert.ok(x.scene.snapshot().overlays.find(o=>o.id==='real').removed);
+ for(let i=0;i<10;i++)x.scene.update(.1);
+ assert.equal(x.scene.snapshot().overlays.find(o=>o.id==='real').removed,false);
+});
+test('invalid/negative time steps never advance or poison scene clock',()=>{
+ for(const d of definitions){
+  const x=setup(d.id);x.scene.update(NaN);x.scene.update(-500);x.scene.update(Infinity);
+  assert.equal(x.scene.snapshot().time,0,`${d.id} invalid time`);
+  x.scene.update(.06);assert.equal(x.scene.snapshot().time,.06);assert.ok(Number.isFinite(x.scene.snapshot().flash));
+ }
+});
