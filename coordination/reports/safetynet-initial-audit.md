@@ -1,40 +1,61 @@
 # SAFETYNET overflow lane | execution and acceptance report
 
-**Run:** 8 November 2026 AEDT, independent container execution.  
-**Branch:** `agents/v3-safetynet-atlas-1108` (base: `rebuild/night-shift-v3-hd`).  
-**Scope:** release *source* safety verification, not a replacement for QA_GAME, QA_VISUAL or RELEASE.
+**Updated:** Sunday 8 November 2026 AEDT.  
+**Branch:** `agents/v3-safetynet-atlas-1108` (PR [#13](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/13) into `rebuild/night-shift-v3-hd`).  
+**Scope:** supplementary non-regression tooling and independent *actual HD browser baseline*, not a duplicate QA_VISUAL or QA_GAME lane.
 
-## Files delivered
+## Corrected workstation/browser finding
 
-- `tools/v3-safetynet/audit.mjs`: zero-dependency Node 20+ source-stage verifier with JSON/Markdown output and two modes, integration and `--release`.
-- `qa/v3-safetynet.test.mjs`: six deterministic tests, all passing.
-- `qa/v3-safetynet.browser.py`: reproducible Playwright browser QA with actual local screenshots and JSON upload assertions.
-- `previews/v3-safetynet.html`: live, responsive evidence viewer, JSON file upload, status filtering, deliberately distinct from a game screenshot.
-- `tools/v3-safetynet/README.md`: instructions and limitations.
+The earlier statement that the Windows workstation was unavailable **was incomplete and is superseded**. Desktop Commander reports offline, but the locally approved **UniSync host bridge is functioning** with persistent read/run/write access. Confirmed PowerShell, Git, Node and Chrome execution on the actual Windows workstation. An isolated worktree was created at `C:\Users\Admin\AppData\Local\Temp\nightshift-v3-safetynet-20261108\work`. No existing/shared checkout or old release was modified.
 
-## Executed checks
+Chrome was successfully driven using **Chrome DevTools Protocol with Node's built-in WebSocket**, not Playwright's hanging Windows launch. This demonstrates that the actual original HD release can be exercised and captured even when a particular browser automation connector does not launch.
 
-1. **Node:** `node --test qa/v3-safetynet.test.mjs` in the isolated container: **6 passed, 0 failed, 0 skipped**. Same byte-for-byte `audit.mjs` and test source uploaded to GitHub verified by comparing Git blob SHAs.
-2. **Browser:** Chromium through Playwright at **1440×900** and **390×844** using actual local HTML content. Passed: sample load, real file-input JSON load, summary counts, fail filter and portrait no horizontal document overflow; no JavaScript page exceptions. Initial mobile capture revealed overflowing summary type and truncated rows, fixed with responsive type scaling and stacked mobile cards, then rendered and inspected again.
-3. **Live integration branch:** inspected `rebuild/night-shift-v3-hd` through authenticated GitHub. All **14 historically deployed route files** still match the pinned `main` Git blob SHAs, including `arcade-office-hd.html`, `index.html`, `workday-final.html`, and all major arcade routes.
-4. **GDD schema:** the existing `design/v3/contract.json` declares 16 unique authored IDs, 12 per shift, five promotions, eight perks, five directives and both three-cycle bosses. This is a **document presence/conformance finding only**, not an implemented-game pass.
+## Delivered
 
-## Genuine blockers and exclusions
+- `tools/v3-safetynet/audit.mjs`: 14 pinned legacy-route hashes checked through Git clean filters (handles Windows autocrlf), canonical v3 structural scope checks, missing modules/card IDs, Pages local references and JavaScript syntax checks.
+- `qa/v3-safetynet.test.mjs`: **7 passing Node unit tests**, including a new Windows CRLF regression and modified-source detection test.
+- `qa/v3-safetynet-hd-cdp.mjs`: **independently runnable real-browser proof**. Starts installed Chrome/Chromium, navigates to the *unmodified* `arcade-office-hd.html`, computes actual title-button coordinates, dispatches physical browser mouse input through CDP, verifies the scene-start accessibility announcement, and captures title+action frames in two viewport sizes. No LLM calls or artificial gameplay mockups.
+- `qa/v3-safetynet-hd-evidence/**`: four actual browser screenshots and machine-readable `hd-browser-results.json` containing viewport, canvas, interaction response and exceptions.
+- `qa/v3-safetynet.browser.py` and `previews/v3-safetynet.html`: real Playwright audit-*viewer* tests and an interactive evidence browser.
+- `tools/v3-safetynet/README.md`: standalone reproducible commands.
 
-- At the time of this report the shared integration branch had **no `night-shift-v3.html` nor `night-shift-v3/**` merged yet**. This is *pending integration*, not a failed specialist contribution. All original 17 production lanes were reserved in the shared claim directory, so this is an explicitly supplementary lane.
-- Remote Desktop Commander reported the Windows device **offline**; container attempts to navigate network and file URLs were blocked by policy. For browser QA of the viewer, Playwright used `page.set_content` with the exact standalone HTML bytes. The **actual HD game was NOT launched or compared** in this lane; there is no assertion of visual parity.
-- The viewer screenshots were captured locally at the stated viewports and inspected. The report viewer is **not gameplay**. Game footage, human timing, music, 16 live cards, bosses and final physical CLOCK OUT remain the responsibility of the original owners.
-- This tool uses static source matching and URL extraction. A fake scene definition can still pass a structural scan; the audit intentionally keeps `runtime-evidence` pending forever, even when all source-stage checks pass. Dynamic URL creation and runtime asset failures still require browser E2E.
-- No shared release routes, other lanes' code, CI workflows, SWARM, AGENTS, contracts, or `main` were edited.
+## Executed results
 
-## Reproduce and integrate
+| Check | Actual result |
+|---|---|
+| Node unit tests, Windows `node --test qa/v3-safetynet.test.mjs` | **7 passed / 0 failed** |
+| Windows source audit, integration mode | **15 pass / 0 fail / 25 pending** (unmerged v3 implementation) |
+| Windows CRLF cross-platform regression | Corrected source-gate false positive; now all 14 pinned legacy routes pass |
+| **Actual HD Chrome CDP startup** | **PASS** at **1440×900** and **650×800** with real pointer clicks |
+| HD canvas fits CSS viewport | **PASS** at both sizes (canvas boxes 1440×900 and 650×800) |
+| HD title → action accessibility signal | **PASS** in both sizes: `Welcome to Quota Panic! Six short office disasters. Click, drag and dodge.` |
+| Uncaught Chrome JavaScript exceptions | **0** |
+| Separate report-viewer Chromium Playwright | **PASS** desktop 1440×900, narrow 390×844, real JSON upload/filter/overflow |
+| v3 integrated browser acceptance | **PENDING**: no integrated `night-shift-v3.html` in inspected branch |
+| Sound/music, 16 live cards, bosses, 4K and human pacing | **NOT VERIFIED** by this lane |
+
+Actual HD capture links (not generated art):
+- [HD title 1440×900](../../qa/v3-safetynet-hd-evidence/hd-title-1440x900.png)
+- [HD first action 1440×900](../../qa/v3-safetynet-hd-evidence/hd-action-1440x900.png)
+- [HD title 650×800](../../qa/v3-safetynet-hd-evidence/hd-title-650x800.png)
+- [HD first action 650×800](../../qa/v3-safetynet-hd-evidence/hd-action-650x800.png)
+- [Chrome CDP machine-readable results](../../qa/v3-safetynet-hd-evidence/hd-browser-results.json)
+
+## Visual inspection and actionable quality note
+
+The actual HD title retains its strong screen-printed typography, character/printer silhouettes and split cream/coral composition. Its first action shows the animated conveyor office with paper targets and a HUD. At **650×800**, the game's existing `contain` camera compresses the action into a central horizontal band with substantial low-detail top/bottom space. This is a genuine narrow-view baseline limitation: v3 should **improve** it through responsive staging/world coverage rather than merely copy it.
+
+This baseline cannot establish **HD-versus-v3 superiority** until a real integrated v3 candidate exists. The correct next step is to point the same CDP harness (or independent QA_VISUAL browser harness) at `night-shift-v3.html` once integrated, then compare equivalent states and explicitly verify v3's own input paths.
+
+## Reproduction
 
 ```sh
 node --test qa/v3-safetynet.test.mjs
-node tools/v3-safetynet/audit.mjs --root . --out /tmp/v3-audit.json
-node tools/v3-safetynet/audit.mjs --root . --release --out /tmp/v3-release-audit.json
-python -m http.server 4173
-# open /previews/v3-safetynet.html and load the JSON file
+node tools/v3-safetynet/audit.mjs --root . --out qa/v3-safetynet-result.json
+node qa/v3-safetynet-hd-cdp.mjs
+python qa/v3-safetynet.browser.py
 ```
 
-**Integration instructions:** LEAD can merge this additive PR without importing it into the main game runtime. RELEASE may *call* `node tools/v3-safetynet/audit.mjs --release` from its owned workflow once specialist modules are integrated. A source-stage green result never overrides visual, audio, human or Playwright acceptance gates.
+The CDP script requires locally installed Chrome or Chromium. Set `CHROME_PATH` for a nonstandard installation. It uses an isolated temporary Chrome profile and does not require the workstation's usual browser session.
+
+**Release distinction:** source gate and actual HD baseline are now verified. Full v3 gameplay, both bosses, soundtrack and public release remain pending integration. This report does not authorize publishing over the working HD fallback.
