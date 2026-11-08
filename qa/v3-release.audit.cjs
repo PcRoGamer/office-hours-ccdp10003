@@ -26,8 +26,22 @@ function filesBelow(base){
  const out=[];function visit(n){for(const ent of fs.readdirSync(inside(n),{withFileTypes:true})){const p=path.posix.join(n,ent.name);if(ent.isDirectory())visit(p);else if(ent.isFile())out.push(p)}}visit(base);return out;
 }
 function source(){
- for(const p of ['index.html','arcade-office-hd.html','arcade-v3.html'])
+ // Pinned main-release Git blob IDs, verified on 2026-11-08.
+ // Presence alone does not prevent an HD regression; these hashes do.
+ const protectedBlobs={
+  'index.html':'bfe0406441c07663471461af80e9792b35424684',
+  'arcade-office-hd.html':'3533177e4843b7f6d0676300d315b97d44a2cb58',
+  'arcade-v3.html':'4d723fffede945d948fb0967b3d01ca0b482b12e',
+  'arcade-office-genai.html':'96bfd5b400aae100abd87dcca41a253123f8efdd',
+  'arcade-nightshift.html':'a8bd24dc75278c4cd1bc2d623480deb1ec67fa3c'
+ };
+ for(const [p,expected] of Object.entries(protectedBlobs)){
   test(exists(p),'Protected incumbent present: '+p);
+  if(!exists(p))continue;
+  const git=spawnSync('git',['hash-object',p],{cwd:ROOT,encoding:'utf8'});
+  test(git.status===0&&git.stdout.trim()===expected,
+    'Pinned HD/legacy release unchanged: '+p,{expected,actual:git.stdout?.trim()});
+ }
  const present=exists('night-shift-v3.html');
  if(!present){record('warnings','v3 route not present: smoke-only candidate is NOT publishable');return}
  const html=fs.readFileSync(inside('night-shift-v3.html'),'utf8');
