@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
-import { LEGACY_BLOBS, gitBlobSha, idsInSource, localReferences, inspectReference, audit, markdownReport } from '../tools/v3-safetynet/audit.mjs';
+import { spawnSync } from 'node:child_process';
+import { LEGACY_BLOBS, gitBlobSha, workingBlobSha, idsInSource, localReferences, inspectReference, audit, markdownReport } from '../tools/v3-safetynet/audit.mjs';
 
 function fixture() {
   const root=mkdtempSync(join(tmpdir(),'nightshift-safetynet-'));
@@ -63,4 +64,18 @@ test('Present id is structural only; incomplete boss and missing page cannot pas
     assert(report.checks.some(c=>c.id==='quota'&&c.status==='fail'));
     assert(report.checks.some(c=>c.id==='night-shift-v3.html'&&c.status==='fail'));
   }finally{f.cleanup();}
+});
+
+test('Git working-tree hashes respect core.autocrlf without hiding actual edits',()=>{
+  const f=fixture();
+  try {
+    const exec=(args)=>spawnSync('git',args,{cwd:f.root,encoding:'utf8'});
+    assert.equal(exec(['init','-q']).status,0);
+    assert.equal(exec(['config','core.autocrlf','true']).status,0);
+    f.put('hd.html','original\r\n');
+    const expected=gitBlobSha(Buffer.from('original\n'));
+    assert.equal(workingBlobSha(f.root,'hd.html',join(f.root,'hd.html')),expected);
+    f.put('hd.html','changed\r\n');
+    assert.notEqual(workingBlobSha(f.root,'hd.html',join(f.root,'hd.html')),expected);
+  } finally {f.cleanup();}
 });
