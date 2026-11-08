@@ -21,4 +21,54 @@ test('five directives retain counter routes',()=>{for(const directive of ['DOUBL
 test('timers never advance on pause / zero dt',()=>{const {b}=make();b.update(0);b.update(-3);assert.equal(b.snapshot().activeTimeMs,0);b.update(.045);assert.equal(b.snapshot().activeTimeMs,45);});
 test('missed counter never removes bolt; stale window re-opens',()=>{const {b}=make();advance(b,1.9);let s=b.snapshot();drag(b,s.targets.bonus,s.targets.cool);advance(b,2.2);s=b.snapshot();drag(b,s.targets.strip,s.targets.stripTo);s=b.snapshot();click(b,s.targets.seal);s=b.snapshot();drag(b,s.targets.counter,{x:1000,y:100});assert.equal(b.snapshot().boltsRemoved,0);advance(b,5);assert.equal(b.snapshot().boltsRemoved,0);assert.equal(b.snapshot().mode,'telegraph');});
 test('definition export conforms to scene contract',()=>{assert.equal(definitions[0].id,'B2');for(const key of ['enter','update','draw','pointerDown','pointerMove','pointerUp','cancelPointer','snapshot','dispose'])assert.equal(typeof definitions[0].create(make().b).update,'function');});
-console.log(tests.map(t=>`${t.status}: ${t.name}${t.error?'\n'+t.error:''}`).join('\n'));console.log(`${count}/${tests.length} assertions passed`);
+// Print all groups after the continuation regression cases.
+
+test('resume after committed phase I FILE cannot re-file same packet',()=>{
+  const saved={runId:'test-run',seed:23,quotaBoltsRemoved:0,quotaPressure:1,
+    quotaBonusPacketOutcomes:{'quota:p1:b1':'file'}};
+  const emitted=[];
+  const b=createQuotaBoss({run:saved,viewport:{worldWidth:1200,worldHeight:760},events:{emit:e=>emitted.push(e)}});
+  advance(b,1.9);
+  assert.equal(b.snapshot().mode,'telegraph');
+  assert.equal(b.snapshot().bonusCorporatePoints,5);
+  assert.equal(b.snapshot().pressure,1);
+  advance(b,2.1);
+  let s=b.snapshot();assert.equal(s.mode,'recovery');
+  assert.ok(drag(b,s.targets.strip,s.targets.stripTo));
+  s=b.snapshot();assert.ok(click(b,s.targets.seal));
+  s=b.snapshot();assert.ok(drag(b,s.targets.counter,s.targets.gear));
+  assert.equal(emitted.filter(e=>e.type==='quota-bonus-resolved').length,0);
+  assert.equal(b.snapshot().boltsRemoved,1);
+});
+test('resume at phase III skips recorded packet one but offers packet two after routing',()=>{
+  const ctx={run:{runId:'test-run',seed:23,quotaBoltsRemoved:2,quotaPressure:0,currentDirective:'DOUBLE ENTRY',
+    quotaBonusPacketOutcomes:{'quota:p1:b1':'file','quota:p2:b1':'cool','quota:p3:b1':'cool'}},
+    viewport:{worldWidth:1200,worldHeight:760},events:{emit(){}}};
+  const b=createQuotaBoss(ctx);advance(b,1.9);
+  assert.equal(b.snapshot().mode,'route');
+  assert.equal(b.snapshot().boltsRemoved,2);
+  while(b.snapshot().clockSeconds%4.1<1.15)advance(b,.15);
+  let s=b.snapshot();assert.ok(drag(b,s.targets.doc,s.targets.safe));
+  assert.equal(b.snapshot().mode,'bonus');
+  const key=b.snapshot().targets.bonus;assert.ok(drag(b,key,b.snapshot().targets.file));
+  assert.equal(b.snapshot().mode,'latch');
+  assert.equal(b.snapshot().bonusCorporatePoints,10);
+});
+test('three restored bolts require manually dragged CLOCK OUT without duplicates',()=>{
+  const received=[];
+  const ctx={run:{runId:'test-run',seed:23,quotaBoltsRemoved:3,quotaPressure:2,quotaBonusPacketOutcomes:Object.fromEntries(BONUS_IDS.map(k=>[k,'file']))},viewport:{worldWidth:1200,worldHeight:760},events:{emit:e=>received.push(e)}};
+  const b=createQuotaBoss(ctx);
+  advance(b,1.9);let s=b.snapshot();assert.equal(s.mode,'clockout');
+  assert.equal(s.bonusCorporatePoints,20);
+  assert.ok(drag(b,s.targets.stamp,s.targets.stampTo));
+  assert.equal(received.filter(e=>e.type==='boss-complete').length,1);
+  assert.equal(b.pointerDown({x:600,y:608,id:1}),false);
+});
+test('all emitted events have stable ledger IDs and no in-place score mutation',()=>{
+  const {emitted}=play([0,2]);
+  const ids=emitted.map(e=>e.id);
+  assert.equal(new Set(ids).size,ids.length);
+  assert.ok(emitted.every(e=>e.runId==='test-run'&&e.encounterId==='B2'&&e.committed===false&&Object.isFrozen(e)));
+});
+console.log(tests.map(t=>`${t.status}: ${t.name}${t.error?'\n'+t.error:''}`).join('\n'));
+console.log(`${count}/${tests.length} total assertions passed`);
