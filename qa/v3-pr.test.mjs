@@ -212,3 +212,56 @@ test('Double Entry P4 requires matching copy route before effect is committed',(
  assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'headline');
  assert.equal(x.done()[0].evidence.linkedCopy,true);assert.equal(x.actions().filter(a=>a.correct).length,2);
 });
+
+test('Fast or Safe P1 provides simultaneous narrow fast and broad deliberate safe physical routes',()=>{
+ for(const route of ['fast','safe']){
+  const x=setup('P1',{directive:'fast-or-safe'});
+  x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
+  if(route==='fast')x.scene.pointerDown(p(645,630),viewport);
+  else{ x.scene.pointerDown(p(405,630),viewport);for(let i=0;i<6;i++)x.scene.update(.1);x.scene.pointerUp(p(405,630),viewport); }
+  assertWin(x,'P1');assert.equal(x.done()[0].evidence.route,route);
+ }
+});
+test('P1 early safe release is not silently auto-completed',()=>{
+ const x=setup('P1',{directive:'fast-or-safe'});
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
+ x.scene.pointerDown(p(405,630),viewport);x.scene.update(.2);x.scene.pointerUp(p(405,630),viewport);
+ assert.equal(x.done().length,0);assert.equal(x.actions().at(-1).correct,false);
+});
+test('Fast or Safe P4 presents narrow HEADLINE and wider delayed CONTEXT paths',()=>{
+ const x=setup('P4',{directive:'fast-or-safe'});
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(245,565),viewport);x.scene.pointerUp(p(245,565),viewport);
+ assert.equal(x.done().length,0,'outside narrow fast target');
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(805,565),viewport);x.scene.pointerUp(p(805,565),viewport);
+ assert.equal(x.done().length,0);assert.ok(x.scene.snapshot().safeWait>0);
+ for(let i=0;i<8;i++)x.scene.update(.1);
+ assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'context');
+});
+test('Mandatory Collaboration P1 Mira visibly steadies chart but cannot finish it for player',()=>{
+ const x=setup('P1',{directive:'mandatory-collaboration'});x.scene.pointerDown(p(770,630),viewport);
+ assert.equal(x.scene.snapshot().miraHelped,true);assert.equal(x.scene.snapshot().baseline,750);assert.equal(x.done().length,0);
+ assert.equal(x.events.filter(e=>e.type==='coworker-assist').length,1);
+ x.scene.pointerDown(p(400,520),viewport);x.scene.pointerMove(p(400,710),viewport);x.scene.pointerUp(p(400,710),viewport);
+ x.scene.pointerDown(p(600,630),viewport);assertWin(x,'P1');
+});
+test('Mandatory Collaboration P4 Mira expands physically reachable context zone, solo remains viable',()=>{
+ const normal=setup('P4',{directive:'mandatory-collaboration'});
+ normal.scene.pointerDown(p(600,402),viewport);normal.scene.pointerMove(p(805,660),viewport);normal.scene.pointerUp(p(805,660),viewport);
+ assert.equal(normal.done().length,0,'unassisted context must not accept out-of-zone release');
+ const x=setup('P4',{directive:'mandatory-collaboration'});x.scene.pointerDown(p(865,376),viewport);
+ assert.equal(x.scene.snapshot().miraHelped,true);assert.equal(x.events.filter(e=>e.type==='coworker-assist').length,1);
+ x.scene.pointerDown(p(600,402),viewport);x.scene.pointerMove(p(805,660),viewport);x.scene.pointerUp(p(805,660),viewport);
+ assertWin(x,'P4');assert.equal(x.done()[0].evidence.framing,'context');
+});
+test('Sponsored Workflow P2 masks signed help behind hostile overlays until fake removed',()=>{
+ const x=setup('P2',{directive:'sponsored-workflow'});
+ assert.equal(x.scene.snapshot().sponsored,true);
+ x.scene.pointerDown(p(550,360),viewport);x.scene.pointerUp(p(550,360),viewport);
+ assert.equal(x.scene.snapshot().opened,false,'signed help must not be tappable through an ad');
+ x.scene.pointerDown(p(300,280),viewport);x.scene.pointerMove(p(30,80),viewport);x.scene.pointerUp(p(30,80),viewport);
+ assert.equal(x.scene.snapshot().sponsorUnlocked,true);assert.equal(x.events.filter(e=>e.type==='directive-shift').length,1);
+ x.scene.pointerDown(p(550,360),viewport);x.scene.pointerUp(p(550,360),viewport);
+ assert.equal(x.scene.snapshot().opened,true,'real help reachable after fake removed');
+ x.scene.pointerDown(p(750,450),viewport);x.scene.pointerMove(p(1080,600),viewport);x.scene.pointerUp(p(1080,600),viewport);
+ assertWin(x,'P2');
+});
