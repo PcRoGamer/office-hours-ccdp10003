@@ -90,6 +90,8 @@ try:
             narrow=page.evaluate('window.__physicsPreview.snapshot()')
             assert narrow['score']==saved_score, f'RESIZE LOST SCORE: {narrow}'
             assert {body['id'] for body in narrow['sim']['bodies'] if body['id'].startswith('form-')}==saved_unscored, 'RESIZE LOST LIVE FORMS'
+            form_xs=[body['x'] for body in narrow['sim']['bodies'] if body['id'] in saved_unscored]
+            assert max(form_xs)-min(form_xs)>180, f'REFLOW PILED UP FOLDER LABELS: {form_xs}'
             assert narrow['viewport']['width']==650 and narrow['viewport']['height']==800
             chute=next(body for body in narrow['sim']['bodies'] if body['id']=='chute')
             assert abs(chute['x']-(narrow['worldWidth']-115))<.1, 'BIN NOT ANCHORED AFTER RESIZE'
