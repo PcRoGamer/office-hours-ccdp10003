@@ -120,16 +120,16 @@ function effect(g,e){if(!e)return;g.save();const t=e.t;burst(g,{x:e.x,y:e.y},t,e
 class IntakeScene{
  constructor(context,id){
   this.id=id;this.context=context;this.time=0;this.total=16;this.timeLeft=this.total;
-  this.ended=false;this.sparks=[];this.pointer=null;this.errorCount=0;
+  this.ended=false;this.endElapsed=0;this.sparks=[];this.pointer=null;this.errorCount=0;
   this.actions=[];this.noticeState={real:'pending',fake:'pending'};
   this.seed=context?.rng?.next?.()??0.4;
   this.setup();
  }
  setup(){
   if(this.id==='I1'){
-   this.total=20;this.forms=[];this.spawned=0;this.good=0;this.noticeShown=false;this.streak=0;
+   this.total=20;this.forms=[];this.spawned=0;this.good=0;this.noticeShown=false;this.streak=0;this.ghost=null;
   }else if(this.id==='I2'){
-   this.total=20;this.envelopes=[{id:'junk-a',x:380,y:378,kind:'junk',angle:-.15},{id:'pay-slip',x:634,y:400,kind:'real',angle:.09},{id:'junk-b',x:872,y:376,kind:'junk',angle:.2}].map(o=>({...o,w:132,h:88,done:false,held:false,vx:0,vy:0}));this.shredded=0;
+   this.total=20;this.envelopes=[{id:'junk-a',x:380,y:378,kind:'junk',angle:-.15},{id:'pay-slip',x:634,y:400,kind:'real',angle:.09},{id:'junk-b',x:872,y:376,kind:'junk',angle:.2}].map(o=>({...o,w:132,h:88,done:false,held:false,vx:0,vy:0}));this.shredded=0;this.miraRescueUsed=false;
   }else if(this.id==='I3'){
    this.total=18;this.closed=0;this.windows=[{id:'scam-1',x:217,y:235,w:286,h:174,real:false,done:false,angle:-.03},{id:'scam-2',x:564,y:178,w:287,h:182,real:false,done:false,angle:.04},{id:'scam-3',x:450,y:398,w:306,h:162,real:false,done:false,angle:-.05},{id:'mira-notice',x:886,y:267,w:295,h:180,real:true,done:false,angle:.015}];
   }else{
@@ -148,6 +148,8 @@ class IntakeScene{
  fail(reason,objectId){if(this.ended)return;this.ended=true;this.errorCount++;this.sound('fail');this.pop(640,310,reason,C.coral);this.addEvent('failure',objectId??null,{reason});this.emit({type:'card-failed',cardId:this.id,reason,objectId,evidence:this.snapshot()});}
  clear(outcome={}){if(this.ended)return;this.ended=true;this.sound('card-complete');this.pop(640,280,'QUOTA MET!',C.mint);this.emit({type:'card-complete',cardId:this.id,outcome:{cleared:true,...outcome},evidence:this.snapshot()});}
  update(dt){dt=clamp(Number(dt)||0,0,.06);this.time+=dt;if(!this.ended){this.timeLeft=Math.max(0,this.timeLeft-dt);if(this.timeLeft<=0)this.fail('OUT OF TIME','timer');}
+  if(this.ended)this.endElapsed+=dt;
+  if(this.ghost)this.ghost.age+=dt;
   for(const e of this.sparks)e.t+=dt;this.sparks=this.sparks.filter(e=>e.t<.85);
   if(this.id==='I1'&&!this.ended){
    if(this.spawned<9 && this.time>=this.spawned*1.16){const i=this.spawned++;this.forms.push({id:`form-${i}`,kind:[3,6,8].includes(i)?'spam':'approved',x:i===0?930:1360,y:331+(i%2)*115,w:152,h:111,hit:false,hitTime:0,angle:((i%3)-1)*.035});}
@@ -170,8 +172,8 @@ class IntakeScene{
  }
  pointerUp(p){if(this.ended)return;
   if(this.id==='I2'&&this.pointer?.object){const e=this.envelopes.find(e=>e.id===this.pointer.object);if(e&&!e.done){e.held=false;
-    const throat={x:637,y:450};const eligible=dist({x:e.x+e.w/2,y:e.y+e.h/2},throat)<155||dist(p,throat)<102;
-    if(eligible){e.done=true;this.sound('shred');if(e.kind==='real'){this.addEvent('shredded-real-pay-slip',e.id);this.fail('PAY SLIP!',e.id);}else{this.shredded++;this.addEvent('shredded-spam',e.id);this.pop(637,375,'SHREDDED!',C.gold);if(this.shredded===2)this.clear({junkShredded:2,paySlipSaved:true});}}
+    const throat={x:637,y:450};const eligible=dist({x:e.x+e.w/2,y:e.y+e.h/2},throat)<(this.hasPerk('magnet-grip')?200:155)||dist(p,throat)<(this.hasPerk('magnet-grip')?140:102);
+    if(eligible){e.done=true;this.sound('shred');if(e.kind==='real'){if(this.hasPerk('mira-backup')&&!this.miraRescueUsed){this.miraRescueUsed=true;e.done=false;e.x=500;e.y=315;e.vx=0;e.vy=0;this.addEvent('mira-saved-pay-slip',e.id);this.emit({type:'perk-effect',cardId:this.id,perk:'mira-backup',objectId:e.id});this.sound('mira');this.pop(630,360,'MIRA SAVED IT!',C.mint);}else{this.addEvent('shredded-real-pay-slip',e.id);this.fail('PAY SLIP!',e.id);}}else{this.shredded++;this.addEvent('shredded-spam',e.id);this.pop(637,375,'SHREDDED!',C.gold);if(this.shredded===2)this.clear({junkShredded:2,paySlipSaved:true});}}
     else {this.sound('paper-flick');this.addEvent('moved-envelope',e.id);}
    }}else if(this.id==='I4'&&this.tracing){this.extendTrace(p);this.tracing=false;if(this.progress===4){this.addEvent('completed-carbon-route','route-a',{formsStamped:3});this.clear({linkedForms:3,traceCorners:2});}else this.traceFailure('BROKEN COPY LINE');}
   this.pointer=null;
@@ -193,21 +195,22 @@ class IntakeScene{
   }
   const f=[...this.forms].reverse().find(f=>!f.hit&&inBox(p,{x:f.x,y:f.y,w:f.w,h:f.h},11));if(!f){this.sound('desk-tap');return;}
   f.hit=true;f.hitTime=0;if(f.kind==='spam'){this.sound('scam');this.addEvent('accepted-spam',f.id);this.fail('SUBSCRIBED!',f.id);return;}
-  this.good++;this.streak++;this.sound('stamp');this.addEvent('approved-manual',f.id);this.pop(f.x+f.w/2,f.y+f.h/2,`${this.good}/5`,C.mint);
+  this.good++;this.streak++;this.sound('stamp');
+  if(this.good===1&&this.hasPerk('carbon-copy')){this.ghost={x:f.x+f.w+15,y:f.y+22,age:0};this.addEvent('carbon-copy-ghost',f.id,{perk:'carbon-copy'});this.emit({type:'perk-effect',cardId:this.id,perk:'carbon-copy',objectId:f.id});}this.addEvent('approved-manual',f.id);this.pop(f.x+f.w/2,f.y+f.h/2,`${this.good}/5`,C.mint);
   if(this.good===2&&!this.noticeShown){this.noticeShown=true;this.emit({type:'notice-pair-shown',cardId:this.id,objects:['mira-verified','fake-coupon']});}
   if(this.good===5)this.clear({manualApproved:5,spamAccepted:0,noticePairSeen:this.noticeShown});
  }
  pressWindow(p){const w=[...this.windows].reverse().find(w=>!w.done&&inBox(p,w,4));if(!w)return;
-  if(w.real){this.addEvent('opened-genuine-help',w.id);w.done=true;this.noticeState.real='opened';this.sound('mira');this.pop(w.x+w.w/2,w.y,'MIRA ONLINE',C.mint);this.emit({type:'notice-handled',cardId:this.id,objectId:w.id,kind:'genuine',action:'opened'});return;}
+  if(w.real){this.addEvent('opened-genuine-help',w.id);w.done=true;this.noticeState.real='opened';if(this.hasPerk('mira-backup')){this.timeLeft+=1.5;this.addEvent('mira-backup-time','mira-notice',{addedSeconds:1.5});}this.sound('mira');this.pop(w.x+w.w/2,w.y,'MIRA ONLINE',C.mint);this.emit({type:'notice-handled',cardId:this.id,objectId:w.id,kind:'genuine',action:'opened'});return;}
   // Close button is generous, anchored on the upper-right window corner.
   const close={x:w.x+w.w-61,y:w.y+0,w:64,h:66};if(!inBox(p,close,3)){this.sound('paper-flick');return;}
-  w.done=true;this.closed++;this.sound('shred');this.pop(w.x+w.w/2,w.y,'DECLINED!',C.gold);this.addEvent('closed-scam',w.id);this.emit({type:'notice-handled',cardId:this.id,objectId:w.id,kind:'fake',action:'closed'});
+  w.done=true;w.doneAt=this.time;this.closed++;this.sound('shred');this.pop(w.x+w.w/2,w.y,'DECLINED!',C.gold);this.addEvent('closed-scam',w.id);this.emit({type:'notice-handled',cardId:this.id,objectId:w.id,kind:'fake',action:'closed'});
   if(this.closed===3)this.clear({scamsClosed:3,genuineHelp:this.noticeState.real==='opened'?'opened':'preserved'});
  }
- startTrace(p){const a=this.waypoints[0];if(dist(p,a)<84){this.tracing=true;this.trail=[{...a}];this.progress=1;this.sound('stamp');this.addEvent('stamp-start','carbon-1');this.pop(a.x,a.y,'1',C.mint);}else this.sound('desk-tap');}
+ startTrace(p){const a=this.waypoints[0];if(dist(p,a)<(this.hasPerk('magnet-grip')?116:84)){this.tracing=true;this.trail=[{...a}];this.progress=1;this.sound('stamp');this.addEvent('stamp-start','carbon-1');this.pop(a.x,a.y,'1',C.mint);}else this.sound('desk-tap');}
  extendTrace(p){if(!this.tracing||!this.pointer)return;const prev=this.trail.at(-1)??this.waypoints[0];if(dist(prev,p)<2)return;const next=this.waypoints[this.progress];if(!next)return;
   // Whole pointer segment must remain inside generous illuminated route corridor.
-  const from=this.waypoints[this.progress-1];if(segmentDistance(p,from,next)>78&&dist(p,next)>60){this.traceFailure('OFF THE ROUTE');return;}
+  const from=this.waypoints[this.progress-1];if(segmentDistance(p,from,next)>(this.hasPerk('chain-stamp')?115:78)&&dist(p,next)>(this.hasPerk('chain-stamp')?92:60)){this.traceFailure('OFF THE ROUTE');return;}
   this.trail.push({x:p.x,y:p.y});if(this.trail.length>120)this.trail.shift();
   if(segmentDistance(next,prev,p)<58){this.progress++;this.sound('stamp');this.pop(next.x,next.y,`${this.progress===2?'2':this.progress===4?'3':'TURN'}`,C.mint);this.addEvent('route-node',`node-${this.progress}`);
     if(this.progress===4)this.completedForms=3;
@@ -219,7 +222,7 @@ class IntakeScene{
   forms:this.id==='I1'?this.forms.map(f=>({id:f.id,kind:f.kind,hit:f.hit,x:+f.x.toFixed(2)})):undefined,
   envelopes:this.id==='I2'?this.envelopes.map(e=>({id:e.id,kind:e.kind,done:e.done,x:+e.x.toFixed(1),y:+e.y.toFixed(1)})):undefined,
   windows:this.id==='I3'?this.windows.map(w=>({id:w.id,done:w.done})):undefined,
-  notice:{...this.noticeState},routeProgress:this.id==='I4'?this.progress:undefined,actions:this.actions.map(a=>({...a}))};}
+  notice:{...this.noticeState},routeProgress:this.id==='I4'?this.progress:undefined,perkEffects:this.actions.filter(a=>a.perk||a.name.startsWith('mira-')).map(a=>({...a})),actions:this.actions.map(a=>({...a}))};}
  draw(g){
   stage(g,this.time,this.id==='I1'?'conveyor':'desk');
   // Large in-world stage title: not HUD; actual HUD remains LEAD/RENDER-owned.
@@ -229,12 +232,13 @@ class IntakeScene{
   timerBand(g,this.timeLeft,this.total);
   if(this.id==='I1')this.drawStamp(g);else if(this.id==='I2')this.drawShred(g);else if(this.id==='I3')this.drawScam(g);else this.drawCopy(g);
   for(const e of this.sparks)effect(g,e);
-  if(this.ended) {g.save();g.globalAlpha=.65;fill(g,'#0d292f',0,0,W,H);g.restore();txt(g,this.actions.at(-1)?.name==='failure'?'TRY AGAIN':'QUOTA MET!',640,310,83,C.paper,'center');txt(g,this.actions.at(-1)?.name==='failure'?'ONE MISTAKE. ZERO MERCY.':'MANAGEMENT IS DELIGHTED. ALARMINGLY.',640,390,26,C.gold,'center');}
+  if(this.ended&&this.endElapsed>.28) {g.save();g.globalAlpha=.65*clamp((this.endElapsed-.28)/.28,0,1);fill(g,'#0d292f',0,0,W,H);g.restore();txt(g,this.actions.at(-1)?.name==='failure'?'TRY AGAIN':'QUOTA MET!',640,310,83,C.paper,'center');txt(g,this.actions.at(-1)?.name==='failure'?'ONE MISTAKE. ZERO MERCY.':'MANAGEMENT IS DELIGHTED. ALARMINGLY.',640,390,26,C.gold,'center');}
  }
  drawStamp(g){
   txt(g,`APPROVED: ${this.good} / 5`,940,91,28,C.mint);
   painter(g,1082,302,this.good>=4?'stunned':'smug',this.time,.7);
   for(const f of this.forms)if((!f.hit||f.hitTime<.37)&&f.x>-200&&f.x<1410)paper(g,f.x,f.y+(f.hit?12*Math.sin(Math.PI*f.hitTime/.37):0),f.w,f.h,f.angle,f.kind,f.hit?.95*(1-f.hitTime/.37):0);
+  if(this.ghost&&this.ghost.age<1){g.save();g.globalAlpha=.52*(1-this.ghost.age);paper(g,this.ghost.x,this.ghost.y,132,99,.1,'approved');g.restore();}
   if(this.noticeShown){if(this.noticeState.real==='pending')notice(g,280,555,300,129,'real',this.time);if(this.noticeState.fake==='pending')notice(g,675,548,294,125,'fake',this.time);}
   fill(g,'#d99d47',117,634,110,42,8);txt(g,'STAMP!',172,656,21,C.ink,'center');
   if(this.good===0){txt(g,'TAP THE WHITE / GREEN FORM',660,695,18,C.cream,'center');}
@@ -253,8 +257,9 @@ class IntakeScene{
  drawScam(g){
   painter(g,105,385,'stunned',this.time,.65);
   txt(g,`SCAMS CLOSED ${this.closed}/3`,905,90,27,C.gold);
-  for(const w of this.windows){if(w.done)continue;
-   g.save();g.translate(w.x,w.y);g.rotate(w.angle+Math.sin(this.time*2+w.x)*.008);shadow(g,22);
+  if(this.hasPerk('focus-lens')){g.save();g.shadowColor=C.mint;g.shadowBlur=30;stroke(g,C.mint,878,258,310,196,14,4);g.restore();}
+  for(const w of this.windows){const age=w.done?this.time-(w.doneAt??this.time):0;if(w.done&&age>.5)continue;
+   g.save();g.globalAlpha=w.done?clamp(1-age/.5,0,1):1;g.translate(w.x+(w.done?age*540:0),w.y-(w.done?age*370:0));g.rotate(w.angle+Math.sin(this.time*2+w.x)*.008+(w.done?age*1.9:0));shadow(g,22);
    fill(g,w.real?'#e6f5e9':'#fff0d5',0,0,w.w,w.h,13);g.shadowColor='transparent';g.shadowBlur=0;g.shadowOffsetY=0;stroke(g,w.real?'#37997c':'#9c4a45',0,0,w.w,w.h,12,5);
    fill(g,w.real?'#1d806c':'#a13a36',0,0,w.w,51,10);txt(g,w.real?'✓ MIRA / VERIFIED':'! BONUS OFFER',17,27,w.real?19:21,C.paper);
    if(!w.real){fill(g,'#e8aa60',w.w-57,7,48,42,8);txt(g,'×',w.w-33,29,39,'#712d24','center');txt(g,'+ 700% EFFICIENCY',20,91,23,C.red);txt(g,'Definitely not a scam.',19,131,16,C.slate);}
@@ -264,7 +269,7 @@ class IntakeScene{
  }
  drawCopy(g){
   const pts=this.waypoints;
-  g.save();g.shadowColor=C.gold;g.shadowBlur=25;roundedPath(g,pts);g.lineWidth=37;g.lineJoin='round';g.lineCap='round';g.strokeStyle='#f3bc53aa';g.stroke();g.shadowBlur=0;roundedPath(g,pts);g.lineWidth=9;g.setLineDash([17,12]);g.strokeStyle=C.paper;g.stroke();g.setLineDash([]);g.restore();
+  g.save();g.shadowColor=C.gold;g.shadowBlur=25;roundedPath(g,pts);g.lineWidth=this.hasPerk('chain-stamp')?58:37;g.lineJoin='round';g.lineCap='round';g.strokeStyle='#f3bc53aa';g.stroke();g.shadowBlur=0;roundedPath(g,pts);g.lineWidth=9;g.setLineDash([17,12]);g.strokeStyle=C.paper;g.stroke();g.setLineDash([]);g.restore();
   for(let i=0;i<pts.length;i++){const p=pts[i],highlight=i===this.progress;
    if(i===2){g.save();g.shadowColor=C.gold;g.shadowBlur=12;fill(g,i<this.progress?C.mint:C.gold,p.x-28,p.y-28,56,56,28);g.restore();txt(g,'↳',p.x,p.y,38,C.ink,'center');continue;}
    g.save();shadow(g,10);fill(g,highlight?'#f9d47a':'#f8f1d8',p.x-72,p.y-58,144,116,10);g.shadowColor='transparent';g.shadowBlur=0;g.shadowOffsetY=0;
