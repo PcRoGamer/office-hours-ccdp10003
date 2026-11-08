@@ -10,7 +10,7 @@ def served_assets():
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     try:
         result={}
-        for path in ['previews/v3-story.html','night-shift-v3/story/presentation.js','night-shift-v3/story/narrative.js','night-shift-v3/story/actors.js','night-shift-v3/story/story.css']:
+        for path in ['previews/v3-story.html','night-shift-v3/story/presentation.js','night-shift-v3/story/narrative.js','night-shift-v3/story/actors.js','night-shift-v3/story/clockout.js','night-shift-v3/story/story.css']:
             with urllib.request.urlopen(f'http://127.0.0.1:{server.server_port}/{path}',timeout=3) as response:
                 body=response.read()
                 assert response.status==200 and body==(ROOT/path).read_bytes(),path
@@ -22,7 +22,7 @@ def bundle():
     css=(ROOT/'night-shift-v3/story/story.css').read_text()
     html=html.replace('<link rel="stylesheet" href="../night-shift-v3/story/story.css">','<style>'+css+'</style>')
     chunks=[]
-    for p in ['narrative.js','actors.js','presentation.js']:
+    for p in ['narrative.js','actors.js','clockout.js','presentation.js']:
         s=(ROOT/'night-shift-v3/story'/p).read_text()
         s=re.sub(r'^import .*\n','',s,flags=re.MULTILINE)
         s=re.sub(r'^export ','',s,flags=re.MULTILINE)
@@ -84,11 +84,15 @@ async def main():
                 await page.locator('.ns-receipt').click()
                 assert await page.locator('.ns-receipt-title').inner_text()=='PEOPLE & QUALITY'
                 await page.locator('.ns-receipt').focus();await page.keyboard.press('Enter')
+                assert await page.evaluate("document.activeElement.classList.contains('ns-receipt')"), 'receipt focus lost on flip'
                 assert await page.locator('.ns-receipt-title').inner_text()=='OFFICIAL QUOTA'
                 await page.locator('[data-flip]').click()
                 assert await page.locator('.ns-receipt-title').inner_text()=='PEOPLE & QUALITY'
+                assert await page.evaluate("document.activeElement.hasAttribute('data-flip')"), 'button focus lost'
+                assert await page.locator('[data-clockout-cast]').count()==1
                 await page.locator('[data-details]').click()
                 assert await page.locator('.ns-breakdown').count()==1
+                assert await page.evaluate("document.activeElement.hasAttribute('data-details')"), 'detail control focus lost'
                 await page.wait_for_timeout(550) # capture settled paper after print animation
                 await page.screenshot(path=str(OUT/'receipt-people-1920x1080.png'))
                 report['interactions']={'fiveSelections':True,'visibleMachineInstall':True,'clickReceipt':True,'keyboardReceipt':True,'scoreUnmodified':official,'breakdown':True}
@@ -103,6 +107,44 @@ async def main():
         result=await page.evaluate("getComputedStyle(document.querySelector('.ns-upgrade')).transitionDuration")
         assert result in ['0s','1e-06s'],('reduced motion still transitions',result)
         report['interactions']['reducedMotion']=True
+        await page.close()
+        # Narrow receipt: actual visible controls and usable scroll, never a hidden replay button.
+        for w,h in [(390,844),(650,800)]:
+            page=await browser.new_page(viewport={'width':w,'height':h})
+            page.on('pageerror',lambda e:report['errors'].append(str(e)))
+            await page.set_content(html,wait_until='load')
+            await page.get_by_role('button',name='OPEN YOUR PROMOTION EMAIL').click()
+            for i in range(5):
+                await page.locator('[data-pick]').first.click()
+                await page.locator('.ns-announcement').click()
+            assert await page.locator('.ns-receipt-title').inner_text()=='OFFICIAL QUOTA'
+            await page.locator('.ns-receipt').click()
+            await page.locator('[data-details]').click()
+            await page.wait_for_timeout(480)
+            g=await page.evaluate("""() => {
+             const a=document.querySelector('.ns-end-actions').getBoundingClientRect(),
+             c=document.querySelector('.ns-end-center'),p=document.querySelector('.ns-end').getBoundingClientRect();
+             return {controlsBottom:a.bottom,controlsTop:a.top,centerClient:c.clientHeight,centerScroll:c.scrollHeight,panelBottom:p.bottom};}""")
+            assert g['controlsBottom']<=h+1,('receipt controls inaccessible',w,g)
+            assert g['controlsTop']>0,('receipt buttons offscreen',w,g)
+            assert g['panelBottom']<=h+1,('receipt exceeds viewport',w,g)
+            await page.screenshot(path=str(OUT/f'receipt-narrow-{w}x{h}.png'))
+            report['interactions'][f'receiptVisibleControls{w}']=True
+            await page.locator('[data-replay]').click()
+            assert await page.locator('[data-pick]').count()==3
+            report['interactions'][f'narrowReplay{w}']=True
+            await page.close()
+        # Regression: delayed continuation from an abandoned promotion cannot wipe a newer receipt.
+        page=await browser.new_page(viewport={'width':1280,'height':800})
+        page.on('pageerror',lambda e:report['errors'].append(str(e)))
+        await page.set_content(html,wait_until='load')
+        await page.get_by_role('button',name='OPEN YOUR PROMOTION EMAIL').click()
+        await page.locator('[data-pick]').first.click()
+        await page.evaluate('story.showReceipt({run:sample,snapshot:scores})')
+        await page.wait_for_timeout(1750)
+        assert await page.locator('.ns-receipt-title').count()==1, 'stale timer removed receipt'
+        assert await page.evaluate('window.__storyPreview.phase')==1,'stale promotion continuation ran'
+        report['interactions']['cancelledPromotionTimerSafe']=True
         await page.close();await browser.close()
     (OUT/'quality-report.json').write_text(json.dumps(report,indent=2))
     assert not report['errors'],report['errors']
