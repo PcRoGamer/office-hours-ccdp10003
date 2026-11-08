@@ -51,3 +51,15 @@ if(run.stage.type==='victory'){
 Load \`night-shift-v3/story/story.css\`. All references are relative ES imports, including new \`./clockout.js\`. Sound hooks remain \`audio?.play?.('promotion-choose',...)\` and \`audio?.play?.('receipt-flip')\`; the AUDIO owner may map these through an adapter without creating a second soundtrack.
 
 **Quality boundary:** STORY visual craft, mobile availability, keyboard interactions and real current SYSTEMS data contract are tested. The complete Night Shift v3 playable campaign, musical score, both bosses and full HD-vs-v3 release gate belong to LEAD and have not been demonstrated by this independent preview. Do not replace the HD release on this PR alone.
+
+
+## Further executed improvement: upgrade truth, animation and unattended-tab safety
+
+- Found that Level 2 upgrades were rendered with Level 1 descriptions, obscuring their meaningful mechanics. Added **eight explicit, distinct Level 2 descriptions**, matching the actual GDD effects (extra copies, second chain, two bounces, 35% catch radius, twice-per-department Mira, second cushion, 10-second reserve/3-second spend, two longer scans).
+- Found that **unprefixed SYSTEMS perk IDs still produced blank animated perk previews** even after short IDs were accepted for purchasing. Normalise the ID inside the actual Canvas drawing function. Level 2 demonstrations now depict changed effects: second paper, second target, second bumper, larger catch radius, second return, second cushion, '+3s' and second scan. Real 1440×900 DPR2 screenshot: \`qa/v3-story-evidence/level-two-draft-1440x900.png\`. An independent browser assertion compares the drawn result against the actual blank baseline.
+- Refined accessible reduced-motion behaviour: promotion completion takes 350ms rather than leaving a 1650ms empty pause when the OS requests less motion.
+- Hardened the intermission's visibility handoff: if the player switches to a hidden tab after selecting a perk, the stage does **not** auto-start until the tab becomes visible again. Visibility listener and old timeout are cleaned on every replacement/dispose; headless Chromium hidden/resume simulation verifies this.
+
+**Latest actual tests:** \`node --test qa/v3-story.test.mjs\` **17/17 custom narrative checks**; \`python qa/v3-story.quality.py\` **7 responsive viewports, 6 localhost HTTP asset checks, 18 browser interaction assertions, zero JS page exceptions**. One additional 1440×900 DPR2 Level 2 capture and manual visual inspection. The screen and behaviour findings were generated and corrected in the same active development turn.
+
+**Runtime lineage:** The independent browser preview remains a test of this STORY module, not evidence that the unfinished combined game passes the entire v3 release gate. The correct direct LEAD adapter is above. No audio ownership or original releases changed.
