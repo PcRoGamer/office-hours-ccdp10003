@@ -158,9 +158,18 @@ async def main():
             story.showPromotion({index:1,run:{perkLevels:{'carbon-copy':1}},offers:['carbon-copy','bank-shot','mira-backup'],directive:'fast-or-safe',onPick:({perkId})=>window.__systemsPicked=perkId});
         }""")
         assert await page.get_by_role('button',name='Choose CARBON COPY level 2').count()==1
+        assert 'two ghost papers' in await page.locator('[data-pick="carbon-copy"] .ns-upgrade-effect').inner_text()
+        assert await page.locator('[data-pick="carbon-copy"] canvas').get_attribute('data-demo-level')=='2'
+        await page.wait_for_timeout(80)
+        actualDemo=await page.evaluate("""() => {
+           const canvas=document.querySelector('[data-demo="carbon-copy"]');
+           const before=canvas.toDataURL();drawDemo(canvas,'unknown-perk',0,2);
+           return before!==canvas.toDataURL();}""")
+        assert actualDemo,'SYSTEMS short ID produced a blank animated before/after'
         await page.get_by_role('button',name='Choose CARBON COPY level 2').click()
         assert await page.evaluate('window.__systemsPicked')=='carbon-copy', 'purchase ID not compatible with SYSTEMS'
         report['interactions']['systemsShortPerkId']=True
+        report['interactions']['levelTwoPreviewActuallyDrawn']=True
         await page.evaluate("""() => story.showReceipt({run:{},snapshot:{officialScore:78,peopleScore:86,official:{completedWork:40},people:{toolAccess:30},completedCardIds:['S2','T4'],licenceTokensGiven:2,workstationIntact:false,bonusPacketOutcomes:{'quota:p1:b1':'file'}}})""")
         assert await page.locator('.ns-receipt-score').inner_text()=='78/ 100'
         await page.locator('.ns-receipt').click()
