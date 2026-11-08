@@ -135,3 +135,17 @@
 
 /* The existing flip button already teaches the interaction. Do not print a hint over the score heading. */
 .ns-receipt::before{display:none}
+
+
+/* Compact landscape laptops: preserve the complete workbook footer without shrinking the demonstrations into icons. */
+@media (min-width:801px) and (max-height:950px){
+ .ns-promote{min-height:0;max-height:calc(100dvh - 24px)}
+ .ns-upgrade-row{min-height:147px}
+ .ns-upgrade canvas{height:83px}
+ .ns-book footer{margin-top:6px;padding:8px 16px}
+ .ns-schedule{margin-top:8px;padding:8px 14px}
+ .ns-cast{min-height:0;max-height:174px;margin:11px 0 8px}
+ .ns-message h1{font-size:clamp(38px,3vw,54px)}
+ .ns-copy{margin:13px 0 7px}
+ .ns-attachment{min-height:58px}
+}
