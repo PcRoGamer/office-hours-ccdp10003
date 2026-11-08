@@ -33,7 +33,7 @@ async function makeClient(){
  const active=join(profile,'DevToolsActivePort');
  for(let i=0;i<100&&!existsSync(active);i++){if(child.exitCode!==null)throw Error('Chrome exited unexpectedly');await sleep(100)}
  if(!existsSync(active))throw Error('Chrome DevTools unavailable');
- const port=Number(readFileSync(active,'utf8').split(/\r?\n/)[0]);
+ let port=0;for(let retry=0;retry<30;retry++){try{port=Number(readFileSync(active,'utf8').split(/\r?\n/)[0]);if(port>0)break}catch(error){if(!['EBUSY','EACCES'].includes(error.code))throw error;}await sleep(120);}if(!port)throw Error('Chrome DevTools port unreadable');
  const tabs=await (await fetch('http://127.0.0.1:'+port+'/json')).json();
  const page=tabs.find(t=>t.type==='page');if(!page)throw Error('No Chromium page');
  socket=new WebSocket(page.webSocketDebuggerUrl);
