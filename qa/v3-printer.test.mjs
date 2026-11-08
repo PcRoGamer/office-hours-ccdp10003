@@ -53,3 +53,16 @@ test('one completed boss result per entry; restart intentionally starts fresh',(
  assert.equal(events.filter(e=>e.type==='boss-complete').length,2);
 });
 
+
+test('telegraph sheet parry materially widens the manual feeder target while zero-parry remains viable',()=>{
+ const parry=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
+ const solo=createPrinterMutiny({options:{directive:'MOVING_GOALPOSTS'}});
+ tick(parry,.25);ptr(parry,'pointerDown',2,-30);
+ assert.equal(parry.snapshot().parries,1,'a real clicked incoming sheet must be recognized');
+ reachJam(solo);tick(solo,.55);drag(solo,[-104,105],[-104,239]);
+ tick(parry,3.0);tick(parry,.55);drag(parry,[-104,105],[-104,239]);
+ assert.equal(parry.snapshot().phase,'counter');
+ assert.equal(parry.snapshot().feederWidth,solo.snapshot().feederWidth+15);
+ feed(solo);feed(parry);
+ assert.equal(solo.snapshot().removed,1);assert.equal(parry.snapshot().removed,1);
+});
