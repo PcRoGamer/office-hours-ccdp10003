@@ -1,5 +1,10 @@
 # First Shift: Codex agent instructions
 
+**MUST READ SOURCE FILES (all committed):** [CODEX_HANDOFF.md](CODEX_HANDOFF.md), [design/COURSE_ALIGNMENT_PREFLIGHT.md](design/COURSE_ALIGNMENT_PREFLIGHT.md), [design/CCDP_P2_GAME_RESEARCH.md](design/CCDP_P2_GAME_RESEARCH.md), [design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md](design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md), [design/first-shift/contract.json](design/first-shift/contract.json), and [design/NIGHT_SHIFT_GDD_V3_REFERENCE.md](design/NIGHT_SHIFT_GDD_V3_REFERENCE.md). Run `python3 design/first-shift/validate_scope.py` at baseline (scope-only, not game QA). Priority: Course Alignment for rubric/earlier instructor feedback; Research for influence hierarchy; First Shift GDD/contract for playable scope; handoff for execution sequence; full v3 GDD for long-term lore reference only.
+
+**Critical continuity learned from real Project 1 feedback:** The original proposal's successful mechanic was **precision mouse movement despite live distractions**. A self-contained popup minigame alone is insufficient. Recurring readable/fair distractions across two departments must coexist with tactile work, the roguelite builds, corporate satire, and authentic game feel. Earlier assessment explicitly preferred experiential disruption to a long verbal explanation; the final playable game and tutorial must show rather than lecture. The user prioritizes a polished full release candidate without a didactic ending. Full Project 2 submission is a working URL with in-game research. Original branches and main must remain untouched.
+
+
 The production order is [CODEX_HANDOFF.md](./CODEX_HANDOFF.md). Read it completely and **execute**, not just plan. It specifies the campaign, boss, scores, file boundaries, task DAG, release gates and review process.
 
 **Canonical design:** **Dumb Ways to Die = microgames; Brotato = roguelite; Job Simulator = tactile job-as-toy; Quota Panic = their original synthesis with original corporate lore.** Use all three game-design case studies as the main rubric research, evidenced by interactive tutorial and upgrade loop; workplace gamification theory is secondary context.
