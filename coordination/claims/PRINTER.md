@@ -11,3 +11,12 @@
 - Report: `coordination/reports/printer-r8c2.md`. Preview: `previews/v3-printer.html`.
 - Remaining: full 4K software-browser replay and HD side-by-side release gate; Lead director integration and shared audio/Planck source; final end-to-end acceptance.
 - No existing releases or other lanes modified. No background session or unsupported live state claims.
+
+
+## Resumed quality pass, 8 November 2026
+- **Updated branch SHA:** `414d79ef9a6b427b3a41231fae1b3e2bbe2350a2` (see PR #19 for subsequent metadata updates).
+- **Actual new gameplay:** animated moving feeder rail; Mira's visible labelled assistance is clickable; interrupted drag/pause safely resets pointer; voluntary sheet parries visibly and mechanically increase the next feeder's capture width (one +15 per manual parry, capped at three). Default no-parry path remains available.
+- **Node QA:** 17/17 passing, including new movement, cancel, label, replay and parry-benefit assertions.
+- **Final Chromium QA:** full 3/3 manual counters, no page errors at **1920×1080**, **650×800**, **2560×1440**, **3440×1440**, **3840×2160 native** (DPR2); viewport backing asserted. Pause/blur/replay exercised in browser.
+- **Committed actual screenshot proof:** `qa/v3-printer-evidence/1920x1080-counter.jpg`, `650x800-counter.jpg`, `1920x1080-victory.jpg` on PRINTER branch. The checked-in JPEGs predate the optional parry enhancement; final implementation was re-rendered in live Chromium.
+- **Report:** `coordination/reports/printer-r8c2.md` updated with test matrix and command. **Integration quality boundary unchanged:** LEAD must still inspect direct HD comparison, wire AUDIO/Planck services and test the complete new release.
