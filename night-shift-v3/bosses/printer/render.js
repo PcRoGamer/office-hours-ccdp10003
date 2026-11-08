@@ -144,7 +144,7 @@ function action(c,s,w,t,opts){
   if(s.state==='counter'&&opts.directive==='FAST_OR_SAFE')label(c,s.time<1.7?'FAST = NARROW':'SAFE = WIDE',Math.min(w*.35,320),-224,compact?130:192,37,'#9d513f',C.paper);
 }
 export function drawPrinterBoss(ctx,viewport,s,opts){
-  const w=Number(viewport?.worldWidth)||1350,t=s.totalTime||0,compact=w<830;
+  const w=Number(viewport?.worldWidth)||1350,t=viewport?.posterPreview?(viewport.previewTime||0):(s.totalTime||0),compact=w<830;
   ctx.save();if(s.shake>0&&!viewport?.reducedMotion)ctx.translate(Math.sin(t*73)*s.shake*16,Math.cos(t*88)*s.shake*9);
   // Live title preview: actual animated boss isolated against the HD-family
   // coral paper panel, without leaking unstarted gameplay HUD/affordances.
