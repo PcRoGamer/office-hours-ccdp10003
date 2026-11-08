@@ -80,6 +80,29 @@ async function main(){
      await page.evaluate(()=>document.body.classList.remove('capture'));
     }
    }catch(e){fail('Cross-module physical input regression '+w+'x'+h,{error:String(e.stack||e)})}
+   // Drive one genuine Printer Mutiny counter using ONLY browser pointer input.
+   // The ~3.8-second windup is genuine game time, not an invented QA shortcut.
+   try{
+    await page.evaluate(()=>window.__swarmComposition.choose('B1'));
+    await page.waitForFunction(()=>{const a=window.__swarmComposition.scene?.snapshot?.();return a?.phase==='jam'&&a?.safePull===true},{timeout:12000});
+    const point=async(x,y)=>page.evaluate(([x,y])=>window.__swarmComposition.viewport.worldToScreen(x,y),[x,y]);
+    const pullStart=await point(-104,105),pullEnd=await point(-104,239);
+    await page.mouse.move(pullStart.x,pullStart.y);await page.mouse.down();
+    await page.mouse.move(pullEnd.x,pullEnd.y,{steps:12});await page.mouse.up();
+    let b=await page.evaluate(()=>window.__swarmComposition.scene.snapshot());
+    if(b.phase==='counter')pass('Physical printer jam pulled into actual feeder-opening phase '+w+'x'+h);
+    else fail('Printer page pull did not advance boss '+w+'x'+h,{phase:b.phase});
+    if(b.phase==='counter'&&b.packet){
+     const from=await point(b.packet.x,b.packet.y),to=await point(b.feederX,50);
+     await page.mouse.move(from.x,from.y);await page.mouse.down();await page.mouse.move(to.x,to.y,{steps:16});await page.mouse.up();
+     b=await page.evaluate(()=>window.__swarmComposition.scene.snapshot());
+     if(b.phase==='impact'&&b.manualHits===1)pass('Physical printer packet removes first bolt exactly once '+w+'x'+h);
+     else fail('Printer counter did not register exactly one manual hit '+w+'x'+h,{phase:b.phase,hits:b.manualHits,removed:b.removed});
+     await page.evaluate(()=>document.body.classList.add('capture'));
+     await page.screenshot({path:path.join(out,'B1-physical-counter-'+w+'x'+h+'.png')});
+     await page.evaluate(()=>document.body.classList.remove('capture'));
+    }
+   }catch(e){fail('End-to-end shared-canvas printer counter '+w+'x'+h,{error:String(e.stack||e)})}
    if(w===1920){
     try{
      const before=await page.evaluate(()=>window.__swarmComposition.viewport.cssWidth);
