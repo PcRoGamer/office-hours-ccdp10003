@@ -29,3 +29,13 @@
 - New `qa/v3-visual-boss-phases.py` executes author PRINTER+QUOTA E2E three-phase pointer-play tests and collects **fresh only** gameplay screenshots, full logs, SHA256 image provenance. Its independently executed fixture self-test PASSED: fresh mock PNG collected, old mock PNG rejected. Copies `--source` worktree before running to protect users' files.
 - New reports: `coordination/reports/visual-branch-matrix-2026-11-08.md` and `visual-boss-phases-2026-11-08.md`.
 - STILL HOLD release until an integrated v3 game is available for full HD-vs-v3 gameplay/audio/art acceptance. Do not ask user for routine engineering decisions.
+
+
+## Autonomous continuation: authenticated source gates
+
+- **Current tested code:** `agents/v3-qa-visual-1108-7c39`, draft PR https://github.com/PcRoGamer/office-hours-ccdp10003/pull/15
+- **Real module tests:** 280/280 source-authoritative scene/boss combinations, 8,400 updates, zero exceptions/double completions; 1,000/1,000 validated 12-card decks and directive schedules, 24/24 deterministic complete algorithmic campaigns, 25/25 diegetic STORY promotion/directive combinations.
+- **New owned QA files:** `qa/v3-visual-live-source.mjs` (reproducible original-source Node ESM tests), `qa/v3-visual-composition.py` (real PNG-vs-PNG evaluator with strict matched viewport/contact sheet), plus hardening of `v3-visual-branch-matrix.py` and `v3-visual-boss-phases.py` (correct requested scenes, detect console/HTTP errors, reject damaged PNGs, keep fixtures out of production results).
+- **Local tests:** Node loader fixture 80/80 PASS; original nested-ESM two-viewport Chromium fixture PASS; boss screenshot importer fresh/stale corruption tests PASS; real HD and historic First Shift 650×800 original-pixel side-by-side inspected; mismatched PNG size rejected.
+- **Important:** source logic/synthetic browser harness evidence is not new integrated v3 gameplay evidence. Missing STAFF T1–T4 implementation and no LEAD shell at last inspection mean release remains held. No original HD fallback changes.
+- **Cross-agent communication:** `coordination/reports/visual-live-source-2026-11-08.md`, `visual-gdd-source-2026-11-08.md`, `visual-composition-real-2026-11-08.md`.
