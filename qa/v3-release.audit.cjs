@@ -112,12 +112,18 @@ function releaseSignoff(){
  if(!exists(p)){record('failures','No verified acceptance manifest: manual publication remains locked');return}
  let obj;try{obj=JSON.parse(fs.readFileSync(inside(p),'utf8'))}
  catch(e){record('failures','Malformed acceptance manifest: '+String(e));return}
- const required=['full16Cards','normalRun12','fivePromotions','fiveDirectives','eightPerks','twoCompleteBosses','audioChecked','viewportMatrixReviewed','humanPlaythrough','freshBrowserPublicProof','hdNotRegressed'];
+ const required=['full16Cards','normalRun12','fivePromotions','fiveDirectives','eightPerks','twoCompleteBosses','audioChecked','viewportMatrixReviewed','humanPlaythrough','freshBrowserPreviewProof','hdNotRegressed'];
  for(const k of required)test(obj[k]===true,'Signed off after genuine evidence: '+k);
  test(typeof obj.evidenceUrl==='string'&&/^https:\/\/github\.com\/PcRoGamer\/office-hours-ccdp10003\/(actions|pull)\//.test(obj.evidenceUrl),'Evidence URL supplied');
  test(typeof obj.acceptedBy==='string'&&obj.acceptedBy.trim().length>2,'Human reviewer identified');
- const expected=process.env.GITHUB_SHA;
- test(!expected||obj.sourceSha===expected,'Manifest matches exact deployment commit',{expected,recorded:obj.sourceSha});
+ // The manifest itself changes the commit SHA: require the last commit to be
+ // ONLY that manifest, with sourceSha equal to the immediately preceding tree.
+ const parent=spawnSync('git',['rev-parse','HEAD^'],{cwd:ROOT,encoding:'utf8'});
+ const expected=parent.status===0?parent.stdout.trim():'';
+ test(!!expected&&obj.sourceSha===expected,'Acceptance records exact code parent commit',{expected,recorded:obj.sourceSha});
+ const diff=spawnSync('git',['diff','--name-only','HEAD^','HEAD'],{cwd:ROOT,encoding:'utf8'});
+ const changed=diff.status===0?diff.stdout.trim().split(/\r?\n/).filter(Boolean):[];
+ test(changed.length===1&&changed[0]===p,'Final commit contains only release acceptance manifest',{changed});
  const branch=process.env.GITHUB_REF_NAME;
  test(!branch||branch==='rebuild/night-shift-v3-hd','Only integration branch may deploy',{branch});
 }
