@@ -52,4 +52,5 @@ test('SYSTEMS committed event ledger fills observed narrative facts without inve
  assert.match(promotionNarrative({index:5,run}).changes[0],/1 of 2/);
  assert.equal(promotionNarrative({index:5,run:{eventLedger:events,completedCardIds:['S2']}}).changes.length,0);
 });
+test('eight visible and mechanically distinct level-two descriptions are available',()=>{for(const [id,perk] of Object.entries(PERK_STORY)){assert.ok(perk.levelTwoEffect&&perk.levelTwoEffect.length>30,id);assert.notEqual(perk.effect,perk.levelTwoEffect,id)}});
 console.log(`\n${count}/${count} narrative and integrity checks passed`);
