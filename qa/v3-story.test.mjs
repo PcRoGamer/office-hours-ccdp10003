@@ -15,4 +15,41 @@ test('four possible score bands and exact title thresholds',()=>{for(const [q,p,
 test('only observed packet outcomes and licence facts are reported',()=>{const r=copy(),m=receiptNarrative({run:r,snapshot:{officialQuota:67,peopleQuality:65}});assert.match(m.facts.join('|'),/1 FILED · 1 COOLED/);assert.match(m.facts.join('|'),/1 OF 2/);const z=receiptNarrative({run:{},snapshot:{officialQuota:67,peopleQuality:65}});assert.equal(z.facts.length,0)});
 test('strict frozen score boundaries',()=>{assert.throws(()=>receiptNarrative({snapshot:{officialQuota:Infinity,peopleQuality:80}}));assert.throws(()=>receiptNarrative({snapshot:{officialQuota:101,peopleQuality:80}}));assert.throws(()=>receiptNarrative({snapshot:{officialQuota:80}}));assert.throws(()=>promotionNarrative({index:6}))});
 test('optional sources are source-bearing, not false accuracy claims',()=>{for(const x of Object.values(STORY_SOURCES)){assert.ok(x.url.startsWith('https://'));assert.ok(x.why.length>15)}assert.match(STORY_SOURCES.attention.why,/not uniformly worse/)});
+// Cross-lane integration: SYSTEMS uses short perk IDs and a different frozen scoring shape.
+test('SYSTEMS first draft short perk IDs stay unchanged in purchase callbacks',()=>{
+ const draft=['carbon-copy','bank-shot','mira-backup'];
+ assert.deepEqual(validateOffers(draft),draft);
+ assert.deepEqual(validateOffers([{id:'carbon-copy'},{id:'bank-shot'},{id:'mira-backup'}]),draft);
+ assert.throws(()=>validateOffers(['carbon-copy','perk:carbon-copy','bank-shot']));
+});
+test('SYSTEMS readScores frozen report works without transforming scores',()=>{
+ const f=Object.freeze({officialScore:78,peopleScore:86,official:Object.freeze({completedWork:40,pace:13}),people:Object.freeze({toolAccess:30}),completedCardIds:['T4','P4','S2'],licenceTokensGiven:2,frame:'context',workstationIntact:false,bonusPacketOutcomes:{'quota:p1:b1':'file','quota:p2:b1':'cool'},mode:'standard',continued:false});
+ const m=receiptNarrative({run:{},snapshot:f});
+ assert.equal(m.official,78);assert.equal(m.people,86);
+ assert.equal(m.components.official.completedWork,40);
+ assert.match(m.facts.join(' | '),/2 OF 2 SOFTWARE/);
+ assert.match(m.facts.join(' | '),/1 FILED · 1 COOLED/);
+ assert.match(m.facts.join(' | '),/PRESS FRAME: CONTEXT/);
+ assert.match(m.facts.join(' | '),/WORKSTATION WAS INTERRUPTED/);
+});
+test('SYSTEMS run.snapshot.endingSnapshot accepted without score reinterpretation',()=>{
+ const m=receiptNarrative({snapshot:{endingSnapshot:{officialScore:85,peopleScore:70,official:{pace:15},people:{attentionToHelp:12}}}});
+ assert.equal(m.title,'EMPLOYEE OF THE DAY');assert.equal(m.official,85);assert.equal(m.people,70);
+});
+test('SYSTEMS committed event ledger fills observed narrative facts without invention',()=>{
+ const events=[
+  {kind:'worker',objectId:'mira-workstation',outcome:'helped',committed:true},
+  {kind:'notice',objectId:'n1',outcome:'safe',committed:true},
+  {kind:'notice',objectId:'n2',outcome:'unsafe',committed:true},
+  {kind:'notice',objectId:'fake',outcome:'safe',committed:false},
+  {kind:'frame',objectId:'p4',outcome:'context',committed:true},
+  {kind:'licence',objectId:'mira',outcome:'give',committed:true},
+  {kind:'licence',objectId:'jules',outcome:'save',committed:true}];
+ const run={eventLedger:events,completedCardIds:['S2','P4','T4']};
+ assert.match(promotionNarrative({index:2,run}).changes[0],/stayed dry/);
+ assert.match(promotionNarrative({index:3,run}).changes[0],/1 of 2/);
+ assert.match(promotionNarrative({index:4,run}).changes[0],/Context/);
+ assert.match(promotionNarrative({index:5,run}).changes[0],/1 of 2/);
+ assert.equal(promotionNarrative({index:5,run:{eventLedger:events,completedCardIds:['S2']}}).changes.length,0);
+});
 console.log(`\n${count}/${count} narrative and integrity checks passed`);
