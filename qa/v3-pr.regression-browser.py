@@ -58,7 +58,20 @@ with sync_playwright() as p:
         drag((c,402),(c-210,565))
         assert done()[0]['evidence']['framing']=='context',done()
         assert not errs,errs
-        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','runtimeErrors':errs})
+        # First-run sponsored P1: open genuine aid, physically discard a fake ad,
+        # then manually correct the chart. Neither overlay auto-completes the task.
+        page.evaluate("window.__pr.context.run.directive='sponsored-workflow';window.__pr.switchTo('P1')")
+        tipx=930 if width>1000 else 465
+        page.mouse.click(*at(tipx,300))
+        assert snap()['tipOpened'] and snap()['baseline']==1200
+        drag((tipx,415),(tipx+(170 if width>1000 else 140),250))
+        assert snap()['fakeDismissed']
+        page.screenshot(path=str(OUT/f'P1-sponsored-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
+        drag((c-180,520),(c-180,705))
+        page.mouse.click(*at(c,630))
+        assert done()[0]['evidence']['authoredReferenceMs']==14000
+        assert not errs,errs
+        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','runtimeErrors':errs})
         page.close()
     browser.close()
 (OUT/'regression-audit.json').write_text(json.dumps(results,indent=2))
