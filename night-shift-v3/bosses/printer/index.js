@@ -131,7 +131,7 @@ export function createPrinterMutiny(context={}){
       if(!s.adMoved&&isIn(p,{x:s.adX,y:65,w:200,h:135})){
         s.pointer={id,type:'ad',start:p,last:p,origin:{x:s.adX,y:65}};return;
       }
-      if(hasMira&&!s.miraUsed&&isIn(p,{x:-Math.min(260,worldWidth()*.35),y:153,w:105,h:110})){
+      if(hasMira&&!s.miraUsed&&isIn(p,{x:Math.min(260,worldWidth()*.35),y:153,w:105,h:110})){
         s.miraUsed=true;s.feederWidth+=78;s.relief=1.2;emit('printer-mira-assist',{manual:true});s.hint='MIRA HELD THE FEEDER. NICE SHOT!';return;
       }
       if(s.packet&&isIn(p,{x:s.packet.x,y:s.packet.y,w:s.packet.w+35,h:s.packet.h+35})){
