@@ -67,6 +67,34 @@ async function run(){
    check('NO_PAGE_EXCEPTIONS',result.errors.length===0,result.errors);
    result.after='services-s3-sponsored-after-'+width+'x'+height+'.png';
    await page.screenshot({path:path.join(out,result.after)});
+   // Secondary fairness probe: if the same large ad is rendered under a
+   // NON-sponsored corporate directive, it must remain meaningfully dismissible.
+   // Otherwise the player sees a fake interactive object with a dead hitbox.
+   await page.selectOption('#directive','fast-or-safe');
+   await page.evaluate(()=>window.__services.load(2));
+   await page.waitForTimeout(100);
+   const normal=await page.evaluate(()=>({
+     adVisible:window.__services.state.scene.snapshot().adVisible,
+     start:window.__services.viewport.worldToScreen(600,477),
+     end:window.__services.viewport.worldToScreen(850,560)
+   }));
+   result.defaultBefore='services-s3-default-before-'+width+'x'+height+'.png';
+   await page.screenshot({path:path.join(out,result.defaultBefore)});
+   if(normal.adVisible){
+     await page.mouse.move(normal.start.x,normal.start.y);
+     await page.mouse.down();
+     await page.mouse.move(normal.end.x,normal.end.y,{steps:6});
+     await page.mouse.up();
+     await page.waitForTimeout(110);
+   }
+   const normalAfter=await page.evaluate(()=>window.__services.state.scene.snapshot());
+   check('DEFAULT_AD_NOT_A_DEAD_CONTROL',
+     normal.adVisible===false || normalAfter.adVisible===false,
+     {adRenderedWithFastOrSafe:normal.adVisible,
+      afterActualPointerDrag:normalAfter.adVisible,
+      expected:'No obstructive unresponsive sponsored ad under a different directive'});
+   result.defaultAfter='services-s3-default-after-'+width+'x'+height+'.png';
+   await page.screenshot({path:path.join(out,result.defaultAfter)});
   }catch(e){result.error=String(e.stack||e).slice(0,1100)}
   finally{await ctx.close().catch(()=>{})}
  }
