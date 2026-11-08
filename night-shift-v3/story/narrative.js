@@ -33,10 +33,24 @@ const MAIL = [
   {from:'MIRA · BEFORE YOU CLOCK OUT',address:'mira@aster.internal',subject:'That machine has all our promotions inside it.',body:'You helped build it. I can hold a door if you make the opening. Grab one last tool and finish this.'}
 ];
 
+/** SYSTEMS exports short IDs; earlier STORY previews use namespaced IDs.
+ * Normalize for display only, preserving the exact ID used by SYSTEMS callbacks. */
+export function toStoryPerkId(id){return typeof id==='string'&&!id.startsWith('perk:')?'perk:'+id:id;}
+function observedRun(run={}){
+ const evidence={...run};
+ const events=Array.isArray(run.eventLedger)?run.eventLedger.filter(e=>e&&e.committed===true):[];
+ if(!events.length)return evidence;
+ const unique=(kind)=>{const ids=new Map();for(const e of events)if(e.kind===kind&&e.objectId&&!ids.has(e.objectId))ids.set(e.objectId,e);return [...ids.values()]};
+ if(evidence.workstationIntact==null){const e=unique('worker').find(e=>e.objectId==='mira-workstation');if(e)evidence.workstationIntact=e.outcome==='helped';}
+ if(evidence.notificationsEncountered==null){const notices=unique('notice');if(notices.length){evidence.notificationsEncountered=notices.length;evidence.safeNotificationsHandled=notices.filter(e=>e.outcome==='safe').length;}}
+ if(evidence.publicRelationsFrame==null){const f=events.filter(e=>e.kind==='frame').at(-1);if(f)evidence.publicRelationsFrame=f.outcome;}
+ if(evidence.licenceTokensGiven==null){const licences=unique('licence');if(licences.length===2)evidence.licenceTokensGiven=licences.filter(e=>e.outcome==='give').length;}
+ return evidence;
+}
 function seen(run,id){return Array.isArray(run?.completedCardIds)&&run.completedCardIds.includes(id)}
 export function promotionNarrative({index,run={},directive}={}){
   if(!Number.isInteger(index)||index<1||index>5)throw new RangeError('Promotion index must be 1–5');
-  const m=MAIL[index-1],changes=[];
+  run=observedRun(run);const m=MAIL[index-1],changes=[];
   if(index===2&&seen(run,'S2'))changes.push(run.workstationIntact===true?'Mira’s workstation stayed dry. She has the good stapler.':run.workstationIntact===false?'Mira’s workstation needs repairs after the spill.':'Mira’s workstation outcome is still being checked.');
   if(index===3&&Number(run.notificationsEncountered)>0)changes.push(`Notifications handled: ${Number(run.safeNotificationsHandled)||0} of ${run.notificationsEncountered}.`);
   if(index===4&&seen(run,'P4')&&['headline','context'].includes(run.publicRelationsFrame))changes.push(run.publicRelationsFrame==='headline'?'The headline went out first. The next staff task gets your priority pass.':'Context accompanied the headline. You have a final-machine warning card.');
@@ -49,8 +63,19 @@ function finiteScore(n,label){if(!Number.isFinite(n)||n<0||n>100)throw new Range
 function scoreOf(snapshot,names){for(const name of names){if(Object.hasOwn(snapshot,name)&&typeof snapshot[name]==='number')return snapshot[name];}return undefined;}
 export function receiptNarrative({run={},snapshot}={}){
   if(!snapshot||typeof snapshot!=='object')throw new TypeError('Immutable endingSnapshot is required');
-  const official=finiteScore(scoreOf(snapshot,['officialQuota','corporate','quota','official']),'Official QUOTA');
-  const people=finiteScore(scoreOf(snapshot,['peopleQuality','people','quality']),'People & Quality');
+  // Accept the exact frozen SYSTEMS report (or a run.snapshot containing endingSnapshot).
+  snapshot=snapshot.endingSnapshot??snapshot;
+  const official=finiteScore(scoreOf(snapshot,['officialScore','officialQuota','corporateScore','corporate','quota','official']),'Official QUOTA');
+  const people=finiteScore(scoreOf(snapshot,['peopleScore','peopleQuality','quality']),'People & Quality');
+  run=observedRun(run);
+  // Frozen SYSTEMS data is authoritative at ending; never fill missing facts by guesswork.
+  run={...run,completedCardIds:snapshot.completedCardIds??run.completedCardIds,
+   licenceTokensGiven:snapshot.licenceTokensGiven??run.licenceTokensGiven,
+   workstationIntact:snapshot.workstationIntact??run.workstationIntact,
+   publicRelationsFrame:snapshot.frame??run.publicRelationsFrame,
+   quotaBonusPacketOutcomes:snapshot.bonusPacketOutcomes??run.quotaBonusPacketOutcomes,
+   overtimeTicks:snapshot.overtimeTicks??run.overtimeTicks,
+   continueUsed:snapshot.continued??run.continueUsed,mode:snapshot.mode??run.mode};
   const highOfficial=official>=80, highPeople=people>=80;
   const line=highOfficial?(highPeople?'Employee of the Day. Please stop making the rest of us look functional.':'Record productivity! Your colleagues have filed a missing-chairs report.'):(highPeople?'You missed the target. Everybody made it home. The target is under review.':'A catastrophic shift. The printer is requesting hazard pay.');
   const title=official>=85?'EMPLOYEE OF THE DAY':official>=70?'EMPLOYEE OF THE WEEK CANDIDATE':'PROVISIONAL EMPLOYEE';
@@ -64,13 +89,13 @@ export function receiptNarrative({run={},snapshot}={}){
   if(Number.isInteger(run.overtimeTicks)&&run.overtimeTicks>0)facts.push(`${run.overtimeTicks} OVERTIME TICKS`);
   if(run.continueUsed===true)facts.push('UNION BREAK CONTINUE USED');
   if(run.mode==='practice')facts.push('PRACTICE SHIFT');
-  const components=snapshot.components??snapshot.breakdown??{};
+  const components=snapshot.components??snapshot.breakdown??{official:typeof snapshot.official==='object'?snapshot.official:{},people:typeof snapshot.people==='object'?snapshot.people:{}};
   return Object.freeze({official,people,title,line,facts:Object.freeze(facts),components,source:STORY_SOURCES.expression});
 }
 
 export function validateOffers(offers){
   if(!Array.isArray(offers)||offers.length!==3)throw new TypeError('SYSTEMS must supply exactly three offers');
   const ids=offers.map(x=>typeof x==='string'?x:x?.id);
-  if(ids.some(id=>!PERK_STORY[id])||new Set(ids).size!==3)throw new TypeError('Offers must be three distinct canonical perk IDs');
+  if(ids.some(id=>!PERK_STORY[toStoryPerkId(id)])||new Set(ids.map(toStoryPerkId)).size!==3)throw new TypeError('Offers must be three distinct canonical perk IDs');
   return ids;
 }
