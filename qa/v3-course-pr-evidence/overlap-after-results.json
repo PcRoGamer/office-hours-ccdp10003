@@ -1,0 +1,431 @@
+{
+  "testedAt": "2026-11-08T11:37:18.542Z",
+  "scope": "ACTUAL BROWSER/CANVAS VISUAL OVERLAP GATE AFTER REAL P1 CORRECTION",
+  "views": [
+    {
+      "viewport": "1440x900",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "state": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "PHYSICAL_AXIS_CORRECTED",
+          "state": "PASS",
+          "detail": {
+            "baseline": 0,
+            "corrected": true
+          }
+        },
+        {
+          "key": "ACTUAL_BANNER_CAPTURED",
+          "state": "PASS",
+          "detail": {
+            "banner": {
+              "x": 166.60000000000002,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "paintCalls": 141
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_QUARTERLY_CLICKS",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 433.329833984375,
+              "y": 178.5,
+              "w": 349.34033203125,
+              "h": 31
+            },
+            "banner": {
+              "x": 166.60000000000002,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 349.34033203125,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_1_240",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 480.98876953125,
+              "y": 222.5,
+              "w": 69.0224609375,
+              "h": 23
+            },
+            "banner": {
+              "x": 166.60000000000002,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 69.0224609375,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_1_280",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 665.98876953125,
+              "y": 214.5,
+              "w": 69.0224609375,
+              "h": 23
+            },
+            "banner": {
+              "x": 166.60000000000002,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 69.0224609375,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "NO_PAGE_EXCEPTIONS",
+          "state": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "drawn": {
+        "labels": {
+          "QUARTERLY CLICKS": {
+            "x": 433.329833984375,
+            "y": 178.5,
+            "w": 349.34033203125,
+            "h": 31
+          },
+          "1,280": {
+            "x": 665.98876953125,
+            "y": 214.5,
+            "w": 69.0224609375,
+            "h": 23
+          },
+          "1,240": {
+            "x": 480.98876953125,
+            "y": 222.5,
+            "w": 69.0224609375,
+            "h": 23
+          }
+        },
+        "banner": {
+          "x": 166.60000000000002,
+          "y": 560,
+          "w": 882.8,
+          "h": 37,
+          "fillStyle": "#71e3c4"
+        },
+        "paintCalls": 141
+      },
+      "screenshot": "p1-overlap-actual-1440x900.png"
+    },
+    {
+      "viewport": "3840x2160",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "state": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "PHYSICAL_AXIS_CORRECTED",
+          "state": "PASS",
+          "detail": {
+            "baseline": 0,
+            "corrected": true
+          }
+        },
+        {
+          "key": "ACTUAL_BANNER_CAPTURED",
+          "state": "PASS",
+          "detail": {
+            "banner": {
+              "x": 234.15555555555557,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "paintCalls": 145
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_QUARTERLY_CLICKS",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 500.88538953993054,
+              "y": 178.5,
+              "w": 349.34033203125,
+              "h": 31
+            },
+            "banner": {
+              "x": 234.15555555555557,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 349.34033203125,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_1_240",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 548.5443250868055,
+              "y": 222.5,
+              "w": 69.0224609375,
+              "h": 23
+            },
+            "banner": {
+              "x": 234.15555555555557,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 69.0224609375,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_1_280",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 733.5443250868055,
+              "y": 214.5,
+              "w": 69.0224609375,
+              "h": 23
+            },
+            "banner": {
+              "x": 234.15555555555557,
+              "y": 560,
+              "w": 882.8,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 69.0224609375,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "NO_PAGE_EXCEPTIONS",
+          "state": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "drawn": {
+        "labels": {
+          "QUARTERLY CLICKS": {
+            "x": 500.88538953993054,
+            "y": 178.5,
+            "w": 349.34033203125,
+            "h": 31
+          },
+          "1,280": {
+            "x": 733.5443250868055,
+            "y": 214.5,
+            "w": 69.0224609375,
+            "h": 23
+          },
+          "1,240": {
+            "x": 548.5443250868055,
+            "y": 222.5,
+            "w": 69.0224609375,
+            "h": 23
+          }
+        },
+        "banner": {
+          "x": 234.15555555555557,
+          "y": 560,
+          "w": 882.8,
+          "h": 37,
+          "fillStyle": "#71e3c4"
+        },
+        "paintCalls": 145
+      },
+      "screenshot": "p1-overlap-actual-3840x2160.png"
+    },
+    {
+      "viewport": "650x800",
+      "checks": [
+        {
+          "key": "HTTP_200",
+          "state": "PASS",
+          "detail": 200
+        },
+        {
+          "key": "PHYSICAL_AXIS_CORRECTED",
+          "state": "PASS",
+          "detail": {
+            "baseline": 0,
+            "corrected": true
+          }
+        },
+        {
+          "key": "ACTUAL_BANNER_CAPTURED",
+          "state": "PASS",
+          "detail": {
+            "banner": {
+              "x": 73.49000000000001,
+              "y": 560,
+              "w": 470.52,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "paintCalls": 145
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_QUARTERLY_CLICKS",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 184.79052734375,
+              "y": 183,
+              "w": 247.9189453125,
+              "h": 22
+            },
+            "banner": {
+              "x": 73.49000000000001,
+              "y": 560,
+              "w": 470.52,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 247.9189453125,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_1_240",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 200.0485875,
+              "y": 226,
+              "w": 48.015625,
+              "h": 16
+            },
+            "banner": {
+              "x": 73.49000000000001,
+              "y": 560,
+              "w": 470.52,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 48.015625,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "TEXT_UNOBSCURED_1_280",
+          "state": "PASS",
+          "detail": {
+            "label": {
+              "x": 369.43578749999995,
+              "y": 218,
+              "w": 48.015625,
+              "h": 16
+            },
+            "banner": {
+              "x": 73.49000000000001,
+              "y": 560,
+              "w": 470.52,
+              "h": 37,
+              "fillStyle": "#71e3c4"
+            },
+            "overlap": {
+              "x": 48.015625,
+              "y": 0,
+              "area": 0
+            }
+          }
+        },
+        {
+          "key": "NO_PAGE_EXCEPTIONS",
+          "state": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "drawn": {
+        "labels": {
+          "QUARTERLY CLICKS": {
+            "x": 184.79052734375,
+            "y": 183,
+            "w": 247.9189453125,
+            "h": 22
+          },
+          "1,280": {
+            "x": 369.43578749999995,
+            "y": 218,
+            "w": 48.015625,
+            "h": 16
+          },
+          "1,240": {
+            "x": 200.0485875,
+            "y": 226,
+            "w": 48.015625,
+            "h": 16
+          }
+        },
+        "banner": {
+          "x": 73.49000000000001,
+          "y": 560,
+          "w": 470.52,
+          "h": 37,
+          "fillStyle": "#71e3c4"
+        },
+        "paintCalls": 145
+      },
+      "screenshot": "p1-overlap-actual-650x800.png"
+    }
+  ],
+  "status": "P1_VISUAL_TRUTHFULNESS_PASS",
+  "failureCount": 0
+}
