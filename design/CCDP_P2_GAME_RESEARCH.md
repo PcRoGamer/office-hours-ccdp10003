@@ -27,23 +27,33 @@ Canvas title: **Project 2: Exploring Gaming Culture**. The brief permits video g
 **Critical limitation:** Some critics praise Brotato's accessibility and build choices while noting limited enemy/arena variety and combat depth: https://www.metacritic.com/game/brotato/ . The relevant risk for First Shift is a static backdrop and passive bonuses. Countermeasure: eight visibly different interactions, meaningful perk activation, tactile deliberate input, changing office consequences.
 **Our deviation:** Brotato upgrades arena combat; First Shift upgrades mixed office microgames, with care/production tradeoffs and two score perspectives.
 
-## Central researched argument
-**Research topic:** *What happens when video-game reward loops, speed challenges and upgrade economics are imposed on a workplace?* This is an exploration of contemporary game culture and gamification, not an unsupported empirical conclusion that all gamification is harmful.
-**Design proposition:** the same score/reward systems can be motivating and useful while obscuring excluded costs, labour, worker care or quality. Let player feel genuine pleasure in maximising output and then see the consequences through options, saved coworker support, resource decisions and two arithmetically honest final scorecards.
+## Authoritative creative formula | not a workplace-gamification thesis
+**Dumb Ways to Die = MICROGAMES. Brotato = ROGUELITE. Quota Panic = A JOB AS A TOY.** This is the user-approved conceptual frame and outranks older wording that casts the game principally as an employer-gamification critique.
 
-### Contemporary critical perspective (supporting, not replacing game research)
-- Butler, N. & Spoelstra, S. (2024), *Redemption Through Play? Exploring the Ethics of Workplace Gamification*, Journal of Business Ethics, DOI https://doi.org/10.1007/s10551-023-05584-w . Ethical debate includes both dangers and life-affirming organisational play.
-- *Game on! Antecedents and consequents of gamification in the workplace* (2024), Journal of Workplace Learning, DOI https://doi.org/10.1108/JWL-09-2024-0193 . Reports positive associations for actual usage and work engagement/commitment, and advises weighing pros and cons. Do not flatten to "gamification always bad."
-- Deterding et al. (2011), *From Game Design Elements to Gamefulness*, DOI https://doi.org/10.1145/2181037.2181040 ; key concept of gamification.
-- Optional additional Mark, Gudith & Klocke (2008) interruptions study DOI https://doi.org/10.1145/1357054.1357072 . Do not claim the study proves universal accuracy loss; workers sped up with stress and frustration reported.
+**Research question:** *How can the interaction grammar of microgames and the progression grammar of roguelites transform ordinary office tasks into compelling playful experiences?*
+
+- **Dumb Ways to Die contributes moment-to-moment design:** one brief imperative; playful physical gestures, surprising variety, readable stakes, expressive comedy.
+- **Brotato contributes run-scale design:** upgrade decisions, coherent builds, increasing demands, replayability, trade-offs, player mastery.
+- **Quota Panic contributes a distinctive play space:** an office as a tactile toybox. Stamp, fling, catch, juggle, route and operate ridiculous machines; office jobs are funny playable objects, not an essay topic. Corporate satire is the flavour and source of changing rules, not a mandatory lecture.
+- **Our creative synthesis** is not generic gamification. The two game mechanisms meet inside one materially interactive office environment where upgrades carry between different microgames. Research is evidenced by this execution and explained in a few well-designed in-game cues.
+
+**Critical engagement:** identify the affordances and limits of the two source games and show a deliberate response. DWTD excels at instant play but its disconnected microgames give limited long-run build strategy; Brotato excels at builds but its primarily repeated arena combat does not provide the variety of bespoke interactions. Quota Panic attempts to retain variety **and** strategic continuity, accepting a higher design burden of shared perk effects. Discuss this honestly as a design proposition rather than a proven superiority claim.
+
+**Secondary interpretation, never the compulsory premise:** the game can playfully reference productivity culture, metrics and corporate absurdity. Optional post-play two-score receipt can provoke questions about what performance measures capture or omit. This is not the primary game-culture research question, and the ending must not moralise or punish the player for enjoying optimisation. Supporting work on gamification is optional background, subordinate to researched game-design mechanics; no need to foreground a workplace-ethics argument in tutorial or campaign.
+
+### Secondary sources, if needed for optional context
+- Butler, N. & Spoelstra, S. (2024), *Redemption Through Play? Exploring the Ethics of Workplace Gamification*, Journal of Business Ethics, DOI https://doi.org/10.1007/s10551-023-05584-w .
+- *Game on! Antecedents and consequents of gamification in the workplace* (2024), Journal of Workplace Learning, DOI https://doi.org/10.1108/JWL-09-2024-0193 .
+- Deterding et al. (2011), *From Game Design Elements to Gamefulness*, DOI https://doi.org/10.1145/2181037.2181040 .
+These are contextual sources only; do not let them displace video-game design research.
 
 ## Required actual in-game research, not a citation-only menu
 Design an interactive **in-game tutorial** under 30 seconds, not a skippable unexplained research essay. Demonstrate and immediately let the player do an action. Source URLs must be visible/accessible in the game and on the final source ledger. Player should know the *why* from playing, not from later reading.
 **Proposed editorial language, subject to editing for legibility (no invented personal autobiography):**
-- Title/first action, one optional brief overlay immediately after first stamp: "WHY THIS GAME? Games can make repeated tasks exciting. What happens when your boss copies the rules?" Show two compact source marks: **Dumb Ways to Die (2013) ↗** and **Brotato (2023) ↗**. These are game research credits, not marketing or in-universe company claims. Link to sources.
-- After first 2 microgames, at the FIRST actual upgrade decision: "WHY NOW? When work becomes a score, who decides what counts?" Show *an actual selectable perk* and the inherited pressure increase. An optional 2-sentence source drawer links directly to Butler/Spoelstra 2024 and the positive workplace-gamification paper (both outcomes). Do not impose a reading stop longer than play.
-- Early short in-world staff note, tied to a **playable** decision: "FAST gets QUOTA. SAFE protects the team. Both are real work." Then physically choose, not a quiz.
-- Final dual score reveal: "One shift. Two accurate scores. Different things counted." Source credits identify game design comparisons and contemporary critical reading without making fictional statistics look empirical.
+- Title/first action, one brief in-world cue while actually stamping: **"WHY THIS GAME? What if doing a ridiculous office job felt as fun as playing a game?"** Direct links labelled **Microgame research: Dumb Ways to Die (2013) ↗** and **Roguelite research: Brotato (2023) ↗** should be accessible in the same natural tutorial flow (not a compulsory interrupt).
+- After the first two microgames, at the FIRST actual upgrade decision: **"WHY NOW? Tiny challenges are fun. What if each one made you better at the next?"** Show actual perk choice and preview how it changes a later office toy; use a short, optional comparison of Dumb Ways to Die's microgame approach and Brotato's persistent builds. Do not stop play for a lecture.
+- Early short in-world note tied to a **playable** decision: "FAST or SAFE? Different tools, different tricks." Let the player physically try it. Corporate humour is welcome; presenting an ethical verdict is not required.
+- Final score reveal: celebrate the actual play, acquired build and funny office consequences; two arithmetically honest scores can still show different dimensions of the run, but avoid a sermon. Source credits show explicit game-design comparisons; context about productivity metrics is optional.
 
 **Alternative UI:** Aster Mail may carry these notes between rounds, but only if first-time completion requires naturally noticing a small portion of the explanation; an optional sources drawer alone cannot satisfy "research reasoning into your in-game tutorial". Keep direct links with legible labels and author/year or studio/year.
 
@@ -59,7 +69,7 @@ Design an interactive **in-game tutorial** under 30 seconds, not a skippable une
 
 ## Non-negotiable rubric gates
 1. **Class/game strategy 25:** show 2+ real gameplay manifestations each of microgame interaction, repeatable game loop, item economy, feedback, risk/reward, mastery; include actual class-specific vocabulary only where source-backed.
-2. **Gaming culture 25:** actual two primary case studies with citations, explicit comparative transformation, contemporary work gamification debate, different perspectives, zero invented research data. Distinguish *works as a game* from *academic critique*. Detective/courtroom quiz is forbidden.
+2. **Gaming culture 25:** actual two primary games with citations, explicit comparison of their different design traditions, an original synthesis and considered limitations/counterarguments; modern game-design culture is the focus. Workplace metrics or gamification may appear as secondary interpretation only. No invented findings. Detective/courtroom quiz is forbidden.
 3. **Inventive communication 25:** vivid original artwork, sound, expressive characters, text integrated into interaction, meaningful physical boss and ending; no slides-with-buttons.
 4. **Clarity 25:** a stranger understands objective without reading the GDD; tiny in-context primer and UI credits; every source link accessible; meaningful clear fail/success and the two metrics correctly described.
 5. **Project continuity:** retain characters/theme/mechanics from previously proposed AsterOS office-survival project (office, emails, upgrades, ads, deadlines, productivity incentives, coworker choices, quota boss). In-game title, opening and source notes should make evolution evident.
@@ -70,6 +80,6 @@ Design an interactive **in-game tutorial** under 30 seconds, not a skippable une
 - During first 15 seconds, at least one genuine input and feedback, plus a concise research *why* visible during tutorial flow.
 - By first promotion the user has encountered **both named research games** in an unobtrusive source cue, not just generic design theory.
 - Two studies materially change mechanics (cross-microgame builds, short funny prompts); two credible limitations actively addressed.
-- Final dual metrics honestly capture original ledger; a player can explain the central design question after play, no essay required.
+- Final scores honestly capture the original ledger; a player can explain the design synthesis (microgames + roguelite progression + office toy) after play, no essay required.
 - Sources tested as clickable links from real on-screen UI at 1024x600 and 650x800; no instructional overlay prevents play.
 - Existing original game passes QA and candidate game visually assessed independently; unmodified public release until promotion gate.
