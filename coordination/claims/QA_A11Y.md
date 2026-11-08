@@ -27,3 +27,10 @@
 - **Test-tool repairs:** proper CDP touch cancellation (eliminates synthetic event `setPointerCapture` false positives), delayed live gameplay screenshots, explicit UTF-8 report encoding on Windows. Windows self-test now PASS.
 - **Evidence report:** `coordination/reports/a11y-windows-hd-verified-2026-11-08.md`, real screenshots `qa/v3-a11y-hd-real-*.webp`. New source commit `795211fb7b8db40a44e4107079faf1f32c394552`.
 - **Truth boundary:** this verifies HD baseline and the audit harness, **not** a full v3 release or full manual accessibility/audio pass. PR #18 remains draft for LEAD review.
+
+## LEAD local v3 preview verification (8 Nov ~22:30 AEDT)
+
+- **New independent QA commit:** `fecee74`, pushed and attached to [draft PR #18](https://github.com/PcRoGamer/office-hours-ccdp10003/pull/18).
+- **Real Windows Chromium:** read-only local LEAD v3 prototype at 1440×900 and 650×800, **20 PASS / 0 FAIL / 8 REVIEW**. The `#clock-in` button started `mode=card`, authored good-paper hitbox resolved under world transform, Escape froze the clock, and no page errors occurred.
+- **Evidence:** `qa/v3-a11y-lead-local-real-browser-results.json`, real Chromium screenshots `qa/v3-a11y-lead-real-*.webp`, and `coordination/reports/a11y-lead-local-preview-2026-11-08.md` with source hashes.
+- **Limit:** the LEAD local preview contained I1 only and was uncommitted. This is not integrated v3 acceptance. Remaining audio/motion/contrast/manual criteria are REVIEW, not pass. No shared source or legacy release edited.
