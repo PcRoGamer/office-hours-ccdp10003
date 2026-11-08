@@ -1,10 +1,14 @@
-"""Fast real-Chromium regression: scoring evidence, false-chart reversion, fullscreen.
-Run from the repository root: python qa/v3-pr.regression-browser.py
-Uses real native browser ES modules with data: import URLs, not a flattened script.
+"""Fast real-browser regression for viewport, truth-preserving axis reversion and score evidence.
+
+    python qa/v3-pr.regression-browser.py
+
+Uses real native browser ES modules with data: import URLs, not a flattened script,
+so it works even when local HTTP navigation is administratively restricted.
 """
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import os, json, base64
+
 ROOT=Path(__file__).resolve().parent.parent
 OUT=ROOT/'qa'/'v3-pr-screenshots'
 OUT.mkdir(exist_ok=True)
@@ -23,59 +27,62 @@ with sync_playwright() as p:
         page.on('pageerror',lambda error:errs.append(str(error)))
         page.set_content(html,wait_until='domcontentloaded',timeout=10000)
         page.wait_for_function('!!window.__pr',timeout=10000)
-        c=page.evaluate('window.__pr.viewport.worldWidth/2')
+        v=page.evaluate('window.__pr.viewport') if False else page.evaluate('({W:window.__pr.viewport.worldWidth,H:window.__pr.viewport.worldHeight})')
         assert page.locator('canvas').evaluate('(canvas)=>[canvas.width,canvas.height]')==[width,height]
         unit=height/760
+        c=v['W']/2
         def at(x,y):return x*unit,y*unit
         def snap():return page.evaluate('window.__pr.scene.snapshot()')
         def done():return page.evaluate('window.__pr.events.filter(e=>e.type==="card-complete")')
-        def drag(start,end):
-            page.mouse.move(*at(*start))
-            page.mouse.down()
-            page.mouse.move(*at(*end),steps=6)
-            page.mouse.up()
-        drag((c-180,520),(c-180,705))
+        def mouse_drag(start,end):
+            page.mouse.move(*at(*start));page.mouse.down();page.mouse.move(*at(*end),steps=6);page.mouse.up()
+        # In P1, after reaching zero, dragging the handle upward must undo correction.
+        mouse_drag((c-180,520),(c-180,705))
         assert snap()['baseline']==0,snap()
-        drag((c-180,520),(c-180,465))
+        mouse_drag((c-180,520),(c-180,465))
         assert snap()['baseline']>0 and not snap()['corrected'],snap()
         page.screenshot(path=str(OUT/f'P1-revert-{width}x{height}.jpg'),type='jpeg',quality=65,timeout=10000)
+        # Start a new correct run; evidence must carry canonical reference.
         page.locator('[data-card=P1]').click()
-        drag((c-180,520),(c-180,705))
-        page.mouse.click(*at(c,630))
+        mouse_drag((c-180,520),(c-180,705))
+        page.mouse.click(*at(c,630)) if height>900 else page.mouse.click(*at(c,630))
         assert len(done())==1,(width,height,snap(),done())
         assert done()[0]['evidence']['authoredReferenceMs']==14000
         page.screenshot(path=str(OUT/f'P1-zero-{width}x{height}.jpg'),type='jpeg',quality=65,timeout=10000)
+        # Make sure stage remains real full bleed and all cards render at both sizes.
         for id in ('P2','P3','P4'):
             page.locator(f'[data-card={id}]').click()
             page.wait_for_timeout(30)
             assert not errs,(id,errs)
-            assert page.evaluate('window.__pr.scene.snapshot().finished') is False
-        # Directive routes swap on a visible rail; real mouse input must hit the moved CONTEXT target.
+            assert page.evaluate('window.__pr.scene.snapshot().finished')==False
+        # GDD v3 Moving Goalposts: the report is dropped into CONTEXT after the rail
+        # swaps, proving the visible target and the hitbox move as one object.
         page.evaluate("window.__pr.context.run.directive='moving-goalposts';window.__pr.switchTo('P4')")
         page.wait_for_timeout(2500)
-        assert snap()['routeShift']==1,snap()
+        assert snap()['routeShift']==1, snap()
         page.screenshot(path=str(OUT/f'P4-goalposts-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
-        drag((c,402),(c-210,565))
+        mouse_drag((c,402),(c-210,565))
         assert done()[0]['evidence']['framing']=='context',done()
         assert not errs,errs
-        # First-run sponsored P1: open genuine aid, physically discard a fake ad,
-        # then manually correct the chart. Neither overlay auto-completes the task.
+        # Sponsored first-run P1: distinguish verified help from a paid advert,
+        # discard the advert, and still manually set the zero baseline and stamp.
         page.evaluate("window.__pr.context.run.directive='sponsored-workflow';window.__pr.switchTo('P1')")
         tipx=930 if width>1000 else 465
         page.mouse.click(*at(tipx,300))
         assert snap()['tipOpened'] and snap()['baseline']==1200
-        drag((tipx,415),(tipx+(170 if width>1000 else 140),250))
+        mouse_drag((tipx,415),(tipx+(170 if width>1000 else 140),250))
         assert snap()['fakeDismissed']
         page.screenshot(path=str(OUT/f'P1-sponsored-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
-        drag((c-180,520),(c-180,705))
+        mouse_drag((c-180,520),(c-180,705))
         page.mouse.click(*at(c,630))
         assert done()[0]['evidence']['authoredReferenceMs']==14000
         assert not errs,errs
-        # P2 authentic projectile beam-crossing earns precisely one displayed 0.8s shutter extension.
+        # P2's projectile sweeps the beam during the drag and earns exactly one
+        # physically shown +0.8s shutter (not fabricated pace improvement).
         page.evaluate("window.__pr.switchTo('P2')")
         start=(c-375,230) if width>1000 else (60,230)
         end=(c+150,245) if width>1000 else (380,245)
-        drag(start,end)
+        mouse_drag(start,end)
         cover=snap()
         assert cover['coverBeats']==1 and cover['graceSeconds']==.8,cover
         assert len(page.evaluate('window.__pr.events.filter(e=>e.type==="popup-cover")'))==1
@@ -92,11 +99,12 @@ with sync_playwright() as p:
         offset=min(125,v['W']*.17)
         page.mouse.click(*at(c+offset,630))
         assert done()[0]['outcome']=='success',done()
-        # P4 uses the committed immutable event ledger, never invented incidents.
+        # P4 must report only actual logged colleague outcomes.
         page.evaluate("window.__pr.context.run.directive=null;window.__pr.context.run.miraIncident=null;window.__pr.context.run.eventLedger=[{kind:'worker',objectId:'mira-workstation',outcome:'not-helped',committed:true}];window.__pr.switchTo('P4')")
         assert snap()['miraOutcome']=='interrupted',snap()
         page.screenshot(path=str(OUT/f'P4-evidence-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
-        # Double Entry requires TWO separately manipulated linked objects in P1/P4.
+        assert not errs,errs
+        # Double Entry is a two-object physical mechanic in BOTH guaranteed PR cards.
         page.evaluate("window.__pr.context.run.directive='double-entry';window.__pr.switchTo('P1')")
         mouse_drag((c-180,520),(c-180,705))
         page.mouse.click(*at(c,630))
@@ -110,11 +118,11 @@ with sync_playwright() as p:
         assert snap()['pendingCopy']=='headline' and not done()
         page.screenshot(path=str(OUT/f'P4-double-entry-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
         mouse_drag((c,402),(c+205,565))
-        assert not done(),'wrong linked destination must not commit'
+        assert not done(),'wrong linked destination should not commit'
         mouse_drag((c,402),(c-210,565))
         assert done()[0]['evidence']['linkedCopy'] is True,done()
         assert not errs,errs
-        # FAST OR SAFE changes both mandatory PR cards with manual tradeoffs.
+        # FAST OR SAFE: narrow one-tap finish and broad slower human hold.
         page.evaluate("window.__pr.context.run.directive='fast-or-safe';window.__pr.switchTo('P1')")
         page.screenshot(path=str(OUT/f'P1-fast-safe-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
         mouse_drag((c-180,520),(c-180,705))
@@ -124,7 +132,8 @@ with sync_playwright() as p:
         mouse_drag((c-180,520),(c-180,705))
         safex=c-min(205,min(1060,max(320,v['W']-26))*.29)
         page.mouse.move(*at(safex,630));page.mouse.down()
-        page.wait_for_timeout(740);page.mouse.up()
+        page.wait_for_timeout(740)
+        page.mouse.up()
         assert done()[0]['evidence']['route']=='safe',done()
         page.evaluate("window.__pr.switchTo('P4')")
         page.screenshot(path=str(OUT/f'P4-fast-safe-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
@@ -134,7 +143,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(760)
         assert done()[0]['evidence']['framing']=='context',done()
         assert not errs,errs
-        # MANDATORY COLLABORATION improves physical route but never auto-completes.
+        # MANDATORY COLLABORATION offers real optional route improvement; never autoplay.
         page.evaluate("window.__pr.context.run.directive='mandatory-collaboration';window.__pr.switchTo('P1')")
         page.mouse.click(*at(c+172,630))
         assert snap()['miraHelped'] and snap()['baseline']==750 and not done()
@@ -150,7 +159,7 @@ with sync_playwright() as p:
         mouse_drag((c,402),(c+routeW/2+11,660))
         assert done()[0]['evidence']['framing']=='context',done()
         assert not errs,errs
-        # Sponsored fake physically blocks authentic help in P2 until dismissed.
+        # Sponsored Workflow physically obscures genuine help in P2 until an ad moves.
         page.evaluate("window.__pr.context.run.directive='sponsored-workflow';window.__pr.switchTo('P2')")
         page.mouse.click(*at(c-80,320))
         assert not snap()['opened'] and not snap()['sponsorUnlocked'],snap()
@@ -163,7 +172,7 @@ with sync_playwright() as p:
         assert snap()['opened'],snap()
         page.screenshot(path=str(OUT/f'P2-sponsored-revealed-{width}x{height}.jpg'),type='jpeg',quality=70,timeout=10000)
         assert not errs,errs
-        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','popupCover':'real 0.8s bonus','P1Goalpost':'moved send hitbox confirmed','P4Evidence':'committed worker incident loaded','doubleEntry':'two physical linked-object routes','fastOrSafe':'physical narrow/deliberate alternatives','collaboration':'manual optional coworker aids','P2Sponsored':'signed help uncovered by fake ad removal','runtimeErrors':errs})
+        results.append({'viewport':f'{width}x{height}','browser':'Chromium','axisReversion':'passed','scoreEvidence':'passed','movingGoalposts':'context caught in moved hitbox','sponsoredWorkflow':'signed help and ad flick verified','popupCover':'real 0.8s bonus','P1Goalpost':'moved send hitbox confirmed','P4Evidence':'committed worker incident loaded','doubleEntry':'two physical linked-object routes','fastOrSafe':'real narrow/hold/delayed routes','collaboration':'optional physical assist never auto-completes','P2Sponsored':'signed help physically revealed by fake ad removal','runtimeErrors':errs})
         page.close()
     browser.close()
 (OUT/'regression-audit.json').write_text(json.dumps(results,indent=2))
