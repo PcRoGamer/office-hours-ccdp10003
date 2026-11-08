@@ -111,12 +111,14 @@ def select(page,lane,state):
  elif lane=='pr':page.evaluate('(id)=>window.__pr.switchTo(id)',state)
  elif lane=='printer':page.locator('#go').click(timeout=4000)
  elif lane=='story':
-  page.locator('#launch').click(timeout=4000)
-  if state=='RECEIPT':
-   for _ in range(5):
-    buttons=page.locator('#story button:visible')
-    if buttons.count()==0:raise RuntimeError('Receipt cannot be reached through visible upgrade buttons')
-    buttons.first.click(timeout=4000);page.wait_for_timeout(200)
+  if state=='PROMOTION':page.locator('#launch').click(timeout=4000)
+  elif state=='RECEIPT':
+   # Drive five real selected upgrade clicks and wait for each authored intermission.
+   if not page.evaluate('window.__storyPreview.isShowing'):page.locator('#launch').click(timeout=4000)
+   for index in range(1,6):
+    page.locator('#story [data-pick]:not([disabled])').first.click(timeout=9000)
+    page.wait_for_function('(n)=>window.__storyPreview.phase > n',arg=index,timeout=9000)
+   page.wait_for_function('()=>window.__storyPreview.receipt===true',timeout=5000)
 def capture_lane(browser,lane,root,out,quick=False):
  conf=LANES[lane];path=root/conf['page'];bundle=Bundle(root);rows=[]
  sha=subprocess.run(['git','rev-parse','HEAD'],cwd=root,capture_output=True,text=True).stdout.strip() or None
