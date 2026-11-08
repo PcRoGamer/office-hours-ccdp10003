@@ -26,3 +26,13 @@
 - **Actual committed visual evidence:** `qa/v3-services-captures/services-s3-safe.jpg`; further actual screenshots in chat-delivered `night-shift-v3-services-delivered.zip`.
 - **Detailed report:** `coordination/reports/services-implementation.md` on the agent branch.
 - **Remaining acceptance blockers:** live HTTP ES-module check, shared runtime/ledger integration, HD-quality ART/AUDIO comparison, Planck contacts where needed, physical 4K/GPU QA and full campaign E2E. **Do not merge/release solely because 53/53 tests pass.**
+
+
+## Quality follow-up (2026-11-08, same role and PR)
+- **Status:** Post-delivery fixes committed to draft PR #16, not a separate lane or release.
+- **Current agent head:** `4febc34d171ee0959950bdf3609cf93ee4dd2e08`.
+- **Fairness fixes:** S3 green-window grab remains valid through red, unsafe grab cannot wait to turn green, pointer cancellation clears safe latch; S4 socket requires continuous hold and moving port relocates before failure; S2 terminal input cannot modify state.
+- **Evidence:** original Chromium suite **53/53 PASS** plus focused real Chromium suite **21/21 PASS**; branch-committed Node unit suite **9/9 PASS**; native ES-module import verified separately inside Chromium. No console exceptions in focused suite.
+- **Visual loop:** S4 target relocation and S3 safe-hold screenshots inspected and improved, specifically removing feedback text overlap.
+- **PR:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/16, `qa/v3-services-timing.test.mjs` and `coordination/reports/services-implementation.md`.
+- **Remaining gates:** true HTTP/Pages load and shared-branch integration, HD comparative character/art/audio quality and entire campaign release QA. Existing Night Shift HD is protected.
