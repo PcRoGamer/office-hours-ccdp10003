@@ -115,6 +115,22 @@ async function browser(candidate){
    const label=(candidate?'candidate-':'incumbent-')+w+'x'+h+'@'+dpr;
    await page.screenshot({path:path.join(DIR,label+'.png'),fullPage:false});
    fs.writeFileSync(path.join(DIR,label+'.json'),JSON.stringify({route,...state,errors:errs,broken,remote},null,2));
+   // The fallback is a real game, not only a polished still: exercise CLOCK IN
+   // at one desktop size and preserve a screenshot of the live first card.
+   if(!candidate&&w===1440&&h===900){
+    try{
+     await page.waitForFunction(()=>window.__officeArcade?.snapshot()?.atlasReady,{timeout:15000});
+     const first=await page.evaluate(()=>window.__officeArcade.snapshot());
+     const vp=first.viewport;
+     const point={x:220*vp.scale+vp.ox,y:605*vp.scale+vp.oy};
+     await page.mouse.click(point.x,point.y);
+     await page.waitForTimeout(300);
+     const after=await page.evaluate(()=>window.__officeArcade.snapshot());
+     test(after.screen==='play','HD CLOCK IN reaches live playable card',{screen:after.screen});
+     await page.screenshot({path:path.join(DIR,'incumbent-first-card-1440x900.png'),fullPage:false});
+     fs.writeFileSync(path.join(DIR,'incumbent-first-card-1440x900.json'),JSON.stringify({before:first.screen,after:after.screen,phase:after.phase,card:after.card,errors:errs},null,2));
+    }catch(error){record('failures','HD first-card smoke failed: '+String(error))}
+   }
    await context.close();
   }
  }finally{if(browser)await browser.close()}
