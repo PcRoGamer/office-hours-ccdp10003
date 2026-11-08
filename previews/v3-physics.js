@@ -21,11 +21,20 @@ function resize(){
   sim.release({flick:false});
   const active=pointerId;pointerId=null;
   if(active!==null&&canvas.hasPointerCapture(active))canvas.releasePointerCapture(active);
-  for(const f of files){
-    if(!sim.objects.has(f.id))continue;
-    const pos=sim.state(f),left=f.width/2+14,right=Math.max(left,W-195);
-    const nextX=r(pos.x/Math.max(1,oldW-200)*(W-200),left,right);
-    sim.setTransform(f,nextX,pos.y,pos.angle);
+  const live=files.filter(f=>sim.objects.has(f.id))
+    .map(f=>({file:f,pos:sim.state(f)})).sort((a,b)=>a.pos.x-b.pos.x);
+  // Folders must remain individually readable and grabbable on portrait reflow.
+  const minX=Math.max(42,...live.map(x=>x.file.width/2+16));
+  const maxX=Math.max(minX,W-215);
+  const gap=live.length>1?Math.min(
+    Math.max(...live.map(x=>x.file.width))+12,(maxX-minX)/(live.length-1)):0;
+  let previous=minX-gap;
+  for(let i=0;i<live.length;i++){
+    const {file:f,pos}=live[i];
+    const desired=r(pos.x/Math.max(1,oldW-200)*(W-200),minX,maxX);
+    const x=r(Math.max(desired,previous+gap),minX,maxX-(live.length-i-1)*gap);
+    sim.setTransform(f,x,pos.y,pos.angle);
+    previous=x;
   }
   rebuildFurniture();
 }
@@ -63,7 +72,9 @@ function reset(){if(sim)sim.dispose();files=[];score=0;time=0;won=false;paused=f
   sim.box({id:'left-wall',x:0,y:370,width:18,height:800});
   rebuildFurniture();
   for(let i=0;i<5;i++){
-    let x=r(W*.17+i*Math.min(W*.09,72),78,W-225),y=165+(i%3)*71;
+    const left=r(W*.12,78,160),right=Math.max(left,W-225);
+    let x=W<820?left+i*(right-left)/4:r(W*.17+i*Math.min(W*.09,72),78,W-225),
+      y=165+(i%3)*71;
     files.push(sim.box({id:`form-${i}`,kind:'form',data:{label:['INVOICE','OVERTIME','PAY SLIP','EXPENSES','APPROVAL'][i],order:i},
       x,y,width:r(W*.105,70,114),height:69,type:'dynamic',density:0.48,friction:.5,
       restitution:.42,angularDamping:1.8,linearDamping:.13,bullet:true}));
