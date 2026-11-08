@@ -27,17 +27,30 @@ Canvas title: **Project 2: Exploring Gaming Culture**. The brief permits video g
 **Critical limitation:** Some critics praise Brotato's accessibility and build choices while noting limited enemy/arena variety and combat depth: https://www.metacritic.com/game/brotato/ . The relevant risk for First Shift is a static backdrop and passive bonuses. Countermeasure: eight visibly different interactions, meaningful perk activation, tactile deliberate input, changing office consequences.
 **Our deviation:** Brotato upgrades arena combat; First Shift upgrades mixed office microgames, with care/production tradeoffs and two score perspectives.
 
+## Primary research C: Job Simulator (2016) | everyday work as a tactile toy
+- Official game: https://www.jobsimulatorgame.com/
+- Owlchemy Labs original presskit: https://jobsimulatorgame.com/press/
+- Developer page: https://owlchemylabs.com/games
+
+**Documented mechanism:** Owlchemy Labs presents a humorous VR recreation of obsolete human jobs where physical object manipulation is itself entertaining. Staplers, food, office supplies and machinery can be grabbed, stacked, thrown and experimented with. The office-worker role is especially relevant; the satirical framing makes ordinary work wonderfully absurd.
+
+**Design response:** Job Simulator supplies the **toy** in "job as a toy": First Shift's props must feel delightful before there are points, timers, boss fights or upgrades. Mouse/touch gestures need immediate physical anticipation and release, readable velocity/weight, forgiving grab regions, reactive character performances and satisfying small accidents. Let the player test silly interactions where feasible, while each microgame keeps a clear goal.
+
+**Deliberate departure:** Job Simulator has VR hands and open-ended tactile affordances; First Shift is a tightly authored **2D browser arcade** with quick timed microgames, so avoid promising full VR physics or copying Job Simulator's exact tasks, robots or art. Use compact gestures, simulated physicality, squash/stretch and consequence, not heavyweight full-object simulation. The "toy" must coexist with our existing corporate lore, the Promotion Trap and the actual cast.
+
+**Validation gate:** for at least three distinct props (for example stamped paper, a thrown folder, a rescued coffee cup) capture genuine pointer/touch interaction and a direct positive visual/sound response. Observe whether each interaction is legible and expressive without relying on score popups. If the same interaction feels like clicking a generic UI button, redesign it.
+
 ## Authoritative creative formula | not a workplace-gamification thesis
-**Dumb Ways to Die = MICROGAMES. Brotato = ROGUELITE. Quota Panic = A JOB AS A TOY.** This is the user-approved conceptual frame and outranks older wording that casts the game principally as an employer-gamification critique.
+**Dumb Ways to Die = MICROGAMES. Brotato = ROGUELITE. Job Simulator = TACTILE JOB-AS-TOY. Quota Panic = THEIR ORIGINAL SYNTHESIS WITH CORPORATE LORE.** This is the user-approved conceptual frame and outranks older wording that casts the game principally as an employer-gamification critique.
 
 **Research question:** *How can the interaction grammar of microgames and the progression grammar of roguelites transform ordinary office tasks into compelling playful experiences?*
 
 - **Dumb Ways to Die contributes moment-to-moment design:** one brief imperative; playful physical gestures, surprising variety, readable stakes, expressive comedy.
 - **Brotato contributes run-scale design:** upgrade decisions, coherent builds, increasing demands, replayability, trade-offs, player mastery.
-- **Quota Panic contributes a distinctive play space:** an office as a tactile toybox. Stamp, fling, catch, juggle, route and operate ridiculous machines; office jobs are funny playable objects, not an essay topic. Corporate satire is the flavour and source of changing rules, not a mandatory lecture.
-- **Our creative synthesis** is not generic gamification. The two game mechanisms meet inside one materially interactive office environment where upgrades carry between different microgames. Research is evidenced by this execution and explained in a few well-designed in-game cues.
+- **Job Simulator contributes tactile object-play:** mundane tasks become funny and inherently satisfying to perform.\n- **Quota Panic contributes a distinctive synthesis and world:** an office as a tactile toybox. Stamp, fling, catch, juggle, route and operate ridiculous machines; office jobs are funny playable objects, not an essay topic. Corporate satire is the flavour and source of changing rules, not a mandatory lecture.
+- **Our creative synthesis** is not generic gamification. The three different design mechanisms meet inside one materially interactive office environment where upgrades carry between different microgames. Research is evidenced by this execution and explained in a few well-designed in-game cues.
 
-**Critical engagement:** identify the affordances and limits of the two source games and show a deliberate response. DWTD excels at instant play but its disconnected microgames give limited long-run build strategy; Brotato excels at builds but its primarily repeated arena combat does not provide the variety of bespoke interactions. Quota Panic attempts to retain variety **and** strategic continuity, accepting a higher design burden of shared perk effects. Discuss this honestly as a design proposition rather than a proven superiority claim.
+**Critical engagement:** identify the affordances and limits of the three source games and show a deliberate response. DWTD excels at instant play but its disconnected microgames give limited long-run build strategy; Brotato excels at builds but its primarily repeated arena combat does not provide the variety of bespoke interactions. Quota Panic attempts to retain variety **and** strategic continuity, accepting a higher design burden of shared perk effects. Discuss this honestly as a design proposition rather than a proven superiority claim.
 
 **Story and canon are non-negotiable:** **Keep the existing NIGHT SHIFT v3 corporate lore, not a sanitised office playground.** The Promotion Trap is the spine: management rewards success with real useful upgrades, then announces more demanding rules; physical parts are bolted onto a mysterious machine after each promotion; eventually those very modules assemble into THE QUOTA. Finch embodies cheerful institutional pressure; Mira and Jules react with distinct personalities and actual consequences from the player's rescue, filing and licensing choices. Ads/scams, misleading charts, recruitment decisions, KPI obsession, conflicting interpretations of a shift and increasingly absurd company propaganda all belong. The final battle uses productivity as both weapon and hazard. A playful job is our **interaction premise**, not a replacement for the fiction, stakes or satire. The workplace satire does not need to be the main academic thesis to be central to the *story*.
 
@@ -54,7 +67,7 @@ These are contextual sources only; do not let them displace video-game design re
 ## Required actual in-game research, not a citation-only menu
 Design an interactive **in-game tutorial** under 30 seconds, not a skippable unexplained research essay. Demonstrate and immediately let the player do an action. Source URLs must be visible/accessible in the game and on the final source ledger. Player should know the *why* from playing, not from later reading.
 **Proposed editorial language, subject to editing for legibility (no invented personal autobiography):**
-- Title/first action, one brief in-world cue while actually stamping: **"WHY THIS GAME? What if doing a ridiculous office job felt as fun as playing a game?"** Direct links labelled **Microgame research: Dumb Ways to Die (2013) ↗** and **Roguelite research: Brotato (2023) ↗** should be accessible in the same natural tutorial flow (not a compulsory interrupt).
+- Title/first action, one brief in-world cue while actually stamping: **"WHY THIS GAME? What if doing a ridiculous office job felt as fun as playing a game?"** Direct links labelled **Microgames: Dumb Ways to Die (2013) ↗**, **Roguelite: Brotato (2023) ↗**, and **Tactile job play: Job Simulator (2016) ↗** should be accessible in the same natural tutorial flow (not a compulsory interrupt).
 - After the first two microgames, at the FIRST actual upgrade decision: **"WHY NOW? Tiny challenges are fun. What if each one made you better at the next?"** Show actual perk choice and preview how it changes a later office toy; use a short, optional comparison of Dumb Ways to Die's microgame approach and Brotato's persistent builds. Do not stop play for a lecture.
 - Early short in-world note tied to a **playable** decision: "FAST or SAFE? Different tools, different tricks." Let the player physically try it. Corporate humour is welcome; presenting an ethical verdict is not required.
 - Final score reveal: celebrate the actual play, acquired build and funny office consequences; two arithmetically honest scores can still show different dimensions of the run, but avoid a sermon. Source credits show explicit game-design comparisons; context about productivity metrics is optional.
@@ -73,7 +86,7 @@ Design an interactive **in-game tutorial** under 30 seconds, not a skippable une
 
 ## Non-negotiable rubric gates
 1. **Class/game strategy 25:** show 2+ real gameplay manifestations each of microgame interaction, repeatable game loop, item economy, feedback, risk/reward, mastery; include actual class-specific vocabulary only where source-backed.
-2. **Gaming culture 25:** actual two primary games with citations, explicit comparison of their different design traditions, an original synthesis and considered limitations/counterarguments; modern game-design culture is the focus. Workplace metrics or gamification may appear as secondary interpretation only. No invented findings. Detective/courtroom quiz is forbidden.
+2. **Gaming culture 25:** actual three game case studies with citations, explicit comparison of their different design traditions, an original synthesis and considered limitations/counterarguments; modern game-design culture is the focus. Workplace metrics or gamification may appear as secondary interpretation only. No invented findings. Detective/courtroom quiz is forbidden.
 3. **Inventive communication 25:** vivid original artwork, sound, expressive characters, text integrated into interaction, meaningful physical boss and ending; no slides-with-buttons.
 4. **Clarity 25:** a stranger understands objective without reading the GDD; tiny in-context primer and UI credits; every source link accessible; meaningful clear fail/success and the two metrics correctly described.
 5. **Project continuity:** retain characters/theme/mechanics from previously proposed AsterOS office-survival project (office, emails, upgrades, ads, deadlines, productivity incentives, coworker choices, quota boss). In-game title, opening and source notes should make evolution evident.
@@ -82,8 +95,8 @@ Design an interactive **in-game tutorial** under 30 seconds, not a skippable une
 
 ## Codex acceptance checklist
 - During first 15 seconds, at least one genuine input and feedback, plus a concise research *why* visible during tutorial flow.
-- By first promotion the user has encountered **both named research games** in an unobtrusive source cue, not just generic design theory.
-- Two studies materially change mechanics (cross-microgame builds, short funny prompts); two credible limitations actively addressed.
-- Final scores honestly capture the original ledger; a player can explain the design synthesis (microgames + roguelite progression + office toy) after play, no essay required.
+- By first promotion the user has encountered **the three named research games** in an unobtrusive source cue, not just generic design theory.
+- Three studies materially change mechanics (cross-microgame builds, short funny prompts); two credible limitations actively addressed.
+- Final scores honestly capture the original ledger; a player can explain the design synthesis (microgames + roguelite progression + Job Simulator-like tactile job play + original corporate lore) after play, no essay required.
 - Sources tested as clickable links from real on-screen UI at 1024x600 and 650x800; no instructional overlay prevents play.
 - Existing original game passes QA and candidate game visually assessed independently; unmodified public release until promotion gate.
