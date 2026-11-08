@@ -66,9 +66,9 @@ canvas.addEventListener('pointerdown',e=>{if(paused||!started)return;canvas.setP
 canvas.addEventListener('pointermove',e=>{if(paused||!started)return;boss.pointerMove(coords(e));});
 canvas.addEventListener('pointerup',e=>{if(paused||!started)return;boss.pointerUp(coords(e));try{canvas.releasePointerCapture(e.pointerId)}catch{}});
 canvas.addEventListener('pointercancel',()=>boss.cancelPointer());
-document.addEventListener('visibilitychange',()=>{if(document.hidden)paused=true;el('pause').textContent=paused?'RESUME':'PAUSE'});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){paused=true;boss.cancelPointer();}el('pause').textContent=paused?'RESUME':'PAUSE'});
 el('go').onclick=()=>{el('start').classList.add('hidden');started=true;paused=false;sound=new TinyMusic();sound.a.resume();};
-el('pause').onclick=()=>{if(!started)return;paused=!paused;el('pause').textContent=paused?'RESUME':'PAUSE';};
+el('pause').onclick=()=>{if(!started)return;paused=!paused;if(paused)boss.cancelPointer();el('pause').textContent=paused?'RESUME':'PAUSE';};
 el('mute').onclick=()=>{muted=!muted;el('mute').textContent=muted?'UNMUTE':'MUTE';};
 el('restart').onclick=()=>{newBoss();started=true;paused=false;};el('again').onclick=el('restart').onclick;
 addEventListener('keydown',e=>{if(e.code==='Escape'){el('pause').click()}if(e.code==='KeyM')el('mute').click();if(e.code==='KeyF'&&!document.fullscreenElement)document.documentElement.requestFullscreen?.();});
