@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>QUOTA PANIC: OFFICE ATTACK</title>
+<meta name="description" content="Six crisp office microgames. One command. Four seconds. Three hearts.">
+<link rel="stylesheet" href="./office-attack/style.css"></head>
+<body>
+<main id="game" aria-label="QUOTA PANIC: OFFICE ATTACK">
+<canvas id="stage" tabindex="0" aria-label="Arcade microgames: follow the one-word command using your mouse"></canvas>
+<div id="hud" aria-live="off"><div id="lives" aria-label="3 hearts"></div><div id="round"></div><button id="mute" type="button" aria-label="Toggle sound">♫</button></div>
+<div id="splash" class="overlay"><div class="poster">
+<div class="kicker">OFFICE HOURS PRESENTS</div><h1>QUOTA<br><em>PANIC!</em></h1>
+<p class="sub">ONE CURSOR. SIX OFFICE DISASTERS.</p>
+<p class="instruction">Click. Catch. Drag. React.<br>Faster every round. Three mistakes and you're fired.</p>
+<button id="play" type="button">CLOCK IN ►</button>
+<p class="micro">MOUSE OR TOUCH · ESC TO PAUSE · M TO MUTE</p></div>
+<img class="poster-printer" src="./office-attack/icons/computer.png" alt="" aria-hidden="true"></div>
+<div id="pause" class="overlay hidden"><div class="modal"><h2>PAUSED</h2><p>No overtime. Not yet.</p><button id="resume">RESUME ►</button></div></div>
+<div id="ending" class="overlay hidden"><div class="modal"><div class="kicker">SHIFT COMPLETE</div><h2 id="end-title"></h2><p id="end-score"></p><button id="again">TRY AGAIN ►</button><p class="micro">SIX MECHANICS · ZERO UPGRADES</p></div></div>
+<div id="sr" class="sr-only" aria-live="polite"></div>
+</main>
+<script type="module" src="./office-attack/game.js"></script>
+</body></html>
