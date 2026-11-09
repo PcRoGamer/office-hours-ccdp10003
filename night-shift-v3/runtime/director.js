@@ -1,16 +1,22 @@
 // LEAD-owned orchestration. Demo first-card fallback is NOT a replacement for INTAKE's I1.
 // Full campaign requires actual 12 authored definitions, both bosses, draft provider and seeded RNG.
 import {createFallbackStampScene} from './transitions.js';
-export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audio,options={}}){
+import {createSceneScoreBridge} from './score-bridge.js';
+export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audio,options={},scoreFactory=null}){
   let mode='title',paused=false,scene=null,elapsed=0,limit=18,clock=0,hearts=3,attempt=0;
   let result=null,delay=0,sceneIndex=0,perk=null,deck=['I1'],promotion=null,promotionSlot=-1;
   let ledger=[],definitions=new Map(),bosses=new Map(),draftProvider=null,rand=()=>.5;
   let levels={},activeDirective=null,continueUsed=false,practice=false;
   let fullCampaign=false,currentBoss=null;
+  let scoreRun=null,scoreBridge=null,scoreIssue=null;
   const emit=e=>externalEvents?.emit?.(e);
+  const scoreProblem=e=>{if(scoreIssue)return;scoreIssue=String(e?.message||e);emit({type:'score-ledger-error',message:scoreIssue})};
   const fail=(why='mistake')=>{
     if(result||!['card','printer','quota'].includes(mode))return;
     result={outcome:'failed',why};
+    if(scoreRun&&!scoreIssue)try{
+      if(['card','printer','quota'].includes(mode))scoreRun.failAttempt({reason:why,damage:!practice});
+    }catch(e){scoreProblem(e)}
     if(!practice)hearts=Math.max(0,hearts-1);
     audio?.play?.('wrong');emit({type:'damage',hearts,why});
     scene?.cancelPointer?.();mode='recover';emit({type:'recover',hearts});
@@ -22,6 +28,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
     const id=mode==='card'?deck[sceneIndex]:mode;
     if(mode==='card' && e.cardId && e.cardId!==id)return;
     if(mode!=='card' && e.bossId && e.bossId!==id)return;
+    if(scoreBridge&&!scoreIssue)try{scoreBridge.observe(e,id)}catch(error){scoreProblem(error)}
     if(['card-failed','boss-failed'].includes(e.type))return fail(e.reason||'scene-failure');
     const complete=mode==='card'?'card-complete':'boss-complete';
     if(e.type!==complete)return;
@@ -29,6 +36,10 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
     if(outcome==='failed'||outcome==='failure'||outcome==='lose'||outcome===false||outcome?.cleared===false)
       return fail('scene-failure');
     result={...e,evidence:Object.freeze({...e.evidence})};
+    if(scoreBridge&&!scoreIssue)try{
+      if(mode==='card')scoreBridge.commit(id,e.evidence,e.outcome);
+      else scoreBridge.bossComplete(id,e);
+    }catch(error){scoreProblem(error)}
     ledger.push(Object.freeze({id,attemptId:e.attemptId||'attempt-'+attempt,
       outcome:e.outcome,evidence:result.evidence,synthetic:false,committed:true}));
     delay=.75;emit({type:'encounter-cleared',id});
@@ -91,7 +102,14 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   }
   function start(){
     scene?.dispose?.();scene=null;mode='title';paused=false;hearts=3;clock=0;
-    sceneIndex=0;perk=null;promotion=null;promotionSlot=-1;ledger=[];attempt=0;levels={};activeDirective=null;continueUsed=false;enterCard();audio?.play?.('start');
+    sceneIndex=0;perk=null;promotion=null;promotionSlot=-1;ledger=[];attempt=0;levels={};activeDirective=null;continueUsed=false;
+    scoreIssue=null;scoreRun=null;scoreBridge=null;
+    if(fullCampaign&&typeof scoreFactory==='function'){
+      scoreRun=scoreFactory({mode:practice?'practice':'standard'});
+      if(!scoreRun||JSON.stringify(scoreRun.deck)!==JSON.stringify(deck))throw Error('SYSTEMS and player campaign have different decks');
+      scoreBridge=createSceneScoreBridge(scoreRun);
+    }
+    enterCard();audio?.play?.('start');
   }
   const previewOffers=[
     {id:'carbon-copy',title:'CARBON COPY',description:'One perfect stamp duplicates a clean approval.',symbol:'▤',detail:'DUPLICATE A REAL ACTION'},
@@ -121,6 +139,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   }
   function pickPerk(id){
     if(mode!=='promotion'||!promotion?.offers.some(p=>p.id===id))return false;
+    if(scoreRun&&!scoreIssue)try{scoreRun.choosePerk(id)}catch(e){scoreProblem(e)}
     perk=id;levels[id]=(levels[id]||0)+1;activeDirective=promotion.directiveId||promotion.directive;audio?.play?.('promotion');emit({type:'perk-picked',id,slot:promotionSlot,level:levels[id],directive:activeDirective});
     if(!fullCampaign){mode='preview-end';return true;}
     switch(promotionSlot){
@@ -134,10 +153,12 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   }
   function update(dt){
     if(paused||!['card','printer','quota'].includes(mode))return;
-    clock+=dt;scene?.update?.(dt);
-    // A scene can synchronously fail from update(). The failure handler changes
-    // mode to recover and sets result=failed; do not treat that result as a
-    // successful encounter completion and advance to the next card/boss.
+    clock+=dt;
+    if(scoreRun&&!scoreIssue&&!result&&['card','boss'].includes(scoreRun.stage.type))
+      try{scoreRun.tickActive(dt*1000)}catch(e){scoreProblem(e)}
+    scene?.update?.(dt);
+    // A scene may synchronously fail inside update(). Never advance a failed
+    // result as if it cleared the card; preserve retry and discard attempt data.
     if(!['card','printer','quota'].includes(mode)||result?.outcome==='failed')return;
     if(result){delay-=dt;if(delay<=0)afterClear();return;}
     elapsed+=dt;
@@ -146,7 +167,9 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   function retry(){if(mode!=='recover')return false;
     if(hearts===0){
       if(continueUsed&&!practice){mode='gameover';return false;}
-      continueUsed=true;hearts=3;emit({type:'union-break',hearts});
+      continueUsed=true;hearts=3;
+      if(scoreRun&&!scoreIssue)try{scoreRun.useContinue()}catch(e){scoreProblem(e)}
+      emit({type:'union-break',hearts});
     }
     if(currentBoss)enterBoss(currentBoss);else enterCard();
     return true;
@@ -155,15 +178,19 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   function pointer(kind,point){if(paused||!['card','printer','quota'].includes(mode)||result||!scene)return;
     const key={down:'pointerDown',move:'pointerMove',up:'pointerUp',cancel:'cancelPointer'}[kind];scene[key]?.(mode==='printer'?{...point,x:point.x-viewport.worldWidth/2,y:point.y-viewport.worldHeight/2}:point,viewport);}
   function togglePause(force){if(!['card','printer','quota','recover'].includes(mode))return false;
-    paused=force===undefined?!paused:!!force;emit({type:'pause',paused});return paused;}
+    paused=force===undefined?!paused:!!force;
+    if(scoreRun&&!scoreIssue)try{scoreRun.pause(paused)}catch(e){scoreProblem(e)}
+    emit({type:'pause',paused});return paused;}
   function snapshot(){return {mode,paused,hearts,clock:Math.max(0,limit-elapsed),elapsed,
     currentCardId:mode==='card'?deck[sceneIndex]:null,currentBoss,imperative:mode==='card'?(definitions.get(deck[sceneIndex])?.imperative||'STAMP GOOD!'):(mode==='printer'?'UNJAM IT!':mode==='quota'?'CLOCK OUT!':''),deck:[...deck],sceneIndex,selectedPerk:perk,promotionSlot,
     result:result?{id:result.cardId||result.bossId,outcome:result.outcome}:null,
     evidence:ledger.map(x=>({...x})),sceneState:scene?.snapshot?.()??null,targets:['card','printer','quota'].includes(mode)?(scene?.snapshot?.()?.targets||[]):[],
     pendingPromotion:promotion?{offers:promotion.offers.map(x=>x.id),directive:promotion.directive,slot:promotionSlot}:null,
     perkLevels:{...levels},activeDirective,continueUsed,practice,
-    completeCampaign:mode==='victory'&&fullCampaign,fullCampaign};}
+    completeCampaign:mode==='victory'&&fullCampaign,fullCampaign,
+    scoreIssue,verifiedScoreReady:mode==='victory'&&!scoreIssue&&scoreRun?.status==='victory'};}
   return {registerDefinitions,registerBosses,configureRun,start,update,pointer,retry,togglePause,setPractice,pickPerk,snapshot,
+    getSystemsSnapshot:()=>scoreRun?.snapshot??null,
     get mode(){return mode},get paused(){return paused},get time(){return clock},get scene(){return scene},
     get promotion(){return promotion},get hearts(){return hearts}};
 }
