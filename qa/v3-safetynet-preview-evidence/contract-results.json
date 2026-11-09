@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "stage": "rehearsal",
+  "source": "real staged production modules",
+  "note": "Lifecycle/seed invariants only, NOT gameplay/visual acceptance",
+  "counts": {
+    "pass": 15,
+    "fail": 0,
+    "pending": 4
+  },
+  "results": [
+    {
+      "id": "I1",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (13 keys); 0 emitted events"
+    },
+    {
+      "id": "I2",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (13 keys); 0 emitted events"
+    },
+    {
+      "id": "I3",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (13 keys); 0 emitted events"
+    },
+    {
+      "id": "I4",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (13 keys); 0 emitted events"
+    },
+    {
+      "id": "S1",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (8 keys); 0 emitted events"
+    },
+    {
+      "id": "S2",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (15 keys); 1 emitted events"
+    },
+    {
+      "id": "S3",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (16 keys); 0 emitted events"
+    },
+    {
+      "id": "S4",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (16 keys); 0 emitted events"
+    },
+    {
+      "id": "P1",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (12 keys); 0 emitted events"
+    },
+    {
+      "id": "P2",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (13 keys); 0 emitted events"
+    },
+    {
+      "id": "P3",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (12 keys); 0 emitted events"
+    },
+    {
+      "id": "P4",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (12 keys); 0 emitted events"
+    },
+    {
+      "id": "T1",
+      "status": "pending",
+      "detail": "night-shift-v3/scenes/staff/index.js not staged"
+    },
+    {
+      "id": "T2",
+      "status": "pending",
+      "detail": "night-shift-v3/scenes/staff/index.js not staged"
+    },
+    {
+      "id": "T3",
+      "status": "pending",
+      "detail": "night-shift-v3/scenes/staff/index.js not staged"
+    },
+    {
+      "id": "T4",
+      "status": "pending",
+      "detail": "night-shift-v3/scenes/staff/index.js not staged"
+    },
+    {
+      "id": "B1",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (23 keys); 2 emitted events"
+    },
+    {
+      "id": "B2",
+      "status": "pass",
+      "detail": "9 lifecycle/pointer methods; serialisable snapshot (25 keys); 0 emitted events"
+    },
+    {
+      "id": "SYSTEMS",
+      "status": "pass",
+      "detail": "128 seeded 12-card decks, 5 promotion stages, both bosses, all 16 card IDs observed"
+    }
+  ]
+}

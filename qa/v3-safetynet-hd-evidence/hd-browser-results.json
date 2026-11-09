@@ -1,0 +1,42 @@
+{
+  "source": "arcade-office-hd.html",
+  "capture": "actual Chrome headless and real CDP mouse events",
+  "timestamp": "2026-11-08T10:25:58.929Z",
+  "records": [
+    {
+      "width": 1440,
+      "height": 900,
+      "before": {
+        "width": 1440,
+        "height": 900,
+        "canvasWidth": 1440,
+        "canvasHeight": 900,
+        "announcement": ""
+      },
+      "after": {
+        "announcement": "Welcome to Quota Panic! Six short office disasters. Click, drag and dodge.",
+        "canvasWidth": 1440,
+        "canvasHeight": 900
+      },
+      "started": true
+    },
+    {
+      "width": 650,
+      "height": 800,
+      "before": {
+        "width": 650,
+        "height": 800,
+        "canvasWidth": 650,
+        "canvasHeight": 800,
+        "announcement": ""
+      },
+      "after": {
+        "announcement": "Welcome to Quota Panic! Six short office disasters. Click, drag and dodge.",
+        "canvasWidth": 650,
+        "canvasHeight": 800
+      },
+      "started": true
+    }
+  ],
+  "uncaughtExceptions": []
+}
