@@ -57,3 +57,10 @@ An earlier diagnostic run intermittently failed the original **test driver's** o
 3. Separately finish public link, viewport/audio comparison, and 16-card seeded campaign/retries. This report proves one 12-card run and replay, **not** independent human fun, published URL or all release gates.
 
 No edits to main, Night Shift HD, protected Windows recovery worktrees or Canvas.
+
+## Follow-up: current LEAD branch passes without local gameplay patches (13:53 AEDT)
+
+Re-fetched `agents/v3-lead-systems-bridge-1109` and checked out **8a3f6fce4a83c4c9b0e3143dbc5162a885e7587a** in the isolated test checkout. The runtime source was clean, with **no local one-line patch or other gameplay modification**. Ran `node qa/v3-wrap-fullrun-1323.browser.cjs` as-is: **PASS**. It verified 12 real committed cards, both three-cycle bosses, five promotions, four QUOTA packets and zero browser/page errors; one actual safe QUOTA routing drag. The frozen receipt was visible, Official Quota **83/100** and People & Quality **61/100**. Flip Receipt, How Counted and Replay all worked. Replay returned to I1 with a different deck, an empty ledger and no inherited victory score. The three PNG files in this PR have been refreshed from this unmodified 8a3f6fc branch.
+
+The undeclared-variable defect is **already corrected in lead PR #37's head**, but has not been established as merged into the shared integration branch. The original failed reproduction above remains historical verified evidence, not a claim that the current lead branch still fails.
+
