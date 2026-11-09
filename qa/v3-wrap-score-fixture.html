@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SCORE_ENDING actual SYSTEMS ledger / STORY browser integration test</title>
+<style>html,body{margin:0;min-width:0;min-height:100%;background:#172f2d;color:#f4e8c9;font:16px Arial,sans-serif}#story{min-height:100vh}</style>
+</head><body><main id="story" aria-label="Final Night Shift receipt"></main>
+<script type="module">
+import {newRun} from '../night-shift-v3/systems/engine.js';
+import {presentVerifiedClockout} from '../night-shift-v3/finalization/scoring/receipt.js';
+const need={I1:5,I2:2,I3:3,I4:3,S1:3,S2:2,S3:1,S4:1,P1:2,P2:2,P3:1,P4:1,T1:2,T2:1,T3:1,T4:2};
+const run=newRun({seed:119,firstRun:true});
+for(let i=0;i<32;i++){
+ const s=run.stage;
+ if(s.type==='card'){
+  for(let j=0;j<10;j++)run.tickActive(100);
+  if(s.id==='I1'){run.recordNotice('real',{genuine:true,safelyHandled:true});run.recordNotice('fake',{genuine:false,safelyHandled:true})}
+  if(s.id==='S2')run.recordWorker('mira-workstation',true);
+  if(s.id==='T1')for(const id of ['worker-1','worker-2','worker-3'])run.recordWorker(id,id!=='worker-3');
+  if(s.id==='P4')run.recordFrame('context');
+  if(s.id==='T4'){run.allocateLicence('mira','give');run.allocateLicence('jules','save')}
+  for(let j=0;j<need[s.id];j++)run.recordAction({objectId:s.id+':'+j});
+  run.completeCard();
+ }else if(s.type==='promotion'){run.choosePerk(run.availableDraft[0]);}
+ else if(s.type==='boss'){
+  for(let p=1;p<=3;p++){
+   if(s.id==='quota'){
+    const ids=['quota:p1:b1','quota:p2:b1','quota:p3:b1','quota:p3:b2'];
+    for(const id of ids.filter(id=>id.startsWith('quota:p'+p+':')))
+      run.resolveBonusPacket(id,id.endsWith('b1')?'file':'cool');
+   }
+   run.recordBossAction('manual-'+p,{kind:'counter'});
+   run.resolveBossCounter();
+  }
+ }else if(s.type==='victory')break;
+ else throw Error('Unexpected game stage '+s.type);
+}
+if(run.status!=='victory')throw Error('SYSTEMS did not reach actual logical victory');
+window.__scoreFixture={replayed:false,mode:'verified-ledger-test',runStatus:run.status};
+const receipt=presentVerifiedClockout({
+ host:document.getElementById('story'),runSnapshot:run.snapshot,
+ reduceMotion:new URLSearchParams(location.search).has('reduce'),
+ onReplay:()=>{window.__scoreFixture.replayed=true;}
+});
+window.__scoreFixture.slip=receipt.slip;
+window.__scoreFixture.ready=true;
+</script></body></html>
