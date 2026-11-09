@@ -1,4 +1,4 @@
-import {sprite, paper, rr, ink, confetti} from './art.js';
+import {paper, rr, ink, confetti} from './art.js';
 
 // World coordinates are 960 × 540. Keep every touch target comfortably clear
 // of the shared 0–170 instruction area and the 491–535 deadline strip.
@@ -60,6 +60,37 @@ function eyes(c,x,y,scale=1,mood='panic',blink=false){
  if(mood==='angry'){rr(c,-12,34,24,7,4,'#8e4251')}
  if(mood==='happy'){c.beginPath();c.arc(0,15,22,.16,Math.PI-.16);c.lineWidth=7;c.strokeStyle='#8e4251';c.stroke()}
  c.restore();
+}
+function printerBody(c,g){
+ // A bespoke printer-creature, built from filled, softly chamfered volumes.
+ // No HD atlas: the slot, paper mouth and limbs form one readable silhouette.
+ rr(c,-203,-72,50,95,24,'#7fc4cc');
+ rr(c,153,-72,50,95,24,'#7fc4cc');
+ rr(c,-157,103,62,36,18,'#507b8a');
+ rr(c,95,103,62,36,18,'#507b8a');
+ rr(c,-186,-120,372,252,78,'#79c7d1');
+ rr(c,-159,-132,318,68,32,'#a4e2df');
+ rr(c,-92,-122,184,46,16,'#f4fbdf');
+ rr(c,-74,-112,148,8,4,'#b4d9b9');
+ rr(c,-74,-98,112,7,4,'#c4e2bf');
+ rr(c,-130,43,260,78,28,'#3c8285');
+ rr(c,-104,49,208,35,16,'#b0e8c9');
+ rr(c,-163,91,30,20,10,'#f4a99c');
+ rr(c,133,91,30,20,10,'#f4a99c');
+ eyes(c,0,-37,.86,g.bossMood,Math.sin(g.t*3.3)>.997);
+}
+function managerBody(c,g){
+ // A worried bean-shaped office manager with tiny arms, feet and a soft tie.
+ rr(c,-140,-18,47,90,23,'#aa92d1');
+ rr(c,93,-18,47,90,23,'#aa92d1');
+ rr(c,-87,95,66,30,15,'#746696');
+ rr(c,21,95,66,30,15,'#746696');
+ rr(c,-120,-124,240,248,114,'#b6a1dc');
+ rr(c,-93,68,186,45,23,'#d2bee6');
+ rr(c,-39,56,78,25,12,'#fff2dc');
+ c.fillStyle='#fa796e';c.beginPath();c.moveTo(0,71);c.lineTo(-13,96);c.lineTo(0,115);c.lineTo(13,96);c.closePath();c.fill();
+ rr(c,-97,9,29,15,8,'#ef9d9d');rr(c,68,9,29,15,8,'#ef9d9d');
+ eyes(c,0,-32,.61,g.bossMood,Math.sin(g.t*2.2)>.999);
 }
 function bubble(c,text,x,y,color=colors.navy,w=200){
  c.save();c.globalAlpha=.95;
@@ -128,8 +159,7 @@ function printerBoss(){
    c.rotate(g.bossFlinch>0?Math.sin(g.t*42)*.035:Math.sin(g.t*2)*.008);
    const sx=1+bounced*.075,sy=1-bounced*.12;
    c.scale(sx,sy);
-   sprite(c,2,Math.floor(g.t*4)%4,0,5,410,295);
-   eyes(c,0,-10,.78,g.bossMood,Math.sin(g.t*3.3)>0.997);
+   printerBody(c,g);
    c.restore();
    bar(c,207,398,546,66,'#255a5b');
    bar(c,223,409,514,44,'#427774');
@@ -144,9 +174,9 @@ function printerBoss(){
     c.restore();
    }
    pips(c,g.bossHits,3,472);
-   if(g.bossImpact>0)bubble(c,g.bossBanner,480,244,'#297b66',235);
-   else if(g.bossWarning>0)bubble(c,g.bossBanner,480,245,'#bd5650',240);
-   else if(g.bossHits===2)bubble(c,'ONE MORE!',480,248,'#b85549',186);
+   if(g.bossImpact>0)bubble(c,g.bossBanner,758,250,'#297b66',213);
+   else if(g.bossWarning>0)bubble(c,g.bossBanner,758,250,'#bd5650',213);
+   else if(g.bossHits===2)bubble(c,'ONE MORE!',758,250,'#b85549',186);
    if(g.bossMistakes>0&&g.bossWarning<=0)
     ink(c,'⚠  NEXT MISS COSTS A HEART',480,379,20,'#a7443c');
    effects(c,g);
@@ -206,8 +236,7 @@ function managerBoss(){
    const squash=Math.sin(Math.PI*clamp(g.bossImpact/.4,0,1));
    c.scale(1+squash*.12,1-squash*.14);
    c.rotate(Math.sin(g.t*3.5)*.027);
-   sprite(c,1,Math.floor(g.t*4)%4,0,6,282,265);
-   eyes(c,0,-16,.53,g.bossMood,Math.sin(g.t*2.2)>0.999);
+   managerBody(c,g);
    c.restore();
    if(g.bossPhase==='memos'&&g.bossPop){
     const p=g.bossPop;
