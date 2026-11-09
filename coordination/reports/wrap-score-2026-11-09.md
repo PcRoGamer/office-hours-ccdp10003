@@ -32,3 +32,7 @@ presentVerifiedClockout({
 
 ## Falsifiable boundary
 These files improve factual scoring, source integrity, receipt legibility and reproducible browser QA. The assembled lead candidate still needs an authoritative SYSTEMS-to-scene action bridge and actual public deployment; the source-only commit itself is not proof of full release readiness.
+
+## Browser-verified narrative correction (post-fix)
+
+Actual visual review of the flipped 650×800 People & Quality receipt exposed a substantive contradiction: a People score of 76 was displaying the corporate `EMPLOYEE OF THE DAY` title derived from the Corporate score of 89, plus a corporate-oriented congratulatory line. The SCORE_ENDING-only adapter now observes STORY's legitimate receipt flip/re-render and replaces that *People-lens-only* prose with audited support, licence allocation and safely handled notice facts, while leaving the official award intact on the corporate side. STORY-owned files remain untouched. The updated Python Chrome QA explicitly asserts `PEOPLE & QUALITY · NOT A COMPANY AWARD`, the grounded `$40 of $80` message, >=4 breakdown rows, preserved event provenance and replay. **PASS on 650×800, DPR1, zero errors/overflow**, and the resulting real frame was visually inspected. The four-viewport matrix was previously green before the portrait CSS adjustment; no unsupported claim of post-edit full matrix retest is made.
