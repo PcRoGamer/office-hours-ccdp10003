@@ -89,9 +89,10 @@ if(originalBridge){
    'UNPATCHED lead bridge rejects a genuine bonus timeout: reproduced defect');
  console.log('REPRODUCED: current lead bridge incorrectly rejects expired bonus');
  const prRun=newRun({seed:1,firstRun:true});
- for(let n=0;n<10&&prRun.stage.id!=='P1';n++){
+ for(let n=0;n<20&&prRun.stage.id!=='P1';n++){
    if(prRun.stage.type==='card')finishCard(prRun,prRun.stage.id);
    else if(prRun.stage.type==='promotion')prRun.choosePerk(prRun.availableDraft[0]);
+   else if(prRun.stage.type==='boss'&&prRun.stage.id==='printer')for(let p=0;p<3;p++)counter(prRun);
    else throw Error('Unexpected PR prelude stage');
  }
  assert.equal(prRun.stage.id,'P1');
