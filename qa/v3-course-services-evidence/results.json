@@ -1,0 +1,231 @@
+{
+  "scope": "REAL POINTER ADS IN SERVICES S3, NOT FULL GAMEPLAY OR HUMAN PLAYTEST",
+  "views": [
+    {
+      "viewport": "1440x900",
+      "checks": [
+        {
+          "name": "HTTP_200",
+          "status": "PASS",
+          "detail": 200
+        },
+        {
+          "name": "S3_SELECTED",
+          "status": "PASS",
+          "detail": "S3"
+        },
+        {
+          "name": "WORLD_EDGE_TO_EDGE",
+          "status": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 900,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900,
+            "left": 0
+          }
+        },
+        {
+          "name": "SPONSORED_AD_PRESENT",
+          "status": "PASS",
+          "detail": {
+            "snapshot": {
+              "id": "S3",
+              "t": 0.029,
+              "remaining": 22.971,
+              "done": false,
+              "emitted": false,
+              "safe": true,
+              "grab": false,
+              "grabSafe": false,
+              "adVisible": true,
+              "goalShift": 0,
+              "helper": false,
+              "errors": 0,
+              "confirm": false,
+              "pulled": false,
+              "sheet": {
+                "x": 600,
+                "y": 500
+              },
+              "resetTime": 0
+            }
+          }
+        },
+        {
+          "name": "DRAG_POINTS_ONSCREEN",
+          "status": "PASS",
+          "detail": {
+            "start": {
+              "x": 720,
+              "y": 564.8684210526316
+            },
+            "end": {
+              "x": 1016.0526315789473,
+              "y": 663.1578947368421
+            }
+          }
+        },
+        {
+          "name": "REAL_MOUSE_DISMISSES_SPONSORED_AD",
+          "status": "PASS",
+          "detail": {
+            "before": true,
+            "after": false
+          }
+        },
+        {
+          "name": "NO_PAGE_EXCEPTIONS",
+          "status": "PASS",
+          "detail": []
+        },
+        {
+          "name": "NON_SPONSORED_AD_VISUALLY_ABSENT",
+          "status": "PASS",
+          "detail": {
+            "sponsored": {
+              "redDominantPixels": 1265,
+              "totalPixels": 1444,
+              "at": {
+                "x": 720,
+                "y": 565
+              }
+            },
+            "default": {
+              "redDominantPixels": 188,
+              "totalPixels": 1444,
+              "at": {
+                "x": 720,
+                "y": 565
+              }
+            },
+            "storedAdState": true,
+            "note": "Hidden backing state is legitimate; UI must not render inert sponsored ad"
+          }
+        }
+      ],
+      "errors": [],
+      "before": "services-s3-sponsored-before-1440x900.png",
+      "after": "services-s3-sponsored-after-1440x900.png",
+      "defaultBefore": "services-s3-default-before-1440x900.png",
+      "defaultAfter": "services-s3-default-after-1440x900.png"
+    },
+    {
+      "viewport": "650x800",
+      "checks": [
+        {
+          "name": "HTTP_200",
+          "status": "PASS",
+          "detail": 200
+        },
+        {
+          "name": "S3_SELECTED",
+          "status": "PASS",
+          "detail": "S3"
+        },
+        {
+          "name": "WORLD_EDGE_TO_EDGE",
+          "status": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 650,
+            "height": 800,
+            "top": 0,
+            "right": 650,
+            "bottom": 800,
+            "left": 0
+          }
+        },
+        {
+          "name": "SPONSORED_AD_PRESENT",
+          "status": "PASS",
+          "detail": {
+            "snapshot": {
+              "id": "S3",
+              "t": 0.208,
+              "remaining": 22.792,
+              "done": false,
+              "emitted": false,
+              "safe": true,
+              "grab": false,
+              "grabSafe": false,
+              "adVisible": true,
+              "goalShift": 0,
+              "helper": false,
+              "errors": 0,
+              "confirm": false,
+              "pulled": false,
+              "sheet": {
+                "x": 600,
+                "y": 500
+              },
+              "resetTime": 0
+            }
+          }
+        },
+        {
+          "name": "DRAG_POINTS_ONSCREEN",
+          "status": "PASS",
+          "detail": {
+            "start": {
+              "x": 325,
+              "y": 502.10526315789474
+            },
+            "end": {
+              "x": 588.1578947368421,
+              "y": 589.4736842105264
+            }
+          }
+        },
+        {
+          "name": "REAL_MOUSE_DISMISSES_SPONSORED_AD",
+          "status": "PASS",
+          "detail": {
+            "before": true,
+            "after": false
+          }
+        },
+        {
+          "name": "NO_PAGE_EXCEPTIONS",
+          "status": "PASS",
+          "detail": []
+        },
+        {
+          "name": "NON_SPONSORED_AD_VISUALLY_ABSENT",
+          "status": "PASS",
+          "detail": {
+            "sponsored": {
+              "redDominantPixels": 1189,
+              "totalPixels": 1444,
+              "at": {
+                "x": 325,
+                "y": 502
+              }
+            },
+            "default": {
+              "redDominantPixels": 192,
+              "totalPixels": 1444,
+              "at": {
+                "x": 325,
+                "y": 502
+              }
+            },
+            "storedAdState": true,
+            "note": "Hidden backing state is legitimate; UI must not render inert sponsored ad"
+          }
+        }
+      ],
+      "errors": [],
+      "before": "services-s3-sponsored-before-650x800.png",
+      "after": "services-s3-sponsored-after-650x800.png",
+      "defaultBefore": "services-s3-default-before-650x800.png",
+      "defaultAfter": "services-s3-default-after-650x800.png"
+    }
+  ],
+  "status": "SERVICES_S3_SPONSORED_POINTER_SMOKE_PASS",
+  "checkedAt": "2026-11-08T11:34:20.402Z"
+}

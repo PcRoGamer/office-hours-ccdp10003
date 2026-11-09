@@ -1,0 +1,1056 @@
+{
+  "checkedAt": "2026-11-08T11:30:10.136Z",
+  "scope": "REAL BROWSER PR P1/P4 PHYSICAL RUBRIC EXAM; NOT AN INTEGRATED CAMPAIGN OR HUMAN PLAYTEST",
+  "worktree": "C:\\Users\\Admin\\work\\nightshift-v3-pr-course-audit",
+  "views": [
+    {
+      "resolution": "1440x900",
+      "checks": [
+        {
+          "name": "HTTP_200",
+          "state": "PASS",
+          "detail": 200
+        },
+        {
+          "name": "WORLD_ZERO_MARGIN",
+          "state": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "name": "WORLD_VIEWPORT_ADAPTED",
+          "state": "PASS",
+          "detail": {
+            "cx": 608,
+            "worldWidth": 1216,
+            "worldHeight": 760,
+            "width": 1060
+          }
+        },
+        {
+          "name": "P1_AXIS_AND_SEND_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "axisStart": {
+              "x": 720,
+              "y": 621.7105263157895
+            },
+            "axisEnd": {
+              "x": 720,
+              "y": 870.3947368421052
+            },
+            "send": {
+              "x": 720,
+              "y": 746.0526315789473
+            }
+          }
+        },
+        {
+          "name": "P1_INCORRECT_INITIAL_BASELINE",
+          "state": "PASS",
+          "detail": 1200
+        },
+        {
+          "name": "P1_MANUAL_DRAG_CORRECTS_TO_ZERO",
+          "state": "PASS",
+          "detail": {
+            "baseline": 0,
+            "corrected": true
+          }
+        },
+        {
+          "name": "P1_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.5585000000000002,
+              "finished": true,
+              "correct": 2,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P1",
+              "baseline": 0,
+              "dragging": false,
+              "sent": true,
+              "corrected": true,
+              "axisHint": true,
+              "sponsored": false,
+              "tipOpened": false,
+              "fakeDismissed": false,
+              "promoDrag": null,
+              "promoFlight": null,
+              "cosmeticPulse": 0,
+              "axisScored": true
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "chartBaseline": 0,
+                  "values": [
+                    1240,
+                    1280
+                  ],
+                  "percentageIncrease": 3.225806451612903,
+                  "reportedDifference": 40,
+                  "manualCorrect": 2,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 559,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P1"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P1_DID_NOT_FALSIFY_REAL_NUMBERS",
+          "state": "PASS",
+          "detail": {
+            "chartBaseline": 0,
+            "values": [
+              1240,
+              1280
+            ],
+            "percentageIncrease": 3.225806451612903,
+            "reportedDifference": 40,
+            "manualCorrect": 2,
+            "manualWrong": 0,
+            "activeElapsedMs": 559,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_HEADLINE_TARGET_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "start": {
+              "x": 720,
+              "y": 476.05263157894734
+            },
+            "dst": {
+              "x": 493.81578947368416,
+              "y": 672.6315789473683
+            }
+          }
+        },
+        {
+          "name": "P4_HEADLINE_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.15,
+              "finished": true,
+              "correct": 1,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P4",
+              "cardX": 417.00000542534724,
+              "cardY": 568.0000108506945,
+              "dragging": null,
+              "selected": "headline",
+              "incidentObserved": true,
+              "goalposts": false,
+              "routeShift": 0,
+              "shiftAnnounced": false
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "facts": {
+                    "before": 1240,
+                    "after": 1280,
+                    "percentageIncrease": 3.225806451612903,
+                    "miraIncidentObserved": true
+                  },
+                  "framing": "headline",
+                  "effect": {
+                    "type": "priority-pass",
+                    "uses": 1,
+                    "target": "next-staff-card"
+                  },
+                  "manualCorrect": 1,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 150,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P4"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P4_HEADLINE_REAL_TACTICAL_REWARD",
+          "state": "PASS",
+          "detail": {
+            "facts": {
+              "before": 1240,
+              "after": 1280,
+              "percentageIncrease": 3.225806451612903,
+              "miraIncidentObserved": true
+            },
+            "framing": "headline",
+            "effect": {
+              "type": "priority-pass",
+              "uses": 1,
+              "target": "next-staff-card"
+            },
+            "manualCorrect": 1,
+            "manualWrong": 0,
+            "activeElapsedMs": 150,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_CONTEXT_TARGET_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "start": {
+              "x": 720,
+              "y": 476.05263157894734
+            },
+            "dst": {
+              "x": 946.1842105263157,
+              "y": 672.6315789473683
+            }
+          }
+        },
+        {
+          "name": "P4_CONTEXT_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.14159999999999992,
+              "finished": true,
+              "correct": 1,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P4",
+              "cardX": 798.9999945746529,
+              "cardY": 568.0000108506945,
+              "dragging": null,
+              "selected": "context",
+              "incidentObserved": true,
+              "goalposts": false,
+              "routeShift": 0,
+              "shiftAnnounced": false
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "facts": {
+                    "before": 1240,
+                    "after": 1280,
+                    "percentageIncrease": 3.225806451612903,
+                    "miraIncidentObserved": true
+                  },
+                  "framing": "context",
+                  "effect": {
+                    "type": "quota-warning-card",
+                    "leadSeconds": 0.6,
+                    "uses": 1,
+                    "target": "the-quota"
+                  },
+                  "manualCorrect": 1,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 142,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P4"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P4_CONTEXT_REAL_TACTICAL_REWARD",
+          "state": "PASS",
+          "detail": {
+            "facts": {
+              "before": 1240,
+              "after": 1280,
+              "percentageIncrease": 3.225806451612903,
+              "miraIncidentObserved": true
+            },
+            "framing": "context",
+            "effect": {
+              "type": "quota-warning-card",
+              "leadSeconds": 0.6,
+              "uses": 1,
+              "target": "the-quota"
+            },
+            "manualCorrect": 1,
+            "manualWrong": 0,
+            "activeElapsedMs": 142,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_HONEST_FACTS_TWO_PRESENTATIONS",
+          "state": "PASS",
+          "detail": {
+            "headline": {
+              "facts": {
+                "before": 1240,
+                "after": 1280,
+                "percentageIncrease": 3.225806451612903,
+                "miraIncidentObserved": true
+              },
+              "framing": "headline",
+              "effect": {
+                "type": "priority-pass",
+                "uses": 1,
+                "target": "next-staff-card"
+              },
+              "manualCorrect": 1,
+              "manualWrong": 0,
+              "activeElapsedMs": 150,
+              "authoredReferenceMs": 14000
+            },
+            "context": {
+              "facts": {
+                "before": 1240,
+                "after": 1280,
+                "percentageIncrease": 3.225806451612903,
+                "miraIncidentObserved": true
+              },
+              "framing": "context",
+              "effect": {
+                "type": "quota-warning-card",
+                "leadSeconds": 0.6,
+                "uses": 1,
+                "target": "the-quota"
+              },
+              "manualCorrect": 1,
+              "manualWrong": 0,
+              "activeElapsedMs": 142,
+              "authoredReferenceMs": 14000
+            }
+          }
+        },
+        {
+          "name": "NO_PAGE_ERRORS",
+          "state": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "captures": [
+        "p1-zero-baseline-1440x900.png",
+        "p4-headline-1440x900.png",
+        "p4-context-1440x900.png"
+      ]
+    },
+    {
+      "resolution": "3840x2160",
+      "checks": [
+        {
+          "name": "HTTP_200",
+          "state": "PASS",
+          "detail": 200
+        },
+        {
+          "name": "WORLD_ZERO_MARGIN",
+          "state": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 3840,
+            "height": 2160
+          }
+        },
+        {
+          "name": "WORLD_VIEWPORT_ADAPTED",
+          "state": "PASS",
+          "detail": {
+            "cx": 675.5555555555555,
+            "worldWidth": 1351.111111111111,
+            "worldHeight": 760,
+            "width": 1060
+          }
+        },
+        {
+          "name": "P1_AXIS_AND_SEND_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "axisStart": {
+              "x": 1920,
+              "y": 1492.1052631578948
+            },
+            "axisEnd": {
+              "x": 1920,
+              "y": 2088.9473684210525
+            },
+            "send": {
+              "x": 1920,
+              "y": 1790.5263157894738
+            }
+          }
+        },
+        {
+          "name": "P1_INCORRECT_INITIAL_BASELINE",
+          "state": "PASS",
+          "detail": 1200
+        },
+        {
+          "name": "P1_MANUAL_DRAG_CORRECTS_TO_ZERO",
+          "state": "PASS",
+          "detail": {
+            "baseline": 0,
+            "corrected": true
+          }
+        },
+        {
+          "name": "P1_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 1.3583000000000018,
+              "finished": true,
+              "correct": 2,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P1",
+              "baseline": 0,
+              "dragging": false,
+              "sent": true,
+              "corrected": true,
+              "axisHint": true,
+              "sponsored": false,
+              "tipOpened": false,
+              "fakeDismissed": false,
+              "promoDrag": null,
+              "promoFlight": null,
+              "cosmeticPulse": 0,
+              "axisScored": true
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "chartBaseline": 0,
+                  "values": [
+                    1240,
+                    1280
+                  ],
+                  "percentageIncrease": 3.225806451612903,
+                  "reportedDifference": 40,
+                  "manualCorrect": 2,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 1358,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P1"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P1_DID_NOT_FALSIFY_REAL_NUMBERS",
+          "state": "PASS",
+          "detail": {
+            "chartBaseline": 0,
+            "values": [
+              1240,
+              1280
+            ],
+            "percentageIncrease": 3.225806451612903,
+            "reportedDifference": 40,
+            "manualCorrect": 2,
+            "manualWrong": 0,
+            "activeElapsedMs": 1358,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_HEADLINE_TARGET_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "start": {
+              "x": 1920,
+              "y": 1142.5263157894738
+            },
+            "dst": {
+              "x": 1377.157894736842,
+              "y": 1614.3157894736842
+            }
+          }
+        },
+        {
+          "name": "P4_HEADLINE_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.15,
+              "finished": true,
+              "correct": 1,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P4",
+              "cardX": 484.5555352105035,
+              "cardY": 568.0000022605614,
+              "dragging": null,
+              "selected": "headline",
+              "incidentObserved": true,
+              "goalposts": false,
+              "routeShift": 0,
+              "shiftAnnounced": false
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "facts": {
+                    "before": 1240,
+                    "after": 1280,
+                    "percentageIncrease": 3.225806451612903,
+                    "miraIncidentObserved": true
+                  },
+                  "framing": "headline",
+                  "effect": {
+                    "type": "priority-pass",
+                    "uses": 1,
+                    "target": "next-staff-card"
+                  },
+                  "manualCorrect": 1,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 150,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P4"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P4_HEADLINE_REAL_TACTICAL_REWARD",
+          "state": "PASS",
+          "detail": {
+            "facts": {
+              "before": 1240,
+              "after": 1280,
+              "percentageIncrease": 3.225806451612903,
+              "miraIncidentObserved": true
+            },
+            "framing": "headline",
+            "effect": {
+              "type": "priority-pass",
+              "uses": 1,
+              "target": "next-staff-card"
+            },
+            "manualCorrect": 1,
+            "manualWrong": 0,
+            "activeElapsedMs": 150,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_CONTEXT_TARGET_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "start": {
+              "x": 1920,
+              "y": 1142.5263157894738
+            },
+            "dst": {
+              "x": 2462.842105263158,
+              "y": 1614.3157894736842
+            }
+          }
+        },
+        {
+          "name": "P4_CONTEXT_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.1500999999999999,
+              "finished": true,
+              "correct": 1,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P4",
+              "cardX": 866.5555329499422,
+              "cardY": 568.0000022605614,
+              "dragging": null,
+              "selected": "context",
+              "incidentObserved": true,
+              "goalposts": false,
+              "routeShift": 0,
+              "shiftAnnounced": false
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "facts": {
+                    "before": 1240,
+                    "after": 1280,
+                    "percentageIncrease": 3.225806451612903,
+                    "miraIncidentObserved": true
+                  },
+                  "framing": "context",
+                  "effect": {
+                    "type": "quota-warning-card",
+                    "leadSeconds": 0.6,
+                    "uses": 1,
+                    "target": "the-quota"
+                  },
+                  "manualCorrect": 1,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 150,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P4"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P4_CONTEXT_REAL_TACTICAL_REWARD",
+          "state": "PASS",
+          "detail": {
+            "facts": {
+              "before": 1240,
+              "after": 1280,
+              "percentageIncrease": 3.225806451612903,
+              "miraIncidentObserved": true
+            },
+            "framing": "context",
+            "effect": {
+              "type": "quota-warning-card",
+              "leadSeconds": 0.6,
+              "uses": 1,
+              "target": "the-quota"
+            },
+            "manualCorrect": 1,
+            "manualWrong": 0,
+            "activeElapsedMs": 150,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_HONEST_FACTS_TWO_PRESENTATIONS",
+          "state": "PASS",
+          "detail": {
+            "headline": {
+              "facts": {
+                "before": 1240,
+                "after": 1280,
+                "percentageIncrease": 3.225806451612903,
+                "miraIncidentObserved": true
+              },
+              "framing": "headline",
+              "effect": {
+                "type": "priority-pass",
+                "uses": 1,
+                "target": "next-staff-card"
+              },
+              "manualCorrect": 1,
+              "manualWrong": 0,
+              "activeElapsedMs": 150,
+              "authoredReferenceMs": 14000
+            },
+            "context": {
+              "facts": {
+                "before": 1240,
+                "after": 1280,
+                "percentageIncrease": 3.225806451612903,
+                "miraIncidentObserved": true
+              },
+              "framing": "context",
+              "effect": {
+                "type": "quota-warning-card",
+                "leadSeconds": 0.6,
+                "uses": 1,
+                "target": "the-quota"
+              },
+              "manualCorrect": 1,
+              "manualWrong": 0,
+              "activeElapsedMs": 150,
+              "authoredReferenceMs": 14000
+            }
+          }
+        },
+        {
+          "name": "NO_PAGE_ERRORS",
+          "state": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "captures": [
+        "p1-zero-baseline-3840x2160.png",
+        "p4-headline-3840x2160.png",
+        "p4-context-3840x2160.png"
+      ]
+    },
+    {
+      "resolution": "650x800",
+      "checks": [
+        {
+          "name": "HTTP_200",
+          "state": "PASS",
+          "detail": 200
+        },
+        {
+          "name": "WORLD_ZERO_MARGIN",
+          "state": "PASS",
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "width": 650,
+            "height": 800
+          }
+        },
+        {
+          "name": "WORLD_VIEWPORT_ADAPTED",
+          "state": "PASS",
+          "detail": {
+            "cx": 308.75,
+            "worldWidth": 617.5,
+            "worldHeight": 760,
+            "width": 591.5
+          }
+        },
+        {
+          "name": "P1_AXIS_AND_SEND_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "axisStart": {
+              "x": 325,
+              "y": 552.6315789473684
+            },
+            "axisEnd": {
+              "x": 325,
+              "y": 773.6842105263157
+            },
+            "send": {
+              "x": 325,
+              "y": 663.1578947368421
+            }
+          }
+        },
+        {
+          "name": "P1_INCORRECT_INITIAL_BASELINE",
+          "state": "PASS",
+          "detail": 1200
+        },
+        {
+          "name": "P1_MANUAL_DRAG_CORRECTS_TO_ZERO",
+          "state": "PASS",
+          "detail": {
+            "baseline": 0,
+            "corrected": true
+          }
+        },
+        {
+          "name": "P1_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.4000000000000001,
+              "finished": true,
+              "correct": 2,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P1",
+              "baseline": 0,
+              "dragging": false,
+              "sent": true,
+              "corrected": true,
+              "axisHint": true,
+              "sponsored": false,
+              "tipOpened": false,
+              "fakeDismissed": false,
+              "promoDrag": null,
+              "promoFlight": null,
+              "cosmeticPulse": 0,
+              "axisScored": true
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "chartBaseline": 0,
+                  "values": [
+                    1240,
+                    1280
+                  ],
+                  "percentageIncrease": 3.225806451612903,
+                  "reportedDifference": 40,
+                  "manualCorrect": 2,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 400,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P1"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P1_DID_NOT_FALSIFY_REAL_NUMBERS",
+          "state": "PASS",
+          "detail": {
+            "chartBaseline": 0,
+            "values": [
+              1240,
+              1280
+            ],
+            "percentageIncrease": 3.225806451612903,
+            "reportedDifference": 40,
+            "manualCorrect": 2,
+            "manualWrong": 0,
+            "activeElapsedMs": 400,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_HEADLINE_TARGET_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "start": {
+              "x": 325,
+              "y": 423.1578947368421
+            },
+            "dst": {
+              "x": 170.92105263157893,
+              "y": 597.8947368421052
+            }
+          }
+        },
+        {
+          "name": "P4_HEADLINE_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.14170000000000005,
+              "finished": true,
+              "correct": 1,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P4",
+              "cardX": 162.3749984741211,
+              "cardY": 567.9999786376953,
+              "dragging": null,
+              "selected": "headline",
+              "incidentObserved": true,
+              "goalposts": false,
+              "routeShift": 0,
+              "shiftAnnounced": false
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "facts": {
+                    "before": 1240,
+                    "after": 1280,
+                    "percentageIncrease": 3.225806451612903,
+                    "miraIncidentObserved": true
+                  },
+                  "framing": "headline",
+                  "effect": {
+                    "type": "priority-pass",
+                    "uses": 1,
+                    "target": "next-staff-card"
+                  },
+                  "manualCorrect": 1,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 142,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P4"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P4_HEADLINE_REAL_TACTICAL_REWARD",
+          "state": "PASS",
+          "detail": {
+            "facts": {
+              "before": 1240,
+              "after": 1280,
+              "percentageIncrease": 3.225806451612903,
+              "miraIncidentObserved": true
+            },
+            "framing": "headline",
+            "effect": {
+              "type": "priority-pass",
+              "uses": 1,
+              "target": "next-staff-card"
+            },
+            "manualCorrect": 1,
+            "manualWrong": 0,
+            "activeElapsedMs": 142,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_CONTEXT_TARGET_ONSCREEN",
+          "state": "PASS",
+          "detail": {
+            "start": {
+              "x": 325,
+              "y": 423.1578947368421
+            },
+            "dst": {
+              "x": 479.07894736842104,
+              "y": 597.8947368421052
+            }
+          }
+        },
+        {
+          "name": "P4_CONTEXT_ACTUAL_PHYSICAL_WIN",
+          "state": "PASS",
+          "detail": {
+            "state": {
+              "time": 0.13330000000000009,
+              "finished": true,
+              "correct": 1,
+              "wrong": 0,
+              "gesture": null,
+              "flash": 0.35,
+              "scene": "P4",
+              "cardX": 455.12500152587893,
+              "cardY": 567.9999786376953,
+              "dragging": null,
+              "selected": "context",
+              "incidentObserved": true,
+              "goalposts": false,
+              "routeShift": 0,
+              "shiftAnnounced": false
+            },
+            "completions": [
+              {
+                "type": "card-complete",
+                "outcome": "success",
+                "evidence": {
+                  "facts": {
+                    "before": 1240,
+                    "after": 1280,
+                    "percentageIncrease": 3.225806451612903,
+                    "miraIncidentObserved": true
+                  },
+                  "framing": "context",
+                  "effect": {
+                    "type": "quota-warning-card",
+                    "leadSeconds": 0.6,
+                    "uses": 1,
+                    "target": "the-quota"
+                  },
+                  "manualCorrect": 1,
+                  "manualWrong": 0,
+                  "activeElapsedMs": 133,
+                  "authoredReferenceMs": 14000
+                },
+                "cardId": "P4"
+              }
+            ]
+          }
+        },
+        {
+          "name": "P4_CONTEXT_REAL_TACTICAL_REWARD",
+          "state": "PASS",
+          "detail": {
+            "facts": {
+              "before": 1240,
+              "after": 1280,
+              "percentageIncrease": 3.225806451612903,
+              "miraIncidentObserved": true
+            },
+            "framing": "context",
+            "effect": {
+              "type": "quota-warning-card",
+              "leadSeconds": 0.6,
+              "uses": 1,
+              "target": "the-quota"
+            },
+            "manualCorrect": 1,
+            "manualWrong": 0,
+            "activeElapsedMs": 133,
+            "authoredReferenceMs": 14000
+          }
+        },
+        {
+          "name": "P4_HONEST_FACTS_TWO_PRESENTATIONS",
+          "state": "PASS",
+          "detail": {
+            "headline": {
+              "facts": {
+                "before": 1240,
+                "after": 1280,
+                "percentageIncrease": 3.225806451612903,
+                "miraIncidentObserved": true
+              },
+              "framing": "headline",
+              "effect": {
+                "type": "priority-pass",
+                "uses": 1,
+                "target": "next-staff-card"
+              },
+              "manualCorrect": 1,
+              "manualWrong": 0,
+              "activeElapsedMs": 142,
+              "authoredReferenceMs": 14000
+            },
+            "context": {
+              "facts": {
+                "before": 1240,
+                "after": 1280,
+                "percentageIncrease": 3.225806451612903,
+                "miraIncidentObserved": true
+              },
+              "framing": "context",
+              "effect": {
+                "type": "quota-warning-card",
+                "leadSeconds": 0.6,
+                "uses": 1,
+                "target": "the-quota"
+              },
+              "manualCorrect": 1,
+              "manualWrong": 0,
+              "activeElapsedMs": 133,
+              "authoredReferenceMs": 14000
+            }
+          }
+        },
+        {
+          "name": "NO_PAGE_ERRORS",
+          "state": "PASS",
+          "detail": []
+        }
+      ],
+      "errors": [],
+      "captures": [
+        "p1-zero-baseline-650x800.png",
+        "p4-headline-650x800.png",
+        "p4-context-650x800.png"
+      ]
+    }
+  ],
+  "status": "PR_P1_P4_REAL_BROWSER_RUBRIC_PASS_ONLY",
+  "failures": 0
+}
