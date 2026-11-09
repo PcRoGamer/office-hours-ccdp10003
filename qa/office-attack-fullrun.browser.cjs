@@ -122,14 +122,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    if(!after.history.at(-1).success){console.error('FAIL_CONTEXT',JSON.stringify({round,id:s.id,after,previous:s}));await page.screenshot({path:path.join(out,'FAIL-'+round+'-'+s.id+'.png')});}
    assert.equal(after.history.at(-1).success,true,'round '+(round+1)+' '+s.id+' should be won with real pointer');
    handled++;
-   if(round===6||round===12){
+   if(round===5||round===12){
      await page.waitForFunction(()=>window.__officeAttackQA.snapshot().mode==='intermission',{timeout:2900});
      const stage=await snap();
      assert.ok(stage.interDuration>=3&&stage.interDuration<=5,'intermission must last 3-5 seconds');
      assert.match(await page.locator('#inter-score').innerText(),/POINTS/);
      assert.match(await page.locator('#inter-lives').innerText(),/♥/);
-     if(!(autoBreak&&autoResearch&&round===6))await page.screenshot({path:path.join(out,'intermission-'+(round===6?1:2)+'.png')});
-     if(autoBreak&&autoResearch&&round===6){
+     if(!(autoBreak&&autoResearch&&round===5))await page.screenshot({path:path.join(out,'intermission-'+(round===5?1:2)+'.png')});
+     if(autoBreak&&autoResearch&&round===5){
        const before=await snap();
        assert.ok(before.interTime>0,'must open research during celebration');
        await page.locator('#inter-research-open').click();
@@ -201,8 +201,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
      assert.ok(boundsFit,'research panel must fit viewport (1px fractional rounding tolerance)');
      assert.ok(layout.bodyOverflow<=2,'research panel must not require mandatory scrolling');
      assert.equal(layout.researchTextClipped,false,'visible research/citations must fit inside the page');
-     await page.screenshot({path:path.join(out,'research-'+(round===6?1:2)+'.png')});
-     if(round===6){
+     await page.screenshot({path:path.join(out,'research-'+(round===5?1:2)+'.png')});
+     if(round===5){
        await page.keyboard.press('Escape');
        assert.equal((await snap()).researchOpen,false);
        assert.equal((await snap()).mode,'intermission');
@@ -212,7 +212,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
        await page.locator('#research-back').click();
      }
      assert.equal((await snap()).mode,'intermission');
-     if(bossRetries&&round===6){
+     if(bossRetries&&round===5){
        await page.keyboard.press('Escape');
        await page.waitForFunction(()=>window.__officeAttackQA.snapshot().mode==='pause',{timeout:1100});
        const frozen=(await snap()).interTime;await sleep(650);
