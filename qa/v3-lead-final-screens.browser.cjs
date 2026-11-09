@@ -33,10 +33,19 @@ const server=http.createServer((request,response)=>{
     g.setTransform(scale,0,0,scale,0,0);drawCampaignVictory(g,size,null,2.4,{evidence});
     const samples=[];for(let j=1;j<7;j++)for(let i=1;i<9;i++){const x=Math.floor(canvas.width*i/9),y=Math.floor(canvas.height*j/7);const data=[...g.getImageData(x,y,1,1).data].slice(0,3).join(',');colors[data]=true;samples.push(data)}
     const victoryColors=Object.keys(colors).length;
-    g.setTransform(scale,0,0,scale,0,0);drawCampaignGameOver(g,size,null,2.4);
-    return {victoryColors,gameOverReady:true,rect:[canvas.width,canvas.height],worldWidth:size.worldWidth};
+    return {victoryColors,rect:[canvas.width,canvas.height],worldWidth:size.worldWidth};
    },{width,height,dpr});
    await page.locator('canvas').last().screenshot({path:path.join(dir,name+'-victory-fixture.png')});
+   const gameOver=await page.evaluate(async()=>{
+     const {drawCampaignGameOver}=await import('./night-shift-v3/runtime/transitions.js');
+     const canvas=[...document.querySelectorAll('canvas')].at(-1);
+     const g=canvas.getContext('2d'),w=innerWidth,h=innerHeight;
+     g.setTransform(devicePixelRatio*h/760,0,0,devicePixelRatio*h/760,0,0);
+     drawCampaignGameOver(g,{worldWidth:760*w/h,worldHeight:760},null,2.4);
+     return true;
+   });
+   await page.locator('canvas').last().screenshot({path:path.join(dir,name+'-gameover-fixture.png')});
+   assert.equal(gameOver,true);
    assert.ok(stats.victoryColors>=6,'victory frame has actual scene variation');
    assert.equal(stats.rect[0],width*dpr);assert.equal(stats.rect[1],height*dpr);
    assert.deepEqual(errors,[],'no browser errors');
