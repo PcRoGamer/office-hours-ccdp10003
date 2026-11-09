@@ -1,0 +1,230 @@
+{
+  "time": "2026-11-09T10:52:26.912Z",
+  "source": "integration branch, no game modifications",
+  "cases": [
+    {
+      "name": "desktop-16x9",
+      "width": 1920,
+      "height": 1080,
+      "pixel": {
+        "width": 1920,
+        "height": 1080,
+        "top": 0,
+        "bottom": 98,
+        "fraction": 0.0907,
+        "centerBuckets": 128
+      },
+      "geometry": {
+        "lives": {
+          "x": 45,
+          "y": 21,
+          "width": 125,
+          "height": 47,
+          "right": 170,
+          "bottom": 68
+        },
+        "round": {
+          "x": 956.984375,
+          "y": 27.5,
+          "width": 84.03125,
+          "height": 34,
+          "right": 1041.015625,
+          "bottom": 61.5
+        },
+        "mute": {
+          "x": 1828,
+          "y": 21,
+          "width": 47,
+          "height": 47,
+          "right": 1875,
+          "bottom": 68
+        },
+        "hud": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 89,
+          "right": 1920,
+          "bottom": 89
+        },
+        "stage": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080,
+          "right": 1920,
+          "bottom": 1080
+        }
+      },
+      "errors": [],
+      "httpErrors": [],
+      "titleFile": "desktop-16x9-title.jpg"
+    },
+    {
+      "name": "portrait",
+      "width": 650,
+      "height": 800,
+      "pixel": {
+        "width": 650,
+        "height": 800,
+        "top": 216,
+        "bottom": 249,
+        "fraction": 0.5813,
+        "centerBuckets": 149
+      },
+      "geometry": {
+        "lives": {
+          "x": 19.5,
+          "y": 13.890625,
+          "width": 75,
+          "height": 30,
+          "right": 94.5,
+          "bottom": 43.890625
+        },
+        "round": {
+          "x": 322.578125,
+          "y": 20.390625,
+          "width": 42.859375,
+          "height": 17,
+          "right": 365.4375,
+          "bottom": 37.390625
+        },
+        "mute": {
+          "x": 593.5,
+          "y": 10.390625,
+          "width": 37,
+          "height": 37,
+          "right": 630.5,
+          "bottom": 47.390625
+        },
+        "hud": {
+          "x": 0,
+          "y": 0,
+          "width": 650,
+          "height": 57.78125,
+          "right": 650,
+          "bottom": 57.78125
+        },
+        "stage": {
+          "x": 0,
+          "y": 0,
+          "width": 650,
+          "height": 800,
+          "right": 650,
+          "bottom": 800
+        }
+      },
+      "errors": [],
+      "httpErrors": [],
+      "titleFile": "portrait-title.jpg"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "pixel": {
+        "width": 390,
+        "height": 844,
+        "top": 312,
+        "bottom": 331,
+        "fraction": 0.7618,
+        "centerBuckets": 118
+      },
+      "geometry": {
+        "lives": {
+          "x": 15,
+          "y": 11.5,
+          "width": 75,
+          "height": 30,
+          "right": 90,
+          "bottom": 41.5
+        },
+        "round": {
+          "x": 192.578125,
+          "y": 18,
+          "width": 42.859375,
+          "height": 17,
+          "right": 235.4375,
+          "bottom": 35
+        },
+        "mute": {
+          "x": 338,
+          "y": 8,
+          "width": 37,
+          "height": 37,
+          "right": 375,
+          "bottom": 45
+        },
+        "hud": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 53,
+          "right": 390,
+          "bottom": 53
+        },
+        "stage": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844,
+          "right": 390,
+          "bottom": 844
+        }
+      },
+      "errors": [],
+      "httpErrors": [],
+      "titleFile": "mobile-title.jpg"
+    }
+  ],
+  "touch": {
+    "seed": 2,
+    "success": true,
+    "score": 2,
+    "lives": 3
+  },
+  "defects": [
+    {
+      "code": "REUSED_HD_ATLAS",
+      "viewport": "all",
+      "description": "The current visual adapter still draws from the original HD cast atlas, contrary to the locked new-art direction.",
+      "evidence": {}
+    },
+    {
+      "code": "BLACK_BARS",
+      "viewport": "portrait",
+      "description": "Saved screenshot contains large uniform dark bands around the playable 16:9 region",
+      "evidence": {
+        "width": 650,
+        "height": 800,
+        "top": 216,
+        "bottom": 249,
+        "fraction": 0.5813,
+        "centerBuckets": 149
+      }
+    },
+    {
+      "code": "BLACK_BARS",
+      "viewport": "mobile",
+      "description": "Saved screenshot contains large uniform dark bands around the playable 16:9 region",
+      "evidence": {
+        "width": 390,
+        "height": 844,
+        "top": 312,
+        "bottom": 331,
+        "fraction": 0.7618,
+        "centerBuckets": 118
+      }
+    }
+  ],
+  "screenshots": [
+    "desktop-16x9-title.jpg",
+    "desktop-16x9-stamp.jpg",
+    "portrait-title.jpg",
+    "portrait-stamp.jpg",
+    "mobile-title.jpg",
+    "mobile-stamp.jpg",
+    "mobile-touch-shred-before.jpg",
+    "mobile-touch-shred-after.jpg"
+  ]
+}
