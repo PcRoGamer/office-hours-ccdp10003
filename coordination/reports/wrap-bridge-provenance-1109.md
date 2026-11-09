@@ -65,3 +65,33 @@ This preserves previously completed physical boss phases and packet outcomes. Do
 - Only additive QA files and independent bridge helper committed here. Lead must apply the two tiny wiring edits before the playable build uses the fix, then rerun the full real Chrome campaign including timeout-at-phase-two recovery.
 - No HD/main/worktree changes, no Canvas submission, no public release assertion.
 - Baseline source-unit and real I1 browser tests pass. Before lead wiring, the current game still has both reproduced defects; **do not call this a full release pass**.
+
+
+## Additional verified PR action provenance failure (third defect)
+
+The lead bridge currently maps each `card-action` event to `id + objectId/kind + (++sequence)`. The arbitrary increment means the *same* physical source event repeated twice becomes two separately credited SYSTEMS actions. `captured` also resets only on a changed card ID, not on `run.attemptId`: after a failed PR attempt, the new model attempt is empty but the bridge retains prior successes and can claim the card is complete prematurely, whereupon SYSTEMS correctly rejects it and the receipt becomes unavailable.
+
+Reproduction in `qa/v3-wrap-bridge-provenance-contract.test.mjs`:
+- Start authentic 12-card SYSTEMS roster and advance to P1.
+- Repeat identical `card-action(kind:'correct-chart-axis')` once; current lead `bridge.count === 2`, even though only one physical source object was identified.
+- Call `run.failAttempt`, then one physical action on the new attempt: `bridge.count === 3`, but the new model attempt contains only one action. Current `bridge.commit('P1',{},'success')` fails `insufficient real actions for P1: 1/2`.
+- New `identifyPrAction` gives stable identity keyed to P2's unique overlay object, P3's distinct alignment mark, P4's route or one-shot kind. Same event reproduces same key, new real object gives a different key; synthetic events are rejected.
+
+**Minimal additional lead-owned bridge wiring:**
+```js
+import {identifyPrAction} from '../finalization/bridge/provenance-guards.js';
+// In createSceneScoreBridge:
+let current='',captured=0,sequence=0,lastAttempt='';
+function reset(id){
+  const active=run.attemptId;
+  if(id!==current||active!==lastAttempt){
+    current=id;captured=0;sequence=0;lastAttempt=active;
+  }
+}
+// In the id[0]==='P' card-action observe branch, retain e.correct validation,
+// but replace the sequence-suffixed action id with a stable source identity:
+action(identifyPrAction(e,id),e.correct?'correct':'wrong');
+```
+Because the lead's unit fixture currently emits two `kind:'manual-verified'` events with no distinct object IDs, modify that **fixture only** to add `objectId:'fixture-'+j` to each authored correct action. The *real* PR scenes have distinct kinds, overlay IDs or alignment marks. Rerun the fixture and new regression test after wiring. Do not let a test's invented sequence numbers define what constitutes a physical action.
+
+**Updated local test result (lead 8a3f6fc):** PASS plus `REPRODUCED: duplicate PR event credit and stale retry counter`. Three actual scoring bugs remain unresolved in the playable lead-owned code until wiring lands.
