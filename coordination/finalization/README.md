@@ -1,4 +1,10 @@
 # Night Shift v3 | DEMO & SUBMISSION FINALIZATION
+
+## VERIFIED PUBLIC DEMO / RELEASE FREEZE (9 NOV 2026)
+The playable v3 URL is **LIVE and independently browser-tested**: https://pcrogamer.github.io/office-hours-ccdp10003/night-shift-v3.html . Public Chrome checked 1920x1080, 1366x768, 650x800 portrait and DPR2: no JS errors or missing assets, functional Clock In/pause, exactly 12-card campaign. Authentic full-run Chrome reached 12 cards + 2 bosses + 5 promotions + verified dual-score CLOCK OUT receipt. Protected publish workflow https://github.com/PcRoGamer/office-hours-ccdp10003/actions/runs/42553924624 passed gate and release; Night Shift HD remains available. **Source of truth:** coordination/finalization/RELEASE_SIGNOFF.md .
+**Canvas is NOT submitted by agents**: student must submit the public link by 2026-11-09 23:59 AEDT. Do not claim completion of academic submission without a Canvas receipt.
+**Release freeze:** after this verified build, keep all unreviewed QA, visuals and feature PRs draft; no spontaneous source merges or redeployments before submission. Only a reproducible release-critical bug warrants an isolated hotfix with full regression and public re-verification.
+
 **Date:** 9 November 2026 AEDT. **Deadline:** 23:59 AEDT via https://canvas.lms.unimelb.edu.au/courses/239834/assignments/658087
 **Integration branch:** `rebuild/night-shift-v3-hd`. **Primary creative contract:** `design/NIGHT_SHIFT_GDD_V3.md`. **Short-form comparison:** `feat/first-shift:design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md`. **Course fit:** `design/CCDP_COURSE_ALIGNMENT.md`.
 **Safety:** do not modify main, index or the working Night Shift HD. Do not automatically submit to Canvas. Do not silently replace full v3 with eight cards. No unnecessary user questions or blocker dumps. No external LLM calls.
