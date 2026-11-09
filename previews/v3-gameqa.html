@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Night Shift v3 | Gameplay QA Input Rig</title><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101b28;color:#f9edd2;font:700 15px system-ui,sans-serif}canvas{position:fixed;inset:0;width:100vw;height:100dvh;touch-action:none;display:block}
+header{pointer-events:none;position:fixed;inset:0 0 auto;display:flex;justify-content:space-between;align-items:start;padding:clamp(13px,2vw,32px);gap:20px}header>div{min-width:0}small{display:block;font:600 10px system-ui;letter-spacing:.15em;color:#a9ccca}h1{font-size:clamp(17px,2vw,33px);margin:3px 0;letter-spacing:-.045em;line-height:1}header .right{text-align:right}strong{font-size:clamp(15px,2vw,25px);font-variant-numeric:tabular-nums}
+footer{position:fixed;bottom:clamp(12px,2vw,28px);left:clamp(12px,2vw,28px);right:clamp(12px,2vw,28px);display:flex;align-items:end;justify-content:space-between;gap:15px;pointer-events:none}footer .status{font:600 12px/1.45 monospace;color:#d4e1ce;background:#102334ca;border:1px solid #ffffff29;padding:10px 12px;border-radius:12px;max-width:65vw}nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:end;pointer-events:auto}button{font:700 12px system-ui;color:#fff1d8;border-radius:10px;padding:12px 15px;background:#1d4956;border:1px solid #70aeb4;cursor:pointer;min-height:44px}button:focus-visible{outline:3px solid #f9c84a}#badge{color:#f9c84a}#notice{color:#f5baa0}body[data-paused="true"] #badge{color:#faad7f}
+@media(max-width:680px){header{padding:12px}h1{font-size:18px}footer{display:block}footer .status{max-width:none;font-size:10px;margin-bottom:10px}nav{justify-content:stretch}button{flex:1;padding:9px 10px}header .right small{letter-spacing:0}}
+</style></head><body>
+<canvas id="world" aria-label="QA-only draggable gesture test rig" role="img"></canvas>
+<header><div><small>QUOTA PANIC // TEST LAB</small><h1>INPUT &amp; CAMERA QA</h1><small id="badge">FIXTURE, NOT THE V3 GAME</small></div><div class="right"><small>ACTIVE CLOCK</small><strong id="clock">00:00.00</strong><small>VIEWPORT <span id="dims"></span></small></div></header>
+<footer><div class="status" id="status" aria-live="polite">Drag the blue paper into the green feeder. Real pointer input only.<br>Test rig only: gameplay coverage is BLOCKED until integrated.</div><nav><button type="button" id="pause">PAUSE</button><button type="button" id="cancel">CANCEL POINTER</button><button type="button" id="reset">RESET</button></nav></footer>
+<script type="module">
+const canvas=document.getElementById('world'),ctx=canvas.getContext('2d');const $=id=>document.getElementById(id);
+let w=0,h=0,dpr=1,activeMs=0,paused=false,drag=null,paper={x:0,y:0},start={x:0,y:0},hits=0,cancels=0,misses=0,last='READY',prev=0;
+function resize(){w=innerWidth;h=innerHeight;dpr=devicePixelRatio||1;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);start={x:w*.34,y:h*.55};if(!drag)paper={...start};$('dims').textContent=w+'×'+h+' @'+dpr;}
+const target=()=>({x:w*.72,y:h*.55,r:Math.max(62,Math.min(w,h)*.10)});
+function roundRect(x,y,ww,hh,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,ww,hh,r);ctx.fill();}
+function draw(t){const dt=Math.min(50,Math.max(0,t-prev||0));prev=t;if(!paused&&!document.hidden)activeMs+=dt;$('clock').textContent=String(Math.floor(activeMs/60000)).padStart(2,'0')+':'+String(Math.floor(activeMs/1000)%60).padStart(2,'0')+'.'+String(Math.floor(activeMs%1000/10)).padStart(2,'0');
+const a=target(),unit=Math.min(w,h);ctx.clearRect(0,0,w,h);const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#193345');g.addColorStop(.55,'#233f49');g.addColorStop(1,'#14232e');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+ctx.fillStyle='#ffffff06';for(let x=0;x<w;x+=Math.max(25,unit*.06))ctx.fillRect(x,0,1,h);for(let y=0;y<h;y+=Math.max(25,unit*.06))ctx.fillRect(0,y,w,1);
+ctx.save();ctx.translate(w/2,h*.57);ctx.rotate(-.04);roundRect(-w*.55,-unit*.22,w*1.1,unit*.44,24,'#c48d5e');roundRect(-w*.55,-unit*.19,w*1.1,unit*.36,18,'#a76e47');ctx.restore();
+ctx.strokeStyle='#bfe6a2';ctx.lineWidth=5;ctx.setLineDash([12,9]);ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
+roundRect(a.x-a.r*.85,a.y-a.r*.42,a.r*1.7,a.r*.84,14,'#376e52');ctx.textAlign='center';ctx.font='800 '+Math.max(13,Math.min(22,unit*.029))+'px system-ui';ctx.fillStyle='#e4f7ce';ctx.fillText('DROP HERE',a.x,a.y+7);
+ctx.save();ctx.translate(paper.x,paper.y);ctx.rotate(drag?.08:-.08);ctx.shadowColor='#07131c';ctx.shadowBlur=18;ctx.shadowOffsetY=9;roundRect(-57,-69,114,138,10,'#cde9f3');ctx.shadowBlur=0;ctx.shadowOffsetY=0;roundRect(-35,-35,70,10,4,'#3b8daf');roundRect(-35,-16,70,6,3,'#81b7c5');roundRect(-35,-2,60,6,3,'#81b7c5');ctx.fillStyle='#19485f';ctx.font='900 17px system-ui';ctx.fillText('FILE',0,35);ctx.restore();
+ctx.textAlign='center';ctx.font='800 '+Math.max(15,Math.min(24,unit*.026))+'px system-ui';ctx.fillStyle='#f7e9cb';ctx.fillText(paused?'PAUSED':'DRAG PAPER → FEEDER',w/2,h*.26);
+ctx.textAlign='left';ctx.font='700 13px monospace';ctx.fillStyle='#dbf0d0';ctx.fillText('HITS '+hits+'   MISSES '+misses+'   CANCELS '+cancels,Math.max(12,w*.025),Math.max(95,h*.17));
+requestAnimationFrame(draw)}
+function point(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.x)*w/r.width,y:(e.clientY-r.y)*h/r.height}}
+function down(e){if(paused)return;const p=point(e);if(Math.abs(p.x-paper.x)<67&&Math.abs(p.y-paper.y)<78){drag={id:e.pointerId,dx:p.x-paper.x,dy:p.y-paper.y};canvas.setPointerCapture(e.pointerId);last='DRAGGING'}}
+function move(e){if(!drag||drag.id!==e.pointerId)return;const p=point(e);paper={x:p.x-drag.dx,y:p.y-drag.dy}}
+function end(e,cancelled){if(!drag||drag.id!==e.pointerId)return;const a=target();if(cancelled){cancels++;last='CANCELLED'}else if(Math.hypot(paper.x-a.x,paper.y-a.y)<=a.r){hits++;last='DELIVERED'}else{misses++;last='MISSED'}drag=null;paper={...start};$('status').innerHTML='Last input: <b>'+last+'</b>. Drag the blue paper into the green feeder.<br>Real input rig only. Full v3 gameplay QA remains BLOCKED.'}
+canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',e=>end(e,false));canvas.addEventListener('pointercancel',e=>end(e,true));
+$('pause').onclick=()=>{paused=!paused;document.body.dataset.paused=String(paused);$('pause').textContent=paused?'RESUME':'PAUSE'};
+$('cancel').onclick=()=>{if(drag)end({pointerId:drag.id},true);else{cancels++;last='CANCEL (NO CAPTURE)'}};
+$('reset').onclick=()=>{activeMs=0;hits=0;misses=0;cancels=0;drag=null;paper={...start};paused=false;last='RESET';$('pause').textContent='PAUSE';document.body.dataset.paused='false'};
+addEventListener('resize',resize);addEventListener('blur',()=>{if(drag)end({pointerId:drag.id},true);paused=true;$('pause').textContent='RESUME'});addEventListener('keydown',e=>{if(e.key==='Escape')$('pause').click()});
+window.__v3GameQaFixture={snapshot:()=>({fixture:true,width:w,height:h,dpr,clockMs:activeMs,paused,hits,misses,cancels,dragging:!!drag,last,paper:{...paper},target:target()})};resize();requestAnimationFrame(draw);
+</script></body></html>
