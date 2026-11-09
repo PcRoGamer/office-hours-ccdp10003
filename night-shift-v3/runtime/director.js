@@ -135,6 +135,10 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   function update(dt){
     if(paused||!['card','printer','quota'].includes(mode))return;
     clock+=dt;scene?.update?.(dt);
+    // A scene can synchronously fail from update(). The failure handler changes
+    // mode to recover and sets result=failed; do not treat that result as a
+    // successful encounter completion and advance to the next card/boss.
+    if(!['card','printer','quota'].includes(mode)||result?.outcome==='failed')return;
     if(result){delay-=dt;if(delay<=0)afterClear();return;}
     elapsed+=dt;
     if(elapsed>=limit)fail('timeout');
