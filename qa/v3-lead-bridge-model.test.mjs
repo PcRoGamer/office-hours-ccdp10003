@@ -35,7 +35,7 @@ for(const [seed,firstRun] of [[1,true],[73,false],[1031,false]]){
    for(let j=0;j<5;j++)run.tickActive(100);
    if(id[0]==='P'){
     for(let j=0;j<(id==='P3'||id==='P4'?1:2);j++)
-     bridge.observe({type:'card-action',correct:true,kind:'manual-verified',synthetic:false},id);
+     bridge.observe({type:'card-action',correct:true,kind:'manual-verified',objectId:'fixture-'+j,synthetic:false},id);
     // P4's actual game supports one physical framing gesture; model requests one.
    }
    bridge.commit(id,evidence(id),{status:'success'});cards++;

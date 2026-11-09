@@ -14,6 +14,7 @@ import {createAudioEngine,AUDIO_CUES} from './audio/engine.js';
 import {createStoryExperience} from './story/presentation.js';
 import {newRun as newSystemsRun} from './systems/engine.js';
 import {presentVerifiedClockout} from './finalization/scoring/receipt.js';
+import {withPerkCompatibleDefinitions} from './finalization/perks/context-aliases.js';
 
 const canvas=document.getElementById('world'),g=canvas.getContext('2d',{alpha:false});
 const ui={start:document.getElementById('clock-in'),hud:document.getElementById('hud'),
@@ -108,8 +109,8 @@ const events={emit(event){
  if(event.type==='encounter-cleared')ui.sr.textContent='Approved! Promotion incoming.';
  if(event.type==='promotion')ui.sr.textContent='Promotion offer. Choose one real perk.';
 }};
-const ALL_DEFINITIONS=[...intake,...services,...publicRelations,...staff];
-const ALL_BOSSES=[{...printer[0],id:'printer'},{...quota[0],id:'quota'}];
+const ALL_DEFINITIONS=withPerkCompatibleDefinitions([...intake,...services,...publicRelations,...staff]);
+const ALL_BOSSES=withPerkCompatibleDefinitions([{...printer[0],id:'printer'},{...quota[0],id:'quota'}]);
 if(ALL_DEFINITIONS.length!==16||new Set(ALL_DEFINITIONS.map(x=>x.id)).size!==16)
   throw Error('Expected exactly sixteen authored v3 cards');
 const PERK_NAMES={

@@ -2,6 +2,7 @@
 // Full campaign requires actual 12 authored definitions, both bosses, draft provider and seeded RNG.
 import {createFallbackStampScene} from './transitions.js';
 import {createSceneScoreBridge} from './score-bridge.js';
+import {assertBossRetrySafe} from '../finalization/bridge/provenance-guards.js';
 export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audio,options={},scoreFactory=null}){
   let mode='title',paused=false,scene=null,elapsed=0,limit=18,clock=0,hearts=3,attempt=0;
   let result=null,delay=0,sceneIndex=0,perk=null,deck=['I1'],promotion=null,promotionSlot=-1;
@@ -170,7 +171,13 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
       if(scoreRun&&!scoreIssue)try{scoreRun.useContinue()}catch(e){scoreProblem(e)}
       emit({type:'union-break',hearts});
     }
-    if(currentBoss)enterBoss(currentBoss);else enterCard();
+    if(currentBoss){
+      if(scoreRun&&!scoreIssue)try{
+        assertBossRetrySafe({run:scoreRun,scene,bossId:currentBoss});
+      }catch(e){scoreProblem(e);return false;}
+      result=null;delay=0;elapsed=0;attempt++;mode=currentBoss;
+      emit({type:'boss-retry-resumed',id:currentBoss,attempt});
+    }else enterCard();
     return true;
   }
   function setPractice(value){practice=Boolean(value)}
