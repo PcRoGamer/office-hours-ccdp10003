@@ -193,7 +193,12 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
          researchTextClipped:source.bottom>br.bottom+2||eyebrow.top<br.top-2,
          width:innerWidth,height:innerHeight};
      });
-     assert.ok(layout.left>=0&&layout.right<=layout.width+1&&layout.top>=0&&layout.bottom<=layout.height+1,'research panel must fit viewport');
+     const boundsFit=layout.left>=-1&&layout.right<=layout.width+1&&layout.top>=-1&&layout.bottom<=layout.height+1;
+     if(!boundsFit){
+       console.error('RESEARCH_PANEL_BOUNDS',JSON.stringify(layout));
+       await page.screenshot({path:path.join(out,'FAIL-research-bounds-'+(round===6?1:2)+'.png'),animations:'disabled'});
+     }
+     assert.ok(boundsFit,'research panel must fit viewport (1px fractional rounding tolerance)');
      assert.ok(layout.bodyOverflow<=2,'research panel must not require mandatory scrolling');
      assert.equal(layout.researchTextClipped,false,'visible research/citations must fit inside the page');
      await page.screenshot({path:path.join(out,'research-'+(round===6?1:2)+'.png')});
