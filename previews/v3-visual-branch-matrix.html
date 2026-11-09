@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quota Panic · Multi-lane Visual QA</title>
+<style>
+:root{color-scheme:dark;--ink:#111b20;--panel:#1d3138;--paper:#f3e9d3;--mint:#69dfb5;--amber:#edbc62}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 80% 0,#29494c,transparent 45%),var(--ink);font-family:system-ui,'Segoe UI',sans-serif;color:var(--paper)}
+header{padding:25px clamp(16px,3vw,50px);border-bottom:2px solid #3b5b60;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+h1{font-size:clamp(28px,3vw,48px);line-height:1;letter-spacing:-.055em;margin:0}h1 span{color:var(--mint)}.subtitle{color:#b2cdc9;font-size:13px;line-height:1.4;margin:9px 0 0}
+#provenance{border:1px solid var(--amber);color:var(--amber);padding:8px 11px;font-size:11px;letter-spacing:.08em;font-weight:900;border-radius:7px;max-width:300px}
+main{padding:20px clamp(16px,3vw,50px) 60px}.metrics{display:flex;gap:24px;flex-wrap:wrap;padding-bottom:22px}.metric{border-bottom:2px solid #54706d;padding:2px 0 12px;min-width:100px}.metric b{display:block;font-size:28px}.metric small{font-size:11px;color:#adc2bd;text-transform:uppercase;letter-spacing:.09em}
+.filters{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:22px}.filters label{font-size:12px;color:#c2d5cc;display:grid;gap:7px}select,button{background:#19323a;border:1px solid #5b7978;color:var(--paper);border-radius:8px;padding:10px 14px;font:inherit;font-size:13px;min-height:42px}button{cursor:pointer}button[aria-pressed=true]{background:#275848;border-color:var(--mint);color:var(--mint)}button:hover{border-color:var(--mint)}
+#results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.capture{background:#182b32;border:1px solid #4b676a;border-radius:12px;overflow:hidden;min-width:0;box-shadow:0 13px 30px #050f1355}.capture.issue{border-color:#cb796b}.capture header{padding:12px 14px;background:#233d43;border:0;align-items:start}.capture h2{font-size:18px;margin:0;font-weight:900}.capture .details{font-size:11px;color:#bad2cb;margin:5px 0 0;line-height:1.6}.capture img{width:100%;height:auto;max-height:75vh;object-fit:contain;display:block;background:#121a1c}.capture figure{margin:0;display:grid;place-items:center;min-height:140px}.capture .notes{padding:12px 15px;font-size:12px;color:#c9d8ce;line-height:1.6}.capture .notes .fail{color:#ffa29b}.capture .notes .warn{color:#f5ce8e}.empty{padding:48px 20px;text-align:center;border:2px dashed #3a6060;color:#c2d0c8;grid-column:1/-1}.footer{border-top:1px solid #39545a;padding:18px clamp(16px,3vw,50px);color:#a6b7b4;font-size:12px;line-height:1.65}
+@media(max-width:900px){#results{grid-template-columns:1fr}.capture img{max-height:none}}
+</style></head>
+<body>
+<header><div><h1>QUOTA PANIC <span>VISUAL GATE</span></h1><p class="subtitle">Real browser captures across independent v3 workstreams and viewport sizes</p></div><div id="provenance">EVIDENCE NOT LOADED</div></header>
+<main><div class="metrics"><div class="metric"><b id="count">0</b><small>Captured scenes</small></div><div class="metric"><b id="fault">0</b><small>Failed checks</small></div><div class="metric"><b id="warn">0</b><small>Warnings to inspect</small></div><div class="metric"><b id="laneCount">0</b><small>Active lanes</small></div></div>
+<div class="filters"><label>WORKSTREAM<select id="lane"><option value="all">All lanes</option></select></label><label>SCREEN SIZE<select id="viewport"><option value="all">All viewports</option></select></label><button id="issues" aria-pressed="false">Show issues only</button><button id="refresh">Reload captures</button></div>
+<div id="results" aria-live="polite"><div class="empty">No verified screenshots have been loaded.</div></div></main>
+<div class="footer"><strong>Evidence policy:</strong> Only captures with <code>actual-authored-PR-scenes</code> provenance are game evidence. The self-test fixture is explicitly NOT game evidence. Passing viewport checks cannot certify enjoyable gameplay, great visuals or musical quality.</div>
+<script>
+'use strict';
+var report=null,issues=false;
+var $=function(id){return document.getElementById(id)};
+var uri=new URL(new URLSearchParams(location.search).get('report')||'../qa-artifacts/v3-visual/branch-matrix/report.json',document.baseURI);
+function el(tag,value){var n=document.createElement(tag);if(value!==undefined)n.textContent=value;return n}
+function uniq(a){return Array.from(new Set(a)).filter(Boolean).sort()}
+function option(value,label){var n=el('option',label);n.value=value;return n}
+function render(){
+ if(!report)return;
+ var a=report.captures||[];
+ var shown=a.filter(function(c){return ($('lane').value==='all'||$('lane').value===c.lane)&&($('viewport').value==='all'||$('viewport').value===c.viewport)&&(!issues||(c.failures||[]).length||(c.warnings||[]).length)});
+ $('count').textContent=a.filter(function(c){return !!c.screenshot}).length;
+ $('fault').textContent=a.filter(function(c){return (c.failures||[]).length>0}).length;
+ $('warn').textContent=a.filter(function(c){return (c.warnings||[]).length>0}).length;
+ $('laneCount').textContent=uniq(a.map(function(c){return c.lane})).length;
+ var view=$('results');view.replaceChildren();
+ if(!shown.length){var empty=el('div','No matching captures. Missing screenshots are never a pass.');empty.className='empty';view.append(empty);return}
+ for(var c of shown){
+  var article=el('article');article.className='capture'+((c.failures||[]).length?' issue':'');
+  var head=el('header'),title=el('div');title.append(el('h2',(c.lane||'?').toUpperCase()+' · '+(c.scene||'LOAD')));
+  var details=el('p',(c.viewport||'?')+' · '+(c.size||[]).join('×')+' @'+(c.dpr||1)+'x · '+(c.mode||'?'));details.className='details';title.append(details);head.append(title);article.append(head);
+  var fig=el('figure');
+  if(c.screenshot){var img=el('img');img.loading='lazy';img.alt='Browser capture: '+c.lane+' '+c.scene+' '+c.viewport;img.src=new URL(c.screenshot,uri).href;img.onerror=function(){this.replaceWith(el('span','Screenshot missing: not verified'))};fig.append(img)}
+  else fig.append(el('span','No screenshot. Browser state failed.'));
+  article.append(fig);var notes=el('div');notes.className='notes';
+  for(var fail of (c.failures||[])){var line=el('div','FAIL: '+fail);line.className='fail';notes.append(line)}
+  for(var warning of (c.warnings||[])){var line=el('div','REVIEW: '+warning);line.className='warn';notes.append(line)}
+  if(!(c.failures||[]).length&&!(c.warnings||[]).length)notes.append(el('div','No automatic geometry warnings. Artistic review still required.'));
+  notes.append(el('div','Source: '+(c.sourceSha||'local/unrecorded')+' · '+(c.sourceBranch||'unknown')));article.append(notes);view.append(article);
+ }
+}
+async function load(){
+ try{var r=await fetch(uri,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);report=await r.json();
+ var a=report.captures||[],oldLane=$('lane').value,oldVp=$('viewport').value;
+ $('lane').replaceChildren(option('all','All lanes'),...uniq(a.map(function(c){return c.lane})).map(function(x){return option(x,x.toUpperCase())}));
+ $('viewport').replaceChildren(option('all','All viewports'),...uniq(a.map(function(c){return c.viewport})).map(function(x){return option(x,x)}));
+ $('lane').value=Array.from($('lane').options).some(function(o){return o.value===oldLane})?oldLane:'all';
+ $('viewport').value=Array.from($('viewport').options).some(function(o){return o.value===oldVp})?oldVp:'all';
+ $('provenance').textContent=report.selftest?'FIXTURE TEST · NOT REAL GAME':'REAL BRANCH SCENE CAPTURES · NOT INTEGRATED RELEASE';render()
+ }catch(e){report=null;$('provenance').textContent='NO VERIFIED EVIDENCE';$('results').replaceChildren(el('div','Could not load report: '+e.message))}
+}
+$('lane').onchange=render;$('viewport').onchange=render;$('refresh').onclick=load;
+$('issues').onclick=function(){issues=!issues;$('issues').setAttribute('aria-pressed',String(issues));render()};
+load();
+</script></body></html>
