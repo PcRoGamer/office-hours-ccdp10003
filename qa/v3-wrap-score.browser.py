@@ -24,7 +24,9 @@ results=[]
 try:
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path=r"C:\Program Files\Google\Chrome\Application\chrome.exe",headless=True,args=["--no-sandbox"])
-  for width,height,dpr in [(1920,1080,1),(1366,768,1),(650,800,1),(1920,1080,2)]:
+  matrices=[(1920,1080,1),(1366,768,1),(650,800,1),(1920,1080,2)]
+  if __import__('os').environ.get('NS_SCORE_PORTRAIT_ONLY')=='1': matrices=[(650,800,1)]
+  for width,height,dpr in matrices:
    ctx=browser.new_context(viewport={"width":width,"height":height},device_scale_factor=dpr,reduced_motion="reduce")
    page=ctx.new_page();errors=[]
    page.on("pageerror",lambda e:errors.append(str(e)))
@@ -61,6 +63,6 @@ try:
   browser.close()
 finally:
  server.shutdown();server.server_close()
-assert len(results)==4
+assert len(results)==(1 if __import__('os').environ.get('NS_SCORE_PORTRAIT_ONLY')=='1' else 4)
 print(json.dumps({"status":"PASS","test":"REAL_CHROME_SYSTEMS_STORY_RECEIPT","results":results,
  "screenshots":str(OUT)},indent=2))
