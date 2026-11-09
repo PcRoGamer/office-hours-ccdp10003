@@ -20,7 +20,16 @@ const path=process.env.BRIDGE_FILE||resolve(root,'night-shift-v3/runtime/score-b
 const ref=process.env.BRIDGE_REF||'origin/agents/v3-lead-systems-bridge-1109';
 const source=existsSync(path)?readFileSync(path,'utf8'):
  execFileSync('git',['show',ref+':night-shift-v3/runtime/score-bridge.js'],{cwd:root,encoding:'utf8'});
-const {createSceneScoreBridge}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+// Import a real .mjs file rather than a data: URL, to preserve useful stack traces.
+const {mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+const {tmpdir}=await import('node:os');
+const {join}=await import('node:path');
+const {pathToFileURL}=await import('node:url');
+const moduleDir=mkdtempSync(join(tmpdir(),'nightshift-bridge-source-'));
+const moduleFile=join(moduleDir,'score-bridge.mjs');
+writeFileSync(moduleFile,source,'utf8');
+process.once('exit',()=>rmSync(moduleDir,{recursive:true,force:true}));
+const {createSceneScoreBridge}=await import(pathToFileURL(moduleFile).href);
 const required={I1:5,I2:2,I3:3,I4:3,S1:3,S2:2,S3:1,S4:1,
  P1:2,P2:2,P3:1,P4:1,T1:2,T2:1,T3:1,T4:2};
 function scoreSystemCard(run,id){

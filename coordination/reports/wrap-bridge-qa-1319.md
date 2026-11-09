@@ -3,6 +3,7 @@
 **Owner:** independent BRIDGE_QA lane. **Date:** 9 November 2026 AEDT.
 **Target integration:** `rebuild/night-shift-v3-hd`. **Lead bridge evaluated:** `agents/v3-lead-systems-bridge-1109` as fetched into the dedicated clone `C:\Users\Admin\NightShiftV3-BridgeQA-1319`.
 **Safety:** no changes to `main`, Night Shift HD, PACKAGE-owned files, protected lead worktree or Canvas. No external LLM calls.
+**Freshness check after PR creation:** fetched latest lead head `0777982724684dc6997ef42af2edb4dcc1e90d46` and re-ran on its live bridge: baseline **1/6** (exit 1), shadow fix **6/6** (exit 0). Retested with readable temporary-module stack traces; no production bridge writes.
 
 ## Implemented
 
