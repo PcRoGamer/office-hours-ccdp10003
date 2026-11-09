@@ -23,3 +23,11 @@ The integration owner must preserve the existing **recover** and **victory/gameo
 
 ## Next acceptance
 Execute `node qa/v3-wrap-input.browser.cjs` in an isolated run without Chrome launch stalls; inspect all eight screenshots and JSON; verify drag/flick/hold against real scenes; then have PACKAGE wire the adapter and run the complete campaign. Existing HD route remains unchanged.
+
+## Follow-up: Chrome completion recovered from Windows evidence
+Although host invocations timed out returning the browser process, the **completed** `qa/v3-wrap-input-evidence/results.json` was subsequently read from the isolated worktree. It records all four named viewports **PASS** for HTTP 200, first I1 scene, 12-card deck, correct backing dimensions, and **0** observed page errors: desktop 1920×1080, laptop 1366×768, portrait 650×800, and 1920×1080 DPR2. Real Chrome rendered PNGs exist for title and first card at all four viewport configurations. Two genuine first-card captures and the JSON were pushed at commit `50f6688`:
+- [desktop 1920×1080 first card](../../qa/v3-wrap-input-evidence/desktop-first-card.png)
+- [portrait 650×800 first card](../../qa/v3-wrap-input-evidence/portrait-first-card.png)
+- [machine-readable results](../../qa/v3-wrap-input-evidence/results.json)
+
+**Evidence qualification:** captures are browser-generated, but were not yet inspected visually in this chat; screenshot readability/visual superiority is **not** certified. These checks only prove first-card smoke, not 12-card complete playthrough or integration of the optional adapter. The earlier timeout diagnosis is superseded for the first-card smoke result, not for general full-campaign testing.
