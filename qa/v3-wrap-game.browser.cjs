@@ -63,6 +63,11 @@ const success=(name,data)=>{trace.push({name,pass:true,...data});console.log('PA
     assert.equal(start.viewport.backing[0],w*dpr);
     assert.equal(start.viewport.backing[1],h*dpr);
     await page.screenshot({path:path.join(output,name+'-title.png')});
+    // In Windows headless Chrome the compositor can return partially grey
+    // screenshots despite a fully painted backing buffer. Preserve both:
+    // native page screenshot AND actual rendered Canvas2D pixel data.
+    const titleCanvas=await page.evaluate(()=>document.querySelector('#world').toDataURL('image/png').split(',')[1]);
+    fs.writeFileSync(path.join(output,name+'-canvas-title.png'),Buffer.from(titleCanvas,'base64'));
     await page.getByRole('button',{name:/CLOCK IN/i}).click();
     await page.waitForFunction(()=>window.__nightShiftV3.snapshot().mode==='card',{timeout:8000});
     const game=await page.evaluate(()=>window.__nightShiftV3.snapshot());
@@ -70,6 +75,8 @@ const success=(name,data)=>{trace.push({name,pass:true,...data});console.log('PA
     assert.ok(game.sceneState,'I1 real scene must be instantiated');
     assert.equal(game.deck.length,12);
     await page.screenshot({path:path.join(output,name+'-I1.png')});
+    const firstCanvas=await page.evaluate(()=>document.querySelector('#world').toDataURL('image/png').split(',')[1]);
+    fs.writeFileSync(path.join(output,name+'-canvas-I1.png'),Buffer.from(firstCanvas,'base64'));
     // Pause must freeze elapsed (actual state, not only the visual countdown).
     await page.keyboard.press('Escape');
     const paused=await page.evaluate(()=>window.__nightShiftV3.snapshot());
@@ -82,15 +89,22 @@ const success=(name,data)=>{trace.push({name,pass:true,...data});console.log('PA
     assert.equal(resumed.paused,false);
     if(name==='desktop'){
      // One genuine pointer gesture on an approved I1 form.
-     const obj=game.sceneState.forms?.find(f=>f.kind==='approved'&&!f.hit);
-     assert.ok(obj,'I1 must expose at least one approved stamp target');
-     const i=Number(obj.id.slice('form-'.length));
-     const s=game.viewport.cssHeight/game.viewport.worldHeight;
-     await page.mouse.click((obj.x+65)*s,(331+(i%2)*115+55)*s,{delay:50});
-     await page.waitForTimeout(200);
-     const stamped=await page.evaluate(()=>window.__nightShiftV3.snapshot());
-     assert.ok(stamped.sceneState?.forms?.some(f=>f.id===obj.id&&f.hit),
-       'Real mouse stamp must mark an approved form as hit');
+     // Screenshot, pause and resume may take seconds under a busy CI GPU.
+     // Always aim using the CURRENT moving form position, never a stale frame.
+     let hit=false,attempts=0,lastTarget=null;
+     while(!hit&&attempts++<8){
+       const live=await page.evaluate(()=>window.__nightShiftV3.snapshot());
+       assert.equal(live.currentCardId,'I1','I1 changed before a real stamp landed');
+       const obj=live.sceneState?.forms?.find(f=>f.kind==='approved'&&!f.hit&&f.x>140&&f.x<1030);
+       if(!obj){await page.waitForTimeout(120);continue;}
+       lastTarget=obj.id;
+       const i=Number(obj.id.slice('form-'.length));
+       const s=live.viewport.cssHeight/live.viewport.worldHeight;
+       await page.mouse.click((obj.x+76)*s,(331+(i%2)*115+55)*s,{delay:15});
+       const stamped=await page.evaluate(()=>window.__nightShiftV3.snapshot());
+       hit=Boolean(stamped.sceneState?.forms?.some(f=>f.id===obj.id&&f.hit));
+     }
+     assert.ok(hit,'Real pointer stamp could not hit a live moving approved form; last target '+lastTarget);
      await page.screenshot({path:path.join(output,name+'-real-stamp.png')});
     }
     // The RESTART button must create a fresh run and a new seed/topology.
