@@ -1,4 +1,4 @@
-import {paper, rr, ink, confetti} from './art.js';
+import {rr, ink, confetti} from './art.js';
 
 // World coordinates are 960 × 540. Keep every touch target comfortably clear
 // of the shared 0–170 instruction area and the 491–535 deadline strip.
@@ -89,6 +89,14 @@ function managerBody(c,g){
  rr(c,-97,9,29,15,8,'#ef9d9d');rr(c,68,9,29,15,8,'#ef9d9d');
  eyes(c,0,-32,.61,g.bossMood,Math.sin(g.t*2.2)>.999);
 }
+function receipt(c,x,y,ok,rot=0){
+ c.save();c.translate(x,y);c.rotate(rot);
+ rr(c,-29,-36,58,72,10,'#fff9e9');
+ rr(c,-18,-22,36,7,3,ok?'#83d4a5':'#efa69a');
+ rr(c,-18,-8,36,5,2,'#d8dfcc');
+ ink(c,ok?'✓':'×',0,19,27,ok?'#39946a':'#c26b62');
+ c.restore();
+}
 function bubble(c,text,x,y,color=colors.navy,w=200){
  c.save();c.globalAlpha=.95;
  rr(c,x-w/2,y-24,w,48,22,color);
@@ -167,7 +175,7 @@ function printerBoss(){
    for(let i=0;i<3;i++){
     const x=371+i*109;
     c.save();c.globalAlpha=i<g.bossHits?1:.62;
-    paper(c,x,199,58,66,i<g.bossHits?'good':'bad',Math.sin(g.t*3+i)*.07);
+    receipt(c,x,199,i<g.bossHits,Math.sin(g.t*3+i)*.07);
     c.restore();
    }
    pips(c,g.bossHits,3,472);
