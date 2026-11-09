@@ -188,3 +188,65 @@ export function drawPreviewEnd(g,v,art,t,perk){
  label(g,'Full 12-card campaign + 2 bosses integrate from other lanes.',c,469,clamp(box*.026,13,19),'#4f736a','center','Arial,sans-serif');
  label(g,'PRESS ENTER TO REPLAY THIS VERIFIED FIRST-CARD ROUTE',c,572,clamp(box*.022,13,19),INK,'center');
 }
+
+/**
+ * Lead-owned, non-scoring emergency coda for the complete v3 campaign.
+ * This depicts ONLY events present in the committed gameplay evidence.
+ * The finalization SCORE_ENDING lane supplies the full two-sided receipt;
+ * never invent scores here or display the old "HD shell preview" after victory.
+ */
+export function drawCampaignVictory(g,v,art,t,state={}){
+ const w=v.worldWidth,c=w/2,narrow=w<840,wide=Math.min(1000,w-28);
+ drawOffice(g,v,art,t);
+ const y=narrow?112:64,h=narrow?573:623;
+ panel(g,c-wide/2,y,wide,h,'#f2ead7');
+ rect(g,c-wide/2,y,wide,13,INK);
+ rect(g,c-wide/2,y+h-12,wide,12,RED);
+ const head=clamp(wide*.105,53,113);
+ label(g,'CLOCK OUT.',c,narrow?211:184,head,INK,'center');
+ label(g,'THE QUOTA HAS FINALLY BEEN DISMANTLED.',c,narrow?250:226,clamp(wide*.026,15,26),RED,'center');
+ // A physical punched office machine: loose bolts, folded housing, oversized stamp.
+ const machineY=narrow?416:424;
+ const s=narrow?.77:1.24;
+ g.save();g.translate(c,machineY);g.scale(s,s);
+ g.save();g.rotate(Math.sin(t*2.4)*.012);
+ rect(g,-172,-70,344,164,'#314c4b');
+ rect(g,-157,-55,314,133,'#74908a');
+ rect(g,-118,-31,236,45,'#193335');
+ rect(g,-96,-24,192,9,'#e2cb92');
+ g.fillStyle='#fcdfad';
+ for(const xx of [-56,56]){g.beginPath();g.ellipse(xx,12,15,23,0,0,Math.PI*2);g.fill();}
+ g.strokeStyle=RED;g.lineWidth=8;g.beginPath();g.moveTo(-67,57);g.lineTo(60,47);g.stroke();
+ for(const xx of [-130,126]){
+   g.save();g.translate(xx,88);g.rotate(Math.sin(t*1.7+xx)*.13);
+   rect(g,-18,-10,36,21,'#e2bd69');g.restore();
+ }
+ g.restore();
+ // Final CLOCK OUT stamp lands on the machine itself; not fake bonus accounting.
+ const bob=Math.max(0,Math.sin(t*1.6))*.05;
+ g.save();g.translate(0,-130+bob*18);
+ rect(g,-105,-74,210,95,RED);
+ rect(g,-72,-103,144,39,INK);
+ rect(g,-112,14,224,31,'#f3bd65');
+ label(g,'CLOCK OUT',0,-22,27,PAPER,'center');
+ g.restore();
+ for(let i=0;i<12;i++){
+  const xx=(i%6-2.5)*68,yy=-50+Math.floor(i/6)*141+Math.sin(t*1.25+i)*8;
+  g.save();g.translate(xx,yy);g.rotate(i*.43+t*.13);
+  rect(g,-6,-4,13,8,i%3===0?GOLD:i%3===1?MINT:RED);g.restore();
+ }
+ g.restore();
+ const events=Array.isArray(state.evidence)?state.evidence:[];
+ const cards=new Set(events.filter(e=>/^[ISPT][1-4]$/.test(e.id)&&e.committed).map(e=>e.id));
+ const bosses=new Set(events.filter(e=>e.committed&&['printer','quota'].includes(e.id)).map(e=>e.id));
+ label(g,('JOBS COMPLETED: '+cards.size+'  ·  BOSSES DEFEATED: '+bosses.size),c,narrow?578:588,clamp(wide*.024,14,23),'#365b54','center');
+ label(g,'PRESS ENTER OR CLICK TO BEGIN A NEW SHIFT',c,narrow?636:642,clamp(wide*.023,14,22),INK,'center');
+}
+export function drawCampaignGameOver(g,v,art,t){
+ const w=v.worldWidth,c=w/2,bw=Math.min(900,w-36);
+ drawOffice(g,v,art,t);
+ panel(g,c-bw/2,169,bw,420,PAPER);
+ label(g,'SHIFT TERMINATED.',c,292,clamp(bw*.095,44,91),RED,'center');
+ label(g,'THE MACHINE REMAINS EMPLOYED.',c,363,clamp(bw*.035,17,29),INK,'center');
+ label(g,'PRESS ENTER OR CLICK TO CLOCK IN AGAIN',c,505,clamp(bw*.025,15,23),'#3a665b','center');
+}
