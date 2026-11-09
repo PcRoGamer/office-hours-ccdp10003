@@ -3,6 +3,9 @@
 **Integration branch:** `rebuild/night-shift-v3-hd`. **Primary creative contract:** `design/NIGHT_SHIFT_GDD_V3.md`. **Short-form comparison:** `feat/first-shift:design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md`. **Course fit:** `design/CCDP_COURSE_ALIGNMENT.md`.
 **Safety:** do not modify main, index or the working Night Shift HD. Do not automatically submit to Canvas. Do not silently replace full v3 with eight cards. No unnecessary user questions or blocker dumps. No external LLM calls.
 
+## Actual shared source for new agents (IMPORTANT)
+**Working integrated candidate is now in draft PR #24:** https://github.com/PcRoGamer/office-hours-ccdp10003/pull/24, branch `agents/v3-package-mirror-1109` at `cf9e7c0`. Its full `night-shift-v3.html` and 16 authored scene definitions are **not yet merged** to `rebuild/night-shift-v3-hd`. It contains 38 mirrored text sources and two SHA-reused vendor blobs. The earlier unpushed local screenshots remain on the Windows workstation; do not claim uploaded screenshots. Fresh contributors must inspect PR #24, not assume the coordination-only integration branch already holds the executable game. For changes to game source, branch from PR #24 HEAD and open a **stacked draft PR targeting `agents/v3-package-mirror-1109`**; once PACKAGE merges the base PR, retarget to integration. Never force-merge or overwrite the protected local branch.
+
 ## Verified baseline and release truth
 - First Shift is a distinct *eight-card demo specification*: I1/I3, S1/S2, P1/P4, T1/T4; four promotion drafts/directives, six perks, one three-phase QUOTA boss, two score lenses, responsive music, researched interactive explanation, meaningful ending. Target first-time 4.5–6.5 min, **not measured**.
 - Full v3 adds sixteen authored cards (twelve per seeded run), five promotions/directives, eight perks, Printer Mutiny plus QUOTA, 7–10 min aspirational first run. More scope is NOT proof of better design.
@@ -22,7 +25,7 @@
 8. Publish candidate only when complete release gate passes, and verify hosted link on a fresh profile. If release gate fails at deadline, preserve and submit the strongest verified existing game instead.
 
 ## Atomic parallel finishing lanes
-**Read `coordination/finalization/NEW_CHAT_PROMPT.md` before choosing.** Claim exactly one unused lane by GitHub contents API CREATE `coordination/finalization/claims/<LANE>.md` **on the shared integration branch**. Do not overwrite claims. Create a unique `agents/wrap-<lane>-<suffix>` feature branch from current shared HEAD. Do not use the same Windows worktree as another chat; each lane owns only paths below. Finish code/test or a verified actionable fix PR in your turn. A claim is not evidence of an active process.
+**Read `coordination/finalization/NEW_CHAT_PROMPT.md` before choosing.** Claim exactly one unused lane by GitHub contents API CREATE `coordination/finalization/claims/<LANE>.md` **on the shared integration branch**. Do not overwrite claims. Create a unique `agents/wrap-<lane>-<suffix>` feature branch from PR #24 head for gameplay-source work (or shared HEAD for independent QA only). Target PR #24 head with a stacked draft PR when code depends on the unmerged mirror, and retarget after PACKAGE merges. Do not use the same Windows worktree as another chat; each lane owns only paths below. Finish code/test or a verified actionable fix PR in your turn. A claim is not evidence of an active process.
 
 | Priority / lane | Exclusive writable implementation and QA | Specific deliverable |
 | --- | --- | --- |
