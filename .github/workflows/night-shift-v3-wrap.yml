@@ -87,7 +87,7 @@ jobs:
           if-no-files-found: warn
   release:
     needs: [gate]
-    if: ${{always() && github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'rollback') && (inputs.mode == 'rollback' || needs.gate.result == 'success') }}
+    if: ${{always() && ((github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'rollback')) || (github.event_name == 'push' && github.event.head_commit.message == 'Publish verified Office Attack release')) && (inputs.mode == 'rollback' || needs.gate.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     environment:
@@ -104,7 +104,7 @@ jobs:
           path: main-site
           persist-credentials: false
       - uses: actions/checkout@v4
-        if: ${{inputs.mode == 'publish' }}
+        if: ${{inputs.mode == 'publish' || (github.event_name == 'push' && github.event.head_commit.message == 'Publish verified Office Attack release') }}
         with:
           ref: ${{needs.gate.outputs.sha }}
           path: candidate
@@ -112,7 +112,7 @@ jobs:
       - name: Stage current main + only the verified v3 route
         shell: bash
         env:
-          MODE: ${{inputs.mode }}
+          MODE: ${{inputs.mode || 'publish' }}
         run: |
           set -euo pipefail
           mkdir site
