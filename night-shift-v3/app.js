@@ -12,12 +12,14 @@ import {definitions as quota} from './bosses/quota/quota.mjs';
 import {CARDS,PERKS,createDeck,validateDeck,assignDirectives,makeDraft,makeRng} from './systems/core.js';
 import {createAudioEngine,AUDIO_CUES} from './audio/engine.js';
 import {createStoryExperience} from './story/presentation.js';
+import {newRun as newSystemsRun} from './systems/engine.js';
+import {presentVerifiedClockout} from './finalization/scoring/receipt.js';
 
 const canvas=document.getElementById('world'),g=canvas.getContext('2d',{alpha:false});
 const ui={start:document.getElementById('clock-in'),hud:document.getElementById('hud'),
   hearts:document.getElementById('hearts'),timer:document.getElementById('timer'),
   imperative:document.getElementById('imperative'),hint:document.getElementById('hint'),
-  mail:document.getElementById('mail'),pause:document.getElementById('pause-sheet'),
+  mail:document.getElementById('mail'),receipt:document.getElementById('score-receipt'),pause:document.getElementById('pause-sheet'),
   sound:document.getElementById('sound'),sr:document.getElementById('screen-reader')};
 const reducedMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const viewport={cssWidth:innerWidth,cssHeight:innerHeight,dpr:devicePixelRatio||1,
@@ -121,6 +123,7 @@ const PERK_NAMES={
  'focus-lens':['FOCUS LENS','LENS','Reveal a fraud or hazard before acting']
 };
 let director=null,runSeed=1,firstRun=true,runNumber=0,deck=[],schedule=[];
+let receiptHandle=null,receiptAttempted=false;
 const options=new URLSearchParams(location.search);
 function readSeed(){
  const specified=Number(options.get('seed'));
@@ -134,7 +137,8 @@ function bootDirector(){
  if(!validateDeck(deck))throw Error('Invalid SYSTEMS roster');
  schedule=assignDirectives(runSeed,deck,{firstRun});
  const rng=makeRng(runSeed^0x5eeda11);
- const newDirector=createDirector({viewport,canvas,ctx2d:g,events,audio,options:{reducedMotion}});
+ const newDirector=createDirector({viewport,canvas,ctx2d:g,events,audio,options:{reducedMotion},
+    scoreFactory:({mode})=>newSystemsRun({seed:runSeed,firstRun,mode})});
  newDirector.configureRun({
    cards:deck,definitions:ALL_DEFINITIONS,bosses:ALL_BOSSES,rng,
    draftProvider:({slot})=>{
@@ -152,6 +156,8 @@ function bootDirector(){
 }
 director=bootDirector();
 function runStart(){
+ receiptHandle?.dispose?.();receiptHandle=null;receiptAttempted=false;
+ if(ui.receipt)ui.receipt.hidden=true;
  audio.unlock();
  if(runNumber>0||director.mode!=='title')director=bootDirector();
  runNumber++;
@@ -231,6 +237,22 @@ function presentPromotion(){
 }
 function syncUi(){
  const m=director.mode,playing=['card','printer','quota'].includes(m),hud=playing||m==='recover';
+ if(m==='victory'&&!receiptAttempted){
+   receiptAttempted=true;
+   const runSnapshot=director.getSystemsSnapshot();
+   if(director.snapshot().verifiedScoreReady&&runSnapshot){
+     try {
+       receiptHandle=presentVerifiedClockout({host:ui.receipt,runSnapshot,audio,
+         onReplay:runStart,reduceMotion});
+     }catch(error){
+       console.error('Final score blocked by invalid player evidence:',error);
+       ui.sr.textContent='The machine was defeated, but its scoring evidence was incomplete.';
+     }
+   }else{
+     console.warn('Final score unavailable: real encounter events are insufficient:',director.snapshot().scoreIssue);
+     ui.sr.textContent='CLOCK OUT achieved. The final report is unavailable until the run ledger is verified.';
+   }
+ }
  ui.start.hidden=m!=='title';
  ui.hud.classList.toggle('visible',hud);
  ui.pause.classList.toggle('visible',director.paused);
