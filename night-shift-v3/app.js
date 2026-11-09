@@ -2,7 +2,7 @@
 // internal compatibility adapters until RENDER provides the shared implementations.
 // Do not market this independently verified shell preview as the full v3 campaign.
 import {createDirector} from './runtime/director.js';
-import {drawPoster,drawOffice,drawRecover,drawPreviewEnd} from './runtime/transitions.js';
+import {drawPoster,drawOffice,drawRecover,drawPreviewEnd,drawCampaignVictory,drawCampaignGameOver} from './runtime/transitions.js';
 import {definitions as intake} from './scenes/intake/index.js';
 import {definitions as services} from './scenes/services/index.js';
 import {definitions as publicRelations} from './scenes/pr/index.js';
@@ -243,7 +243,7 @@ function syncUi(){
  ui.imperative.innerHTML='<span>'+label+'</span><small>'+(playing?(m==='card'&&director.snapshot().deck.length===1?'APPROVE THE REAL FORMS':'MOVE THE WORK · BEAT THE CLOCK'):'CLICK THE GREEN PAPER')+'</small>';
  ui.hint.textContent=playing&&director.snapshot().deck.length===1?'GREEN CHECK = VERIFIED    /    RED X = SPONSORED':m==='recover'?'PRESS ENTER TO RETRY':'';
  if(m==='recover')ui.hint.textContent='PRESS ENTER TO RETRY';
- if(m==='preview-end')ui.hint.textContent='PRESS ENTER TO REPLAY';
+ if(['preview-end','victory','gameover'].includes(m))ui.hint.textContent='PRESS ENTER OR CLICK TO REPLAY';
  if(m==='title')ui.hint.textContent='';
 }
 let last=performance.now(),frames=0;
@@ -266,7 +266,9 @@ function animate(now){
    if(printer||cam)g.restore();
  }
  else if(director.mode==='recover')drawRecover(g,viewport,art,now/1000);
- else if(director.mode==='preview-end'||director.mode==='victory'||director.mode==='gameover')drawPreviewEnd(g,viewport,art,now/1000,director.snapshot().selectedPerk||'SHIFT FINISHED');
+ else if(director.mode==='victory')drawCampaignVictory(g,viewport,art,now/1000,director.snapshot());
+ else if(director.mode==='gameover')drawCampaignGameOver(g,viewport,art,now/1000);
+ else if(director.mode==='preview-end')drawPreviewEnd(g,viewport,art,now/1000,director.snapshot().selectedPerk||'SHIFT FINISHED');
  else drawOffice(g,viewport,art,now/1000);
  frames++;
  requestAnimationFrame(animate);
