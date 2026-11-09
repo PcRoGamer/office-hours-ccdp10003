@@ -17,7 +17,7 @@ export function createSceneScoreBridge(run){
  function reset(id){if(id!==current){current=id;captured=0;sequence=0}}
  function action(objectId,outcome='correct'){
   must(typeof objectId==='string'&&objectId.length>0,'action has no real identifier');
-  if(run.recordAction({objectId,outcome,gesture:'physical'}))captured++;
+  if(run.recordAction({objectId,outcome,gesture:'physical'})&&outcome==='correct')captured++;
  }
  function observe(e,id){
   if(!e||!id)return;
@@ -65,14 +65,14 @@ export function createSceneScoreBridge(run){
     must(evidence.progress===5&&evidence.notice?.real&&evidence.notice?.fake,
       'first five forms or real/fake notice not observed');
     const real=evidence.notice.real,fake=evidence.notice.fake;
-    run.recordNotice('I1:real-mira',{genuine:true,safelyHandled:real==='opened'||real==='pending'});
-    run.recordNotice('I1:fake-ad',{genuine:false,safelyHandled:fake==='closed'||fake==='pending'});
+    run.recordNotice('I1:real-mira',{genuine:true,safelyHandled:real==='opened'});
+    run.recordNotice('I1:fake-ad',{genuine:false,safelyHandled:fake==='closed'});
    }
    if(id==='I3'){
     must(evidence.progress===3,'three scam windows not dismissed');
     if(evidence.notice?.real)
       run.recordNotice('I3:real-mira',{genuine:true,
-        safelyHandled:['opened','pending'].includes(evidence.notice.real)});
+        safelyHandled:evidence.notice.real==='opened'});
    }
   }else if(id==='S1'){
    must(Array.isArray(evidence.filed)&&evidence.filed.length===3&&
