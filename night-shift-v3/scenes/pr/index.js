@@ -3,7 +3,7 @@ import {C, clamp, rr, tx, line, circle, layout, sceneBackdrop, theatrePanel, but
 // All interactions consume scene WORLD coordinates from the shared viewport.
 // Game logic is deterministic, dt-driven and completely independent of the preview.
 const cards=[
-  {id:'P1', imperative:'RESET THE SCALE!',title:'THE TRUTH IS IN THE AXIS',seconds:30,referenceMs:14000},
+  {id:'P1', imperative:'FIX THE CHART!',title:'THE TRUTH IS IN THE AXIS',seconds:30,referenceMs:14000},
   {id:'P2', imperative:'POP-UP PURGE!',title:'THE PROJECTOR IS SPONSORED',seconds:32,referenceMs:12000},
   {id:'P3', imperative:'HOLD THE SLIDE!',title:'FOCUS IS A TEAM SPORT',seconds:31,referenceMs:12000},
   {id:'P4', imperative:'HEADLINE OR CONTEXT?',title:'SAME FACTS. DIFFERENT STORY.',seconds:35,referenceMs:14000}
@@ -66,7 +66,7 @@ function createP1(context,meta){
     tx(ctx,'LAST',bx+barW/2,ground+22,15,C.ink);tx(ctx,'NOW',bx+barGap+barW/2,ground+22,15,C.ink);
     const handleY=clamp(p.y+p.h-9+((1200-s.baseline)/1200)*5,p.y,p.y+p.h);
     rr(ctx,p.x-4,handleY-12,p.w+8,27,9,C.red,C.ink,4);
-    tx(ctx,`BASELINE ${Math.round(s.baseline).toLocaleString('en-US')}     ↓ DRAG`,p.x+p.w/2,handleY+1,l.portrait?13:18,C.ink);
+    tx(ctx,`CLICK TO FIX: ${Math.round(s.baseline).toLocaleString('en-US')} → 0`,p.x+p.w/2,handleY+1,l.portrait?13:18,C.ink);
     if(s.corrected&&s.baseline===0){rr(ctx,g.x+25,g.chart.y-7,g.w-50,37,9,C.mint,C.ink,3);tx(ctx,'+40 CLICKS   /   +3.2%   /   ZERO BASELINE',l.cx,g.chart.y+12,l.portrait?13:19,C.ink);}
     else sticker(ctx,'MISLEADING!',g.x+g.w-85,g.chart.y+5,{size:l.portrait?11:15});
     // Sponsored Workflow: genuine signed help and cosmetic ad coexist; no automatic axis change.
@@ -80,17 +80,17 @@ function createP1(context,meta){
         rr(ctx,r.x,r.y,r.w,Math.min(24,r.h*.38),8,kind==='tip'?C.mint:C.red,C.ink,2);
         tx(ctx,kind==='tip'?'ASTER IT / VERIFIED':'PAID PLACEMENT',r.x+r.w/2,r.y+13,l.portrait?9:13,C.ink);
         tx(ctx,kind==='tip'?(s.tipOpened?'ZERO IS DOWN ↓':'OPEN REAL TIP'):'ADD 40% MORE GLOW',r.x+r.w/2,r.y+r.h*.57,l.portrait?10:15,C.ink);
-        tx(ctx,kind==='tip'?'TAP FOR A HINT':'FLICK TO DISMISS',r.x+r.w/2,r.y+r.h*.83,l.portrait?9:12,C.slate);
+        tx(ctx,kind==='tip'?'TAP FOR A HINT':'DRAG AD AWAY',r.x+r.w/2,r.y+r.h*.83,l.portrait?9:12,C.slate);
         ctx.restore();
       }
       if(s.tipOpened&&!s.corrected){
         ctx.save();ctx.setLineDash([9,7]);line(ctx,g.chart.x+17,510,g.chart.x+17,580,C.mint,5);ctx.restore();
-        tx(ctx,'PULL DOWN TO 0',g.chart.x+122,577,l.portrait?12:18,C.slate);
+        tx(ctx,'CLICK RED BAR',g.chart.x+122,577,l.portrait?12:18,C.slate);
       }
       if(s.promoFlight){const f=s.promoFlight;ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);rr(ctx,-56,-22,112,44,7,C.red,C.ink,3);tx(ctx,'SPONSORED',0,0,12,C.ink);ctx.restore();}
     }
-    button(ctx,s.corrected?'STAMP  SEND':'SHOW  ZERO',g.send.x,g.send.y,g.send.w,g.send.h,{disabled:!s.corrected,small:l.portrait});
-    if(!l.portrait)tx(ctx,s.corrected?'CORRECT SCALE. ORIGINAL DATA.':'PULL THE RED BASELINE DOWN TO ZERO',l.cx,l.H-28,l.portrait?13:17,C.cream);
+    button(ctx,s.corrected?'SEND CHART':'CLICK RED BAR FIRST',g.send.x,g.send.y,g.send.w,g.send.h,{disabled:!s.corrected,small:l.portrait});
+    if(!l.portrait)tx(ctx,s.corrected?'CORRECT SCALE. ORIGINAL DATA.':'CLICK THE RED BASELINE, THEN SEND',l.cx,l.H-28,l.portrait?13:17,C.cream);
     if(s.flash>0)stars(ctx,l.cx+g.w*.31,195,s.time*6,15,context?.options?.reducedMotion);
     drawResult(ctx,l,s,s.sent?'SENT WITH THE REAL SCALE':'SHUTTER CLOSED');
   }
@@ -100,7 +100,11 @@ function createP1(context,meta){
       if(pointIn(p,promoRect(g,kind))){s.promoDrag={id:p.id,kind,startX:p.x,startY:p.y,dx:0,dy:0};return;}
     }}
     if(pointIn(p,g.send)){if(s.corrected&&s.baseline===0){s.sent=true;b.act(true,'send-real-chart',{base:0,from:1240,to:1280});b.complete('success',{chartBaseline:0,values:[1240,1280],percentageIncrease:40/1240*100,reportedDifference:40});}else b.act(false,'premature-send');return;}
-    if(pointIn(p,{...g.handle,y:g.handle.y-28,h:94})){s.dragging=true;s.gesture={id:p.id,startY:p.y,startBaseline:s.baseline};return;}
+    if(pointIn(p,{...g.handle,y:g.handle.y-28,h:94})){
+      // Desktop-first one-click correction. The manual drag remains an alternative.
+      if(!s.axisScored){s.baseline=0;s.corrected=true;s.axisScored=true;b.act(true,'correct-chart-axis',{before:1200,after:0});}
+      return;
+    }
   }
   function pointerMove(p){
     if(s.promoDrag?.id===p.id){s.promoDrag.dx=p.x-s.promoDrag.startX;s.promoDrag.dy=p.y-s.promoDrag.startY;return;}
@@ -155,9 +159,9 @@ function createP2(context,meta){
     }
     const n=s.overlays.filter(x=>x.kind==='sale'&&x.removed).length;
     rr(ctx,l.cx-Math.min(l.width*.4,320),l.H-153,Math.min(l.width*.8,640),70,14,C.ink,C.mint,3);
-    tx(ctx,`${n} / 2 HOSTILE ADS FLICKED`,l.cx,l.H-126,l.portrait?17:22,C.cream);
+    tx(ctx,`${n} / 2 HOSTILE ADS REMOVED`,l.cx,l.H-126,l.portrait?17:22,C.cream);
     tx(ctx,s.opened?'GENUINE ALERT OPENED':'PRESERVE THE SIGNED ALERT',l.cx,l.H-99,l.portrait?12:14,s.opened?C.mint:C.gold);
-    if(!l.portrait)tx(ctx,'FLICK AWAY SPONSORED WINDOWS • TAP SIGNED HELP',l.cx,l.H-28,l.portrait?11:16,C.cream);
+    if(!l.portrait)tx(ctx,'DRAG AWAY SPONSORED WINDOWS • TAP SIGNED HELP',l.cx,l.H-28,l.portrait?11:16,C.cream);
     drawResult(ctx,l,s,n===2&&s.opened?'MEETING SAVED':'PROJECTOR OVERRUN');
   }
   function pointerDown(p,v){

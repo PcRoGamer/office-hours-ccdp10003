@@ -1,3 +1,4 @@
+import {drawSpriteTile} from '../../art/hd-sprites.js';
 // NIGHT SHIFT v3 · Staff Support stagecraft. Original Canvas2D art, no external assets.
 export const PALETTE = Object.freeze({
   ink:'#132b32', deep:'#10262a', teal:'#176b6c', mint:'#6bf0c0',
@@ -25,96 +26,21 @@ function spark(c,x,y,angle,r,color){
  c.beginPath();c.moveTo(0,-r);c.lineTo(0,r);c.moveTo(-r,0);c.lineTo(r,0);c.stroke();c.restore();
 }
 export function backdrop(c,{w,h,wide},id,t=0){
- // The paper-theatre backdrop fills the physical viewport. Never a letterboxed rectangle.
- const g=c.createLinearGradient(0,0,0,h);
- g.addColorStop(0,'#0b2a36');g.addColorStop(.58,'#1b5159');g.addColorStop(1,'#20333a');
- c.fillStyle=g;c.fillRect(0,0,w,h);
- const margin=Math.max(0,(w-1300)/2);
- // Outside the play area the world continues with architectural panels and glowing windows.
- for(let x=margin-180;x<w+250;x+=240){
-  const y=95+19*Math.sin(x*.019);
-  c.fillStyle='#0e3a42';c.fillRect(x+15,y,174,218);
-  c.fillStyle='#447a7b';c.fillRect(x+29,y+14,146,187);
-  const night=c.createLinearGradient(0,y,0,y+187);
-  night.addColorStop(0,'#173954');night.addColorStop(1,'#477e78');
-  c.fillStyle=night;c.fillRect(x+32,y+17,140,181);
-  for(let b=0;b<9;b++){
-    let bx=x+32+(b*31%141),bh=35+(b*37%89);
-    c.fillStyle=b%2?'#143248':'#203e52';c.fillRect(bx,y+195-bh,29,bh);
-    c.fillStyle='#ffd47a77';
-    for(let k=0;k<3;k++)c.fillRect(bx+5+(k%2)*12,y+194-bh+9+k*17,5,6);
-  }
-  c.strokeStyle='#12313b';c.lineWidth=7;
-  c.beginPath();c.moveTo(x+102,y+17);c.lineTo(x+102,y+199);c.stroke();
- }
- // Hanging office fluorescents and rails
- c.fillStyle='#0b242b';c.fillRect(0,52,w,17);
- for(let x=88;x<w+100;x+=340){
-  c.strokeStyle='#607e77';c.lineWidth=5;c.beginPath();c.moveTo(x,0);c.lineTo(x,85);c.stroke();
-  round(c,x-95,80,190,21,8,'#ffe5a7','#0b2b31',4);
-  const lg=c.createRadialGradient(x,102,8,x,102,145);
-  lg.addColorStop(0,'#f6d99630');lg.addColorStop(1,'#f6d99600');
-  c.fillStyle=lg;c.fillRect(x-150,96,300,190);
- }
- // Cluttered office theatre wings and floor, with no black margins.
- c.fillStyle='#122f36';c.fillRect(0,h*.73,w,h*.27);
- c.fillStyle='#447d75';c.fillRect(0,h*.73,w,11);
- for(let x=0;x<w;x+=85){
-  c.strokeStyle='#6fa59624';c.lineWidth=2;c.beginPath();
-  c.moveTo(x,h*.74);c.lineTo(x-85,h);c.stroke();
- }
- for(let y=h*.79;y<h;y+=34){c.fillStyle='#7cb6a014';c.fillRect(0,y,w,2);}
- // Neon corporate pennants, coherent with HD's theatrical typography.
- for(let i=0;i<7;i++){
-  let x=(i*229+48)%Math.max(1,w+100),y=139+((i*43)%70);
-  c.save();c.translate(x,y);c.rotate(Math.sin(t*.5+i)*.018);
-  c.fillStyle=['#f6d47c','#c0e4c6','#f2a082'][i%3];
-  c.beginPath();c.moveTo(-12,-12);c.lineTo(12,-12);c.lineTo(0,13);c.fill();c.restore();
- }
- // Foreground stage spotlight and desk silhouette
- const spot=c.createRadialGradient(w/2,h*.52,30,w/2,h*.52,Math.max(400,w*.52));
- spot.addColorStop(0,'#a7e0b81b');spot.addColorStop(1,'#091e2300');
- c.fillStyle=spot;c.fillRect(0,0,w,h);
- c.fillStyle='#08232a';c.fillRect(0,h-30,w,30);
- for(let x=0;x<w;x+=32){c.fillStyle=x%64?'#395653':'#bd9560';c.fillRect(x,h-23,20,3);}
- // Cinematic office wings: ultrawide reveals more *world*, never blank letterbox.
- const wing=Math.max(0,(w-1010)/2);
- if(wing>138){
-  for(const side of [-1,1]){
-   const wx=w/2+side*(505+Math.min(155,wing*.50));
-   c.save();c.translate(wx,0);c.rotate(side*.012);
-   shadow(c,0,560,99,.35);
-   round(c,-78,335,156,210,15,'#153a48','#6b9993',6);
-   round(c,-65,347,131,27,5,'#eec986','#19353b',3);
-   type(c,side<0?'PERSONNEL':'KPI MACHINE',0,361,15,PALETTE.ink,'center');
-   round(c,-56,387,110,83,11,'#0b2934','#a3c7ae',4);
-   round(c,-44,396,88,65,7,'#346c68');
-   for(let k=0;k<4;k++){
-    c.fillStyle=k%2?'#f2c16c':'#75e5b5';
-    c.fillRect(-32+k*17,446-(k*9+16+Math.sin(t*2+k)*10),11,k*9+16+Math.sin(t*2+k)*10);
-   }
-   round(c,-56,481,112,23,5,'#e9d8ad','#142c33',3);
-   c.fillStyle='#fff1d1';
-   for(let k=0;k<3;k++)c.fillRect(-48+k*27,489,19,5);
-   round(c,-65,516,130,22,6,'#1a2f37');
-   c.fillStyle='#e9b85c';c.fillRect(-60,524,120,4);
-   c.restore();
-   for(let p=0;p<3;p++){
-    const px=wx+side*(-70+p*23),py=565+p*8;
-    round(c,px-26,py,65,18,3,p%2?'#f7dbab':'#d3e8ce','#12333b',2);
-   }
-  }
- }
- // Scene-specific diegetic company sign, never the game HUD.
- const s= id==='T1'?'SAFEWAY  ↗':id==='T2'?'SAFETY FIRST*':id==='T3'?'TIME IS MONEY':"EMPLOYEE ACCESS";
- round(c,w/2-168,170,336,43,9,'#ead9ab',PALETTE.ink,4);
- type(c,s,w/2,193,24,PALETTE.ink,'center');
- type(c,'* TERMS MAY CHANGE WITHOUT NOTICE',w/2,h-43,11,'#a6bdb2','center');
+ // One unobtrusive stage across the department. Workers, tape, crates and
+ // the physical exit provide the visual vocabulary.
+ c.fillStyle='#29494a';c.fillRect(0,0,w,h);
+ c.fillStyle='#375b59';c.fillRect(0,h*.77,w,h*.23);
+ c.fillStyle='#cea769';c.fillRect(0,h*.77,w,8);
 }
 export function shadow(c,x,y,rx=60,alpha=.22){
  c.beginPath();c.ellipse(x,y,rx,13,0,0,PI*2);c.fillStyle='rgba(2,21,28,'+alpha+')';c.fill();
 }
 export function character(c,x,y,scale=1,name='MIRA',mood='idle',t=0,{tool=false,ghost=false}={}){
+ if(!tool&&!ghost){
+   const row=name==='MIRA'?1:name==='FINCH'?0:name==='JULES'?1:0;
+   if(drawSpriteTile(c,x,y-113*scale,220*scale,260*scale,row,Math.floor(t*3)%4))return;
+ }
+
  // Distinct silhouette and emotion, articulated arms/head and eye shapes.
  c.save();c.translate(x,y);c.scale(scale,scale);
  if(ghost)c.globalAlpha=.32;

@@ -211,7 +211,7 @@ const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+de
    await qDrag('bonus','cool');await qMode('latch');await qDrag('latch','latchTo');
    await qMode('verify');await qClick('seal');await qMode('opening');await qDrag('counter','gear');
    await qMode('counter-hit');await page.screenshot({path:path.join(out,'1080p-real-quota-bolt-3.png')});
-   await qMode('clockout');await qDrag('stamp','stampTo');
+   await qMode('clockout');await qClick('stamp'); // Desktop-first giant button, no swipe
    await qMode('complete');
    await eventual(s=>s.mode==='victory',4500);
    const final=await snap();

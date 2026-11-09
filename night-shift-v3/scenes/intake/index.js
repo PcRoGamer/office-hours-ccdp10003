@@ -1,3 +1,4 @@
+import {drawSpriteTile} from '../../art/hd-sprites.js';
 /**
  * Night Shift v3: INTAKE I1-I4. Standalone Canvas2D scenes with an injected
  * world transform, clock, RNG, audio and event sink. No global game state.
@@ -27,57 +28,21 @@ function roundedPath(g,points){g.beginPath();g.moveTo(points[0].x,points[0].y);f
 
 /** A lived-in widescreen paper-theatre office, with no blank/letterboxed pixels. */
 function stage(g,time,kind='conveyor'){
-  const grad=g.createLinearGradient(0,0,0,720);grad.addColorStop(0,'#0c333b');grad.addColorStop(.54,'#2c5c60');grad.addColorStop(1,'#112a30');fill(g,grad,-1200,-300,W+2400,H+600);
-  // Wall, panel seams, inked city rain, safety stripes and cheap corporate light.
-  g.save();g.globalAlpha=.22;for(let i=0;i<16;i++){const x=i*99+23;fill(g,'#d0e6c9',x,35,2,380);}
-  g.restore();fill(g,'#153c43',70,115,345,260,18);stroke(g,'#81a18d',70,115,345,260,15,7);
-  for(let i=0;i<18;i++){const x=80+i*19;const h=(i*53%90)+42;fill(g,i%3?'#74a0a3':'#c9b87d',x,359-h,10,h);}
-  for(let i=0;i<25;i++){const x=85+(i*71%315),y=132+(i*47%205);line(g,{x,y:y+8*Math.sin(time*1.8+i)},{x:x-6,y:y+24},'#add0c255',1.5)}
-  fill(g,'#0c2c31',900,85,280,300,12);stroke(g,'#719186',900,85,280,300,13,5);
-  for(let i=0;i<5;i++){fill(g,'#294e4f',923,105+i*51,232,40,5);fill(g,'#e9dca9',943,118+i*51,29,8,2);}
-  // Fluorescent light and pool reflection.
-  g.save();g.globalAlpha=.16;g.fillStyle='#f4ebbb';g.beginPath();g.ellipse(630,120,460,150,0,0,Math.PI*2);g.fill();g.restore();
-  fill(g,'#293f40',430,9,437,24,8);fill(g,'#fff2c4',467,22,361,13,5);
-  g.save();g.shadowColor='#eae9af';g.shadowBlur=27;fill(g,'#f4d893',482,22,330,7,3);g.restore();
-  // Tall/narrow cameras reveal the rest of the same office, not empty bars.
-  fill(g,'#0b2b32',-1200,-460,W+2400,350);for(let i=0;i<16;i++){
-    const xx=-240+i*120;fill(g,'#254c50',xx,-370,80,270,7);fill(g,'#385e5d',xx+12,-343,54,54,4);
-  }
-  fill(g,'#b49252',-1200,-143,W+2400,14);fill(g,'#0b252b',-1200,-127,W+2400,18);
-  txt(g,'ACME QUOTA DIVISION / NIGHT OPERATIONS',640,-198,47,'#e1c68c','center');
-  fill(g,'#173d44',-1200,720,W+2400,490);
-  for(let i=0;i<12;i++){
-    const xx=-120+i*135;fill(g,'#63493f',xx,791+(i%2)*13,103,135,9);
-    fill(g,'#e8cd8f',xx+12,803+(i%2)*13,78,18,3);
-    txt(g,i%3===0?'URGENT':'FILE',xx+51,847+(i%2)*13,15,'#3e4742','center');
-  }
-  fill(g,'#b89150',-1200,945,W+2400,18);
-  // Office floor and looming desk surface.
-  fill(g,'#102c32',-1200,474,W+2400,546);fill(g,'#071e24',-1200,510,W+2400,520);
-  g.save();g.fillStyle='#c29358';g.beginPath();g.moveTo(-130,518);g.lineTo(1410,518);g.lineTo(1280,708);g.lineTo(0,708);g.closePath();g.fill();g.restore();
-  fill(g,'#f2d392',-1200,516,W+2400,16);fill(g,'#523b37',-1200,693,W+2400,27);
-  // Thin wood grain and paper scratches.
-  g.save();g.globalAlpha=.16;for(let i=0;i<31;i++)line(g,{x:((i*193)%1400)-90,y:558+i%9*13},{x:((i*193)%1400)+280,y:556+i%9*13},'#5c2e26',1.5);g.restore();
-  // Personal desk props, stamps, pencil mug, taped sticky notes.
-  g.save();g.translate(99,457);g.rotate(-.13);fill(g,'#f9d77d',-29,-20,116,85,3);txt(g,'WORK',-20,3,20,'#5e4730');txt(g,'HARDER',-20,27,22,'#5e4730');g.restore();
-  fill(g,'#67473f',1125,508,98,12,5);fill(g,'#344e4f',1144,460,55,60,5);
-  for(let i=0;i<6;i++)line(g,{x:1153+i*7,y:466},{x:1139+i*10,y:420+(i%3)*11},i%2?'#e2b75b':'#a8c7bd',3);
+  // One playable foreground, two quiet document lanes. No decorative office furniture.
+  fill(g,'#263c3f',-1300,-500,W+2600,H+1500);
+  fill(g,'#30484a',-1300,259,W+2600,277);
+  fill(g,'#263c3f',-1300,529,W+2600,H+500);
   if(kind==='conveyor'){
-    fill(g,'#263d3f',95,462,1090,165,28);fill(g,'#586c66',106,480,1068,119,20);
-    for(let i=0;i<17;i++){const x=114+i*67;fill(g,'#2b4548',x,490,34,97,10);}
-    fill(g,'#edc765',98,455,1080,13,6);fill(g,'#0e2c33',102,613,1063,18,7);
+    // Paper lanes are physical information: documents cross here.
+    for(const y of [315,430]){
+      fill(g,'#506763',-80,y,1440,21,3);
+      fill(g,'#19343a',-80,y+8,1440,8);
+      for(let x=24;x<1380;x+=100)fill(g,'#8aa19a',x,y+4,42,3,2);
+    }
+  }else{
+    fill(g,'#4e6662',-200,552,W+400,14);
+    fill(g,'#27393c',-200,566,W+400,150);
   }
-  // Fullscreen atmosphere vignette only, no camera frame.
-  const vg=g.createRadialGradient(640,380,200,640,370,900);vg.addColorStop(0,'#04191e00');vg.addColorStop(1,'#06151e77');fill(g,vg,-1200,-500,W+2400,H+1000);
-  // Tall view: a real lower office set instead of a blank strip beneath the action.
-  fill(g,'#72523f',-900,782,W+1800,260);
-  fill(g,'#c2a16d',-900,772,W+1800,24);
-  for(let i=0;i<12;i++){
-   const xx=-110+i*132;fill(g,'#2a4745',xx,820,116,138,9);stroke(g,'#597b70',xx+7,830,102,115,6,3);
-   fill(g,'#d1b174',xx+23,843,69,13,3);txt(g,i%3?'FILES':'URGENT',xx+57,901,17,'#c6d0af','center');
-  }
-  fill(g,'#243f43',-900,975,W+1800,140);
-  txt(g,'PAPERWORK IS FOREVER',640,1062,29,'#ebca8b','center');
 }
 function paper(g,x,y,w,h,rotation=0,type='approved',pressed=0){
   g.save();g.translate(x+w/2,y+h/2);g.rotate(rotation);g.translate(-w/2,-h/2);
@@ -105,6 +70,7 @@ function notice(g,x,y,w,h,kind,time){
   g.restore();
 }
 function painter(g,x,y,face,t,scale=1){
+  if(drawSpriteTile(g,x,y+22,222*scale,252*scale,0,Math.floor(t*3)%4))return;
   // Scene-local paper puppet Finch fallback; ART may replace via context.art.
   g.save();g.translate(x,y+Math.sin(t*1.5)*3);g.scale(scale,scale);
   fill(g,'#173d42',-62,30,125,120,28);fill(g,'#f1c3a0',-55,-85,110,126,38);
@@ -225,12 +191,7 @@ class IntakeScene{
   notice:{...this.noticeState},routeProgress:this.id==='I4'?this.progress:undefined,perkEffects:this.actions.filter(a=>a.perk||a.name.startsWith('mira-')).map(a=>({...a})),actions:this.actions.map(a=>({...a}))};}
  draw(g){
   stage(g,this.time,this.id==='I1'?'conveyor':'desk');
-  // Large in-world stage title: not HUD; actual HUD remains LEAD/RENDER-owned.
-  const narrowSafe=this.context?.viewport?.safeRect;
-  const titleX=narrowSafe&&narrowSafe.w<1250?Math.max(96,narrowSafe.x+28):96;
-  txt(g,'DEPT. 01 / INTAKE',titleX,88,25,C.gold);
-  txt(g,({I1:'STAMP GOOD!',I2:'SHRED THE SPAM!',I3:'CLOSE THE SCAMS!',I4:'COPY THAT!'})[this.id],titleX,146,59,C.cream);
-  txt(g,({I1:'STAMP 5 GOOD FORMS. IGNORE THE SPAM.',I2:'FEED 2 JUNK ENVELOPES. SAVE THE PAY SLIP.',I3:'CLOSE 3 FAKE POP-UPS. MIRA IS REAL.',I4:'TRACE THE GLOWING ROUTE IN ONE GESTURE.'})[this.id],titleX+3,199,20,'#cbddd2');
+  // The fixed HUD gives the objective and countdown once. The game remains uncluttered.
   timerBand(g,this.timeLeft,this.total);
   if(this.id==='I1')this.drawStamp(g);else if(this.id==='I2')this.drawShred(g);else if(this.id==='I3')this.drawScam(g);else this.drawCopy(g);
   for(const e of this.sparks)effect(g,e);

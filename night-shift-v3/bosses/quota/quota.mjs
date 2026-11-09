@@ -156,8 +156,17 @@ export function createQuotaBoss(context={}){
     if(mode==='clockout'){obj.stamp=pt(.50,.80);obj.stampTo=pt(.50,.37);}
     return obj;
   }
+  function clockOut(){
+    if(mode!=='clockout'||bolts!==3)return false;
+    mode='complete';timer=0;printed=true;shake=prefs.motion?0:1.6;
+    emit('boss-complete',{objectId:'quota:clock-out',outcome:'victory',boltsRemoved:3,bonusOutcomes:{...bonus},pressure,synthetic:false});
+    tell('CLOCKED OUT. INFINITE PROFIT HAS LEFT THE BUILDING.',2);return true;
+  }
   function pointerDown(p){if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||mode==='complete'||mode==='paused')return false;
-    const t=targets();const key=['bonus','strip','fake','doc','latch','counter','stamp'].find(k=>t[k]&&near(p,t[k],k==='bonus'?49:66));
+    const t=targets();
+    // Final task is a huge clickable physical stamp, not a hidden upward drag.
+    if(mode==='clockout'&&near(p,t.stamp,Math.max(140,W()*.22)))return clockOut();
+    const key=['bonus','strip','fake','doc','latch','counter','stamp'].find(k=>t[k]&&near(p,t[k],k==='bonus'?49:66));
     if(key){drag={key,start:{x:p.x,y:p.y},at:{x:p.x,y:p.y},id:p.id??0};return true;}
     if(mode==='bonus'&&near(p,t.skip,85)){expireBonus();return true;}
     if(mode==='verify'&&near(p,t.seal,84)){doubleVerified=true;openCounter();return true;}
@@ -194,11 +203,7 @@ export function createQuotaBoss(context={}){
       if(perkLevel(context,'bank-shot')&&near(p,bumper,80)){fly('bank',t.counter,bumper);fly('counter',bumper,t.gear);return counterHit();}
       counterMiss();return false;
     }
-    if(key==='stamp'&&mode==='clockout'&&near(p,t.stampTo,130)){
-      mode='complete';timer=0;printed=true;shake=prefs.motion?0:1.6;
-      emit('boss-complete',{objectId:'quota:clock-out',outcome:'victory',boltsRemoved:3,bonusOutcomes:{...bonus},pressure,synthetic:false});
-      tell('CLOCKED OUT. INFINITE PROFIT HAS LEFT THE BUILDING.',4);return true;
-    }
+    if(key==='stamp'&&mode==='clockout'&&near(p,t.stampTo,130))return clockOut();
     tell('DROPPED. TRY THE MARKED TARGET.',1.2);return false;
   }
   function cancelPointer(){drag=null;}
@@ -223,21 +228,10 @@ export function renderQuota(c,v,s,fx){
   const C={ink:'#142326',bg:'#10252a',turq:'#8be2cf',gold:'#efbe65',cream:'#f6edda',red:'#e95f4f',paper:'#fff4da'};
   const t=fx.beam,phase=s.phase; c.save();
   if(fx.shake&&!fx.prefs.motion)c.translate(Math.sin(t*53)*fx.shake*10,Math.cos(t*62)*fx.shake*6);
-  const bg=c.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#102832');bg.addColorStop(.53,'#204a4d');bg.addColorStop(1,'#102c34');c.fillStyle=bg;c.fillRect(0,0,W,H);
-  // Tall office architraves and projector light, stretching with viewport, not a letterbox.
-  c.strokeStyle='#6faea333';c.lineWidth=2;for(let i=0;i<11;i++){let px=i*W/10;c.beginPath();c.moveTo(px,0);c.lineTo(px+Math.sin(i*7)*18,H);c.stroke();}
-  const glow=c.createRadialGradient(x,H*.29,10,x,H*.29,H*.7);glow.addColorStop(0,'#e1c58a38');glow.addColorStop(1,'#0e242600');c.fillStyle=glow;c.fillRect(0,0,W,H);
-  // Stage windows and side office silhouettes.
-  for(let side of [-1,1]){const ax=x+side*(W*.48); c.save();c.translate(ax,H*.43);c.scale(side,1);c.fillStyle='#102e36';c.fillRect(-W*.075,-H*.22,W*.12,H*.45);c.fillStyle='#50847d';for(let i=0;i<5;i++)c.fillRect(-W*.06,-H*.18+i*H*.073,W*.09,2);c.restore();}
-  const deck=c.createLinearGradient(0,H*.75,0,H);deck.addColorStop(0,'#35515a');deck.addColorStop(.17,'#6b6558');deck.addColorStop(1,'#151f2b');c.fillStyle=deck;c.beginPath();c.moveTo(0,H*.75);c.lineTo(W,H*.75);c.lineTo(W,H);c.lineTo(0,H);c.fill();
-  c.fillStyle='#f7c567';c.fillRect(0,H*.75,W,5);c.fillStyle='#131c29bb';for(let i=0;i<16;i++)c.fillRect(i*W/16,H*.78,2,H*.24);
-  // Far-off factory clock faces and spotlit filing silhouettes sell the theatrical scale.
-  c.save();c.globalAlpha=.23;c.fillStyle='#f9dfad';
-  for(const sign of [-1,1]){
-    const sx=x+sign*Math.min(W*.36,530),sy=H*.19;
-    c.beginPath();c.arc(sx,sy,Math.min(47,H*.052),0,Math.PI*2);c.fill();
-    c.strokeStyle='#142d37';c.lineWidth=4;c.beginPath();c.moveTo(sx,sy);c.lineTo(sx+Math.sin(t*.34+sign)*20,sy-21);c.stroke();
-  }c.restore();
+  // Quiet neutral machine stage: show only elements with gameplay meaning.
+  c.fillStyle='#223f42';c.fillRect(0,0,W,H);
+  c.fillStyle='#354f4f';c.fillRect(0,H*.76,W,H*.24);
+  c.fillStyle='#c79b59';c.fillRect(0,H*.76,W,6);
   // Corporate machine assembled from five distinct modules, physically substantial.
   const bw=Math.min(W*.59,620),bh=Math.min(H*.53,395),by=H*.37;
   c.fillStyle='#10252a';c.beginPath();c.ellipse(x,by+bh*.66,bw*.64,H*.072,0,0,Math.PI*2);c.fill();
@@ -300,7 +294,7 @@ export function renderQuota(c,v,s,fx){
   }
   if(s.mode==='clockout'||s.mode==='complete'){
     const a=fx.drag?.key==='stamp'?fx.drag.at:point.stamp||{x,y:H*.78};
-    if(s.mode==='clockout'){round(c,a.x-W*.19,a.y-H*.065,W*.38,H*.13,Math.min(W*.045,35),'#ebbb66','#1b3033',8);label(c,'CLOCK OUT',a.x,a.y+Math.min(18,W*.022),Math.min(49,W*.069),C.ink);label(c,'DRAG ↑ TO BREAK THE SMILE',x,H*.92,Math.min(23,W*.033),C.gold);}
+    if(s.mode==='clockout'){round(c,a.x-W*.19,a.y-H*.065,W*.38,H*.13,Math.min(W*.045,35),'#ebbb66','#1b3033',8);label(c,'CLOCK OUT',a.x,a.y+Math.min(18,W*.022),Math.min(49,W*.069),C.ink);label(c,'CLICK THE BIG CLOCK OUT BUTTON',x,H*.92,Math.min(23,W*.033),C.gold);}
     else{label(c,'SHIFT TERMINATED.',x,H*.78,Math.min(58,W*.079),'#f5c47b');label(c,'THE MACHINE HAS FILED FOR EMOTIONAL DAMAGES',x,H*.87,Math.min(21,W*.027),C.cream);}
   }
   if(s.mode==='counter-hit'){
@@ -335,7 +329,7 @@ export function renderQuota(c,v,s,fx){
   if(fx.drag){const from=({bonus:ptValue(.5,.792),strip:ptValue(.25,.70),fake:ptValue(.66,.47),doc:ptValue(.17,.78),latch:ptValue(.74,.55),counter:ptValue(.21,.8),stamp:ptValue(.5,.8)})[fx.drag.key];
     if(from){c.save();c.setLineDash([9,9]);c.strokeStyle='#ffe5a5c4';c.lineWidth=5;c.beginPath();c.moveTo(from.x,from.y);c.lineTo(fx.drag.at.x,fx.drag.at.y);c.stroke();c.restore();}}
   function ptValue(ax,ay){return {x:W*ax,y:H*ay};}
-  const instruction=fx.slash>0?fx.msg:(s.mode==='bonus'?'DRAG THE BONUS REPORT':s.mode==='opening'?'FLING PACKET INTO THE OPEN GEAR':PHASES[Math.min(phase,3)-1].task);
+  const instruction=fx.slash>0?fx.msg:(s.mode==='bonus'?'DRAG THE BONUS REPORT':s.mode==='opening'?'DRAG PAPER INTO THE GREEN GEAR':s.mode==='clockout'?'CLICK CLOCK OUT TO FINISH':PHASES[Math.min(phase,3)-1].task);
   if(s.mode!=='bonus')label(c,instruction,x,H*.92,Math.min(24,W*.034),C.paper,Math.max(260,W*.93));
   c.restore();
 }

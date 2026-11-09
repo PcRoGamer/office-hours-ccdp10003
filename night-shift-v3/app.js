@@ -262,12 +262,12 @@ function syncUi(){
    const key=director.snapshot().promotionSlot+':'+director.promotion?.subject;
    if(key!==mailKey){mailKey=key;presentPromotion();}
  }else if(mailKey){mailKey='';pendingStoryPerk=null;storyExperience.hide();}
- ui.hearts.textContent='♥'.repeat(Math.max(0,director.hearts))+'♡'.repeat(Math.max(0,3-director.hearts));
+ ui.hearts.textContent='♥'.repeat(Math.max(0,director.hearts))+'♡'.repeat(Math.max(0,3-director.hearts))+(director.snapshot().globalGuardReady?' ✦':'');
  ui.timer.textContent=Math.ceil(director.snapshot().clock)+'s';
  const label=playing?(director.snapshot().imperative||'STAMP GOOD!'):m==='recover'?'RETRY SHIFT':'';
  ui.imperative.innerHTML='<span>'+label+'</span><small>'+(playing?(m==='card'&&director.snapshot().deck.length===1?'APPROVE THE REAL FORMS':'MOVE THE WORK · BEAT THE CLOCK'):'CLICK THE GREEN PAPER')+'</small>';
  ui.hint.textContent=playing&&director.snapshot().deck.length===1?'GREEN CHECK = VERIFIED    /    RED X = SPONSORED':m==='recover'?'PRESS ENTER TO RETRY':'';
- if(m==='recover')ui.hint.textContent='PRESS ENTER TO RETRY';
+ if(m==='recover')ui.hint.textContent=director.snapshot().lastGlobalGuard?'POWER-UP SAVED A HEART · ENTER TO RETRY':'PRESS ENTER TO RETRY';
  if(['preview-end','victory','gameover'].includes(m))ui.hint.textContent='PRESS ENTER OR CLICK TO REPLAY';
  if(m==='title')ui.hint.textContent='';
 }

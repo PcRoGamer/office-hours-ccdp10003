@@ -13,11 +13,11 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const isIn=(p,box)=>p.x>=box.x-box.w/2&&p.x<=box.x+box.w/2&&p.y>=box.y-box.h/2&&p.y<=box.y+box.h/2;
 const point=(x,y)=>({x,y});
 const PHASES=['telegraph','jam','counter','impact','victory'];
-const WIN_IMPERATIVES={telegraph:'STAMP A SHEET!',jam:'PULL WHEN GREEN!',counter:'FLICK INTO FEEDER!',impact:'BOLT REMOVED!',victory:'PRINTER DEFEATED!'};
+const WIN_IMPERATIVES={telegraph:'STAMP A SHEET!',jam:'PULL WHEN GREEN!',counter:'DRAG INTO FEEDER!',impact:'BOLT REMOVED!',victory:'PRINTER DEFEATED!'};
 
 /** A single entry in definitions; id is not a health-bar based card. */
 export const definitions=[{
-  id:'B1', department:'boss', name:'PRINTER MUTINY', imperative:'PULL. FLICK. REPEAT.',
+  id:'B1', department:'boss', name:'PRINTER MUTINY', imperative:'PULL. DRAG. REPEAT.',
   create(context={}) {return createPrinterMutiny(context);}
 }];
 
@@ -136,7 +136,7 @@ export function createPrinterMutiny(context={}){
       if(page){s.pointer={id,type:page,start:p,last:p,origin:p,safeAtGrab:canPull()};emit('printer-grab',{object:page});}
     }else if(s.state==='counter'){
       if(s.shutter&&isIn(p,{x:s.feederX,y:-28,w:185,h:65})){
-        s.shutter=false;s.hint='SEAL VERIFIED. NOW FLICK A PACKET!';emit('printer-confirm-stamp',{manual:true});return;
+        s.shutter=false;s.hint='SEAL VERIFIED. NOW DRAG THE PACKET!';emit('printer-confirm-stamp',{manual:true});return;
       }
       if(!s.adMoved&&isIn(p,{x:s.adX,y:65,w:200,h:135})){
         s.pointer={id,type:'ad',start:p,last:p,origin:{x:s.adX,y:65}};return;
