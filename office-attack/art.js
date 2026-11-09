@@ -133,23 +133,24 @@ function printer(c,frame=0){
 }
 function file(c,w,h,kind='good',lines=true){
  const good=kind==='good';
- const coral=good?'#64c99e':'#ef7666';
- // A thick paper silhouette, irregular folded corner and shaded edge.
+ const accent=good?'#5dd28d':'#ff657b';
+ const rim=good?'#3fb573':'#dc405a';
+ // High-contrast approved / rejected document: the decision still reads at card scale.
  c.save();c.shadowColor='#6e62513b';c.shadowBlur=18;c.shadowOffsetY=10;
  smooth(c,-w*.48,-h*.48,w*.96,h*.96,Math.min(21,w*.13),fade(c,0,-h*.5,0,h,'#fffef3','#f2e3ca'));
  c.restore();
- c.fillStyle='#e6d5b9';c.beginPath();
+ c.fillStyle=good?'#e7eaf7':'#f5d3da';c.beginPath();
  c.moveTo(w*.18,-h*.47);c.lineTo(w*.48,-h*.15);c.lineTo(w*.48,-h*.47);c.closePath();c.fill();
- smooth(c,-w*.36,-h*.31,w*.47,h*.08,h*.025,'#d9dfcf');
+ smooth(c,-w*.36,-h*.31,w*.43,h*.08,h*.025,good?'#7899f4':'#ff995a');
  if(lines){
-  for(let i=0;i<3;i++)smooth(c,-w*.33,-h*.14+i*h*.13,w*(i===1?.48:.61),h*.04,3,'#b8cabe');
+  for(let i=0;i<3;i++)smooth(c,-w*.33,-h*.14+i*h*.13,w*(i===1?.48:.61),h*.04,3,good?'#cdd8ef':'#f1c7d0');
  }
- smooth(c,-w*.31,h*.26,w*.64,h*.15,h*.07,coral);
- // little mark on paper
- c.save();c.strokeStyle='#fff9df';c.lineWidth=Math.max(3,w*.055);
+ // One dominant verification badge makes the valid/fake distinction unmissable.
+ egg(c,w*.20,h*.29,w*.17,h*.17,rim);egg(c,w*.20,h*.25,w*.17,h*.17,accent);
+ c.save();c.strokeStyle='#fffdf4';c.lineWidth=Math.max(3,w*.052);
  c.lineCap='round';c.lineJoin='round';c.beginPath();
- if(good){c.moveTo(-w*.15,h*.335);c.lineTo(-w*.07,h*.38);c.lineTo(w*.17,h*.285);}
- else{c.moveTo(-w*.12,h*.29);c.lineTo(w*.12,h*.38);c.moveTo(w*.12,h*.29);c.lineTo(-w*.12,h*.38);}
+ if(good){c.moveTo(w*.08,h*.25);c.lineTo(w*.16,h*.34);c.lineTo(w*.32,h*.15);}
+ else{c.moveTo(w*.10,h*.15);c.lineTo(w*.30,h*.35);c.moveTo(w*.30,h*.15);c.lineTo(w*.10,h*.35);}
  c.stroke();c.restore();
 }
 function envelope(c,w,h){
