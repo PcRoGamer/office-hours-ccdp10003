@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17292b"><link rel="icon" href="data:,">
+<title>QUOTA PANIC · NIGHT SHIFT v3 · HD Rebuild</title>
+<meta name="description" content="A full-viewport 2D office disaster. The company promotes you, then rewrites the rules.">
+<style>
+:root{color-scheme:dark;--ink:#17292b;--paper:#f1ebdf;--red:#b94b36;--mint:#37c4a1;--gold:#f0bc55}
+*{box-sizing:border-box}
+html,body{height:100%;width:100%;overflow:hidden;margin:0;background:var(--ink);font-family:Impact,'Arial Narrow','Liberation Sans Narrow',Arial,sans-serif;touch-action:none}
+#world{display:block;position:fixed;inset:0;width:100vw;height:100dvh;cursor:crosshair;touch-action:none;outline:0}
+#clock-in{position:fixed;left:clamp(30px,5.25vw,105px);top:76.2%;width:clamp(245px,34vw,625px);height:clamp(67px,9.2vh,100px);border:0;border-radius:6px;background:#152d2e;color:#f4eee1;font:900 clamp(22px,2.5vw,39px) 'Trebuchet MS','Arial Narrow',sans-serif;letter-spacing:.025em;box-shadow:7px 9px 0 #0e1b1c33;cursor:pointer;z-index:3;transform-origin:left center;transition:transform .12s,background .12s}
+#clock-in:hover,#clock-in:focus-visible{background:#315850;transform:translateY(-3px);outline:3px solid #f0bc55;outline-offset:4px}
+#clock-in[hidden]{display:none}
+#hud{display:none;position:fixed;inset:0;pointer-events:none;z-index:4;color:#1b2d2e}
+#hud.visible{display:block}
+.hud-tag{position:absolute;top:max(14px,env(safe-area-inset-top));min-height:55px;display:flex;align-items:center;justify-content:center;padding:9px 22px;background:#eee9dc;border:2px solid #263636;box-shadow:4px 5px 0 #0b1e1e66;border-radius:5px}
+#hearts{left:max(18px,env(safe-area-inset-left));color:#c44a3a;font:900 26px Arial,sans-serif;letter-spacing:3px}
+#timer{right:max(18px,env(safe-area-inset-right));font:900 clamp(25px,2vw,35px) Impact,Arial,sans-serif;font-variant-numeric:tabular-nums;min-width:115px}
+#imperative{left:50%;transform:translateX(-50%);width:min(620px,40vw);display:flex;flex-direction:column;gap:5px;text-align:center;letter-spacing:.015em;font:900 clamp(24px,2.5vw,42px) Impact,Arial,sans-serif}
+#imperative small{font:900 clamp(11px,.9vw,16px) 'Arial Narrow',Arial,sans-serif;color:#a6493b;letter-spacing:.07em}
+#hud-controls{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));right:max(16px,env(safe-area-inset-right));display:flex;gap:12px;pointer-events:auto}
+.hud-button{border:2px solid #243535;border-radius:4px;color:#193234;background:#eee6d5cc;font:900 14px Arial,sans-serif;padding:10px 15px;cursor:pointer}
+.hud-button:focus-visible{outline:3px solid #f0bc55}
+#hint{position:fixed;left:50%;bottom:5.2vh;transform:translateX(-50%);color:#f6eee2;font:900 clamp(14px,1.2vw,20px) Arial,sans-serif;text-align:center;letter-spacing:.08em;text-shadow:0 2px 8px #000;pointer-events:none;z-index:4;max-width:90vw}
+#mail{display:none;position:fixed;inset:0;background:#152b2de9;z-index:8;overflow:auto;padding:clamp(12px,2.7vh,36px);font-family:Arial,'Segoe UI',sans-serif;color:#26443e}
+#mail.visible{display:grid;place-items:center}
+.mail-shell{width:min(1320px,100%);min-height:min(690px,93dvh);display:grid;grid-template-columns:minmax(270px,.80fr) minmax(340px,1.3fr);background:#e9e6db;border:2px solid #56786d;box-shadow:0 23px 95px #0008;overflow:hidden}
+.mail-left{display:flex;flex-direction:column;background:#f8f8f3;border-right:3px solid #b8cbbd}
+.mail-bar,.work-bar{padding:15px 21px;background:#165144;color:white;font-weight:900;display:flex;justify-content:space-between;gap:20px;font-size:14px;letter-spacing:.06em}
+.mail-chrome{color:#5a8270;border-bottom:1px solid #d4dcd6;padding:15px 22px;font-size:12px}
+.mail-copy{display:flex;flex-direction:column;gap:22px;padding:31px;flex:1}
+.mail-flag{color:#ae4a3b;font-size:12px;font-weight:900;letter-spacing:.18em}
+.mail-copy h2{font:900 clamp(29px,3vw,47px) Impact,Arial,sans-serif;line-height:1.02;letter-spacing:-.025em;margin:0;color:#173b38}
+.mail-copy p{font-size:clamp(15px,1.25vw,18px);line-height:1.6;margin:0;max-width:37ch}
+.mail-sender{font-size:12px;color:#718680;border-bottom:1px solid #d2dcd6;padding-bottom:15px}
+.mail-attach{margin-top:auto;padding:17px;border:1px solid #a7c9b5;background:#e7f1e8;font-weight:800;font-size:13px}
+.mail-right{display:flex;flex-direction:column;min-width:0;background:white}
+.work-bar{background:#186c48}
+.work-menu{padding:14px 21px;background:#edf4ef;color:#5c7768;font-size:13px;border-bottom:1px solid #d0dfd3}
+.work-fx{padding:13px 21px;border-bottom:1px solid #c9d9cf;color:#426957;font-size:13px}
+.work-fx b{color:#17834f;font-style:italic;font-size:19px;margin-right:15px}
+.work-content{padding:clamp(15px,2vw,34px);flex:1;min-height:280px}
+.work-content h3{margin:0 0 16px;color:#416b55;font-size:14px;letter-spacing:.09em}
+.offers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.offer{border:2px solid #d3a952;background:#fff8e9;padding:16px 11px;text-align:left;cursor:pointer;color:#234e40;min-height:236px;display:flex;flex-direction:column;gap:9px}
+.offer:hover,.offer:focus-visible{border-color:#168956;background:#e6f6df;outline:3px solid #168956;outline-offset:2px}
+.offer .symbol{font:900 42px Arial,sans-serif}
+.offer strong{font:900 clamp(19px,1.4vw,24px) Impact,Arial,sans-serif;letter-spacing:.02em}
+.offer span{font-size:13px;line-height:1.35}
+.offer em{font-size:11px;color:#9a5a35;margin-top:auto;font-style:normal;font-weight:800}
+.work-past{color:#678376;font-size:12px;line-height:1.5;margin-top:25px}
+.work-footer{padding:17px 21px;display:flex;align-items:center;justify-content:space-between;background:#1b3533;color:#f7eddf;gap:15px;font:800 13px Arial,sans-serif}
+.work-footer strong{color:#f0bc55;font-size:17px}
+#pause-sheet{display:none;position:fixed;inset:0;z-index:10;background:#102225d9;align-items:center;justify-content:center}
+#pause-sheet.visible{display:flex}
+.pause-card{width:min(560px,90vw);background:var(--paper);border-top:14px solid var(--red);padding:45px;text-align:center;box-shadow:0 30px 80px #0008}
+.pause-card h2{font:900 56px Impact,Arial,sans-serif;color:var(--ink);margin:0 0 26px}
+.pause-card button{margin:6px;padding:15px 26px;background:#20493e;color:white;border:0;font-weight:900;cursor:pointer}
+#screen-reader{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+@media(max-width:900px){#imperative{width:min(390px,47vw)}.hud-tag{min-height:48px;padding:7px 12px}#hearts{font-size:20px}#timer{min-width:70px}.mail-shell{display:flex;flex-direction:column;max-height:none;min-height:100%;overflow:visible}.mail-left{border-right:0;border-bottom:2px solid #b8cbbd}.mail-copy{padding:18px;gap:10px}.mail-attach{margin-top:0}.mail-copy h2{font-size:27px}.mail-copy p{font-size:14px;line-height:1.35}.mail-chrome{display:none}}
+@media(max-width:700px){#clock-in{left:7%;top:39%;width:75%;height:68px;font-size:23px}#hearts{top:9px;left:9px}#timer{top:9px;right:9px}#imperative{top:69px;width:calc(100vw - 22px);font-size:28px;min-height:50px}#imperative small{font-size:11px}#hud-controls{bottom:8px;right:8px}#hint{bottom:61px;font-size:12px}.offers{grid-template-columns:1fr;gap:7px}.offer{min-height:75px;display:grid;grid-template-columns:48px 1fr;align-items:center;gap:6px 10px;padding:9px}.offer .symbol{grid-row:span 3;font-size:32px}.offer strong{font-size:18px}.offer span,.offer em{font-size:11px}.work-content{padding:15px}.work-past,.work-menu{display:none}.mail-copy{gap:8px}.mail-copy p{font-size:12px}.mail-attach{padding:9px}.work-footer{padding:11px}}
+</style></head><body>
+<canvas id="world" tabindex="0" aria-label="Quota Panic Night Shift v3, pointer-controlled office arcade"></canvas>
+<button id="clock-in" type="button">CLOCK IN &nbsp; ▶</button>
+<div id="hud" aria-live="off"><div id="hearts" class="hud-tag">♥♥♥</div><div id="imperative" class="hud-tag"><span>STAMP GOOD!</span><small>APPROVE THE REAL FORMS</small></div><div id="timer" class="hud-tag">18s</div><div id="hud-controls"><button class="hud-button" id="sound" type="button" aria-label="Mute game">SOUND ON</button><button class="hud-button" id="pause" type="button">PAUSE</button></div></div>
+<div id="hint" aria-live="polite"></div>
+<div id="mail" role="dialog" aria-modal="true" aria-label="Promotion email and workbook upgrade choices"></div>
+<div id="pause-sheet" role="dialog" aria-modal="true" aria-label="Pause"><div class="pause-card"><h2>UNPAID BREAK</h2><button id="resume" type="button">RESUME SHIFT</button><button id="restart" type="button">RESTART DEMO</button></div></div>
+<div id="screen-reader" aria-live="polite"></div>
+<script type="module" src="./night-shift-v3/app.js"></script>
+</body></html>
