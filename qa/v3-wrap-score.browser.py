@@ -49,9 +49,11 @@ try:
    page.screenshot(path=str(OUT/("receipt-%dx%d-dpr%d.png"%(width,height,dpr))),full_page=True)
    page.locator("[data-flip]").click()
    assert page.locator(".ns-receipt-score").evaluate("el=>el.firstChild.textContent.trim()")==str(js["peopleScore"])
+   assert page.locator(".ns-receipt h2").inner_text()=="PEOPLE & QUALITY · NOT A COMPANY AWARD"
+   assert "Software access: $40 of $80." in page.locator(".ns-receipt .ns-conclusion").inner_text()
    page.locator("[data-details]").click()
-   assert page.locator(".ns-breakdown").count()==1
-   assert page.locator(".ns-line").count()>=0 or True
+   assert page.locator(".ns-breakdown .ns-line").count()>=4
+   assert "VERIFIED COMMITTED EVENTS" in page.locator(".ns-receipt-bottom").inner_text()
    page.screenshot(path=str(OUT/("flipped-%dx%d-dpr%d.png"%(width,height,dpr))),full_page=True)
    page.locator("[data-replay]").click()
    assert page.evaluate("window.__scoreFixture.replayed===true")
