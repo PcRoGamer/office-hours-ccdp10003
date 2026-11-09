@@ -68,8 +68,16 @@ jobs:
         run: node qa/v3-lead-scored-full.browser.cjs
       - name: Office Attack responsive smoke and sprite loading
         run: node qa/office-attack-smoke.browser.cjs
-      - name: Office Attack authentic 18-round pointer campaign
-        run: node qa/office-attack-fullrun.browser.cjs
+      - name: Office Attack 1,536 deterministic Dodge fairness trials
+        run: node qa/office-attack-dodge-balance.browser.cjs
+      - name: Office Attack 20-encounter campaign, boss retries, cited research and voluntary breaks
+        run: |
+          node qa/office-attack-fullrun.browser.cjs
+          OFFICE_ATTACK_AUTO_INTERMISSION=1 node qa/office-attack-fullrun.browser.cjs
+          OFFICE_ATTACK_AUTO_INTERMISSION=1 OFFICE_ATTACK_AUTO_RESEARCH=1 node qa/office-attack-fullrun.browser.cjs
+          OFFICE_ATTACK_BOSS_RETRY=1 node qa/office-attack-fullrun.browser.cjs
+          OFFICE_ATTACK_VIEWPORT=650x800 node qa/office-attack-fullrun.browser.cjs
+          OFFICE_ATTACK_VIEWPORT=390x760 node qa/office-attack-fullrun.browser.cjs
       - name: Office Attack real failure, pause, expiration and replay
         run: node qa/office-attack-adversarial.browser.cjs
       - name: Upload evidence even on failure
