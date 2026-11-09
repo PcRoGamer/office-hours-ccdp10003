@@ -14,7 +14,7 @@ const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+de
  const eventual=async(fn,timeout=25000)=>{const end=Date.now()+timeout;while(Date.now()<end){const s=await snap();if(await fn(s))return s;await page.waitForTimeout(90)}throw Error('timed out: '+JSON.stringify((await snap()).sceneState)?.slice(0,450))};
  let stamped=0,shredded=0,closed=0;
  try {
-   await page.goto('http://127.0.0.1:'+server.address().port+'/night-shift-v3.html');
+   await page.goto('http://127.0.0.1:'+server.address().port+'/night-shift-v3.html',{waitUntil:'domcontentloaded',timeout:15000});
    await page.getByRole('button',{name:/CLOCK IN/i}).click();
    assert.equal((await snap()).currentCardId,'I1');
    const first=await snap();assert.equal(first.fullCampaign,true);assert.equal(first.deck.length,12);
