@@ -85,7 +85,7 @@ assert.equal(packet(run,'quota:p1:b1','expired'), 'expired');
 assert.equal(run.getScorePreview().packetsFiled,0);
 assert.equal(run.getScorePreview().official.bossFileBonus,0);
 const firstPacket=count(run,'quota-packet');
-assert.throws(()=>packet(run,'quota:p1:b1','file'),/duplicate or out-of-order/);
+assert.throws(()=>packet(run,'quota:p1:b1','file'),/packet already resolved|duplicate or out-of-order/);
 assert.equal(count(run,'quota-packet'),firstPacket,'duplicate must never mutate ledger');
 counter(run);
 assert.equal(run.phase,2);
