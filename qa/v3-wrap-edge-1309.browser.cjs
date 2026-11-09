@@ -52,8 +52,8 @@ async function main(){
   assert.equal(frozenStart.elapsed,frozenEnd.elapsed);
   await page.getByRole('button',{name:'RESUME SHIFT'}).click();
   assert.equal((await page.evaluate(()=>window.__nightShiftV3.snapshot())).paused,false);
-  await page.getByRole('button',{name:/SOUND/i}).click();
-  await page.getByRole('button',{name:/SOUND/i}).click();
+  await page.locator('#sound').click();
+  await page.locator('#sound').click();
   const postSound=await page.evaluate(()=>window.__nightShiftV3.snapshot());
   assert.equal(postSound.mode,'card','Sound toggle changed game phase');
   await page.keyboard.press('Escape');
