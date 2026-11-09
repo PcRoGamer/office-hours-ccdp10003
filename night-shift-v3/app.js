@@ -243,7 +243,7 @@ function syncUi(){
    if(director.snapshot().verifiedScoreReady&&runSnapshot){
      try {
        receiptHandle=presentVerifiedClockout({host:ui.receipt,runSnapshot,audio,
-         onReplay:runStart,reduceMotion});
+         onReplay:runStart,reduceMotion:reducedMotion});
      }catch(error){
        console.error('Final score blocked by invalid player evidence:',error);
        ui.sr.textContent='The machine was defeated, but its scoring evidence was incomplete.';
