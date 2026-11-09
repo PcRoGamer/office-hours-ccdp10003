@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Night Shift v3 Perk Edge QA</title><link rel="icon" href="data:,">
+<style>html,body{margin:0;background:#091a22;width:100%;height:100%;overflow:hidden}canvas{width:100vw;height:100vh;display:block;touch-action:none}#mode{position:absolute;top:8px;left:8px;z-index:9;color:white;background:#0e3335;padding:7px 12px;font:700 16px sans-serif;border:2px solid #f4c45a}</style>
+</head><body><div id="mode">QA ONLY</div><canvas id="world"></canvas>
+<script type="module">
+import {definitions} from '../night-shift-v3/scenes/staff/index.js';
+import {withPerkCompatibleDefinitions} from '../night-shift-v3/finalization/perks/context-aliases.js';
+const canvas=document.querySelector('canvas'),g=canvas.getContext('2d');
+const viewport={worldWidth:1200,worldHeight:760,safeRect:{x:40,y:170,w:1120,h:540}};
+canvas.width=1200;canvas.height=760;
+let scene=null,mode='uninitialized',errors=[],events=[];
+const def=definitions.find(d=>d.id==='T2');
+window.initMode=function(next){
+ if(scene)scene.dispose();mode=next;events=[];
+ const selected=next==='compatibility'?withPerkCompatibleDefinitions([def])[0]:def;
+ scene=selected.create({viewport,run:{perks:{'magnet-grip':1},perkLevels:{'magnet-grip':1},directive:'moving-goalposts'},events:{emit:e=>events.push(e)},audio:{play(){}},options:{}});
+ scene.enter();document.getElementById('mode').textContent=next.toUpperCase()+' / MAGNET GRIP SELECTED';
+ return scene.snapshot();
+};
+window.readScene=()=>({mode,...scene.snapshot(),events});
+function mapped(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*1200,y:(e.clientY-r.top)/r.height*760,id:e.pointerId};}
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);scene?.pointerDown(mapped(e))});
+canvas.addEventListener('pointermove',e=>scene?.pointerMove(mapped(e)));
+canvas.addEventListener('pointerup',e=>{scene?.pointerUp(mapped(e));canvas.releasePointerCapture(e.pointerId)});
+window.addEventListener('error',e=>errors.push(e.message));
+window.readErrors=()=>errors;
+window.initMode('baseline');
+let last=performance.now();
+function loop(now){const dt=Math.min(.04,(now-last)/1000);last=now;scene?.update(dt);g.clearRect(0,0,1200,760);scene?.draw(g,viewport);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script></body></html>
