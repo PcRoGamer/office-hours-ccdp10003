@@ -51,3 +51,28 @@ export function assertBossRetrySafe({run,scene,bossId}){
  scene.cancelPointer?.();
  return scene;
 }
+
+/**
+ * A real PR gesture must have an identity stable across repeated callbacks.
+ * P2's adversarial overlays carry unique objectIds, while P3's alignment
+ * locks carry distinct mark numbers. P1/P4's unique action kinds identify
+ * their one-shot controls. No arbitrary sequence suffix may invent identity.
+ *
+ * The caller should pass this key to the normal run.recordAction machinery;
+ * SYSTEMS then rejects repeat callbacks within an attempt.
+ */
+export function identifyPrAction(e,cardId){
+ requireEvidence(/^P[1-4]$/.test(cardId)&&e?.type==='card-action',
+   'not an authored PR action');
+ requireEvidence(typeof e.kind==='string'&&e.kind.length>0,
+   'PR gesture missing action kind');
+ requireEvidence(e.synthetic===false,'synthetic PR gesture cannot score');
+ let object='';
+ if(typeof e.objectId==='string'&&e.objectId.length>0)object='object:'+e.objectId;
+ else if(cardId==='P3'&&e.kind==='slide-alignment-lock'&&Number.isInteger(e.mark)&&
+   e.mark>=1&&e.mark<=3)object='mark:'+e.mark;
+ else if(cardId==='P4'&&e.kind==='route-report'&&['headline','context'].includes(e.route))
+   object='route:'+e.route;
+ else object='one-shot';
+ return cardId+':'+e.kind+':'+object;
+}
