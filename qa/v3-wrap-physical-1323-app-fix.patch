@@ -1,0 +1,13 @@
+diff --git a/night-shift-v3/app.js b/night-shift-v3/app.js
+index 1881d48..aa6e63f 100644
+--- a/night-shift-v3/app.js
++++ b/night-shift-v3/app.js
+@@ -243,7 +243,7 @@ function syncUi(){
+    if(director.snapshot().verifiedScoreReady&&runSnapshot){
+      try {
+        receiptHandle=presentVerifiedClockout({host:ui.receipt,runSnapshot,audio,
+-         onReplay:runStart,reduceMotion});
++         onReplay:runStart,reduceMotion:reducedMotion});
+      }catch(error){
+        console.error('Final score blocked by invalid player evidence:',error);
+        ui.sr.textContent='The machine was defeated, but its scoring evidence was incomplete.';
