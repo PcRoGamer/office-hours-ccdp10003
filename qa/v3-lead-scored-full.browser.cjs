@@ -210,6 +210,8 @@ const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+de
    assert.equal(final.evidence.filter(e=>/^[ISPT][1-4]$/.test(e.id)).length,12);
    assert.equal(final.scoreIssue,null,'no authentic SYSTEMS ledger mismatch');
    assert.equal(final.verifiedScoreReady,true,'actual frozen score must be available');
+   const receiptDom=await page.evaluate(()=>{const e=document.querySelector('#score-receipt');return {exists:!!e,hidden:e?.hidden,children:e?.children?.length,html:e?.innerHTML.slice(0,240)}});
+   console.log('RECEIPT_DIAGNOSTIC',JSON.stringify({mode:final.mode,issue:final.scoreIssue,ready:final.verifiedScoreReady,ui:receiptDom,errors}));
    const paper=page.locator('#score-receipt .ns-receipt');
    await paper.waitFor({state:'visible',timeout:4000});
    assert.equal(await page.locator('#score-receipt [data-flip]').count(),1);
