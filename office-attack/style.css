@@ -70,3 +70,100 @@ transform:rotate(-8deg);box-shadow:8px 10px 0 #102f31;animation:boss-slam .7s cu
 @media(max-height:600px){.ending .end-copy h2{font-size:clamp(36px,6.6vw,60px)}
 .ending #end-grade{font-size:68px}.ending .end-scorecard{margin:3px auto 7px}
 .ending #again{padding:9px 24px}}
+
+
+/* 2026-11-09 CREATIVE REBUILD: the playable surface and countdown have distinct,
+   protected layout rows. Nothing is drawn over a game's touch targets. */
+:root{--hud-height:clamp(58px,8.3dvh,83px);--timer-height:clamp(58px,8.7dvh,82px)}
+#stage{position:absolute;inset:var(--hud-height) 0 var(--timer-height);width:100%;height:calc(100dvh - var(--hud-height) - var(--timer-height));background:#b9dfd2;cursor:default}
+#hud{z-index:4;top:0;bottom:auto;min-height:var(--hud-height);padding:9px clamp(13px,3vw,42px);align-items:center;background:#fff1c7;color:#254d52;filter:none;border-bottom:6px solid #eab96b;box-shadow:0 6px 0 #1b4d4930}
+#hud .hud-label{font:900 clamp(9px,1.05vw,13px)/1.1 Arial,sans-serif;letter-spacing:.12em;color:#527470}
+#hud .hud-hearts,#hud .hud-center{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px}
+#hud .hud-center{align-items:center;position:absolute;left:50%;transform:translateX(-50%)}
+#lives{color:#f3716e;min-width:0;font:900 clamp(26px,3vw,42px)/.95 Arial,sans-serif;letter-spacing:.09em;filter:drop-shadow(0 3px 0 #bc514c28)}
+#round{color:#1f5355;font:900 clamp(18px,2.4vw,29px)/1 Impact,Arial,sans-serif;letter-spacing:.055em}
+#mute{width:clamp(39px,4vw,49px);height:clamp(39px,4vw,49px);background:#b2e5dd;box-shadow:0 4px 0 #73b8a9;border-radius:16px}
+#deadline-ui{position:absolute;bottom:0;left:0;right:0;height:var(--timer-height);z-index:4;display:flex;align-items:center;justify-content:center;gap:clamp(7px,1.8vw,22px);padding:8px clamp(12px,2.5vw,42px);background:#fff0c3;border-top:6px solid #e6ab60;box-shadow:0 -6px 0 #1a4c4a2a;pointer-events:none}
+#deadline-ui[hidden]{display:none!important}
+.deadline-stamp{flex:none;background:#e65f56;color:#fff8db;font:900 clamp(15px,2.1vw,27px)/1 Impact,Arial,sans-serif;letter-spacing:.055em;border-radius:11px;padding:12px clamp(8px,1.5vw,19px);transform:rotate(-4deg);box-shadow:0 5px 0 #a94742}
+.deadline-track{position:relative;flex:1;max-width:910px;min-width:0;height:clamp(23px,3.8vw,37px);padding:4px;background:#315c5b;border:4px solid #234a4b;border-radius:25px;box-shadow:inset 0 4px 0 #15383b65}
+#deadline-fill{position:absolute;inset:0;transform-origin:left;border-radius:20px;background:linear-gradient(90deg,#ffe07b,#fbb966,#97e5a4);box-shadow:inset 0 3px 0 #fff8e283;transition:background .08s}
+.deadline-dashes{position:absolute;inset:4px 11px;background:repeating-linear-gradient(90deg,transparent 0 52px,#23514c33 53px 56px,transparent 57px 62px);border-radius:20px}
+#deadline-seconds{min-width:74px;font:900 clamp(23px,3vw,37px)/1 Impact,Arial,sans-serif;color:#2d5755;text-align:right;letter-spacing:.01em}
+#panic-bean{position:relative;flex:none;width:clamp(30px,4.6vw,53px);height:clamp(35px,5.3vw,60px);background:#f5b270;border-radius:45% 45% 42% 42%;transform:rotate(6deg);box-shadow:inset -6px -5px 0 #e9936038,0 5px 0 #c5834d}
+.panic-eyes:before,.panic-eyes:after{content:'';position:absolute;top:24%;width:9%;height:22%;background:#293f41;border-radius:9px}
+.panic-eyes:before{left:31%}.panic-eyes:after{right:29%}
+.panic-mouth{position:absolute;top:58%;left:44%;width:17%;height:16%;border-bottom:3px solid #293f41;border-radius:50%}
+#deadline-ui.panic #deadline-fill{background:linear-gradient(90deg,#ffc15b,#ff9c59,#f15d53)}
+#deadline-ui.panic #panic-bean{animation:deadline-wobble .18s ease-in-out infinite alternate}
+#deadline-ui.critical{animation:deadline-pulse .34s ease-in-out infinite alternate}
+#deadline-ui.critical #deadline-seconds{color:#df4e47}
+#deadline-ui.critical .panic-mouth{width:15%;height:24%;background:#613e3b;border:0;border-radius:50%}
+#deadline-ui.win #deadline-fill{background:#5ddc94}
+#deadline-ui.win .deadline-stamp{background:#2eb87e;transform:rotate(3deg) scale(1.08)}
+#deadline-ui.fail #deadline-fill{background:#e65e59}
+#deadline-ui.fail .deadline-stamp{animation:deadline-slam .28s ease-out both}
+@keyframes deadline-wobble{from{transform:rotate(-13deg) scaleY(1.04)}to{transform:rotate(12deg) scaleY(.93)}}
+@keyframes deadline-pulse{to{background:#ffe1b8}}
+@keyframes deadline-slam{from{transform:rotate(-23deg) scale(2)}to{transform:rotate(-4deg) scale(1)}}
+
+/* A self-contained, illustrated bean celebration replaces old icon-atlas artwork. */
+.intermission,.ending{background:radial-gradient(circle at 26% 27%,#fff1bb,transparent 39%),linear-gradient(115deg,#b1e9dc,#ffd5ae 58%,#f8aeb5);color:#234d50}
+.intermission:before,.ending:before{opacity:.1;background:repeating-conic-gradient(from 0deg,#fffbeb 0 9deg,transparent 9deg 25deg)}
+.inter-copy .kicker,.end-copy .kicker{color:#456c64}
+.inter-copy h2,.end-copy h2{color:#ee675e;text-shadow:6px 6px 0 #fff2d0}
+#inter-tagline{color:#285854}
+.inter-stats span{background:#fff9e7;color:#235654;box-shadow:0 7px 0 #cf9f77}
+#inter-speed{color:#dc6b54;text-shadow:2px 3px 0 #fff4d5}
+#inter-rest-note{color:#365f5b}
+.inter-meter{background:#cf9b77}
+#inter-fill{background:#f47d63}
+.inter-art,.end-art{width:clamp(145px,23vw,310px);aspect-ratio:1}
+.celebrate-worker{position:absolute;left:18%;top:13%;width:64%;height:74%;background:#f9b37a;border-radius:46% 47% 43% 41%;box-shadow:inset -14px -11px 0 #eb976b,0 13px 0 #c77f57,13px 17px 0 #2249461a;transform-origin:50% 89%;animation:worker-party .64s ease-in-out infinite alternate}
+.worker-eyes:before,.worker-eyes:after{content:'';position:absolute;top:34%;width:8%;height:13%;border-radius:100%;background:#264a48}
+.worker-eyes:before{left:30%}.worker-eyes:after{right:28%}
+.worker-mouth{position:absolute;left:43%;top:55%;height:19%;width:18%;background:#9f5351;border-radius:12% 12% 70% 70%;box-shadow:inset 0 -5px 0 #f7d9c2}
+.worker-arm{position:absolute;top:49%;width:26%;height:9%;background:#f9b37a;border-radius:40px;z-index:-1}
+.arm-left{left:-23%;transform:rotate(-35deg)}.arm-right{right:-23%;transform:rotate(35deg)}
+.worker-tie{position:absolute;left:46%;top:77%;width:13%;height:17%;background:#e96c61;clip-path:polygon(50% 0,100% 27%,76% 100%,24% 100%,0 27%)}
+.party-hat{position:absolute;top:-21%;left:35%;width:38%;height:32%;background:#8edcc3;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotate(9deg);filter:drop-shadow(0 4px 0 #4d9c90)}
+.inter-stars,.end-flourish{color:#fff8d3;top:-1%;text-shadow:0 4px 0 #d99968}
+@keyframes worker-party{from{transform:rotate(-9deg) scale(1.05,.94)}to{transform:rotate(9deg) scale(.94,1.07)}}
+@media(max-width:780px){:root{--hud-height:61px;--timer-height:66px}
+#hud{padding:6px 12px;gap:4px}#hud .hud-label{font-size:9px}
+#lives{font-size:27px}#round{font-size:17px}
+#mute{width:38px;height:38px;font-size:19px}
+#deadline-ui{gap:7px;padding:5px 9px}
+.deadline-stamp{font-size:15px;padding:10px 7px}
+#deadline-seconds{font-size:22px;min-width:48px}
+#panic-bean{width:30px;height:38px}
+.inter-art,.end-art{max-width:120px}
+}
+@media(max-width:400px){#hud .hud-center .hud-label{display:none}#round{font-size:15px}
+.deadline-stamp{font-size:13px;padding:8px 5px}#deadline-seconds{font-size:20px;min-width:44px}
+#panic-bean{width:25px;height:33px}.deadline-track{border-width:3px;min-height:19px}
+}
+@media(prefers-reduced-motion:reduce){#deadline-ui,.deadline-stamp,#panic-bean,.celebrate-worker{animation:none!important}}
+
+
+/* The title now shares the same rounded office cast as chapter transitions. */
+.poster-character{position:relative;min-width:240px;width:clamp(230px,32vw,440px);aspect-ratio:1;z-index:2;filter:drop-shadow(0 18px 0 #0d2b3045)}
+.poster-character .office-worker{left:20%;top:15%;width:62%;height:75%;background:#f9ba7d;box-shadow:inset -14px -12px 0 #e99167,0 14px 0 #b96c4f}
+.poster-character .office-worker .worker-mouth{top:57%;left:43%;height:15%;width:20%;border-radius:10% 10% 65% 65%}
+.coffee-hat{position:absolute;top:-19%;left:25%;width:50%;height:25%;background:#fff2cf;border-radius:14px 14px 8px 8px;box-shadow:inset 0 -7px 0 #d0d9c4}
+.coffee-hat:after{content:'';position:absolute;right:-20%;top:16%;width:23%;height:57%;border:7px solid #fff2cf;border-radius:0 70% 70% 0}
+.poster-spark{position:absolute;top:3%;right:0;color:#ffe59c;font:900 105px Arial,sans-serif;text-shadow:0 7px 0 #b47755;animation:boss-stars 1.2s infinite alternate}
+@media(max-width:820px){.poster-character{display:none}}
+@media(prefers-reduced-motion:reduce){.poster-spark{animation:none}}
+
+/* Reserve the actual box height, including padding/borders, for the HUD. */
+:root{--hud-height:clamp(82px,10.2dvh,98px);--timer-height:clamp(84px,11dvh,104px)}
+#hud{height:var(--hud-height);min-height:0}
+@media(max-width:780px){:root{--hud-height:61px;--timer-height:66px}}
+
+
+/* Paper confetti tumbles across the whole break card, never over game hit targets. */
+.confetti-sheet{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.confetti-sheet i{position:absolute;top:-19px;left:var(--x);width:clamp(8px,1.5vw,18px);height:clamp(13px,2vw,26px);border-radius:3px;opacity:0;animation:confetti-fall var(--fall) linear var(--delay) both}
+@keyframes confetti-fall{0%{opacity:0;transform:translateY(-26px) rotate(0deg) scale(.7)}8%{opacity:.9}90%{opacity:.9}100%{opacity:0;transform:translateY(115dvh) rotate(var(--tilt)) scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.confetti-sheet i{animation:none;display:none}}
