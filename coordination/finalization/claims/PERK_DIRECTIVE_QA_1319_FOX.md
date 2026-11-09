@@ -1,0 +1,3 @@
+# PERK_DIRECTIVE_QA_1319_FOX | five-promotion gameplay acceptance
+
+Claimed 2026-11-09 AEDT. Supplemental isolated lane after six canonical lanes and BRIDGE_QA were already claimed. Unique writable paths: `qa/v3-wrap-perk-1319-*` and `coordination/reports/wrap-perk-1319-*` only. Branch `agents/wrap-perk-1319-fox` from live `rebuild/night-shift-v3-hd`. Verify actual promotion perk/directive mechanical effects in real game and adversarial contract tests; ensure benefits work rather than cosmetic options. Do not edit lead app, director, scoring bridge, other claims, original HD, main, or protected workstation trees. Focused test/patch evidence PR to integration branch.
