@@ -70,7 +70,7 @@ jobs:
         run: node qa/office-attack-smoke.browser.cjs
       - name: Office Attack 1,536 deterministic Dodge fairness trials
         run: node qa/office-attack-dodge-balance.browser.cjs
-      - name: Office Attack 20-encounter campaign, boss retries, cited research and voluntary breaks
+      - name: Office Attack 26-encounter campaign, boss retries, cited research and voluntary breaks
         run: |
           node qa/office-attack-fullrun.browser.cjs
           OFFICE_ATTACK_AUTO_INTERMISSION=1 node qa/office-attack-fullrun.browser.cjs

@@ -96,7 +96,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
      await mouse(425,330);await mouse(520,315);await mouse(620,333);
      await page.mouse.up();
    }else if(s.id==='sort'){
-     for(const kind of ['paper','peel']){
+     for(const kind of ['paper','banana']){
        const b=await snap();const item=b.sortItems.find(x=>x.kind===kind);
        const bin=b.sortBins.find(x=>x.kind===kind);
        await mouse(item.x,item.y);await page.mouse.down();
