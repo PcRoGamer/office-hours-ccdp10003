@@ -20,24 +20,24 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: v3-wrap-${{ github.ref }-${{ inputs.mode || 'verify' }
+  group: v3-wrap-${{github.ref }}-${{inputs.mode || 'verify' }}
   cancel-in-progress: false
 jobs:
   gate:
-    if: ${{ inputs.mode != 'rollback' }
+    if: ${{inputs.mode != 'rollback' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     outputs:
-      sha: ${{ steps.lock.outputs.sha }
+      sha: ${{steps.lock.outputs.sha }}
     steps:
       - name: Prevent publication of arbitrary refs
-        if: ${{ inputs.mode == 'publish' }
+        if: ${{inputs.mode == 'publish' }}
         env:
-          CANDIDATE: ${{ inputs.candidate_ref }
+          CANDIDATE: ${{inputs.candidate_ref }}
         run: test "$CANDIDATE" = 'rebuild/night-shift-v3-hd'
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.candidate_ref || github.sha }
+          ref: ${{inputs.candidate_ref || github.sha }}
           persist-credentials: false
       - name: Pin tested commit
         id: lock
@@ -57,17 +57,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v3-release-${{ github.run_id }
+          name: v3-release-${{github.run_id }}
           path: qa-artifacts/v3-wrap-release/
           if-no-files-found: warn
   release:
     needs: [gate]
-    if: ${{ always() && github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'rollback') && (inputs.mode == 'rollback' || needs.gate.result == 'success') }
+    if: ${{always() && github.event_name == 'workflow_dispatch' && (inputs.mode == 'publish' || inputs.mode == 'rollback') && (inputs.mode == 'rollback' || needs.gate.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }
+      url: ${{steps.deploy.outputs.page_url }}
     permissions:
       contents: read
       pages: write
@@ -79,15 +79,15 @@ jobs:
           path: main-site
           persist-credentials: false
       - uses: actions/checkout@v4
-        if: ${{ inputs.mode == 'publish' }
+        if: ${{inputs.mode == 'publish' }}
         with:
-          ref: ${{ needs.gate.outputs.sha }
+          ref: ${{needs.gate.outputs.sha }}
           path: candidate
           persist-credentials: false
       - name: Stage current main + only the verified v3 route
         shell: bash
         env:
-          MODE: ${{ inputs.mode }
+          MODE: ${{inputs.mode }}
         run: |
           set -euo pipefail
           mkdir site
@@ -109,19 +109,19 @@ jobs:
           cmp main-site/arcade-office-hd.html site/arcade-office-hd.html
           cmp main-site/index.html site/index.html
       - uses: actions/setup-node@v4
-        if: ${{ inputs.mode == 'publish' }
+        if: ${{inputs.mode == 'publish' }}
         with:
           node-version: '22'
       - name: Install release smoke dependencies
-        if: ${{ inputs.mode == 'publish' }
+        if: ${{inputs.mode == 'publish' }}
         run: |
           npm install --no-save --no-package-lock playwright@1.58.2
           npx playwright install --with-deps chromium
       - name: Gate the exact staged site before any deployment
-        if: ${{ inputs.mode == 'publish' }
+        if: ${{inputs.mode == 'publish' }}
         env:
-          RELEASE_SITE_ROOT: ${{ github.workspace }/site
-          RELEASE_ARTIFACT_DIR: ${{ github.workspace }/qa-artifacts/staged-site
+          RELEASE_SITE_ROOT: ${{github.workspace }}/site
+          RELEASE_ARTIFACT_DIR: ${{github.workspace }}/qa-artifacts/staged-site
         run: node candidate/qa/v3-wrap-release.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
@@ -132,8 +132,8 @@ jobs:
       - name: Verify public HD and candidate routes
         shell: bash
         env:
-          PAGE_URL: ${{ steps.deploy.outputs.page_url }
-          MODE: ${{ inputs.mode }
+          PAGE_URL: ${{steps.deploy.outputs.page_url }}
+          MODE: ${{inputs.mode }}
         run: |
           set -euo pipefail
           BASE=$(printf %s "$PAGE_URL" | sed 's:/*$::')
@@ -147,6 +147,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v3-staged-${{ github.run_id }
+          name: v3-staged-${{github.run_id }}
           path: qa-artifacts/staged-site/
           if-no-files-found: warn
