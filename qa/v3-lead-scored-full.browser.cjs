@@ -1,11 +1,11 @@
-const { chromium } = require('C:/Users/Admin/NightShiftV3-Lead-tools/node_modules/playwright-core');
+const {chromium}=(()=>{try{return require('playwright')}catch{return require('C:/Users/Admin/NightShiftV3-Lead-tools/node_modules/playwright-core')}})();
 const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert/strict');
 const root=path.resolve(__dirname,'..'),out=path.join(__dirname,'v3-lead-scored-full-evidence');fs.mkdirSync(out,{recursive:true});
 const mime={'.html':'text/html;charset=utf-8','.js':'application/javascript;charset=utf-8','.mjs':'application/javascript;charset=utf-8','.css':'text/css;charset=utf-8'};
 const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(!target.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}fs.readFile(target,(err,buf)=>{if(err){res.writeHead(404);res.end('404');return;}res.writeHead(200,{'content-type':mime[path.extname(target)]||'application/octet-stream'});res.end(buf)})});
 (async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
- const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',args:['--disable-gpu-sandbox']});
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{}),args:['--disable-gpu-sandbox']});
  const context=await browser.newContext({viewport:{width:1920,height:1080},deviceScaleFactor:1,reducedMotion:'reduce'});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
  const snap=()=>page.evaluate(()=>window.__nightShiftV3.snapshot());
@@ -210,12 +210,24 @@ const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+de
    assert.equal(final.evidence.filter(e=>/^[ISPT][1-4]$/.test(e.id)).length,12);
    assert.equal(final.scoreIssue,null,'no authentic SYSTEMS ledger mismatch');
    assert.equal(final.verifiedScoreReady,true,'actual frozen score must be available');
+   console.log('SCORE_RECEIPT_DIAGNOSTIC',JSON.stringify({errors,dom:await page.evaluate(()=>({hostHidden:document.getElementById('score-receipt')?.hidden,html:document.getElementById('score-receipt')?.innerHTML?.slice(0,800),sr:document.getElementById('screen-reader')?.textContent})),scoreIssue:final.scoreIssue,verifiedScoreReady:final.verifiedScoreReady}));
    const paper=page.locator('#score-receipt .ns-receipt');
    await paper.waitFor({state:'visible',timeout:4000});
    assert.equal(await page.locator('#score-receipt [data-flip]').count(),1);
    console.log('VERIFIED_SCORE_VIEW',await page.locator('#score-receipt .ns-receipt-score').innerText());
    assert.equal(errors.length,0,'no browser errors through complete 12-card 2-boss campaign');
    await page.screenshot({path:path.join(out,'1080p-real-full-campaign-ending.png')});
+   await page.locator('#score-receipt [data-flip]').click();
+   assert.match(await page.locator('#score-receipt .ns-receipt-title').innerText(),/PEOPLE & QUALITY/,'physical flip must reveal the second honest score');
+   await page.screenshot({path:path.join(out,'1080p-real-people-quality-ending.png')});
+   await page.locator('#score-receipt [data-details]').click();
+   assert.equal(await page.locator('#score-receipt .ns-breakdown').count(),1,'receipt breakdown must be reachable');
+   console.log('VERIFIED_PEOPLE_VIEW',await page.locator('#score-receipt .ns-receipt-score').innerText());
+   await page.locator('#score-receipt [data-replay]').click();
+   await eventual(s=>s.mode==='card'&&s.currentCardId==='I1',5000);
+   assert.equal((await snap()).evidence.length,0,'replay must begin with no inherited score evidence');
+   assert.equal((await snap()).hearts,3,'replay must reset hearts');
+   console.log('REPLAY_RESET_VERIFIED');
    console.log('REAL FULL CAMPAIGN VERIFIED',JSON.stringify({cards:12,bosses:2,promotions:5,finalMode:final.mode,ledger:final.evidence.map(e=>e.id),bonus:final.sceneState?.bonusOutcomes,errors}));
    assert.equal(errors.length,0,'no browser exceptions');
    console.log(JSON.stringify({pass:true,seed:first.deck,stamped,shredded,closed,committedCards:promotion.evidence.map(e=>e.id),firstPerk:'carbon-copy',currentCard:(await snap()).currentCardId,errors},null,2));
