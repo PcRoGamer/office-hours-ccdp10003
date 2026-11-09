@@ -26,7 +26,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
       if(['card','printer','quota'].includes(mode))scoreRun.failAttempt({reason:why,damage});
     }catch(e){scoreProblem(e)}
     if(damage)hearts=Math.max(0,hearts-1);
-    audio?.play?.(guardUsed?'promotion-choose':'wrong');
+    audio?.play?.(guardUsed?'promotion':'wrong');
     if(guardUsed)emit({type:'global-perk-save',hearts,why,perkIds:Object.keys(levels).filter(k=>levels[k]>0)});
     emit({type:'damage',hearts,why,guardUsed});
     scene?.cancelPointer?.();mode='recover';emit({type:'recover',hearts});
