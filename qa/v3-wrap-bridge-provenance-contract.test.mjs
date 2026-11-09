@@ -5,7 +5,7 @@ import {newRun} from '../night-shift-v3/systems/engine.js';
 import {createPrinterMutiny} from '../night-shift-v3/bosses/printer/index.js';
 import {createQuotaBoss} from '../night-shift-v3/bosses/quota/quota.mjs';
 import {verifyFinalLedger} from '../night-shift-v3/finalization/scoring/ledger.js';
-import {recordQuotaPacketFromScene,assertBossRetrySafe} from
+import {recordQuotaPacketFromScene,assertBossRetrySafe,identifyPrAction} from
   '../night-shift-v3/finalization/bridge/provenance-guards.js';
 
 const required={I1:5,I2:2,I3:3,I4:3,S1:3,S2:2,S3:1,S4:1,
@@ -47,6 +47,17 @@ function packet(run,key,outcome,other={}){
  });
 }
 
+const prGesture={type:'card-action',kind:'flick-hostile-overlay',
+ objectId:'fake-window-1',correct:true,synthetic:false};
+assert.equal(identifyPrAction(prGesture,'P2'),identifyPrAction({...prGesture},'P2'),
+  'duplicate source callback must retain same SYSTEMS identity');
+assert.notEqual(identifyPrAction(prGesture,'P2'),
+ identifyPrAction({...prGesture,objectId:'fake-window-2'},'P2'));
+assert.notEqual(identifyPrAction({type:'card-action',kind:'slide-alignment-lock',
+ mark:1,synthetic:false},'P3'),
+ identifyPrAction({type:'card-action',kind:'slide-alignment-lock',mark:2,synthetic:false},'P3'));
+assert.throws(()=>identifyPrAction({...prGesture,synthetic:true},'P2'),/synthetic/);
+
 const run=newRun({seed:1,firstRun:true});
 advanceTo(run,'printer');
 counter(run);
@@ -77,6 +88,23 @@ if(originalBridge){
    /quota packet not manually resolved/,
    'UNPATCHED lead bridge rejects a genuine bonus timeout: reproduced defect');
  console.log('REPRODUCED: current lead bridge incorrectly rejects expired bonus');
+ const prRun=newRun({seed:1,firstRun:true});
+ for(let n=0;n<10&&prRun.stage.id!=='P1';n++){
+   if(prRun.stage.type==='card')finishCard(prRun,prRun.stage.id);
+   else if(prRun.stage.type==='promotion')prRun.choosePerk(prRun.availableDraft[0]);
+   else throw Error('Unexpected PR prelude stage');
+ }
+ assert.equal(prRun.stage.id,'P1');
+ const leaking=originalBridge.createSceneScoreBridge(prRun);
+ const same={type:'card-action',kind:'correct-chart-axis',correct:true,synthetic:false};
+ leaking.observe(same,'P1');leaking.observe(same,'P1');
+ assert.equal(leaking.count,2,'UNPATCHED duplicate callback incorrectly credited twice');
+ prRun.failAttempt({reason:'timeout',damage:true});
+ leaking.observe({type:'card-action',kind:'open-signed-scale-tip',
+   correct:true,synthetic:false},'P1');
+ assert.equal(leaking.count,3,'UNPATCHED PR evidence counter leaked across retry');
+ assert.throws(()=>leaking.commit('P1',{},'success'),/insufficient real actions for P1/);
+ console.log('REPRODUCED: duplicate PR event credit and stale retry counter');
 }
 assert.throws(()=>packet(run,'quota:p2:b1','file'),/out-of-order|wrong packet phase/);
 assert.throws(()=>packet(run,'quota:p1:b1','file',{synthetic:true}),/authored scene event/);
