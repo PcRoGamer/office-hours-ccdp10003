@@ -1,0 +1,382 @@
+name: Night Shift v3 | release evidence and gated Pages publish
+
+on:
+  push:
+    # Contributor PRs trigger through pull_request below; avoid duplicate
+    # full 13-job runs on every commit to the RELEASE feature branch.
+    branches: [rebuild/night-shift-v3-hd]
+    paths:
+      - 'night-shift-v3.html'
+      - 'night-shift-v3/**'
+      - 'assets/night-shift-v3/**'
+      - 'qa/v3-release*'
+      - 'coordination/reports/release-*'
+      - '.github/workflows/night-shift-v3.yml'
+  pull_request:
+    branches: [rebuild/night-shift-v3-hd]
+    paths:
+      - 'night-shift-v3.html'
+      - 'night-shift-v3/**'
+      - 'assets/night-shift-v3/**'
+      - 'qa/v3-release*'
+      - 'coordination/reports/release-*'
+      - '.github/workflows/night-shift-v3.yml'
+  workflow_dispatch:
+    inputs:
+      publish_candidate:
+        description: 'Manually publish rebuilt branch to EXISTING Pages site (false by default)'
+        type: boolean
+        required: true
+        default: false
+      approval_phrase:
+        description: 'To publish type PUBLISH_NIGHT_SHIFT_V3 after full signoff'
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: night-shift-v3-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  protected-incumbent:
+    name: Verify HD fallback and capture actual reference frames
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Source and subpath-safety checks
+        run: node qa/v3-release.audit.cjs --source
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Serve same-origin website
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/night-shift-v3-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/arcade-office-hd.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/night-shift-v3-http.log
+          exit 1
+      - name: Real HD screenshots and runtime exceptions
+        run: node qa/v3-release.audit.cjs --incumbent
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-incumbent-${{ github.run_id }}
+          path: qa-artifacts/v3-release/
+          retention-days: 14
+
+  candidate-smoke:
+    name: Candidate browser gate (RED until game exists)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Serve same-origin website
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/night-shift-v3-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/arcade-office-hd.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/night-shift-v3-http.log
+          exit 1
+      - name: Actual full-bleed V3 1080p/1440p/4K/ultrawide/portrait/DPR2
+        run: node qa/v3-release.audit.cjs --candidate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-candidate-${{ github.run_id }}
+          path: qa-artifacts/v3-release/
+          retention-days: 14
+
+  publish:
+    name: MANUAL ONLY | accepted v3 Pages publication
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/rebuild/night-shift-v3-hd' &&
+      inputs.publish_candidate == true &&
+      inputs.approval_phrase == 'PUBLISH_NIGHT_SHIFT_V3'
+    needs: [protected-incumbent, candidate-smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 2}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Hard gate on accepted 16-card campaign, boss and visual evidence
+        run: node qa/v3-release.audit.cjs --release
+      - name: Publish all tracked existing routes without overwriting any game files
+        run: |
+          mkdir -p _site
+          git archive HEAD | tar -x -C _site
+          touch _site/.nojekyll
+          test -f _site/index.html
+          test -f _site/arcade-office-hd.html
+          test -f _site/night-shift-v3.html
+          sha256sum _site/arcade-office-hd.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site}
+      - name: Publish to existing GitHub Pages (explicitly approved only)
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Fresh Chromium verification of actual public site
+        env:
+          TEST_BASE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+          node qa/v3-release.audit.cjs --candidate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-public-${{ github.run_id }}
+          path: qa-artifacts/v3-release/
+          retention-days: 30
+
+
+  independently-shipped-previews:
+    name: Independent ${{ matrix.lane }} prototype | real browser + native unit tests
+    # Read-only validation of each owned contributor branch. Never merge source
+    # or import isolated prototypes into the game without LEAD inspection.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: intake
+            branch: agents/v3-intake-81d47
+            preview: previews/v3-intake.html
+            unit: qa/v3-intake-test.mjs
+          - lane: services
+            branch: agents/v3-services-n8-7c42
+            preview: previews/v3-services.html
+            unit: ''
+          - lane: physics
+            branch: agents/v3-physics-261108-soundlab
+            preview: previews/v3-physics.html
+            unit: qa/v3-physics.test.mjs
+          - lane: systems
+            branch: agents/v3-systems-g6-0811b
+            preview: previews/v3-systems.html
+            unit: qa/v3-systems.test.mjs
+          - lane: story
+            branch: agents/v3-story-k7m29
+            preview: previews/v3-story.html
+            unit: qa/v3-story.test.mjs
+          - lane: pr
+            branch: agents/v3-pr-g6-1108c
+            preview: previews/v3-pr.html
+            unit: qa/v3-pr.test.mjs
+          - lane: printer
+            branch: agents/v3-printer-r8c2
+            preview: previews/v3-printer.html
+            unit: qa/v3-printer.test.mjs
+          - lane: quota
+            branch: agents/v3-quota-q7n482
+            preview: previews/v3-quota.html
+            unit: qa/v3-quota.test.mjs
+          - lane: a11y
+            branch: agents/v3-a11y-6f2b1
+            preview: previews/v3-a11y.html
+            unit: qa/v3-a11y-unit.test.mjs
+    steps:
+      - name: Read latest original agent branch without changing it
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          path: candidate
+          persist-credentials: false
+      - name: Read release audit script from this PR/commit
+        uses: actions/checkout@v4
+        with:
+          path: release-harness
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Run original lane's native invariant tests
+        id: native-unit
+        if: ${{ matrix.unit != '' }}
+        # Preserve browser evidence even if a developer's own unit suite fails.
+        continue-on-error: true
+        working-directory: candidate
+        run: node "${{ matrix.unit }}"
+      - name: Install headless Chromium
+        run: |
+          npm --prefix release-harness install --no-save playwright@1.58.2
+          ./release-harness/node_modules/.bin/playwright install --with-deps chromium
+      - name: Serve actual agent-owned preview and its original relative assets
+        working-directory: candidate
+        env:
+          PREVIEW_PATH: ${{ matrix.preview }}
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/v3-peer-preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:4173/$PREVIEW_PATH" >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/v3-peer-preview.log
+          exit 1
+      - name: Observe real viewport pixels, runtime errors and a live interaction
+        working-directory: candidate
+        env:
+          PREVIEW_LANE: ${{ matrix.lane }}
+          PREVIEW_PATH: ${{ matrix.preview }}
+        run: node ../release-harness/qa/v3-release-previews.cjs
+      - name: Upload actual browser frames and machine-readable QA
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-peer-${{ matrix.lane }}-${{ github.run_id }}
+          path: candidate/qa-artifacts/v3-release-previews/
+          retention-days: 14
+      - name: Native tests are mandatory, after screenshots have been captured
+        if: ${{ always() && steps.native-unit.outcome == 'failure' }}
+        run: exit 1
+
+
+  cross-branch-composition:
+    name: Compose existing v3 scene contracts in isolated CI (not a release)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rebuild/night-shift-v3-hd
+          path: staging
+      - uses: actions/checkout@v4
+        with:
+          path: release-harness
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Fetch original owner branches without mutating them
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p staging/qa-artifacts/v3-release-composition
+          while IFS='|' read -r lane ref owned; do
+            [ -z "$lane" ] && continue
+            printf '%s: %s (%s)\n' "$lane" "$ref" "$owned"
+            git -C staging fetch --no-tags --depth=1 origin "refs/heads/$ref"
+            sha=$(git -C staging rev-parse FETCH_HEAD)
+            printf '%s %s %s\n' "$lane" "$sha" "$ref" | tee -a staging/qa-artifacts/v3-release-composition/owners.txt
+            git -C staging archive FETCH_HEAD "$owned" | tar -x -C staging
+          done <<'SOURCES'
+          intake|agents/v3-intake-81d47|night-shift-v3/scenes/intake
+          services|agents/v3-services-n8-7c42|night-shift-v3/scenes/services
+          pr|agents/v3-pr-g6-1108c|night-shift-v3/scenes/pr
+          printer|agents/v3-printer-r8c2|night-shift-v3/bosses/printer
+          quota|agents/v3-quota-q7n482|night-shift-v3/bosses/quota
+          systems|agents/v3-systems-g6-0811b|night-shift-v3/systems
+          physics|agents/v3-physics-261108-soundlab|night-shift-v3/physics
+          story|agents/v3-story-k7m29|night-shift-v3/story
+          SOURCES
+          git -C staging status --short >staging/qa-artifacts/v3-release-composition/worktree-status.txt
+      - name: Exercise imported scene lifecycles, stable IDs and no-auto-score invariants
+        id: composed-contract
+        continue-on-error: true
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-composition.test.mjs
+      - name: Build a single-canvas interactive visual rehearsal, not a product release
+        run: |
+          mkdir -p staging/previews
+          cp release-harness/previews/v3-release-composition.html staging/previews/v3-release-composition.html
+      - name: Install Chromium and production-grade esbuild bundler
+        run: |
+          npm --prefix release-harness install --no-save playwright@1.58.2 esbuild@0.25.12
+          ./release-harness/node_modules/.bin/playwright install --with-deps chromium
+      - name: Serve all composed scene modules and the shared test canvas
+        working-directory: staging
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/night-shift-composition.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/previews/v3-release-composition.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/night-shift-composition.log
+          exit 1
+      - name: Capture 14 real authored scenes and inspect runtime at desktop/portrait
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-composition.browser.cjs
+      - name: Package a standalone playable 14-scene rehearsal for reviewers
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=staging/qa-artifacts/v3-release-composition/playable
+          mkdir -p "$target/previews" "$target/night-shift-v3"
+          cp staging/previews/v3-release-composition.html "$target/previews/"
+          cp -R staging/night-shift-v3/scenes "$target/night-shift-v3/"
+          cp -R staging/night-shift-v3/bosses "$target/night-shift-v3/"
+          cp -R staging/night-shift-v3/systems "$target/night-shift-v3/"
+          cp staging/qa-artifacts/v3-release-composition/owners.txt "$target/SOURCE-COMMITS.txt"
+          cat >"$target/README.txt" <<'README'
+          QUOTA PANIC / NIGHT SHIFT V3: 14-SCENE REHEARSAL
+          ------------------------------------------------
+          EASIEST PLAY: Double-click index.html, a fully bundled
+          no-server version of the exact author-owned original module code.
+          The offline copy is independently tested in real Chromium.
+
+          Alternative with inspectable modules and an HTTP server:
+          This artifact contains 12 playable Intake/Services/PR scenes and both
+          bosses assembled from original agent-owned source branches. It is
+          a temporary same-canvas INPUT AND RENDER test, NOT the finished
+          16-microgame Night Shift game. STAFF, full progression, final art/audio
+          and LEAD production shell are NOT present.
+          
+          RUN: extract this "playable" folder, then from inside it:
+            python3 -m http.server 4173
+          OPEN: http://127.0.0.1:4173/previews/v3-release-composition.html
+          Select any authored card or boss in the bottom bar, interact on the
+          canvas, and use PAUSE/RETRY. It does not commit fictional scores.
+          SOURCE-COMMITS.txt pins every authored module's actual Git SHA.
+          
+          Do NOT submit as the complete course game or replace Night Shift HD.
+          README
+      - name: Bundle everything into one portable no-server HTML file
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-offline-bundle.cjs
+      - name: Verify standalone file URL with genuine Chromium
+        working-directory: staging
+        run: node ../release-harness/qa/v3-release-offline.test.cjs
+      - name: Upload independently runnable composed rehearsal
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-playable-rehearsal-${{ github.run_id }}
+          path: staging/qa-artifacts/v3-release-composition/playable/
+          retention-days: 21
+      - name: Upload source SHAs, integration contract report and defect evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-shift-v3-composition-${{ github.run_id }}
+          path: staging/qa-artifacts/v3-release-composition/
+          retention-days: 21
+      - name: Contract failure remains fatal after browser evidence
+        if: ${{ always() && steps.composed-contract.outcome == 'failure' }}
+        run: exit 1
