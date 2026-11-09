@@ -1,7 +1,8 @@
 'use strict';
 // Independent browser smoke for randomized first cards; never assumes I1 or test-order-specific seed.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
-const {chromium}=require('C:/Users/Admin/NightShiftV3-Lead-tools/node_modules/playwright-core');
+function loadPlaywright(){for(const p of [process.env.PLAYWRIGHT_PATH,'playwright','playwright-core','C:/Users/Admin/NightShiftV3-Lead-tools/node_modules/playwright-core']){if(!p)continue;try{return require(p)}catch{}}throw Error('Playwright missing: install playwright-core or set PLAYWRIGHT_PATH')}
+const {chromium}=loadPlaywright();
 const root=path.resolve(__dirname,'..');
 const viewports=[['desktop',1920,1080,1],['laptop',1366,768,1],['portrait',650,800,1],['retina',1920,1080,2]];
 const failures=[],screens=[];
@@ -17,7 +18,7 @@ const server=http.createServer((req,res)=>{
 });
 (async()=>{
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
- const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',args:['--no-sandbox','--disable-extensions']});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||(process.platform==='win32'?'C:/Program Files/Google/Chrome/Application/chrome.exe':undefined),args:['--no-sandbox','--disable-extensions']});
  const output=path.join(root,'qa','v3-wrap-regression-evidence');fs.mkdirSync(output,{recursive:true});
  try{
  for(const [name,w,h,dpr] of viewports){
