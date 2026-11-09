@@ -36,32 +36,36 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const mouse=async(x,y)=>page.mouse.move(ox+x*scale,oy+y*scale);
   const click=async(x,y)=>{await mouse(x,y);await page.mouse.down();await page.mouse.up()};
   const snap=()=>page.evaluate(()=>window.__officeAttackQA.snapshot());
+  const initial=await snap(),totalRounds=initial.queue.length;
+  const firstBossIndex=initial.queue.indexOf('boss-printer');
+  const secondBreakIndex=firstBossIndex*2+1,finalBossIndex=initial.queue.indexOf('boss-manager');
+  assert.ok(firstBossIndex>0&&finalBossIndex===totalRounds-1,'queue must contain both bosses');
   async function active(i){
     await page.bringToFront();
     try{await page.waitForFunction(i=>{const s=window.__officeAttackQA.snapshot();return s.mode==='active'&&s.index===i},i,{timeout:10500,polling:100});}catch(e){console.error('ACTIVE_TIMEOUT',i,await snap(),{errors,bad});await page.waitForTimeout(450);console.error('AFTER_WAIT',await snap(),{errors,bad});throw e;}
     return await snap()
   }
-  for(let round=0;round<20;round++){
+  for(let round=0;round<totalRounds;round++){
    const s=await active(round);
-   if(bossRetries&&round===6){
+   if(bossRetries&&round===firstBossIndex){
      await click(480,428); // deliberately early: the bar has not reached green
      await page.waitForFunction(()=>window.__officeAttackQA.snapshot().bossMistakes===1,{timeout:1100});
      assert.equal((await snap()).lives,3,'first timing mistake should warn without taking a heart');
      await page.waitForFunction(()=>window.__officeAttackQA.snapshot().bossCooldown<=0,{timeout:1200});
      await click(480,428); // second miss must lose exactly one heart
      await page.waitForFunction(()=>{const x=window.__officeAttackQA.snapshot();return x.mode==='result'&&!x.history.at(-1)?.success&&x.id==='boss-printer'},{timeout:1800});
-     const bad=await snap();assert.equal(bad.lives,2);assert.equal(bad.index,6);assert.equal(bad.score,6);
-     await active(6);assert.equal((await snap()).bossHits,0,'boss retry must clear previous partial counter');
+     const bad=await snap();assert.equal(bad.lives,2);assert.equal(bad.index,firstBossIndex);assert.equal(bad.score,firstBossIndex);
+     await active(firstBossIndex);assert.equal((await snap()).bossHits,0,'boss retry must clear previous partial counter');
      console.log('PASS genuine failed printer timing costs one heart, same boss retries');
    }
-   if(bossRetries&&round===19){
+   if(bossRetries&&round===finalBossIndex){
      // Do nothing and let the incoming red memo hit the worker.
      await page.waitForFunction(()=>{const x=window.__officeAttackQA.snapshot();return x.mode==='result'&&!x.history.at(-1)?.success&&x.id==='boss-manager'},{timeout:7000});
-     const bad=await snap();assert.equal(bad.lives,1);assert.equal(bad.index,19);assert.equal(bad.bossWins,1);
-     await active(19);assert.equal((await snap()).bossHits,0);
+     const bad=await snap();assert.equal(bad.lives,1);assert.equal(bad.index,finalBossIndex);assert.equal(bad.bossWins,1);
+     await active(finalBossIndex);assert.equal((await snap()).bossHits,0);
      console.log('PASS real manager attack expiration costs heart and forces same boss retry');
    }
-   if(round<7)await page.screenshot({path:path.join(out,'micro-'+s.id+'-level1.png')});
+   if(round<totalRounds)await page.screenshot({path:path.join(out,'micro-'+s.id+'-level'+s.level+'.png')});
    console.log('ROUND',round+1,s.id,'level',s.level,'timer',s.remaining.toFixed(2));
    if(s.id==='stamp'){
      for(const f of s.forms.filter(x=>x.ok)){await click(f.x,f.y);await sleep(45)}
@@ -73,7 +77,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
        await mouse(560,340);await mouse(750,333);await page.mouse.up();
        await page.waitForFunction(n=>window.__officeAttackQA.snapshot().shredded>n,n,{timeout:1800});
      }
-   }else if(s.id==='patch'){
+   }else if(s.id==='fix'){
      for(const l of s.leaks){await click(l.x,l.y);await sleep(36)}
    }else if(s.id==='catch'){
      for(let t=0;t<25;t++){
@@ -83,6 +87,28 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    }else if(s.id==='timing'){
      await page.waitForFunction(()=>{const s=window.__officeAttackQA.snapshot();return s.mode==='active'&&Math.abs(s.needle-480)<s.zone*.55},{timeout:2900});
      await click(480,450);
+   }else if(s.id==='plug'){
+     const port=s.plugPorts[s.plugTarget];
+     await mouse(s.plugX,s.plugY);await page.mouse.down();
+     await mouse(480,348);await mouse(port.x,port.y);await page.mouse.up();
+   }else if(s.id==='clean'){
+     await mouse(344,320);await page.mouse.down();
+     await mouse(425,330);await mouse(520,315);await mouse(620,333);
+     await page.mouse.up();
+   }else if(s.id==='sort'){
+     for(const kind of ['paper','peel']){
+       const b=await snap();const item=b.sortItems.find(x=>x.kind===kind);
+       const bin=b.sortBins.find(x=>x.kind===kind);
+       await mouse(item.x,item.y);await page.mouse.down();
+       await mouse((item.x+bin.x)/2,(item.y+bin.y)/2);
+       await mouse(bin.x,bin.y);await page.mouse.up();
+       await sleep(50);
+     }
+   }else if(s.id==='shut'){
+     for(let hit=0;hit<s.shutTotal;hit++){
+       const b=await snap();await click(b.popup.x+94,b.popup.y-55);
+       await sleep(50);
+     }
    }else if(s.id==='boss-printer'){
      await page.screenshot({path:path.join(out,'boss-printer.png')});
      for(let hit=0;hit<3;hit++){
@@ -122,14 +148,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    if(!after.history.at(-1).success){console.error('FAIL_CONTEXT',JSON.stringify({round,id:s.id,after,previous:s}));await page.screenshot({path:path.join(out,'FAIL-'+round+'-'+s.id+'.png')});}
    assert.equal(after.history.at(-1).success,true,'round '+(round+1)+' '+s.id+' should be won with real pointer');
    handled++;
-   if(round===5||round===12){
+   if(round===firstBossIndex-1||round===secondBreakIndex-1){
      await page.waitForFunction(()=>window.__officeAttackQA.snapshot().mode==='intermission',{timeout:2900});
      const stage=await snap();
      assert.ok(stage.interDuration>=3&&stage.interDuration<=5,'intermission must last 3-5 seconds');
      assert.match(await page.locator('#inter-score').innerText(),/POINTS/);
      assert.match(await page.locator('#inter-lives').innerText(),/♥/);
-     if(!(autoBreak&&autoResearch&&round===5))await page.screenshot({path:path.join(out,'intermission-'+(round===5?1:2)+'.png')});
-     if(autoBreak&&autoResearch&&round===5){
+     if(!(autoBreak&&autoResearch&&round===firstBossIndex-1))await page.screenshot({path:path.join(out,'intermission-'+(round===firstBossIndex-1?1:2)+'.png')});
+     if(autoBreak&&autoResearch&&round===firstBossIndex-1){
        const before=await snap();
        assert.ok(before.interTime>0,'must open research during celebration');
        await page.locator('#inter-research-open').click();
@@ -196,8 +222,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
      assert.ok(layout.left>=0&&layout.right<=layout.width+1&&layout.top>=0&&layout.bottom<=layout.height+1,'research panel must fit viewport');
      assert.ok(layout.bodyOverflow<=2,'research panel must not require mandatory scrolling');
      assert.equal(layout.researchTextClipped,false,'visible research/citations must fit inside the page');
-     await page.screenshot({path:path.join(out,'research-'+(round===5?1:2)+'.png')});
-     if(round===5){
+     await page.screenshot({path:path.join(out,'research-'+(round===firstBossIndex-1?1:2)+'.png')});
+     if(round===firstBossIndex-1){
        await page.keyboard.press('Escape');
        assert.equal((await snap()).researchOpen,false);
        assert.equal((await snap()).mode,'intermission');
@@ -207,7 +233,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
        await page.locator('#research-back').click();
      }
      assert.equal((await snap()).mode,'intermission');
-     if(bossRetries&&round===5){
+     if(bossRetries&&round===firstBossIndex-1){
        await page.keyboard.press('Escape');
        await page.waitForFunction(()=>window.__officeAttackQA.snapshot().mode==='pause',{timeout:1100});
        const frozen=(await snap()).interTime;await sleep(650);
@@ -224,10 +250,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   }
   await page.waitForFunction(()=>window.__officeAttackQA.snapshot().mode==='end',{timeout:4000});
   const final=await snap();
-  assert.equal(final.score,20);assert.equal(final.lives,bossRetries?1:3);assert.equal(final.bossWins,2);
-  assert.equal(final.history.length,bossRetries?22:20);
+  assert.equal(final.score,totalRounds);assert.equal(final.lives,bossRetries?1:3);assert.equal(final.bossWins,2);
+  assert.equal(final.history.length,bossRetries?totalRounds+2:totalRounds);
   assert.equal(final.history.filter(x=>!x.success).length,bossRetries?2:0);
-  assert.deepEqual(new Set(final.history.map(x=>x.id)),new Set(['stamp','catch','shred','patch','timing','dodge','boss-printer','boss-manager']));
+  assert.deepEqual(new Set(final.history.map(x=>x.id)),new Set(['stamp','catch','shred','fix','timing','dodge','plug','clean','sort','shut','boss-printer','boss-manager']));
   assert.equal(final.grade,bossRetries?'B':'S');
   assert.equal(await page.locator('#end-title').innerText(),'SHIFT CONQUERED!');
   await page.waitForTimeout(900); // inspect settled slam animation, not an intended overshoot frame

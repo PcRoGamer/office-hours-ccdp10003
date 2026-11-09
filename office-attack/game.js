@@ -419,11 +419,13 @@ function draw(){
  c.fillStyle=active?.bg||'#315250';c.fillRect(0,0,WW,HH);
  if(active&&state.mode!=='title'){
   active.draw(state,c);
+  if(!(height>width*1.22&&offsetY>52)){
   c.save();
   c.shadowColor='#15303766';c.shadowBlur=3;
   ink(c,active.cmd,480,104,84,'#fff9e9');
   c.restore();
   ink(c,active.hint,480,157,20,'#214243');
+  }
   // Dedicated timer dock lives outside the stage: never cover gameplay.
   if(state.mode==='result'){
    c.fillStyle=state.history.at(-1)?.success?'#4ee9a54d':'#f55c5966';c.fillRect(0,0,WW,HH);
@@ -461,6 +463,11 @@ Object.defineProperty(window,'__officeAttackQA',{value:Object.freeze({
  cursor:state.cursor,forms:state.forms,workerX:state.workerX,workerY:state.workerY,
  trayX:state.trayX,docs:state.docs,drag:state.drag,leaks:state.leaks,
  needle:state.needle,zone:state.zone,playerX:state.playerX,hazards:state.hazards,warnings:state.warnings,safeT:state.safeT,
- shredded:state.shredded,required:state.required,stamped:state.stamped,grade:ui.endGrade.textContent,
+ shredded:state.shredded,required:state.required,stamped:state.stamped,
+ plugX:state.plugX,plugY:state.plugY,plugTarget:state.plugTarget,plugPorts:state.plugPorts,plugDrag:state.plugDrag,
+ cleanProgress:state.cleanProgress,cleanNeed:state.cleanNeed,cleanDrag:state.cleanDrag,
+ sortItems:state.sortItems,sortBins:state.sortBins,sorted:state.sorted,sortDrag:state.sortDrag,
+ popup:state.popup,shutTotal:state.shutTotal,shutClosed:state.shutClosed,
+ grade:ui.endGrade.textContent,
  spriteReady:HD.complete&&!!HD.naturalWidth&&iconsReady(),soundEvents,seed,resultTimer:state.resultTimer,frameCount,visibility:document.visibilityState,focus:document.hasFocus()
  }))}),configurable:false});

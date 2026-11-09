@@ -98,9 +98,9 @@ function shred(){
   }
  }
 }
-function patch(){
+function fix(){
  return{
-  id:'patch',cmd:'FIX!',hint:'CLICK EVERY GLOWING ERROR',bg:'#d9cedd',
+  id:'fix',cmd:'FIX!',hint:'CLICK EVERY GLOWING ERROR',bg:'#d9cedd',
   enter(g,a){
    g.leaks=[];
    const cells=[[-130,-55],[125,60],[-15,67],[120,-68],[-127,67]];
@@ -116,7 +116,7 @@ function patch(){
     c.save();c.shadowColor='#fff19c';c.shadowBlur=32;c.fillStyle='#ffe274';c.beginPath();c.arc(l.x,l.y,(27-g.level*3)*z,0,7);c.fill();
     ink(c,'!',l.x,l.y+2,33,'#9a3c36');c.restore();
    }
-   label(c,g.leaks.filter(l=>l.done).length+'/'+g.leaks.length+' PATCHED',480,480,22,'#483e56');
+   label(c,g.leaks.filter(l=>l.done).length+'/'+g.leaks.length+' FIXED',480,480,22,'#483e56');
   }
  }
 }
@@ -189,5 +189,221 @@ function dodge(){
   }
  }
 }
-export const GAMES=[stamp(),catchWorker(),shred(),patch(),timing(),dodge()];
+
+/* Four original WarioWare-like FIX-family mechanics, sharing the same soft office canvas. */
+function plug(){
+ return {
+  id:'plug',cmd:'PLUG!',hint:'DRAG THE PLUG INTO THE MATCHING SOCKET',bg:'#bedfd3',
+  enter(g,a){
+   const c=a.rand()<.5?'#f3b75d':'#ef796a';
+   const other=c==='#f3b75d'?'#ef796a':'#f3b75d';
+   g.plugColor=c;g.plugOther=other;g.plugTarget=a.rand()<.5?0:1;
+   g.plugPorts=[{x:718,y:278},{x:718,y:396}];
+   g.plugX=250;g.plugY=340;g.plugDrag=false;g.plugPulse=0;
+  },
+  down(g,p,a){
+   if(!hit(p,g.plugX,g.plugY,154,138))return;
+   g.plugDrag=true;g.plugDX=p.x-g.plugX;g.plugDY=p.y-g.plugY;a.tap();
+  },
+  move(g,p){
+   if(!g.plugDrag)return;
+   g.plugX=clamp(p.x-g.plugDX,125,831);
+   g.plugY=clamp(p.y-g.plugDY,207,453);
+  },
+  up(g,p,a){
+   if(!g.plugDrag)return;g.plugDrag=false;
+   const target=g.plugPorts.findIndex(v=>hit({x:g.plugX,y:g.plugY},v.x,v.y,124,103));
+   if(target===-1){g.plugX=250;g.plugY=340;return}
+   if(target!==g.plugTarget){a.lose(g.plugX,g.plugY);return}
+   g.plugPulse=1;a.spark(g.plugX,g.plugY,'#93f4b5');a.win(g.plugX,g.plugY);
+  },
+  cancel(g){g.plugDrag=false;g.plugX=250;g.plugY=340;},
+  draw(g,c){
+   // Single chunky cable sweeps from the wall to the player's hand.
+   c.save();c.strokeStyle='#335b60';c.lineWidth=28;c.lineCap='round';
+   c.beginPath();c.moveTo(78,414);c.bezierCurveTo(156,465,225,454,g.plugX-42,g.plugY+12);c.stroke();
+   c.strokeStyle=g.plugColor;c.lineWidth=20;c.stroke();c.restore();
+   rr(c,86,337,133,106,29,'#80afa6');
+   rr(c,102,356,93,66,20,'#f6e7bd');
+   for(let i=0;i<2;i++){
+    const port=g.plugPorts[i],color=i===g.plugTarget?g.plugColor:g.plugOther;
+    c.save();c.translate(port.x,port.y);
+    rr(c,-76,-49,151,98,32,'#608d8b');
+    rr(c,-66,-41,130,80,28,'#fcf4d9');
+    rr(c,-50,-24,100,48,20,color);
+    rr(c,-27,-15,17,33,8,'#3e6b6c');rr(c,10,-15,17,33,8,'#3e6b6c');
+    c.restore();
+   }
+   // Big rounded plug with two thick contact pins, all fills, no thin strokes.
+   c.save();c.translate(g.plugX,g.plugY);
+   c.rotate(g.plugDrag?-.12:Math.sin(g.t*3)*.028);
+   rr(c,-58,-43,105,88,31,g.plugColor);
+   rr(c,22,-20,36,39,16,'#f7e3b2');
+   rr(c,39,-17,44,13,6,'#f6f1d5');
+   rr(c,39,5,44,13,6,'#f6f1d5');
+   rr(c,-43,-31,53,12,6,'#fff0c8a0');
+   rr(c,-10,-9,8,18,4,'#4d6460');rr(c,17,-9,8,18,4,'#4d6460');
+   c.restore();
+   label(c,'MATCH THE COLOURS!',480,472,22,'#346965');
+  }
+ }
+}
+function clean(){
+ return {
+  id:'clean',cmd:'CLEAN!',hint:'HOLD AND SWIPE THE COFFEE SPILL',bg:'#ebd5b4',
+  enter(g){g.cleanProgress=0;g.cleanNeed=145+g.level*12;g.cleanDrag=false;g.cleanX=480;g.cleanY=321;g.cleanTrail=[];g.cleanSpark=0;},
+  down(g,p,a){
+   if(Math.hypot(p.x-480,p.y-326)>190)return;
+   g.cleanDrag=true;g.cleanLast={x:p.x,y:p.y};a.tap();
+  },
+  move(g,p,a){
+   if(!g.cleanDrag)return;
+   const dx=p.x-g.cleanLast.x,dy=p.y-g.cleanLast.y;
+   if(Math.hypot(p.x-480,p.y-326)>190){g.cleanLast={x:p.x,y:p.y};return;}
+   g.cleanProgress+=Math.min(80,Math.hypot(dx,dy));
+   g.cleanLast={x:p.x,y:p.y};
+   g.cleanTrail.push({x:p.x,y:p.y,r:24+Math.min(25,g.cleanProgress*.15)});
+   if(g.cleanTrail.length>24)g.cleanTrail.shift();
+   if(g.cleanProgress>=g.cleanNeed){g.cleanDrag=false;a.spark(480,325,'#ffeeac');a.win(480,325);}
+  },
+  up(g){g.cleanDrag=false;},
+  cancel(g){g.cleanDrag=false;},
+  draw(g,c){
+   // A large coffee spill with four soft puddle lobes, plate and wipe gesture.
+   rr(c,224,225,512,216,33,'#fff4d9');
+   c.save();c.fillStyle='#9e654d';
+   c.beginPath();c.ellipse(480,330,157,74,.1,0,7);c.fill();
+   for(let i=0;i<6;i++){
+    const theta=i*1.047+1.1;
+    c.beginPath();c.ellipse(480+130*Math.cos(theta),325+59*Math.sin(theta),36,26,theta/3,0,7);c.fill();
+   }
+   c.fillStyle='#c88e64';c.beginPath();c.ellipse(465,310,115,37,-.1,0,7);c.fill();c.restore();
+   // Wiping leaves bright cream circular paths, so the result visibly changes.
+   c.save();
+   for(const t of g.cleanTrail){
+    c.globalAlpha=.85;c.fillStyle='#fff4d9';c.beginPath();c.arc(t.x,t.y,t.r,0,7);c.fill();
+    c.globalAlpha=.7;c.fillStyle='#fffdf0';c.beginPath();c.arc(t.x,t.y,8,0,7);c.fill();
+   }
+   c.restore();
+   // Sponge sits near the hand and squashes on contact.
+   const hand=g.cleanDrag?g.cleanLast:{x:330+Math.sin(g.t*3)*7,y:246};
+   c.save();c.translate(hand.x,hand.y);
+   rr(c,-44,-22,88,45,20,'#f7d777');
+   rr(c,-35,-15,70,11,6,'#fff7c2');
+   c.restore();
+   const ratio=Math.min(1,g.cleanProgress/g.cleanNeed);
+   rr(c,326,462,308,18,9,'#caa782');
+   if(ratio>.001)rr(c,330,465,300*ratio,12,6,'#74cfa9');
+   label(c,'WIPE!',480,493,22,'#835d4b');
+  }
+ }
+}
+function sort(){
+ return {
+  id:'sort',cmd:'SORT!',hint:'PAPER IN TRAY · PEEL IN BIN',bg:'#bedbe3',
+  enter(g,a){
+   const flip=a.rand()<.5;
+   g.sortBins=[{kind:'paper',x:flip?700:260,y:422},{kind:'peel',x:flip?260:700,y:422}];
+   g.sortItems=[
+    {kind:'paper',x:390,y:274,homeX:390,homeY:274,done:false},
+    {kind:'peel',x:570,y:274,homeX:570,homeY:274,done:false}
+   ];
+   g.sortDrag=null;g.sortDX=0;g.sortDY=0;g.sorted=0;
+  },
+  down(g,p,a){
+   const item=g.sortItems.findLast(o=>!o.done&&hit(p,o.x,o.y,132,110));if(!item)return;
+   g.sortDrag=item.kind;g.sortDX=p.x-item.x;g.sortDY=p.y-item.y;a.tap();
+  },
+  move(g,p){
+   const item=g.sortItems.find(o=>o.kind===g.sortDrag);if(!item)return;
+   item.x=clamp(p.x-g.sortDX,100,860);item.y=clamp(p.y-g.sortDY,216,471);
+  },
+  up(g,p,a){
+   const item=g.sortItems.find(o=>o.kind===g.sortDrag);g.sortDrag=null;if(!item)return;
+   const bin=g.sortBins.find(b=>hit({x:item.x,y:item.y},b.x,b.y,165,112));
+   if(!bin){item.x=item.homeX;item.y=item.homeY;return}
+   if(bin.kind!==item.kind){a.lose(item.x,item.y);return}
+   item.done=true;g.sorted++;a.tap();a.spark(bin.x,bin.y,'#6ce6b7');
+   if(g.sorted===2)a.win(bin.x,bin.y);
+  },
+  cancel(g){
+   const item=g.sortItems.find(o=>o.kind===g.sortDrag);
+   if(item){item.x=item.homeX;item.y=item.homeY;}g.sortDrag=null;
+  },
+  draw(g,c){
+   // Separate flat desk area and two oversized, color-coded open bins.
+   rr(c,163,237,633,158,36,'#edf6e9');
+   for(const b of g.sortBins){
+    c.save();c.translate(b.x,b.y);
+    const paperBin=b.kind==='paper',color=paperBin?'#6aaeb2':'#efba62';
+    rr(c,-95,-34,190,96,29,color);
+    rr(c,-85,-43,170,30,15,paperBin?'#366f79':'#b77f40');
+    rr(c,-70,-52,140,22,10,'#e9f6e8');
+    label(c,paperBin?'PAPER':'TRASH',0,24,27,'#294f50');
+    c.restore();
+   }
+   for(const o of g.sortItems){
+    if(o.done)continue;
+    if(o.kind==='paper')paper(c,o.x,o.y,108,107,'good',o.kind===g.sortDrag?-.09:0);
+    else{
+     c.save();c.translate(o.x,o.y);c.rotate(o.kind===g.sortDrag?.16:-.07);
+     // One expressive banana peel; three rounded golden loops.
+     c.strokeStyle='#f4be5c';c.lineWidth=18;c.lineCap='round';
+     c.beginPath();c.moveTo(-28,-34);c.quadraticCurveTo(-44,13,-9,37);
+     c.moveTo(-20,-27);c.quadraticCurveTo(7,16,34,29);
+     c.moveTo(-20,-27);c.quadraticCurveTo(3,-45,40,-19);c.stroke();
+     rr(c,-30,-37,22,19,9,'#9f8e58');
+     c.restore();
+    }
+   }
+   label(c,g.sorted+' / 2 SORTED',480,498,22,'#2c5960');
+  }
+ }
+}
+function shut(){
+ return {
+  id:'shut',cmd:'SHUT!',hint:'CLOSE THE POPUPS BEFORE THEY LAND',bg:'#dfcce4',
+  enter(g,a){
+   g.shutTotal=g.level===1?2:3;g.shutClosed=0;g.shutPhase=a.rand()*6;
+   g.popup={x:290+a.rand()*380,y:293,phase:g.shutPhase};
+  },
+  update(g,dt,a){
+   const p=g.popup;
+   if(!p)return;
+   p.y+=(48+g.level*16)*dt;
+   p.x+=Math.sin(g.t*3+p.phase)*dt*24;
+   if(p.y>440)a.lose(p.x,p.y);
+  },
+  down(g,p,a){
+   const box=g.popup;if(!box)return;
+   // Large obvious close target; accidental taps on the body never cost hearts.
+   if(!hit(p,box.x+94,box.y-55,90,86))return;
+   g.shutClosed++;a.tap();a.spark(box.x+90,box.y-50,'#fff5c3');
+   if(g.shutClosed>=g.shutTotal){g.popup=null;a.win(box.x,box.y);return;}
+   g.popup={x:255+a.rand()*440,y:293,phase:a.rand()*6};
+  },
+  draw(g,c){
+   // Bean employee at risk below: cute but expressive, not a 3D atlas sprite.
+   sprite(c,0,Math.floor(g.t*8)%4,480,421,147,160);
+   rr(c,168,466,626,17,9,'#b49aab');
+   if(g.popup){
+    const p=g.popup;
+    c.save();c.translate(p.x,p.y);c.rotate(Math.sin(g.t*5+p.phase)*.06);
+    rr(c,-151,-95,303,188,31,'#fff8e7');
+    rr(c,-151,-95,303,55,24,'#ee7971');
+    rr(c,64,-89,85,75,26,'#b83e51');
+    label(c,'×',107,-51,69,'#fff5d8');
+    // Evil ad face occupies centre, large eyes and mouth.
+    rr(c,-99,-18,198,79,27,'#f3d2c5');
+    rr(c,-59,-1,18,23,9,'#8b5a61');
+    rr(c,36,-1,18,23,9,'#8b5a61');
+    rr(c,-28,39,68,9,5,'#b66b72');
+    c.restore();
+   }
+   label(c,g.shutClosed+' / '+g.shutTotal+' CLOSED',480,489,22,'#674c69');
+  }
+ }
+}
+
+export const GAMES=[stamp(),catchWorker(),shred(),fix(),timing(),dodge(),plug(),clean(),sort(),shut()];
 export const ALL_IDS=GAMES.map(g=>g.id);
