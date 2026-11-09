@@ -106,8 +106,10 @@ jobs:
             fi
           fi
           touch site/.nojekyll
-          cmp main-site/arcade-office-hd.html site/arcade-office-hd.html
-          cmp main-site/index.html site/index.html
+          for protected in index.html arcade-office-hd.html arcade-v3.html arcade-office-genai.html arcade-nightshift.html; do
+            test -s "site/$protected"
+            cmp "main-site/$protected" "site/$protected"
+          done
       - uses: actions/setup-node@v4
         if: ${{inputs.mode == 'publish' }}
         with:
@@ -143,10 +145,21 @@ jobs:
             curl -fL --retry 6 --retry-delay 3 "$BASE/night-shift-v3.html" -o /tmp/v3.html
             grep -q 'night-shift-v3/app.js' /tmp/v3.html
           fi
+      - name: Full real-Chromium smoke against PUBLIC project subpath
+        if: ${{ inputs.mode == 'publish' }}
+        shell: bash
+        env:
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+          RELEASE_ARTIFACT_DIR: ${{ github.workspace }}/qa-artifacts/public-site
+        run: |
+          set -euo pipefail
+          RELEASE_PUBLIC_URL="${PAGE_URL%/}/night-shift-v3.html" node candidate/qa/v3-wrap-release.cjs
       - name: Preserve staged-site evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v3-staged-${{github.run_id }}
-          path: qa-artifacts/staged-site/
+          path: |
+            qa-artifacts/staged-site/
+            qa-artifacts/public-site/
           if-no-files-found: warn
