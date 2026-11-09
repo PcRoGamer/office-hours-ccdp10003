@@ -11,6 +11,7 @@ import {definitions as printer} from './bosses/printer/index.js';
 import {definitions as quota} from './bosses/quota/quota.mjs';
 import {CARDS,PERKS,createDeck,validateDeck,assignDirectives,makeDraft,makeRng} from './systems/core.js';
 import {createAudioEngine,AUDIO_CUES} from './audio/engine.js';
+import {createStoryExperience} from './story/presentation.js';
 
 const canvas=document.getElementById('world'),g=canvas.getContext('2d',{alpha:false});
 const ui={start:document.getElementById('clock-in'),hud:document.getElementById('hud'),
@@ -196,37 +197,38 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Enter' && ['title','preview-end','victory','gameover'].includes(director.mode))runStart();
  if(e.key==='Enter' && director.mode==='recover')director.retry();
 });
-let mailKey='';
-function mailMarkup(data){
- const offers=data?.offers||[];
- return `<section class="mail-shell">
-  <div class="mail-left">
-    <div class="mail-bar"><span>✉ &nbsp; ASTER MAIL</span><span>1 UNREAD</span></div>
-    <div class="mail-chrome">Inbox / Shift Performance / Promotions</div>
-    <div class="mail-copy">
-      <span class="mail-flag">URGENT · REWARD AUTHORISATION</span>
-      <h2>${data?.subject||'Your performance has been noticed.'}</h2>
-      <div class="mail-sender"><strong>From: Finch · Upper Management</strong><br>To: Employee #0001 / Night Shift</div>
-      <p><strong>Excellent productivity!</strong> The company has approved one practical upgrade for your next shift. As a reward, we're also introducing a mandatory new rule.</p>
-      <p><strong>NEW DIRECTIVE: ${data?.directive||'FAST OR SAFE'}.</strong> Pick the fast risky route, or use the slower safe opening. Your choice changes how the next job works.</p>
-      <div class="mail-attach">▣ &nbsp; ATTACHED: EQUIPMENT REQUEST.xlsx &nbsp; / &nbsp; APPROVE ONE CELL</div>
-    </div>
-  </div>
-  <div class="mail-right">
-    <div class="work-bar"><span>▦ &nbsp; ASTER WORKBOOK</span><span>Autosaved</span></div>
-    <div class="work-menu">File &nbsp;&nbsp; Home &nbsp;&nbsp; Insert &nbsp;&nbsp; Formulas &nbsp;&nbsp; Review</div>
-    <div class="work-fx"><b>ƒx</b> Promotion Draft / 1 of 5</div>
-    <div class="work-content">
-      <h3>APPROVED PROCUREMENT OPTIONS · CHOOSE ONE</h3>
-      <div class="offers">${offers.map(o=>`<button class="offer" type="button" data-perk="${o.id}" aria-label="Choose ${o.title}">
-       <span class="symbol">${o.symbol}</span><strong>${o.title}</strong><span>${o.description}</span><em>${o.detail}</em>
-      </button>`).join('')}</div>
-      <p class="work-past">A useful reward is real. So is the requirement management adds after you've earned it. Your selected cell becomes part of the machine.</p>
-    </div>
-    <div class="work-footer"><span>STATUS: PROMOTED &nbsp; · &nbsp; NO REFUNDS</span><strong>1/5 REWARDS</strong></div>
-  </div></section>`;
+
+const storyExperience=createStoryExperience({host:ui.mail,audio,reduceMotion:reducedMotion});
+let mailKey='',pendingStoryPerk=null;
+function observedPromotionRun(snapshot){
+ const committed=snapshot.evidence.filter(e=>e?.committed===true);
+ const ids=committed.filter(e=>/^[ISPT][1-4]$/.test(e.id)).map(e=>e.id);
+ // Derive only facts the player actually earned; no guesswork from unplayed cards.
+ const run={completedCardIds:ids,perkLevels:snapshot.perkLevels,
+  mode:snapshot.practice?'practice':'standard',continueUsed:snapshot.continueUsed};
+ const coffee=committed.find(e=>e.id==='S2');
+ if(coffee?.outcome?.miraWorkstation==='functional')run.workstationIntact=true;
+ else if(coffee?.outcome?.miraWorkstation==='disrupted')run.workstationIntact=false;
+ return run;
 }
-ui.mail.addEventListener('click',e=>{const offer=e.target.closest?.('[data-perk]');if(offer&&director.pickPerk(offer.dataset.perk)){mailKey='';syncUi();canvas.focus({preventScroll:true})}});
+function presentPromotion(){
+ const data=director.promotion,now=director.snapshot(),slot=now.promotionSlot;
+ if(!data||slot<0)return;
+ pendingStoryPerk=null;
+ storyExperience.showPromotion({
+   index:slot+1,run:observedPromotionRun(now),offers:data.offers,
+   directive:data.directiveId,
+   onPick:({perkId})=>{pendingStoryPerk=perkId;},
+   onContinue:({perkId})=>{
+     if(director.mode!=='promotion')return;
+     const chosen=pendingStoryPerk||perkId;
+     if(director.pickPerk(chosen)){
+       mailKey='';pendingStoryPerk=null;syncUi();canvas.focus({preventScroll:true});
+     }
+   }
+ });
+ ui.mail.querySelector('[data-pick]')?.focus({preventScroll:true});
+}
 function syncUi(){
  const m=director.mode,playing=['card','printer','quota'].includes(m),hud=playing||m==='recover';
  ui.start.hidden=m!=='title';
@@ -234,9 +236,9 @@ function syncUi(){
  ui.pause.classList.toggle('visible',director.paused);
  ui.mail.classList.toggle('visible',m==='promotion');
  if(m==='promotion'){
-   const key=director.promotion?.subject;
-   if(key!==mailKey){ui.mail.innerHTML=mailMarkup(director.promotion);mailKey=key;ui.mail.querySelector('[data-perk]')?.focus({preventScroll:true});}
- }else if(mailKey){mailKey='';ui.mail.innerHTML='';}
+   const key=director.snapshot().promotionSlot+':'+director.promotion?.subject;
+   if(key!==mailKey){mailKey=key;presentPromotion();}
+ }else if(mailKey){mailKey='';pendingStoryPerk=null;storyExperience.hide();}
  ui.hearts.textContent='♥'.repeat(Math.max(0,director.hearts))+'♡'.repeat(Math.max(0,3-director.hearts));
  ui.timer.textContent=Math.ceil(director.snapshot().clock)+'s';
  const label=playing?(director.snapshot().imperative||'STAMP GOOD!'):m==='recover'?'RETRY SHIFT':'';
