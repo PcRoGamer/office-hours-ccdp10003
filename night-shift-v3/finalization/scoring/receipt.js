@@ -44,15 +44,31 @@ export function presentVerifiedClockout({host,runSnapshot,audio,onReplay=()=>{},
  const story=createStoryExperience({host,audio,reduceMotion});
  const article=story.showReceipt({run:runSnapshot,snapshot:slip.endingSnapshot,
    onReplay:()=>{story.dispose();onReplay()}});
- // Extra provenance belongs on the actual receipt, not a second summary slide.
- const footer=article.querySelector('.ns-receipt-bottom');
- if(footer){
-  const provenance=document.createElement('span');
-  provenance.textContent=' · '+slip.eventCount+' COMMITTED EVENTS';
-  provenance.setAttribute('aria-label',slip.eventCount+' committed game events verified');
-  footer.append(provenance);
- }
+ // STORY re-renders the thermal paper on every flip/details click. Keep the
+ // source provenance and lens-specific message factual on every new sheet.
+ const annotate=()=>{
+  if(!article.isConnected)return;
+  const footer=article.querySelector('.ns-receipt-bottom');
+  if(footer&&!footer.querySelector('.ns-event-provenance')){
+   const provenance=document.createElement('span');
+   provenance.className='ns-event-provenance';
+   provenance.textContent=' · '+slip.eventCount+' VERIFIED COMMITTED EVENTS';
+   footer.append(provenance);
+  }
+  if(article.querySelector('.ns-receipt-title')?.textContent?.trim()==='PEOPLE & QUALITY'){
+   const heading=article.querySelector('.ns-receipt h2');
+   const conclusion=article.querySelector('.ns-receipt .ns-conclusion');
+   if(heading)heading.textContent='PEOPLE & QUALITY · NOT A COMPANY AWARD';
+   if(conclusion)conclusion.textContent=
+    'Observed support: '+slip.workersHelped+'/'+slip.workersObserved+
+    '. Software access: $'+slip.licence.givenDollars+' of $80.'+
+    ' Safe notices: '+slip.noticesSafe+'/'+slip.noticesObserved+'.';
+  }
+ };
+ const watcher=new MutationObserver(annotate);
+ watcher.observe(article,{childList:true});
+ annotate();
  return Object.freeze({slip,element:article,
-  dispose:()=>story.dispose(),
+  dispose:()=>{watcher.disconnect();story.dispose()},
   flip:()=>article.querySelector('[data-flip]')?.click()});
 }
