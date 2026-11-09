@@ -253,7 +253,6 @@ function plug(){
    c.save();c.translate(g.plugX,g.plugY);
    c.rotate(g.plugDrag?-.12:Math.sin(g.t*3)*.028);
    rr(c,-58,-43,105,88,31,g.plugColor);
-   rr(c,22,-20,36,39,16,'#f7e3b2');
    rr(c,39,-17,44,13,6,'#f6f1d5');
    rr(c,39,5,44,13,6,'#f6f1d5');
    rr(c,-43,-31,53,12,6,'#fff0c8a0');
