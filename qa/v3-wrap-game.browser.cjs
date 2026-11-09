@@ -63,9 +63,8 @@ const success=(name,data)=>{trace.push({name,pass:true,...data});console.log('PA
     assert.equal(start.viewport.backing[0],w*dpr);
     assert.equal(start.viewport.backing[1],h*dpr);
     await page.screenshot({path:path.join(output,name+'-title.png')});
-    // In Windows headless Chrome the compositor can return partially grey
-    // screenshots despite a fully painted backing buffer. Preserve both:
-    // native page screenshot AND actual rendered Canvas2D pixel data.
+    // Preserve both the native full-page screenshot (including the DOM HUD)
+    // and the raw Canvas2D pixel buffer (for independent render inspection).
     const titleCanvas=await page.evaluate(()=>document.querySelector('#world').toDataURL('image/png').split(',')[1]);
     fs.writeFileSync(path.join(output,name+'-canvas-title.png'),Buffer.from(titleCanvas,'base64'));
     await page.getByRole('button',{name:/CLOCK IN/i}).click();
