@@ -121,3 +121,33 @@ letter-spacing:.05em;box-shadow:0 5px 0 #0e353c;min-height:46px;transition:backg
 @media(max-width:780px){
  .research-shell{max-width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}
 }
+
+/* DARK INTERMISSION: keep the celebration, put the copy on a calm dark field. */
+.intermission {
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(52, 119, 116, .42), transparent 43%),
+    radial-gradient(ellipse at 82% 78%, rgba(100, 57, 68, .32), transparent 42%),
+    linear-gradient(125deg, #102f36 0%, #173e47 52%, #202f40 100%);
+  color: #f8f1dd;
+}
+.intermission:before {
+  opacity: .055;
+  background: repeating-conic-gradient(from 0deg, #d8eee6 0 9deg, transparent 9deg 25deg);
+}
+.intermission .inter-copy .kicker { color: #b4dfce; }
+.intermission .inter-copy h2 {
+  color: #ffd66e;
+  text-shadow: 5px 6px 0 #081d27;
+}
+.intermission #inter-tagline { color: #f8f0dc; text-shadow: 0 2px 0 #091e26; }
+.intermission .inter-stats span {
+  background: #f7f0dc;
+  color: #173e43;
+  box-shadow: 0 7px 0 #091f26;
+}
+.intermission #inter-lives { color: #e64f55; }
+.intermission #inter-speed {
+  color: #ffe08a;
+  text-shadow: 2px 3px 0 #091f26;
+}
+.intermission #inter-rest-note { color: #d3e9dc; }
