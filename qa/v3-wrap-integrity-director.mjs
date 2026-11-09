@@ -52,7 +52,7 @@ assert.equal(director.snapshot().evidence.length,1);
 director.pointer('down',{x:4,y:4});
 assert.equal(director.snapshot().evidence.length,1);
 director.update(0.8);
-let promotions=0,bosses=0,cardCompletions=1,steps=0;
+let promotions=0,bosses=0,cardCompletions=1,steps=0,timedOutBoss=false;
 while(director.mode!=='victory' && steps++<90){
   if(director.mode==='promotion'){
     assert.equal(director.snapshot().promotionSlot,promotions);
@@ -64,7 +64,7 @@ while(director.mode!=='victory' && steps++<90){
   if(!['card','printer','quota'].includes(director.mode)){
     throw Error('Unexpected state '+director.mode);
   }
-  if(director.mode==='printer' && bosses===0){
+  if(director.mode==='printer' && !timedOutBoss){
     // Recover from the first boss timeout without creating a phantom boss victory.
     const before=director.snapshot().evidence.length;
     director.update(200);
@@ -72,6 +72,7 @@ while(director.mode!=='victory' && steps++<90){
     assert.equal(director.snapshot().evidence.length,before);
     assert.equal(director.retry(),true);
     assert.equal(director.mode,'printer');
+    timedOutBoss=true;
   }
   const wasBoss=director.mode!=='card';
   director.pointer('down',{x:40,y:40});
