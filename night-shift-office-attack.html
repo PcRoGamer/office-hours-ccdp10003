@@ -1,22 +1,87 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>QUOTA PANIC: OFFICE ATTACK</title>
-<meta name="description" content="Six crisp office microgames. One command. Four seconds. Three hearts.">
-<link rel="stylesheet" href="./office-attack/style.css"></head>
+<meta name="description" content="Six office microgames, two cartoon bosses, a fast timer and three precious lives.">
+<link rel="stylesheet" href="./office-attack/style.css">
+<link rel="stylesheet" href="./office-attack/research.css"></head>
 <body>
 <main id="game" aria-label="QUOTA PANIC: OFFICE ATTACK">
 <canvas id="stage" tabindex="0" aria-label="Arcade microgames: follow the one-word command using your mouse"></canvas>
 <div id="hud" aria-live="off"><div id="lives" aria-label="3 hearts"></div><div id="round"></div><button id="mute" type="button" aria-label="Toggle sound">♫</button></div>
 <div id="splash" class="overlay"><div class="poster">
 <div class="kicker">OFFICE HOURS PRESENTS</div><h1>QUOTA<br><em>PANIC!</em></h1>
-<p class="sub">ONE CURSOR. SIX OFFICE DISASTERS.</p>
+<p class="sub">SIX OFFICE DISASTERS. TWO BIG BOSSES.</p>
 <p class="instruction">Click. Catch. Drag. React.<br>Faster every round. Three mistakes and you're fired.</p>
 <button id="play" type="button">CLOCK IN ►</button>
+<button id="marathon-title" class="marathon-toggle" type="button" aria-pressed="false" title="Automatically continue after each celebration, without playing the microgames for you">MARATHON: OFF</button>
+<p class="marathon-explain">AUTO-CONTINUE BREAKS · YOU STILL PLAY</p>
 <p class="micro">MOUSE OR TOUCH · ESC TO PAUSE · M TO MUTE</p></div>
 <img class="poster-printer" src="./office-attack/icons/computer.png" alt="" aria-hidden="true"></div>
 <div id="pause" class="overlay hidden"><div class="modal"><h2>PAUSED</h2><p>No overtime. Not yet.</p><button id="resume">RESUME ►</button></div></div>
-<div id="ending" class="overlay hidden"><div class="modal"><div class="kicker">SHIFT COMPLETE</div><h2 id="end-title"></h2><p id="end-score"></p><button id="again">TRY AGAIN ►</button><p class="micro">SIX MECHANICS · ZERO UPGRADES</p></div></div>
-<div id="sr" class="sr-only" aria-live="polite"></div>
+<div id="intermission" class="overlay intermission hidden" role="status" aria-live="polite">
+  <div class="inter-art" aria-hidden="true"><img src="./office-attack/icons/tick.png" alt=""><span class="inter-stars">✦ ✦ ✦</span></div>
+  <div class="inter-copy"><div class="kicker">SIX DOWN. KEEP MOVING.</div>
+    <h2 id="inter-title">SPEED UP!</h2><p id="inter-tagline">THE BOSS IS DOWN!</p>
+    <div class="inter-stats"><span id="inter-score">00 POINTS</span><span id="inter-lives">♥ ♥ ♥</span></div>
+    <div id="inter-speed">NEXT: FASTER!</div><div class="inter-meter"><div id="inter-fill"></div></div>
+    <div class="break-actions" aria-label="Rest break controls">
+      <button id="inter-research-open" type="button" aria-haspopup="dialog" aria-controls="inter-research">WHY MICROGAMES? <span aria-hidden="true">?</span></button>
+      <button id="inter-marathon" class="marathon-toggle" type="button" aria-pressed="false" title="Toggle automatic continuation after the celebration">MARATHON: OFF</button>
+      <button id="inter-continue" type="button" disabled>READY IN 4...</button>
+    </div>
+    <p id="inter-rest-note">When the celebration ends, play continues only when you choose.</p>
+
+  </div>
+  <section id="inter-research" class="inter-research hidden" role="dialog" aria-modal="true" aria-labelledby="research-title">
+    <div class="research-shell">
+      <header class="research-head">
+        <span class="research-overline">OFFICE ATTACK · GAME CULTURE STUDY</span>
+        <h3 id="research-title">WHY MICROGAMES?</h3>
+        <button id="research-close" class="research-close" type="button" aria-label="Close research and return to the break">✕</button>
+      </header>
+      <nav class="research-tabs" aria-label="Research topics">
+        <button type="button" data-research-tab="origins" aria-selected="true">01 THE GENRE</button>
+        <button type="button" data-research-tab="portable" aria-selected="false">02 POCKET PLAY</button>
+        <button type="button" data-research-tab="attention" aria-selected="false">03 SCROLL VS PLAY</button>
+      </nav>
+      <div class="research-body">
+        <article class="research-topic" data-research-page="origins">
+          <span class="research-eyebrow">GENRE · GAME DESIGN PRECEDENTS</span>
+          <h4>ONE COMMAND. ONE PANIC.</h4>
+          <p>Nintendo describes <i>WarioWare</i>'s challenges as lasting seconds. The player learns a simple action immediately, then tries to execute it as the pace rises.</p>
+          <p>Melbourne's <i>Dumb Ways to Die</i> turned rail-safety messages into quick, absurd survival games. Its three-life structure helped shape our office-disaster format.</p>
+          <p class="research-application"><b>OUR RESPONSE</b> Readable verbs, expressive failures, six distinct interactions and two bosses. No upgrade menu between every game.</p>
+          <div class="research-sources">PRIMARY SOURCES <a target="_blank" rel="noopener noreferrer" href="https://www.nintendo.com/au/games/nintendo-switch/warioware-move-it/">Nintendo · WarioWare</a> <a target="_blank" rel="noopener noreferrer" href="https://www.gamesforchange.org/games/dumb-ways-to-die/">Games for Change · Dumb Ways</a></div>
+        </article>
+        <article class="research-topic" data-research-page="portable" hidden>
+          <span class="research-eyebrow">CONTEXT · CASUAL AND PORTABLE GAMING</span>
+          <h4>GAMES BETWEEN THINGS.</h4>
+          <p>Keogh and Richardson's research describes how casual mobile games fit around daily routines, waiting and short, flexible sessions. Play need not demand a whole evening.</p>
+          <p>Nintendo's <i>WarioWare: Get It Together!</i> supports handheld play. Portability and accessible controls make brief encounters a compelling <i>design opportunity</i>, not evidence of a proven genre comeback.</p>
+          <p class="research-application"><b>OUR RESPONSE</b> One-click and drag interactions, short rounds, instant retries and a deliberate rest button. The player controls the break.</p>
+          <div class="research-sources">RESEARCH <a target="_blank" rel="noopener noreferrer" href="https://doi.org/10.1177/1367549417705603">Keogh &amp; Richardson · 2017</a> <a target="_blank" rel="noopener noreferrer" href="https://www.nintendo.com/au/games/nintendo-switch/warioware-get-it-together/">Nintendo · Handheld support</a></div>
+        </article>
+        <article class="research-topic" data-research-page="attention" hidden>
+          <span class="research-eyebrow">CRITICAL QUESTION · SHORT-FORM MEDIA</span>
+          <h4>SWIPE OR TAKE ACTION?</h4>
+          <p>A 2026 systematic review found associations between heavier short-video use and attention-related difficulties, but evidence is mixed and does <b>not</b> establish causation.</p>
+          <p>Tj Power's October 2026 video argues for purposeful gaming over doomscrolling, but warns that rapid, novelty-heavy mobile games can also become compulsive. Our short arcade is a design tension, not a proven cure.</p>
+          <p class="research-application"><b>OUR QUESTION</b> Can a finite, silly, five-minute-friendly game offer more agency than an endless feed? We offer that as a design hypothesis, not a scientific fact.</p>
+          <div class="research-sources">RESEARCH <a target="_blank" rel="noopener noreferrer" href="https://pubmed.ncbi.nlm.nih.gov/42781066/">Systematic review · 2026</a> <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=IfgSsgpjAnQ">Tj Power · Video, Oct 2026 (commentary)</a></div>
+        </article>
+      </div>
+      <footer class="research-foot"><span>THE REST BREAK IS UNLIMITED. GAMEPLAY IS PAUSED.</span><button id="research-back" type="button">BACK TO BREAK ✓</button></footer>
+    </div>
+  </section>
+</div>
+<div id="ending" class="overlay ending hidden" role="dialog" aria-labelledby="end-title" aria-modal="true">
+  <div class="end-art" aria-hidden="true"><img src="./office-attack/icons/tick.png" alt=""><span class="end-flourish">✦ ✦ ✦</span></div>
+  <div class="modal end-copy"><div class="kicker" id="end-kicker">SHIFT COMPLETE</div>
+    <h2 id="end-title">SHIFT CONQUERED!</h2>
+    <div class="end-scorecard"><div id="end-grade">S</div><div class="end-tally"><p id="end-score"></p><p id="end-bosses"></p><p id="end-detail"></p></div></div>
+    <button id="again">PLAY AGAIN ►</button><p class="micro">SIX MICROGAMES · TWO BOSSES · ZERO UPGRADES</p>
+  </div>
+</div><div id="sr" class="sr-only" aria-live="polite"></div>
 </main>
 <script type="module" src="./office-attack/game.js"></script>
 </body></html>

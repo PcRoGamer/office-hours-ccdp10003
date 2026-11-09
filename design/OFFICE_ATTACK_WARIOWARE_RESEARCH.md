@@ -50,7 +50,7 @@ No pixel-art or screen assets from Nintendo games are copied. These are original
 
 ## Release contract: the actual game, not prior v3
 
-- **Six handcrafted mechanics, three escalating speed tiers, eighteen rapid-fire rounds.** No level-ups, perks, character builds, skill draft, economy, intermission, loot, boss-phase machinery or scrolling story.
+- **Six handcrafted mechanics, three escalating speed tiers, eighteen rapid-fire rounds plus two boss fights.** No level-ups, perks, character builds, skill draft, economy, loot or compulsory scrolling story. Two animated chapter intermissions offer optional research and explicitly player-controlled Continue.
 - One big imperative; visible hand-action affordances; 3 lives; each microgame can be failed by actual mistakes and timeout.
 - 4.8 s -> 4.05 s -> 3.35 s, with in-game velocity, target-size and hazard increases. No arbitrary tutorial pause.
 - Response to action under 70 ms on desktop; immediate win/loss hit-stop, particles, audible rise/fall, and <0.5 sec transition.
@@ -60,4 +60,4 @@ No pixel-art or screen assets from Nintendo games are copied. These are original
 
 ## What went wrong previously
 
-The previous team optimized rubric coverage, story paperwork and deterministic score fixtures, not the moment of *understand -> attempt -> just miss -> nail it*. 16 microgames created a quality-control multiplication problem, and extra panels competed for attention. This revision intentionally discards those engines, while retaining the strong premise, HD art and meaningful research in this non-play document. The academic context does not become mandatory text during play.
+The previous team optimized rubric coverage, story paperwork and deterministic score fixtures, not the moment of *understand -> attempt -> just miss -> nail it*. 16 microgames created a quality-control multiplication problem, and extra panels competed for attention. This revision intentionally discards those engines, while retaining the strong premise, HD art and meaningful research in this non-play document. The academic context remains optional in the two intermission research tabs (genre, portability, short-form media), with direct links to primary sources and a player-controlled break. See [the current research report](OFFICE_ATTACK_SHORT_PLAY_RESEARCH.md).
