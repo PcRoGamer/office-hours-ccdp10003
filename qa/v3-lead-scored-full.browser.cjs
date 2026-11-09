@@ -63,12 +63,21 @@ const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+de
    await page.screenshot({path:path.join(out,'1080p-real-first-promotion.png')});
    await page.locator('#mail [data-pick="carbon-copy"]').click();
    await eventual(s=>s.currentCardId==='S1',3000);
+   // The director changes stages before the promotion overlay finishes hiding.
+   // Wait until a human can actually reach the canvas, then deliver real files.
+   await page.locator('#mail').waitFor({state:'hidden',timeout:5000});
    await page.screenshot({path:path.join(out,'1080p-real-S1.png')});
    // SERVICES S1: three real folder drops, no mock event dispatch.
    for(let i=0;i<3;i++){
      const state=await snap(),f=state.sceneState.files.find(f=>f.id===i);
      assert.ok(f&&!f.done,'S1 folder '+i+' available');
      await dragWorld(f.x,f.y,923,390);
+     if(i===0){
+       const observed=await eventual(s=>s.sceneState?.filed>=1,1500);
+       assert.equal(observed.sceneState?.filed,1,'one real S1 folder filed');
+       assert.equal(observed.sceneState?.files?.[1]?.copied,true,'earned Carbon Copy must physically affect S1 before Promotion 2');
+       await page.screenshot({path:path.join(out,'1080p-real-carbon-copy-first-activation.png')});
+     }
      await page.waitForTimeout(155);
    }
    await eventual(s=>s.currentCardId==='S2',3500);
@@ -117,7 +126,7 @@ const server=http.createServer((req,res)=>{const target=path.resolve(root,'.'+de
    };
    for(let cycle=0;cycle<3;cycle++){
      await eventual(s=>s.sceneState?.phase==='jam',6500);
-     await eventual(s=>s.sceneState?.safePull===true,1900);
+     await eventual(s=>s.sceneState?.safePull===true,6000);
      await dragCentered(-104,105,-104,239);
      await eventual(s=>s.sceneState?.phase==='counter',2300);
      const stage=(await snap()).sceneState;

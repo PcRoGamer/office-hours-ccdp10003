@@ -59,6 +59,7 @@ jobs:
           node --test qa/v3-wrap-perk-1319-real-scenes.test.mjs
           node qa/v3-wrap-score.test.mjs
           node qa/v3-wrap-game.test.mjs
+          node qa/v3-lead-first-perk-services.test.mjs
       - name: Real pointer full campaign, score receipt, flip and replay
         run: node qa/v3-lead-scored-full.browser.cjs
       - name: Upload evidence even on failure
