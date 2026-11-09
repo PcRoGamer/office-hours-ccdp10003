@@ -1,0 +1,46 @@
+[
+  {
+    "name": "desktop",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "dpr": 1,
+    "card": "I1",
+    "deck": 12,
+    "errors": []
+  },
+  {
+    "name": "laptop",
+    "viewport": [
+      1366,
+      768
+    ],
+    "dpr": 1,
+    "card": "I1",
+    "deck": 12,
+    "errors": []
+  },
+  {
+    "name": "portrait",
+    "viewport": [
+      650,
+      800
+    ],
+    "dpr": 1,
+    "card": "I1",
+    "deck": 12,
+    "errors": []
+  },
+  {
+    "name": "dpr2",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "dpr": 2,
+    "card": "I1",
+    "deck": 12,
+    "errors": []
+  }
+]
