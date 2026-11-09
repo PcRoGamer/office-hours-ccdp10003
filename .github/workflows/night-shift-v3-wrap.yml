@@ -66,6 +66,12 @@ jobs:
         run: node qa/v3-arcade-rescue.browser.cjs
       - name: Real pointer full campaign, score receipt, flip and replay
         run: node qa/v3-lead-scored-full.browser.cjs
+      - name: Office Attack responsive smoke and sprite loading
+        run: node qa/office-attack-smoke.browser.cjs
+      - name: Office Attack authentic 18-round pointer campaign
+        run: node qa/office-attack-fullrun.browser.cjs
+      - name: Office Attack real failure, pause, expiration and replay
+        run: node qa/office-attack-adversarial.browser.cjs
       - name: Upload evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
@@ -75,6 +81,7 @@ jobs:
             qa-artifacts/v3-wrap-release/
             qa/v3-lead-scored-full-evidence/
             qa/v3-arcade-rescue-evidence/
+            qa/office-attack-evidence/
           if-no-files-found: warn
   release:
     needs: [gate]
@@ -115,6 +122,11 @@ jobs:
             cp candidate/night-shift-v3.html site/
             rm -rf site/night-shift-v3
             cp -a candidate/night-shift-v3 site/
+            test -s candidate/night-shift-office-attack.html
+            test -s candidate/office-attack/game.js
+            cp candidate/night-shift-office-attack.html site/
+            rm -rf site/office-attack
+            cp -a candidate/office-attack site/
             mkdir -p site/assets
             if [[ -d candidate/assets/night-shift-v3 ]]; then
               rm -rf site/assets/night-shift-v3
@@ -139,6 +151,11 @@ jobs:
           RELEASE_SITE_ROOT: ${{github.workspace }}/site
           RELEASE_ARTIFACT_DIR: ${{github.workspace }}/qa-artifacts/staged-site
         run: node candidate/qa/v3-wrap-release.cjs
+      - name: Gate new office microgame on exact staged Pages content
+        if: ${{inputs.mode == 'publish' }}
+        env:
+          OFFICE_ATTACK_SITE_ROOT: ${{github.workspace }}/site
+        run: node candidate/qa/office-attack-smoke.browser.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -158,6 +175,10 @@ jobs:
           if [[ "$MODE" == publish ]]; then
             curl -fL --retry 6 --retry-delay 3 "$BASE/night-shift-v3.html" -o /tmp/v3.html
             grep -q 'night-shift-v3/app.js' /tmp/v3.html
+            curl -fL --retry 6 --retry-delay 3 "$BASE/night-shift-office-attack.html" -o /tmp/office-attack.html
+            grep -q 'office-attack/game.js' /tmp/office-attack.html
+            curl -fL --retry 6 --retry-delay 3 "$BASE/office-attack/games.js" -o /tmp/office-games.js
+            test -s /tmp/office-games.js
           fi
       - name: Preserve staged-site evidence
         if: always()
