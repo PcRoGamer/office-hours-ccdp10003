@@ -1,0 +1,41 @@
+# Night Shift v3 | DEMO & SUBMISSION FINALIZATION
+**Date:** 9 November 2026 AEDT. **Deadline:** 23:59 AEDT via https://canvas.lms.unimelb.edu.au/courses/239834/assignments/658087
+**Integration branch:** `rebuild/night-shift-v3-hd`. **Primary creative contract:** `design/NIGHT_SHIFT_GDD_V3.md`. **Short-form comparison:** `feat/first-shift:design/FIRST_SHIFT_VERTICAL_SLICE_GDD.md`. **Course fit:** `design/CCDP_COURSE_ALIGNMENT.md`.
+**Safety:** do not modify main, index or the working Night Shift HD. Do not automatically submit to Canvas. Do not silently replace full v3 with eight cards. No unnecessary user questions or blocker dumps. No external LLM calls.
+
+## Verified baseline and release truth
+- First Shift is a distinct *eight-card demo specification*: I1/I3, S1/S2, P1/P4, T1/T4; four promotion drafts/directives, six perks, one three-phase QUOTA boss, two score lenses, responsive music, researched interactive explanation, meaningful ending. Target first-time 4.5–6.5 min, **not measured**.
+- Full v3 adds sixteen authored cards (twelve per seeded run), five promotions/directives, eight perks, Printer Mutiny plus QUOTA, 7–10 min aspirational first run. More scope is NOT proof of better design.
+- At 2026-11-08 23:05 AEDT, the LEAD recovery Windows worktree `C:\Users\Admin\NightShiftV3-Lead-Recovery-1108` contained the assembled code with all 16 authored definitions, twelve-card first deck, five promotions, both bosses, local ART/AUDIO/RENDER/STAFF snapshots, and real Chrome full-run evidence: twelve committed cards, three printer cycles, three quota phases, four FILE/COOL resolutions, victory, no JS errors (see `coordination/claims/LEAD_RECOVERY.md`). **This is local evidence, not a pushed/public release.**
+- That recovery worktree had 49 STAGED integration files and many UNTRACKED diagnostic scripts. Its commit/push was interrupted; check repository status and branch HEAD before touching. Never reset/clean/delete its contents. Some local specialist work is not pushed to their original GitHub branches.
+- Known incomplete quality work: wire actual immutable SYSTEMS scoring to STORY's two-lens receipt; replace placeholder ending; verify research/direct citations in the real in-game route; human/visual first impression and end-to-end public deployment. Do not claim academic submission without a receipt.
+- First Shift's earlier implementation had mechanically green tests but **failed** audio richness, physical ending, visual HD parity, portrait legibility and natural research integration; see `design/PRIOR_REBUILD_FAILURE_AUDIT.md`. Use these as negative regression tests.
+
+## Release acceptance, all observable
+1. A public URL launches without login, 404s or script errors. No overwritten HD/legacy routes.
+2. A player can CLOCK IN and act on the first target within 15 seconds, with sound/visual feedback and readable instruction.
+3. A normal run has exactly 12 unique cards across I/S/P/T, 5 promotions, real dual bosses with three physical phases/counters each, four unique FILE/COOL choices; a seeded set can reach all 16 authored cards without dummy victories.
+4. A failed interaction costs at most one heart and retries safely; pause freezes time; no double counted rewards; new run changes seed; two $40 licences conserve $80.
+5. Perks and announced directives actually change pointer-action outcomes; three boss bolts require manual actions; physical CLOCK OUT ending and quick replay.
+6. Corporate quota AND People & Quality scores are generated from one frozen committed-event ledger (no invented events). Source-bearing diegetic research is accessible before/at first promotion and in optional credits; why this game, why now, and creator's perspective are conveyed briefly through play.
+7. Chrome real-pointer path plus screenshots on 1920×1080, 650×800, DPR2/4K and at least 1366×768. Actual image inspection and audio playback test; compare against `arcade-office-hd.html`. No claims of human fun from bot scripts.
+8. Publish candidate only when complete release gate passes, and verify hosted link on a fresh profile. If release gate fails at deadline, preserve and submit the strongest verified existing game instead.
+
+## Atomic parallel finishing lanes
+**Read `coordination/finalization/NEW_CHAT_PROMPT.md` before choosing.** Claim exactly one unused lane by GitHub contents API CREATE `coordination/finalization/claims/<LANE>.md` **on the shared integration branch**. Do not overwrite claims. Create a unique `agents/wrap-<lane>-<suffix>` feature branch from current shared HEAD. Do not use the same Windows worktree as another chat; each lane owns only paths below. Finish code/test or a verified actionable fix PR in your turn. A claim is not evidence of an active process.
+
+| Priority / lane | Exclusive writable implementation and QA | Specific deliverable |
+| --- | --- | --- |
+| **01 PACKAGE** | existing LEAD recovery worktree and existing LEAD-owned `night-shift-v3.html`, `night-shift-v3/app.js`, `night-shift-v3/runtime/{director,transitions}.js`, `qa/v3-lead*`; `coordination/reports/wrap-package*` | Verify staged files, commit with command-scoped author if needed, push recovery branch, draft PR against shared integration branch, reconcile source compatibility, integrate other agents' tested changes without overwriting their paths. Avoid committing logs or backups. Own full assembly and final merge. |
+| **02 SCORE_ENDING** | `night-shift-v3/finalization/scoring/**`, `qa/v3-wrap-score*`, `coordination/reports/wrap-score*` | Make immutable event-ledger scoring adapter, 12-card formulas, $80 conservation, 4 unique boss choices, truthful corporate vs people scores and physical receipt/clock-out. Add executable adversarial tests; provide narrow integration wiring instructions to PACKAGE; don't edit LEAD-owned files. |
+| **03 GAME_QA** | `qa/v3-wrap-game*`, `coordination/reports/wrap-game*` | Real Playwright end-to-end 12-card 2-boss campaign, 16 authored variant coverage, retries, input fairness, 4 boss bonus patterns, three license dispositions, seed/replay/pause, zero errors. Inspect real screenshots; improve tests and write actionable fix suggestions. |
+| **04 POLISH_QA** | `night-shift-v3/finalization/polish/**`, `qa/v3-wrap-polish*`, `coordination/reports/wrap-polish*` | Real screenshot/audible comparison vs HD, title, first click, promotions, printers, quota, receipt; fix clipped portrait labels, weak hierarchy, unreadable hit targets, audio mode transitions. Implement optional, self-contained replacement components and deliver tested surgical integration instructions. |
+| **05 COURSE_DEMO** | `night-shift-v3/finalization/course/**`, `qa/v3-wrap-course*`, `coordination/reports/wrap-course*` | Verify short-form First Shift eight-card beats *within* full v3, research sources by first promotion, why-game/why-now, three design influences (Dumb Ways to Die, Brotato, Job Simulator), physically visible source/credit links and four CCDP rubric axes; optional in-game component and tests. No academic slides/lectures forced into play. |
+| **06 DELIVERY** | `.github/workflows/night-shift-v3-wrap.yml`, `qa/v3-wrap-release*`, `coordination/reports/wrap-release*` | Non-destructive GitHub Pages candidate/public smoke, no legacy regressions, playable external URL, performance + screenshot evidence and rollback. Do not claim Canvas submitted; only the actual submission receipt qualifies. Never publish untested integration. |
+
+## Integration protocol and stopping
+- PACKAGE owns the one assembled source of truth; no other lane cherry-picks into or edits PACKAGE's shared worktree.
+- Every feature lane runs its own tests and opens a PR into `rebuild/night-shift-v3-hd`, then writes exact file-level integration steps in PR. No handoff-only placeholder. PACKAGE tests and merges only when quality gate passes.
+- When a lane discovers a fix outside its owned paths, implement a self-contained adapter or PR review comment with exact patch evidence; don't overwrite another lane.
+- No further feature brainstorming until the release route is playable. Prefer eliminating defects over adding new scenes. A practical working demo with complete academic integrity is the immediate critical path; full v3 remains the product scope.
+- No chats remain active between turns. Never promise asynchronous progress. Put all durable evidence in GitHub.
