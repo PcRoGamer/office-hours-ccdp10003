@@ -7,14 +7,18 @@
  * because it appeared in a predetermined deck. Every record is constructed
  * from a real scene's committed evidence or actual manual callback.
  */
+import {recordQuotaPacketFromScene,identifyPrAction} from '../finalization/bridge/provenance-guards.js';
 const required={I1:5,I2:2,I3:3,I4:3,S1:3,S2:2,S3:1,S4:1,
   P1:2,P2:2,P3:1,P4:1,T1:2,T2:1,T3:1,T4:2};
 const must=(c,msg)=>{if(!c)throw Error('SCENE_EVIDENCE: '+msg)};
 const nonneg=(n)=>Number.isInteger(n)&&n>=0;
 export function createSceneScoreBridge(run){
  must(run?.recordAction&&run?.completeCard&&run?.recordBossAction,'real SYSTEMS run required');
- let current='',captured=0,sequence=0;
- function reset(id){if(id!==current){current=id;captured=0;sequence=0}}
+ let current='',captured=0,lastAttempt='';
+ function reset(id){
+  const active=run.attemptId;
+  if(id!==current||active!==lastAttempt){current=id;captured=0;lastAttempt=active;}
+ }
  function action(objectId,outcome='correct'){
   must(typeof objectId==='string'&&objectId.length>0,'action has no real identifier');
   if(run.recordAction({objectId,outcome,gesture:'physical'})&&outcome==='correct')captured++;
@@ -25,8 +29,7 @@ export function createSceneScoreBridge(run){
   if(e.synthetic===true)return;
   if(id[0]==='P'&&e.type==='card-action'){
    must(typeof e.correct==='boolean','PR action missing correctness');
-   const obj=typeof e.objectId==='string'?e.objectId:(typeof e.kind==='string'?e.kind:'manual');
-   action(id+':'+obj+':'+(++sequence),e.correct?'correct':'wrong');
+   action(identifyPrAction(e,id),e.correct?'correct':'wrong');
   }
   if(id==='printer'&&e.type==='printer-bolt-removed'){
    must(e.manual===true&&Number.isInteger(e.boltIndex),'printer bolt lacks manual hit');
@@ -35,11 +38,7 @@ export function createSceneScoreBridge(run){
    run.recordBossAction('manual-bolt-'+run.phase,{kind:'counter'});
    run.resolveBossCounter();
   }
-  if(id==='quota'&&e.type==='quota-bonus-resolved'){
-   must(typeof e.objectId==='string'&&['file','cool'].includes(e.outcome)&&e.synthetic===false,'quota packet not manually resolved');
-   must(run.stage.type==='boss'&&run.stage.id==='quota','quota SYSTEMS order diverged');
-   must(run.resolveBonusPacket(e.objectId,e.outcome,{manual:true}),'quota packet already resolved');
-  }
+  if(id==='quota'&&e.type==='quota-bonus-resolved')recordQuotaPacketFromScene(run,e);
   if(id==='quota'&&e.type==='boss-phase-complete'){
    must(e.outcome==='counter'&&e.synthetic===false&&e.objectId==='quota:bolt:'+run.phase,'quota bolt not player-countered');
    must(run.stage.type==='boss'&&run.stage.id==='quota','quota SYSTEMS boss missing');

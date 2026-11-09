@@ -82,12 +82,16 @@ const originalBridge=await import('../night-shift-v3/runtime/score-bridge.js').c
  throw err;
 });
 if(originalBridge){
- const bridge=originalBridge.createSceneScoreBridge(run);
- assert.throws(()=>bridge.observe({type:'quota-bonus-resolved',
-   objectId:'quota:p1:b1',outcome:'expired',synthetic:false},'quota'),
-   /quota packet not manually resolved/,
-   'UNPATCHED lead bridge rejects a genuine bonus timeout: reproduced defect');
- console.log('REPRODUCED: current lead bridge incorrectly rejects expired bonus');
+ const bridgeRun=newRun({seed:1,firstRun:true});
+ advanceTo(bridgeRun,'quota');
+ const bridge=originalBridge.createSceneScoreBridge(bridgeRun);
+ bridge.observe({type:'quota-bonus-resolved',
+   objectId:'quota:p1:b1',outcome:'expired',synthetic:false},'quota');
+ const expired=bridgeRun.eventLedger.filter(e=>e.kind==='quota-packet');
+ assert.equal(expired.length,1,'legitimate timeout must commit once');
+ assert.equal(expired[0].outcome,'expired','timeout cannot be falsely filed');
+ assert.equal(bridgeRun.getScorePreview().packetsFiled,0);
+ console.log('PASS: integrated lead bridge accepts authentic zero-point timeout');
  const prRun=newRun({seed:1,firstRun:true});
  for(let n=0;n<20&&prRun.stage.id!=='P1';n++){
    if(prRun.stage.type==='card')finishCard(prRun,prRun.stage.id);
@@ -96,16 +100,19 @@ if(originalBridge){
    else throw Error('Unexpected PR prelude stage');
  }
  assert.equal(prRun.stage.id,'P1');
- const leaking=originalBridge.createSceneScoreBridge(prRun);
+ const corrected=originalBridge.createSceneScoreBridge(prRun);
  const same={type:'card-action',kind:'correct-chart-axis',correct:true,synthetic:false};
- leaking.observe(same,'P1');leaking.observe(same,'P1');
- assert.equal(leaking.count,2,'UNPATCHED duplicate callback incorrectly credited twice');
+ corrected.observe(same,'P1');corrected.observe(same,'P1');
+ assert.equal(corrected.count,1,'duplicate PR callback cannot earn a second action');
  prRun.failAttempt({reason:'timeout',damage:true});
- leaking.observe({type:'card-action',kind:'open-signed-scale-tip',
+ corrected.observe({type:'card-action',kind:'open-signed-scale-tip',
    correct:true,synthetic:false},'P1');
- assert.equal(leaking.count,3,'UNPATCHED PR evidence counter leaked across retry');
- assert.throws(()=>leaking.commit('P1',{},'success'),/insufficient real actions for P1/);
- console.log('REPRODUCED: duplicate PR event credit and stale retry counter');
+ assert.equal(corrected.count,1,'PR counter must reset after failed attempt');
+ corrected.observe(same,'P1');
+ assert.equal(corrected.count,2,'two genuinely distinct retry gestures earn two credits');
+ corrected.commit('P1',{},'success');
+ assert.equal(prRun.stage.id,'P2','retry with new real actions advances without stale credits');
+ console.log('PASS: integrated PR callbacks deduplicate, reset on retry and credit only new actions');
 }
 assert.throws(()=>packet(run,'quota:p2:b1','file'),/out-of-order|wrong packet phase/);
 assert.throws(()=>packet(run,'quota:p1:b1','file',{synthetic:true}),/authored scene event/);
