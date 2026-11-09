@@ -193,6 +193,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
          researchTextClipped:source.bottom>br.bottom+2||eyebrow.top<br.top-2,
          width:innerWidth,height:innerHeight};
      });
+     console.log('RESEARCH_LAYOUT',JSON.stringify(layout));
      assert.ok(layout.left>=0&&layout.right<=layout.width+1&&layout.top>=0&&layout.bottom<=layout.height+1,'research panel must fit viewport');
      assert.ok(layout.bodyOverflow<=2,'research panel must not require mandatory scrolling');
      assert.equal(layout.researchTextClipped,false,'visible research/citations must fit inside the page');

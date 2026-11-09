@@ -96,3 +96,12 @@ letter-spacing:.05em;box-shadow:0 5px 0 #0e353c;min-height:46px;transition:backg
 }
 @media(max-height:570px){#marathon-title{font-size:14px;padding:6px 11px;min-height:31px}
  .marathon-explain{display:none}}
+
+/* Guard against wider fallback typography on Linux Chromium. */
+.inter-research{box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%}
+.research-shell{box-sizing:border-box;flex:0 1 auto;min-width:0;min-height:0;
+ max-width:min(930px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+.research-head,.research-tabs,.research-body,.research-topic,.research-foot{min-width:0}
+.research-topic p,.research-sources a,.research-foot span{overflow-wrap:anywhere}
+@media(max-width:780px){.research-shell{max-width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}}
+@media(max-height:640px){.research-shell{max-height:calc(100dvh - 12px)}}
