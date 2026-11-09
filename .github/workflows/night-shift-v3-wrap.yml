@@ -53,12 +53,16 @@ jobs:
         run: node qa/v3-wrap-release.cjs
       - name: Authored campaign contract
         run: node qa/v3-lead-director.mjs
+      - name: Real pointer full campaign, score receipt, flip and replay
+        run: node qa/v3-lead-scored-full.browser.cjs
       - name: Upload evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v3-release-${{github.run_id }}
-          path: qa-artifacts/v3-wrap-release/
+          path: |
+            qa-artifacts/v3-wrap-release/
+            qa/v3-lead-scored-full-evidence/
           if-no-files-found: warn
   release:
     needs: [gate]

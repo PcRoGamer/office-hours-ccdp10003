@@ -157,8 +157,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
     if(scoreRun&&!scoreIssue&&!result&&['card','boss'].includes(scoreRun.stage.type))
       try{scoreRun.tickActive(dt*1000)}catch(e){scoreProblem(e)}
     scene?.update?.(dt);
-    // A scene may synchronously fail inside update(). Never advance a failed
-    // result as if it cleared the card; preserve retry and discard attempt data.
+    // Scene update can synchronously emit failure; never advance it as a success.
     if(!['card','printer','quota'].includes(mode)||result?.outcome==='failed')return;
     if(result){delay-=dt;if(delay<=0)afterClear();return;}
     elapsed+=dt;
