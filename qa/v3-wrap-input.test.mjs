@@ -30,9 +30,18 @@ test('pointer cancel cannot submit a release; next gesture can start',()=>{
  assert.deepEqual(f.calls.map(c=>c[0]),['down','cancel','down']);f.guard.dispose();
 });
 test('boss focus loss cancels input and pauses timer',()=>{
- const f=fixture({mode:'quota'});f.fire('pointerdown');f.director.togglePause(false);
- f.guard.cancel(); // caller can cancel on loss of focus
- assert.deepEqual(f.calls.map(c=>c[0]),['down','pause','cancel']);f.guard.dispose();
+ const previous=globalThis.window;
+ const windowEvents=new EventTarget();
+ globalThis.window=windowEvents;
+ try {
+  const f=fixture({mode:'quota'});
+  f.fire('pointerdown');
+  windowEvents.dispatchEvent(new Event('blur'));
+  assert.deepEqual(f.calls.map(c=>c[0]),['down','cancel','pause']);
+  assert.equal(f.director.paused,true);
+  assert.equal(f.captured.size,0);
+  f.guard.dispose();
+ } finally { if(previous===undefined)delete globalThis.window;else globalThis.window=previous; }
 });
 test('pause, missing scene and disposed adapter ignore further input',()=>{
  const f=fixture();f.director.paused=true;f.fire('pointerdown');assert.equal(f.calls.length,0);
