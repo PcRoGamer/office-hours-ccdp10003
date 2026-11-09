@@ -81,7 +81,15 @@ if(originalBridge){
 assert.throws(()=>packet(run,'quota:p2:b1','file'),/out-of-order|wrong packet phase/);
 assert.throws(()=>packet(run,'quota:p1:b1','file',{synthetic:true}),/authored scene event/);
 assert.throws(()=>packet(run,'quota:p1:b1','cool',{manual:false}),/marked automatic/);
-assert.equal(packet(run,'quota:p1:b1','expired'), 'expired');
+const p1Events=[];
+const physicalP1=createQuotaBoss({viewport:live,run:{currentDirective:'FAST OR SAFE'},
+ events:{emit:e=>{if(e.type==='quota-bonus-resolved'){
+   p1Events.push(e);recordQuotaPacketFromScene(run,e);
+ }}}});
+for(let i=0;i<280&&p1Events.length===0;i++)physicalP1.update(.05);
+assert.equal(p1Events.length,1,'actual authored scene must emit timed expiration');
+assert.equal(p1Events[0].outcome,'expired','real skipped bonus has zero-point outcome');
+assert.equal(physicalP1.snapshot().bonusOutcomes['quota:p1:b1'],'expired');
 assert.equal(run.getScorePreview().packetsFiled,0);
 assert.equal(run.getScorePreview().official.bossFileBonus,0);
 const firstPacket=count(run,'quota-packet');
@@ -97,7 +105,21 @@ assert.throws(()=>assertBossRetrySafe({run,scene:freshQuota,bossId:'quota'}),
 const physicalQuota={snapshot:()=>({boltsRemoved:1,
  bonusOutcomes:{'quota:p1:b1':'expired'}}),cancelPointer(){}};
 assert.equal(assertBossRetrySafe({run,scene:physicalQuota,bossId:'quota'}),physicalQuota);
-assert.equal(packet(run,'quota:p2:b1','cool'), 'cool');
+const p2Events=[];
+const physicalP2=createQuotaBoss({viewport:live,run:{
+ quotaBoltsRemoved:1,quotaBonusPacketOutcomes:{'quota:p1:b1':'expired'},
+ currentDirective:'FAST OR SAFE'
+},events:{emit:e=>{if(e.type==='quota-bonus-resolved'){
+ p2Events.push(e);recordQuotaPacketFromScene(run,e);
+ }}}});
+for(let i=0;i<70&&physicalP2.snapshot().mode!=='bonus';i++)physicalP2.update(.05);
+assert.equal(physicalP2.snapshot().mode,'bonus','rehydrated physical phase two must offer bonus');
+const target=physicalP2.snapshot().targets;
+assert.equal(physicalP2.pointerDown({...target.bonus,id:22}),true);
+physicalP2.pointerMove({...target.cool,id:22});
+assert.equal(physicalP2.pointerUp({...target.cool,id:22}),true);
+assert.equal(p2Events.length,1);
+assert.equal(p2Events[0].outcome,'cool','real manual drag is committed as COOL');
 counter(run);
 assert.equal(run.phase,3);
 assert.throws(()=>packet(run,'quota:p3:b2','file'),/out-of-order/);
