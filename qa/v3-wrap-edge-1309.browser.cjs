@@ -2,7 +2,7 @@
 // Independent integrated candidate edge-case browser gate. Does not modify game code.
 // node qa/v3-wrap-edge-1309.browser.cjs
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
-const {chromium}=require('C:/Users/Admin/NightShiftV3-Lead-tools/node_modules/playwright-core');
+function loadBrowser(){for(const id of [process.env.PLAYWRIGHT_PATH,'playwright','playwright-core','C:/Users/Admin/NightShiftV3-Lead-tools/node_modules/playwright-core']){if(!id)continue;try{return require(id).chromium}catch{}}throw Error('Playwright browser runtime not found')}const chromium=loadBrowser();
 const root=path.resolve(__dirname,'..'),out=path.join(root,'qa','v3-wrap-edge-1309-evidence');
 fs.mkdirSync(out,{recursive:true});
 const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/json'};
@@ -18,9 +18,9 @@ async function main(){
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',args:['--no-sandbox','--disable-extensions']});
  try{
- for(const [name,width,height,dpr,hasTouch] of [['tiny',320,568,1,true],['portrait-dpr2',650,800,2,true],['4k',3840,2160,1,false],['ultrawide',3440,1440,1,false]]){
+ for(const [name,width,height,dpr,hasTouch] of [['tiny',320,568,1,true],['portrait-dpr2',650,800,2,true],['4k',3840,2160,1,false],['ultrawide',3440,1440,1,false]].filter(item=>!process.env.EDGE_CASE||item[0]===process.env.EDGE_CASE)){
  const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:dpr,hasTouch,isMobile:hasTouch,reducedMotion:'reduce',serviceWorkers:'block'});
- const page=await context.newPage(),errors=[],bad=[];
+ const page=await context.newPage(),errors=[],bad=[];page.setDefaultTimeout(7500);
  page.on('pageerror',e=>errors.push(String(e)));page.on('console',e=>{if(e.type()==='error')errors.push(e.text())});
  page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url())});
  try{
