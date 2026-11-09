@@ -1,3 +1,4 @@
+import {drawSpriteTile} from '../../art/hd-sprites.js';
 // Night Shift v3 / Public Relations / original Canvas2D theatre art.
 // World-space drawing only: no canvas sizing, DOM, audio unlock or HUD ownership.
 export const C = Object.freeze({ink:'#162e33',shadow:'#091c22',cream:'#fff4d9',paper:'#f5e7c8',mint:'#71e3c4',gold:'#ffbc50',red:'#f16d66',blue:'#74c1da',slate:'#46666a',white:'#ffffff',plum:'#735f92'});
@@ -20,30 +21,16 @@ export function layout(v){
   return {W,H,width,left,cx:W/2,portrait,scale,boardY:portrait?160:146,usableH:H-160};
 }
 export function sceneBackdrop(ctx,v,clock,id,title,subtitle,{reduced=false}={}){
-  const l=layout(v),{W,H,cx,portrait}=l;
-  const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#264951');gr.addColorStop(.55,'#18383f');gr.addColorStop(1,'#0b242c');ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
-  // Theatre ribs with intentionally continuous off-camera architecture for ultrawide.
-  for(let x=-80;x<W+100;x+=150){ctx.fillStyle='rgba(6,24,29,.23)';ctx.fillRect(x+85,0,26,H);line(ctx,x+80,0,x+80,H,'rgba(255,244,217,.07)',2);}
-  const beam=ctx.createRadialGradient(cx,140,55,cx,300,Math.max(W*.65,H*.8));beam.addColorStop(0,'rgba(253,212,128,.2)');beam.addColorStop(1,'rgba(253,212,128,0)');ctx.fillStyle=beam;ctx.fillRect(0,0,W,H);
-  // Curtains in corners, no rectangle or letterbox around the world.
-  for(const side of [-1,1]){ctx.save();ctx.translate(side<0?0:W,0);ctx.scale(side<0?1:-1,1);ctx.fillStyle='#102b33';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.min(115,W*.16),0);ctx.bezierCurveTo(165,165,50,280,0,343);ctx.closePath();ctx.fill();ctx.strokeStyle='#0a1a20';ctx.lineWidth=8;ctx.stroke();for(let i=0;i<3;i++){line(ctx,18+i*24,0,8+i*10,245,'#365963',3)}ctx.restore();}
-  // Ceiling light housing / projector beam.
-  const lampX=portrait?cx:Math.max(68,cx-l.width*.38);
-  if(!portrait){
-    line(ctx,lampX,-30,lampX,99,'#091b20',9);circle(ctx,lampX,99,28,C.gold,C.ink,6);
-    ctx.fillStyle='rgba(255,207,109,.065)';ctx.beginPath();ctx.moveTo(lampX-28,112);ctx.lineTo(lampX-260,H);ctx.lineTo(lampX+260,H);ctx.lineTo(lampX+28,112);ctx.fill();
-    const sway=reduced?0:Math.sin(clock*2.1)*1.7;
-    rr(ctx,lampX-39+sway,104,78,17,8,C.ink,C.gold,3);
-  }
-  const fs=portrait?25:37;tx(ctx,'PUBLIC RELATIONS',cx,57,fs,C.cream);tx(ctx,'ASTER CORPORATION  //  REPUTATION MAINTENANCE',cx,87,portrait?10:13,C.mint);
-  tx(ctx,`${id}  /  ${title}`,cx,125,portrait?17:22,C.gold);
-  // Desk silhouette gives continuous tangible environment, not a UI sheet.
-  ctx.fillStyle=C.shadow;ctx.fillRect(0,H-64,W,64);ctx.fillStyle='#6b5151';ctx.fillRect(0,H-77,W,16);
-  ctx.fillStyle='#cc9a68';ctx.fillRect(0,H-81,W,9);ctx.fillStyle='rgba(255,255,255,.17)';ctx.fillRect(0,H-81,W,3);
-  if(!portrait){drawFinch(ctx,Math.min(W-100,cx+l.width*.49),H-146,.79,clock,0,reduced);}
-  return l;
+ const l=layout(v),{W,H,cx,portrait}=l;
+ // Quiet presentation surface. The interactive chart and popups own the frame.
+ ctx.fillStyle='#2b4749';ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#36585a';ctx.fillRect(0,H-76,W,76);
+ ctx.fillStyle='#b89a6c';ctx.fillRect(0,H-78,W,8);
+ tx(ctx,'PUBLIC RELATIONS',cx,56,portrait?22:31,C.cream);
+ return l;
 }
 export function drawFinch(ctx,x,y,s,t,expression=0,reduced=false){
+  if(drawSpriteTile(ctx,x,y+5,190*s,230*s,0,reduced?0:Math.floor(t*3)%4))return;
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.rotate(reduced?0:Math.sin(t*2)*.025);
   // Body with dark blazer and flapping pink tie.
   rr(ctx,-39,-5,78,108,24,C.plum,C.ink,6);ctx.fillStyle=C.cream;ctx.beginPath();ctx.moveTo(-10,5);ctx.lineTo(0,53);ctx.lineTo(14,5);ctx.fill();

@@ -412,7 +412,7 @@ function newScene(id,context={}){
       c.strokeStyle='#222a32';c.lineWidth=13;
       for(let v=-90;v<95;v+=28){c.beginPath();c.moveTo(-42,v);c.lineTo(52,v-65);c.stroke();}
       c.restore();
-      type(c,'SWIPE →',l.blockX,y+73,16,P.paper,'center');
+      type(c,'CLICK + DRAG →',l.blockX,y+73,16,P.paper,'center');
     }else if(!w.dispatched){
       badge(c,'SAFE TO RUN',l.blockX,y-35,P.mint);
     }
@@ -432,7 +432,7 @@ function newScene(id,context={}){
   type(c,'2 REQUIRED · THIRD OPTIONAL',l.right-4,671,l.portrait?11:15,P.gold,'right');
  }
  function drawBoxes(c,l,t){
-  ribbon(c,l,'MAKE WAY FOR THE TEAM','GRAB & FLICK THE BOXES OUT OF THE EXIT LANE.');
+  ribbon(c,l,'MAKE WAY FOR THE TEAM','CLICK + DRAG BOXES OUT OF THE EXIT LANE.');
   const laneW=Math.min(l.aw*.67,490);
   round(c,l.center-laneW*.5,323,laneW,271,18,'#416058','#e2c17a',5);
   c.fillStyle='#fff2be22';c.fillRect(l.center-111,338,222,244);

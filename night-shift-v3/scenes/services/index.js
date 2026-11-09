@@ -1,3 +1,4 @@
+import {drawSpriteTile} from '../../art/hd-sprites.js';
 /** QUOTA PANIC: NIGHT SHIFT v3 / Services microgames.
  * Native Canvas2D ES module.  No global state, no DOM dependency and no score mutation.
  * Scene coordinates: centered 1200 x 760 stage, WORLD (not screen) pixels.
@@ -25,24 +26,22 @@ function strokeText(c,s,x,y,size=44,color=P.cream){c.font=`900 ${size}px Impact,
 function shadow(c,x,y,w=100){c.save();c.scale(1,.28);c.beginPath();c.ellipse(x,y*3.55,w,34,0,0,Math.PI*2);c.fillStyle='#06212c55';c.fill();c.restore()}
 function sparkle(c,x,y,t,n=4){for(let i=0;i<n;i++){const a=t*2+i*Math.PI*2/n,r=15+10*Math.sin(t*5+i);line(c,x+Math.cos(a)*(r-5),y+Math.sin(a)*(r-5),x+Math.cos(a)*(r+5),y+Math.sin(a)*(r+5),i%2?P.gold:P.light,3)}}
 function speech(c,text,x,y,w=220){rectangle(c,x,y,w,56,P.paper,13,P.ink,4);label(c,text,x,y+2,17,P.ink);c.fillStyle=P.paper;c.beginPath();c.moveTo(x-18,y+29);c.lineTo(x-7,y+45);c.lineTo(x+7,y+29);c.fill()}
-function sceneBackdrop(c,ctx,t,variant){const width=viewportWidth(ctx),left=600-width/2;
- const grd=c.createLinearGradient(0,0,0,760);grd.addColorStop(0,variant==='coffee'?'#1d4652':variant==='cable'?'#283851':'#1d3944');grd.addColorStop(1,P.dark);c.fillStyle=grd;c.fillRect(left,0,width,760);
- for(let x=left-100;x<left+width+200;x+=210){let k=(Math.round(x/210)%4+4)%4;rectangle(c,x,214,140,305,k===0?'#274a52':'#20444c',5,'#385861',2);rectangle(c,x,212,110,267,'#1b3741',3);line(c,x-45,115,x+45,115,'#456873',3)}
- for(let x=left-50;x<left+width+200;x+=86){line(c,x,0,x-95,440,'#ffffff08',2)}
- rectangle(c,600,675,width+100,170,'#315962',0,P.ink,10);rectangle(c,600,612,width+100,35,'#bb8469',0,P.ink,8);
- for(let x=left-120;x<left+width+120;x+=165){line(c,x,640,x+45,760,'#122d3560',3)}
- // overhead fluorescent spill and paper theatre proscenium
- const glow=c.createRadialGradient(600,170,40,600,170,620);glow.addColorStop(0,'#c3e4c01a');glow.addColorStop(1,'#c3e4c000');c.fillStyle=glow;c.fillRect(left,0,width,760);
- line(c,left,75,left+width,75,P.ink,14);for(let i=0;i<5;i++){const x=left+width*(i+.5)/5;line(c,x,0,x,73,P.ink,7);rectangle(c,x,74,105,20,P.cream,5,P.ink,3)}
+function sceneBackdrop(c,ctx,t,variant){
+ const width=viewportWidth(ctx),left=600-width/2;
+ // Clean theatre field. The physical objects, not the wallpaper, carry the game.
+ c.fillStyle=variant==='coffee'?'#244750':variant==='cable'?'#303e50':'#284448';
+ c.fillRect(left-250,0,width+500,760);
+ rectangle(c,600,654,width+300,126,'#53665c',0,P.ink,5);
+ rectangle(c,600,600,width+300,16,'#c09c6b',0,P.ink,5);
 }
-function finch(c,x,y,t,face='nervous',scale=1){c.save();c.translate(x,y+Math.sin(t*3)*3);c.scale(scale,scale);
+function finch(c,x,y,t,face='nervous',scale=1){if(drawSpriteTile(c,x,y+10,205*scale,255*scale,0,Math.floor(t*3)%4))return;c.save();c.translate(x,y+Math.sin(t*3)*3);c.scale(scale,scale);
  shadow(c,0,132,65);line(c,-42,48,-52,128,P.ink,13);line(c,41,49,48,128,P.ink,13);
  rectangle(c,0,51,118,138,P.gold,26,P.ink,8);rectangle(c,0,90,77,36,'#d49d3a',8);line(c,-50,14,-85,55,P.ink,12);line(c,53,14,84,54,P.ink,12);circle(c,-87,58,10,P.paper,P.ink,4);circle(c,83,58,10,P.paper,P.ink,4);
  circle(c,0,-73,80,P.paper,P.ink,8);c.fillStyle='#1b4e53';c.beginPath();c.moveTo(-67,-96);c.quadraticCurveTo(-42,-156,15,-152);c.quadraticCurveTo(75,-152,68,-103);c.quadraticCurveTo(18,-120,-35,-99);c.closePath();c.fill();
  let e=face==='shocked'?13:9;circle(c,-25,-70,e,P.ink);circle(c,28,-70,e,P.ink);
  if(face==='shocked'){circle(c,1,-30,15,P.ink);circle(c,3,-34,5,P.red)}else if(face==='happy'){c.beginPath();c.arc(0,-36,27,.12,Math.PI-.12);c.strokeStyle=P.ink;c.lineWidth=6;c.stroke()}else{line(c,-5,-36,21,-33,P.ink,5)}
  c.restore()}
-function mira(c,x,y,t,face='focus',scale=1){c.save();c.translate(x,y+Math.sin(t*2.7)*2);c.scale(scale,scale);
+function mira(c,x,y,t,face='focus',scale=1){if(drawSpriteTile(c,x,y+10,205*scale,255*scale,1,Math.floor(t*3)%4))return;c.save();c.translate(x,y+Math.sin(t*2.7)*2);c.scale(scale,scale);
  shadow(c,0,116,61);line(c,-32,50,-40,118,P.ink,12);line(c,29,50,36,119,P.ink,12);rectangle(c,0,47,115,140,P.teal,29,P.ink,8);rectangle(c,0,77,73,35,'#1b8d83',10);line(c,-53,5,-76,65,P.ink,12);line(c,52,5,72,65,P.ink,12);
  circle(c,0,-79,75,P.paper,P.ink,8);c.fillStyle='#4f3134';c.beginPath();c.moveTo(-69,-91);c.bezierCurveTo(-85,-169,70,-178,70,-94);c.lineTo(62,-132);c.quadraticCurveTo(8,-105,-62,-109);c.fill();
  circle(c,-23,-70,face==='panic'?11:8,P.ink);circle(c,26,-70,face==='panic'?11:8,P.ink);

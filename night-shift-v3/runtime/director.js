@@ -8,6 +8,9 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   let result=null,delay=0,sceneIndex=0,perk=null,deck=['I1'],promotion=null,promotionSlot=-1;
   let ledger=[],definitions=new Map(),bosses=new Map(),draftProvider=null,rand=()=>.5;
   let levels={},activeDirective=null,continueUsed=false,practice=false;
+  // Every equipped power-up provides one *real* heart-saving retry in each
+  // encounter. Its authored specialty remains active across matching scenes.
+  let globalGuardSpent=false,lastGlobalGuard=false;
   let fullCampaign=false,currentBoss=null;
   let scoreRun=null,scoreBridge=null,scoreIssue=null;
   const emit=e=>externalEvents?.emit?.(e);
@@ -15,11 +18,17 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   const fail=(why='mistake')=>{
     if(result||!['card','printer','quota'].includes(mode))return;
     result={outcome:'failed',why};
+    const guardUsed=!practice&&!globalGuardSpent&&Object.values(levels).some(n=>n>0);
+    if(guardUsed)globalGuardSpent=true;
+    lastGlobalGuard=guardUsed;
+    const damage=!practice&&!guardUsed;
     if(scoreRun&&!scoreIssue)try{
-      if(['card','printer','quota'].includes(mode))scoreRun.failAttempt({reason:why,damage:!practice});
+      if(['card','printer','quota'].includes(mode))scoreRun.failAttempt({reason:why,damage});
     }catch(e){scoreProblem(e)}
-    if(!practice)hearts=Math.max(0,hearts-1);
-    audio?.play?.('wrong');emit({type:'damage',hearts,why});
+    if(damage)hearts=Math.max(0,hearts-1);
+    audio?.play?.(guardUsed?'promotion-choose':'wrong');
+    if(guardUsed)emit({type:'global-perk-save',hearts,why,perkIds:Object.keys(levels).filter(k=>levels[k]>0)});
+    emit({type:'damage',hearts,why,guardUsed});
     scene?.cancelPointer?.();mode='recover';emit({type:'recover',hearts});
   };
   const events={emit:e=>{
@@ -43,7 +52,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
     }catch(error){scoreProblem(error)}
     ledger.push(Object.freeze({id,attemptId:e.attemptId||'attempt-'+attempt,
       outcome:e.outcome,evidence:result.evidence,synthetic:false,committed:true}));
-    delay=.75;emit({type:'encounter-cleared',id});
+    delay=.38;emit({type:'encounter-cleared',id});
   }};
   const runInfo={
     get hearts(){return hearts},
@@ -79,8 +88,9 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
       throw Error('Department slots must be I×3, S×3, P×3, T×3');
     deck=[...cards];draftProvider=provider;rand=rng;fullCampaign=true;
   }
-  function enterCard(){
+  function enterCard({preserveGuard=false}={}){
     result=null;delay=0;elapsed=0;attempt++;currentBoss=null;
+    if(!preserveGuard){globalGuardSpent=false;lastGlobalGuard=false;}
     scene?.dispose?.();scene=null;
     const id=deck[sceneIndex];if(!id){mode='preview-end';return;}
     const def=definitions.get(id);
@@ -94,7 +104,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   }
   function enterBoss(id){
     if(!fullCampaign)throw Error('Full boss cannot run without authored definitions');
-    result=null;delay=0;elapsed=0;attempt++;scene?.dispose?.();
+    result=null;delay=0;elapsed=0;attempt++;globalGuardSpent=false;lastGlobalGuard=false;scene?.dispose?.();
     const def=bosses.get(id);
     if(!def)throw Error('Missing boss '+id);
     currentBoss=id;limit=Math.max(id==='quota'?130:95,(def.authoredReferenceMs||95000)/1000);
@@ -103,7 +113,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
   }
   function start(){
     scene?.dispose?.();scene=null;mode='title';paused=false;hearts=3;clock=0;
-    sceneIndex=0;perk=null;promotion=null;promotionSlot=-1;ledger=[];attempt=0;levels={};activeDirective=null;continueUsed=false;
+    sceneIndex=0;perk=null;promotion=null;promotionSlot=-1;ledger=[];attempt=0;levels={};activeDirective=null;continueUsed=false;globalGuardSpent=false;lastGlobalGuard=false;
     scoreIssue=null;scoreRun=null;scoreBridge=null;
     if(fullCampaign&&typeof scoreFactory==='function'){
       scoreRun=scoreFactory({mode:practice?'practice':'standard'});
@@ -177,7 +187,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
       }catch(e){scoreProblem(e);return false;}
       result=null;delay=0;elapsed=0;attempt++;mode=currentBoss;
       emit({type:'boss-retry-resumed',id:currentBoss,attempt});
-    }else enterCard();
+    }else enterCard({preserveGuard:true});
     return true;
   }
   function setPractice(value){practice=Boolean(value)}
@@ -193,6 +203,7 @@ export function createDirector({viewport,canvas,ctx2d,events:externalEvents,audi
     evidence:ledger.map(x=>({...x})),sceneState:scene?.snapshot?.()??null,targets:['card','printer','quota'].includes(mode)?(scene?.snapshot?.()?.targets||[]):[],
     pendingPromotion:promotion?{offers:promotion.offers.map(x=>x.id),directive:promotion.directive,slot:promotionSlot}:null,
     perkLevels:{...levels},activeDirective,continueUsed,practice,
+    globalGuardReady:!practice&&!globalGuardSpent&&Object.values(levels).some(n=>n>0),lastGlobalGuard,
     completeCampaign:mode==='victory'&&fullCampaign,fullCampaign,
     scoreIssue,verifiedScoreReady:mode==='victory'&&!scoreIssue&&scoreRun?.status==='victory'};}
   return {registerDefinitions,registerBosses,configureRun,start,update,pointer,retry,togglePause,setPractice,pickPerk,snapshot,
