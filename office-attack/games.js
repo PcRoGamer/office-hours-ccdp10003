@@ -98,7 +98,7 @@ function shred(){
   }
  }
 }
-function patch(){
+function fix(){
  return{
   id:'fix',cmd:'FIX!',hint:'CLICK EVERY GLOWING ERROR',bg:'#d9cedd',
   enter(g,a){
@@ -116,7 +116,7 @@ function patch(){
     c.save();c.shadowColor='#fff19c';c.shadowBlur=32;c.fillStyle='#ffe274';c.beginPath();c.arc(l.x,l.y,(27-g.level*3)*z,0,7);c.fill();
     ink(c,'!',l.x,l.y+2,33,'#9a3c36');c.restore();
    }
-   label(c,g.leaks.filter(l=>l.done).length+'/'+g.leaks.length+' PATCHED',480,480,22,'#483e56');
+   label(c,g.leaks.filter(l=>l.done).length+'/'+g.leaks.length+' FIXED',480,480,22,'#483e56');
   }
  }
 }
@@ -405,5 +405,5 @@ function shut(){
  }
 }
 
-export const GAMES=[stamp(),catchWorker(),shred(),patch(),timing(),dodge(),plug(),clean(),sort(),shut()];
+export const GAMES=[stamp(),catchWorker(),shred(),fix(),timing(),dodge(),plug(),clean(),sort(),shut()];
 export const ALL_IDS=GAMES.map(g=>g.id);
