@@ -1,0 +1,2 @@
+# INTEGRATION_REGRESSION
+Claimed 2026-11-09 by independent GPT-6 finalization agent. All six canonical lanes already claimed. Supplemental isolated lane owns `qa/v3-wrap-integrity-*` and `coordination/reports/wrap-integrity-*` only. Focus: runnable source-level integrity and user-input regression gates. Do not edit PACKAGE or other finalization lane files. Target `rebuild/night-shift-v3-hd` by isolated PR.
