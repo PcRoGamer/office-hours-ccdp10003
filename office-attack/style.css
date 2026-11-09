@@ -167,3 +167,165 @@ transform:rotate(-8deg);box-shadow:8px 10px 0 #102f31;animation:boss-slam .7s cu
 .confetti-sheet i{position:absolute;top:-19px;left:var(--x);width:clamp(8px,1.5vw,18px);height:clamp(13px,2vw,26px);border-radius:3px;opacity:0;animation:confetti-fall var(--fall) linear var(--delay) both}
 @keyframes confetti-fall{0%{opacity:0;transform:translateY(-26px) rotate(0deg) scale(.7)}8%{opacity:.9}90%{opacity:.9}100%{opacity:0;transform:translateY(115dvh) rotate(var(--tilt)) scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.confetti-sheet i{animation:none;display:none}}
+
+
+/* LEFT-RAIL HUD: lives and a numeric clock, with no progress bars. */
+:root{--side-rail:clamp(68px,6.1vw,92px);--top-rail:clamp(48px,6.2vh,62px)}
+#stage{position:absolute;inset:auto;left:var(--side-rail);top:var(--top-rail);right:0;bottom:0;width:calc(100% - var(--side-rail));height:calc(100% - var(--top-rail));background:#b9dfd2}
+#side-hud{position:absolute;z-index:4;left:0;top:0;bottom:0;width:var(--side-rail);display:flex;flex-direction:column;align-items:center;gap:clamp(14px,3.4vh,28px);padding:clamp(12px,2.7vh,24px) 5px;background:linear-gradient(180deg,#fff3d2 0%,#ffe8bd 100%);border-right:5px solid #eab96b;box-shadow:5px 0 0 #1b4d491c;pointer-events:none;color:#244e50}
+#side-hud .hud-label{display:block;font:900 10px/1 Arial,sans-serif;letter-spacing:.13em;color:#64847c;text-align:center;margin-bottom:7px}
+.side-status{display:flex;flex-direction:column;align-items:center;gap:3px}
+.heart-stack{display:flex;flex-direction:column;align-items:center;gap:0;font:900 clamp(21px,2.35vw,29px)/.93 Arial,sans-serif;filter:drop-shadow(0 2px 0 #c65a4d30)}
+.heart-full{color:#ef6d68}.heart-empty{color:#c9b8a0}
+#deadline-ui.deadline-clock-card{position:relative;inset:auto;width:100%;height:auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 3px 11px;background:#ffe0a1;border:0;border-radius:18px;box-shadow:0 5px 0 #d7a75b;pointer-events:none}
+#deadline-ui[hidden]{display:none!important}
+.timer-clock{position:relative;width:34px;height:34px;border:4px solid #356c67;border-radius:50%;background:#fff9e8;box-shadow:inset 0 -3px 0 #e6d2a9}
+.timer-clock:before{content:"";position:absolute;left:50%;top:6px;width:3px;height:10px;border-radius:3px;background:#356c67;transform:translateX(-50%)}
+.timer-clock:after{content:"";position:absolute;left:50%;top:14px;width:9px;height:3px;border-radius:3px;background:#356c67;transform:rotate(28deg);transform-origin:left center}
+#deadline-seconds{display:block;min-width:0;text-align:center;color:#2e5d58;font:900 clamp(19px,2.25vw,25px)/1 Impact,"Arial Narrow",Arial,sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.timer-note{font:900 8px/1 Arial,sans-serif;letter-spacing:.17em;color:#789088}
+#deadline-ui.panic{animation:deadline-pulse .34s ease-in-out infinite alternate;background:#ffd29a}
+#deadline-ui.panic .timer-clock{animation:deadline-wobble .18s ease-in-out infinite alternate}
+#deadline-ui.critical{animation:deadline-pulse .22s ease-in-out infinite alternate;background:#ffc3a9}
+#deadline-ui.critical #deadline-seconds{color:#d94d48}
+#deadline-ui.critical .timer-clock{border-color:#d94d48;animation:deadline-wobble .12s ease-in-out infinite alternate}
+#deadline-ui.win{background:#c6efd0;box-shadow:0 5px 0 #73b88a}
+#deadline-ui.win #deadline-seconds{color:#247f5d}
+#deadline-ui.fail{background:#f4b6a8;box-shadow:0 5px 0 #bd7167}
+#deadline-ui.fail #deadline-seconds{color:#9a3d3d;animation:deadline-slam .28s ease-out both}
+.side-hud-mark{margin-top:auto;color:#8eaa98;font:900 clamp(15px,1.7vw,21px)/1 Impact,Arial,sans-serif;letter-spacing:-.08em;opacity:.68}
+#hud{position:absolute;z-index:4;inset:auto;left:var(--side-rail);right:0;top:0;height:var(--top-rail);min-height:0;display:flex;align-items:center;justify-content:flex-end;padding:5px clamp(10px,2vw,28px);background:#fff1c7;color:#254d52;border:0;border-bottom:5px solid #eab96b;box-shadow:0 5px 0 #1b4d4924;filter:none;pointer-events:none}
+#hud .hud-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#hud .hud-label{font:900 9px/1 Arial,sans-serif;letter-spacing:.15em;color:#66857a}
+#round{color:#1f5355;font:900 clamp(16px,1.75vw,23px)/1 Impact,"Arial Narrow",Arial,sans-serif;letter-spacing:.05em}
+#mute{pointer-events:auto;width:clamp(34px,3.5vw,43px);height:clamp(34px,3.5vw,43px);font-size:22px;background:#b2e5dd;color:#163f43;box-shadow:0 4px 0 #73b8a9;border-radius:13px}
+#mute:hover{background:#d9f3e8}
+.inter-meter{display:none!important}
+@media(max-width:620px){
+ :root{--side-rail:62px;--top-rail:48px}
+ #side-hud{gap:15px;padding:11px 3px}
+ #side-hud .hud-label{font-size:8px;margin-bottom:5px}
+ .heart-stack{font-size:20px}
+ #deadline-ui.deadline-clock-card{padding:8px 2px}
+ .timer-clock{width:29px;height:29px;border-width:3px}
+ .timer-clock:before{top:5px;height:8px}
+ .timer-clock:after{top:12px;width:8px}
+ #deadline-seconds{font-size:18px}
+ .timer-note{font-size:7px}
+ #hud{padding:4px 7px}
+ #hud .hud-label{font-size:8px}
+ #round{font-size:15px}
+ #mute{width:34px;height:34px;font-size:18px;border-radius:11px}
+}
+@media(max-height:520px){
+ #side-hud{gap:7px;padding:6px 3px}
+ .heart-stack{font-size:18px}
+ #deadline-ui.deadline-clock-card{padding:5px 2px}
+ .side-hud-mark{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){#deadline-ui,.timer-clock{animation:none!important}}
+
+
+/* Make the intermission's free-choice note readable at a glance. */
+#inter-rest-note{
+ display:inline-block;
+ width:fit-content;
+ max-width:min(92%,560px);
+ margin:14px auto 0;
+ padding:10px 16px;
+ border-radius:13px;
+ background:#fff9e8;
+ color:#173f3e!important;
+ font:800 clamp(14px,1.08vw,16px)/1.4 Arial,sans-serif;
+ letter-spacing:.015em;
+ text-shadow:none!important;
+ box-shadow:0 4px 0 #c89b6e;
+ opacity:1;
+}
+@media(max-width:780px){
+ #inter-rest-note{max-width:96%;margin:8px auto 0;padding:9px 12px;font-size:14px;line-height:1.35}
+}
+
+
+/* No full-width header strip: leave the playfield full-height. */
+:root{--top-rail:0px}
+#stage{top:0;height:100%}
+#hud{height:0;min-height:0;padding:0;background:transparent;border:0;box-shadow:none;overflow:visible}
+#hud .hud-center{left:auto;right:calc(clamp(34px,3.5vw,43px) + 25px);top:11px;transform:none;flex-direction:row;align-items:center;gap:0}
+#hud .hud-label{display:none}
+#round{display:inline-flex;align-items:center;min-height:32px;padding:7px 12px;border-radius:99px;background:#fff4d6e8;color:#245653;font:900 clamp(14px,1.45vw,19px)/1 Impact,"Arial Narrow",Arial,sans-serif;letter-spacing:.045em;box-shadow:0 3px 0 #244b4930}
+#mute{position:absolute;right:11px;top:10px;pointer-events:auto}
+@media(max-width:620px){
+ #hud .hud-center{right:49px;top:8px}
+ #round{min-height:28px;padding:6px 9px;font-size:13px}
+ #mute{right:8px;top:7px}
+}
+
+
+/* Compact countdown bar belongs to the left HUD rail, never over the playfield. */
+#deadline-ui.deadline-clock-card{gap:7px}
+#deadline-ui .deadline-track{position:relative;display:block;flex:none;width:clamp(46px,5vw,62px);min-width:0;height:11px;padding:2px;overflow:hidden;border:0;border-radius:8px;background:#c9b89a;box-shadow:inset 0 1px 2px #684e3435}
+#deadline-fill{display:block;width:100%;height:100%;border-radius:6px;transform:scaleX(1);transform-origin:left center;background:linear-gradient(90deg,#71cf9d 0%,#f5d36a 56%,#f07861 100%);transition:transform .06s linear}
+#deadline-ui.panic #deadline-fill{background:#f29c54}
+#deadline-ui.critical #deadline-fill{background:#e85c54}
+#deadline-ui.win #deadline-fill{background:#45bd82}
+#deadline-ui.fail #deadline-fill{background:#d84f4b}
+@media(max-width:620px){#deadline-ui .deadline-track{width:48px;height:9px}}
+
+
+/* Full-height vertical countdown: occupy the unused sidebar, below hearts. */
+#side-hud{gap:clamp(9px,1.8vh,16px)}
+#deadline-ui.deadline-clock-card{
+ flex:1 1 0;
+ align-self:stretch;
+ width:auto;
+ min-height:0;
+ margin:0 3px 2px;
+ padding:10px 4px;
+ gap:9px;
+ border-radius:14px;
+}
+#deadline-ui .hud-label{margin:0}
+#deadline-seconds{font-size:clamp(17px,1.8vw,22px)}
+#deadline-ui .deadline-track{
+ flex:1 1 0;
+ align-self:center;
+ display:block;
+ position:relative;
+ width:clamp(18px,2vw,25px);
+ min-width:18px;
+ min-height:80px;
+ height:auto;
+ padding:2px;
+ overflow:hidden;
+ border:0;
+ border-radius:12px;
+ background:#c9b89a;
+ box-shadow:inset 0 1px 3px #684e3450,0 2px 0 #fff6db;
+}
+#deadline-fill{
+ display:block;
+ position:absolute;
+ left:2px;right:2px;bottom:2px;top:2px;
+ width:auto;height:auto;
+ border-radius:9px;
+ transform:scaleY(1);
+ transform-origin:center bottom;
+ background:linear-gradient(180deg,#e96c5e 0%,#f2c85f 48%,#55c98a 100%);
+ transition:transform .06s linear;
+}
+#deadline-ui.panic #deadline-fill{background:linear-gradient(180deg,#e96c5e,#f18d55)}
+#deadline-ui.critical #deadline-fill{background:#e85c54}
+#deadline-ui.win #deadline-fill{background:#45bd82}
+#deadline-ui.fail #deadline-fill{background:#d84f4b}
+@media(max-width:620px){
+ #side-hud{gap:8px}
+ #deadline-ui.deadline-clock-card{margin:0 2px 2px;padding:8px 3px;gap:7px}
+ #deadline-ui .deadline-track{width:17px;min-width:17px}
+ #deadline-seconds{font-size:16px}
+}
+@media(max-height:520px){
+ #side-hud{gap:5px}
+ #deadline-ui.deadline-clock-card{padding:5px 3px;gap:5px}
+ #deadline-ui .deadline-track{min-height:40px}
+}

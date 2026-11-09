@@ -7,19 +7,21 @@
 <body>
 <main id="game" aria-label="QUOTA PANIC: OFFICE ATTACK">
 <canvas id="stage" tabindex="0" aria-label="Arcade microgames: follow the one-word command using your mouse"></canvas>
-<div id="hud" aria-live="off">
-  <div class="hud-hearts"><span class="hud-label">LIVES</span><span id="lives" aria-label="3 hearts"></span></div>
-  <div class="hud-center"><span class="hud-label">OFFICE ATTACK</span><strong id="round"></strong></div>
-  <button id="mute" type="button" aria-label="Toggle sound">♫</button>
+<div id="side-hud" aria-label="Game status">
+  <section class="side-status" aria-label="Remaining lives">
+    <span class="hud-label">LIVES</span>
+    <div id="lives" class="heart-stack" role="img" aria-label="3 hearts remaining"><span class="heart-full">♥</span><span class="heart-full">♥</span><span class="heart-full">♥</span></div>
+  </section>
+  <section id="deadline-ui" class="deadline-clock-card" hidden role="timer" aria-live="off" aria-label="Time remaining">
+    <span class="hud-label">TIME</span>
+    <strong id="deadline-seconds">4.8s</strong>
+    <div class="deadline-track" role="meter" aria-label="Time remaining" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="deadline-fill"></span></div>
+  </section>
+  <div class="side-hud-mark" aria-hidden="true">QP</div>
 </div>
-<div id="deadline-ui" hidden aria-label="Time remaining">
-  <div class="deadline-stamp">URGENT!</div>
-  <div class="deadline-track" role="meter" aria-label="Deadline countdown" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
-    <div id="deadline-fill"></div>
-    <span class="deadline-dashes" aria-hidden="true"></span>
-  </div>
-  <div id="panic-bean" aria-hidden="true"><span class="panic-eyes"></span><span class="panic-mouth"></span></div>
-  <div id="deadline-seconds" aria-live="off">4.8s</div>
+<div id="hud" aria-live="off">
+  <div class="hud-center"><span class="hud-label">OFFICE ATTACK</span><strong id="round"></strong></div>
+  <button id="mute" type="button" aria-label="Toggle sound">♪</button>
 </div>
 <div id="splash" class="overlay"><div class="poster">
 <div class="kicker">OFFICE HOURS PRESENTS</div><h1>QUOTA<br><em>PANIC!</em></h1>
@@ -37,7 +39,7 @@
   <div class="inter-copy"><div class="kicker" id="inter-kicker">CHAPTER CLEAR · TAKE A BREATHER</div>
     <h2 id="inter-title">SPEED UP!</h2><p id="inter-tagline">THE BOSS IS DOWN!</p>
     <div class="inter-stats"><span id="inter-score">00 POINTS</span><span id="inter-lives">♥ ♥ ♥</span></div>
-    <div id="inter-speed">NEXT: FASTER!</div><div class="inter-meter"><div id="inter-fill"></div></div>
+    <div id="inter-speed">NEXT: FASTER!</div>
     <div class="break-actions" aria-label="Rest break controls">
       <button id="inter-research-open" type="button" aria-haspopup="dialog" aria-controls="inter-research">WHY MICROGAMES? <span aria-hidden="true">?</span></button>
       <button id="inter-marathon" class="marathon-toggle" type="button" aria-pressed="false" title="Toggle automatic continuation after the celebration">MARATHON: OFF</button>

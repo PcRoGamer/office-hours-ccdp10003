@@ -11,7 +11,7 @@ const ui={
  resume:document.getElementById('resume'),
  interTitle:document.getElementById('inter-title'),interTag:document.getElementById('inter-tagline'),
  interScore:document.getElementById('inter-score'),interLives:document.getElementById('inter-lives'),
- interSpeed:document.getElementById('inter-speed'),interFill:document.getElementById('inter-fill'),
+ interSpeed:document.getElementById('inter-speed'),
  endTitle:document.getElementById('end-title'),endScore:document.getElementById('end-score'),
  endGrade:document.getElementById('end-grade'),endBosses:document.getElementById('end-bosses'),
  endDetail:document.getElementById('end-detail'),endKicker:document.getElementById('end-kicker'),
@@ -20,8 +20,7 @@ const ui={
  interResearchOpen:document.getElementById('inter-research-open'),interResearch:document.getElementById('inter-research'),
  researchClose:document.getElementById('research-close'),researchBack:document.getElementById('research-back')
 };
-const deadline={shell:document.getElementById('deadline-ui'),fill:document.getElementById('deadline-fill'),
-seconds:document.getElementById('deadline-seconds'),track:document.querySelector('.deadline-track')};
+const deadline={shell:document.getElementById('deadline-ui'),seconds:document.getElementById('deadline-seconds'),fill:document.getElementById('deadline-fill'),track:document.querySelector('.deadline-track')};
 const BATCH_SIZE=Math.min(8,ALL_IDS.length);
 const FIRST_BREAK=BATCH_SIZE,SECOND_BREAK=BATCH_SIZE*2+1;
 const WW=960,HH=540,clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
@@ -76,6 +75,7 @@ function pointer(e){
  return {x:(e.clientX-r.left-measure.offsetX)/measure.scale,
  y:(e.clientY-r.top-measure.offsetY)/measure.scale,id:e.pointerId};
 }
+paintHearts(hud.lives,3);
 let marathonMode=false;
 let state={mode:'title',queue:[],index:0,rounds:BATCH_SIZE*3,lives:3,score:0,combo:0,
  current:null,id:'',level:1,remaining:0,duration:0,t:0,period:0,feedback:'',done:false,
@@ -124,8 +124,7 @@ function startRound(){
    state.level===1?4.8:state.level===2?4.05:3.65;
  state.remaining=state.duration;
  state.current.enter(state,api());
- hud.lives.textContent='♥'.repeat(state.lives)+'♡'.repeat(3-state.lives);
- hud.lives.setAttribute('aria-label',state.lives+' hearts remaining');
+ paintHearts(hud.lives,state.lives);
  hud.round.textContent=isBoss(state.id)?
   (state.id==='boss-printer'?'BOSS 1 / 2':'FINAL BOSS'):
   String(completedMinis()+1).padStart(2,'0')+' / '+state.rounds;
@@ -163,7 +162,7 @@ function startIntermission(){
  ui.interScore.textContent=String(state.score).padStart(2,'0')+' POINTS';
  ui.interLives.textContent='♥'.repeat(state.lives)+'♡'.repeat(3-state.lives);
  ui.interSpeed.textContent=state.index===FIRST_BREAK?'NEXT: PRINTER PANIC!':'FINAL BATCH: MAX PANIC!';
- ui.interFill.style.transform='scaleX(1)';
+
  ui.sr.textContent=ui.interTitle.textContent+'. '+ui.interScore.textContent+'. '+state.lives+' lives.';
  sfx('speed');
 }
@@ -189,7 +188,7 @@ function settle(good,x=480,y=340){
   burst(x,y,'#6ce7ae');sfx('win');
   if(isBoss(state.id))sfx('bosswin');
  }else{
-  state.lives--;state.combo=0;sfx('lose');burst(x,y,'#fb6751');
+  state.lives--;state.combo=0;paintHearts(hud.lives,state.lives);sfx('lose');burst(x,y,'#fb6751');
  }
 }
 function finish(){
@@ -340,7 +339,6 @@ function update(dt){
   // Reading means time is genuinely paused: no automation, no hidden timer.
   if(ui.interResearch.classList.contains('hidden')){
    state.interTime=Math.max(0,state.interTime-dt);
-   ui.interFill.style.transform='scaleX('+(state.interTime/state.interDuration)+')';
    if(state.interTime<=0&&ui.interContinue.disabled){
     ui.interContinue.disabled=false;
     ui.interContinue.textContent='CONTINUE ►';
@@ -373,9 +371,20 @@ function updateDeadlineHud(){
  deadline.shell.classList.toggle('critical',state.mode==='active'&&ratio<=.1);
  deadline.shell.classList.toggle('win',state.mode==='result'&&won);
  deadline.shell.classList.toggle('fail',state.mode==='result'&&lost);
- deadline.fill.style.transform='scaleX('+(won?1:ratio)+')';
  deadline.seconds.textContent=won?'NICE!':lost?'LATE!':Math.max(0,state.remaining).toFixed(1)+'s';
+ deadline.fill.style.transform='scaleY('+(won?1:ratio)+')';
  deadline.track.setAttribute('aria-valuenow',String(Math.round(ratio*100)));
+ deadline.shell.setAttribute('aria-label',won?'Round cleared':lost?'Time expired':Math.max(0,state.remaining).toFixed(1)+' seconds remaining');
+}
+function paintHearts(el,lives){
+ el.replaceChildren();
+ for(let i=0;i<3;i++){
+  const heart=document.createElement('span');
+  heart.className=i<lives?'heart-full':'heart-empty';
+  heart.textContent=i<lives?'♥':'♡';
+  el.append(heart);
+ }
+ el.setAttribute('aria-label',lives+' hearts remaining');
 }
 function portraitStaging(g,c,m){
  const {width,height,scale,offsetY}=m;
