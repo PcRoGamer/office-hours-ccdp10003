@@ -26,6 +26,11 @@ try:
   browser=p.chromium.launch(executable_path=r"C:\Program Files\Google\Chrome\Application\chrome.exe",headless=True,args=["--no-sandbox"])
   matrices=[(1920,1080,1),(1366,768,1),(650,800,1),(1920,1080,2)]
   if __import__('os').environ.get('NS_SCORE_PORTRAIT_ONLY')=='1': matrices=[(650,800,1)]
+  chosen=__import__('os').environ.get('NS_SCORE_VIEWPORT')
+  if chosen:
+   dims=tuple(int(v) for v in chosen.lower().split('x'))
+   assert len(dims)==3 and all(v>0 for v in dims),'Expected NS_SCORE_VIEWPORT=1920x1080x1'
+   matrices=[dims]
   for width,height,dpr in matrices:
    ctx=browser.new_context(viewport={"width":width,"height":height},device_scale_factor=dpr,reduced_motion="reduce")
    page=ctx.new_page();errors=[]
@@ -55,6 +60,13 @@ try:
    assert page.locator(".ns-breakdown .ns-line").count()>=4
    assert "VERIFIED COMMITTED EVENTS" in page.locator(".ns-receipt-bottom").inner_text()
    page.screenshot(path=str(OUT/("flipped-%dx%d-dpr%d.png"%(width,height,dpr))),full_page=True)
+   page.locator(".ns-receipt").focus()
+   page.keyboard.press("Enter")
+   assert page.locator(".ns-receipt-score").evaluate("el=>el.firstChild.textContent.trim()")==str(js["officialScore"])
+   page.locator(".ns-receipt").focus()
+   page.keyboard.press("Space")
+   assert page.locator(".ns-receipt-score").evaluate("el=>el.firstChild.textContent.trim()")==str(js["peopleScore"])
+   assert "NOT A COMPANY AWARD" in page.locator(".ns-receipt h2").inner_text()
    page.locator("[data-replay]").click()
    assert page.evaluate("window.__scoreFixture.replayed===true")
    assert not errors,("page errors",width,errors)
@@ -65,6 +77,6 @@ try:
   browser.close()
 finally:
  server.shutdown();server.server_close()
-assert len(results)==(1 if __import__('os').environ.get('NS_SCORE_PORTRAIT_ONLY')=='1' else 4)
+assert len(results)==(1 if __import__('os').environ.get('NS_SCORE_VIEWPORT') or __import__('os').environ.get('NS_SCORE_PORTRAIT_ONLY')=='1' else 4)
 print(json.dumps({"status":"PASS","test":"REAL_CHROME_SYSTEMS_STORY_RECEIPT","results":results,
  "screenshots":str(OUT)},indent=2))
