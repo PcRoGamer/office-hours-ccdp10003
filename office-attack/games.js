@@ -14,7 +14,7 @@ function banana(c,x,y,rot=-.08){
  c.fillStyle='#ffd24d';c.beginPath();c.moveTo(-52,-51);
  c.bezierCurveTo(-61,15,-10,56,61,28);c.bezierCurveTo(68,20,67,13,60,10);
  c.bezierCurveTo(6,20,-17,-14,-9,-51);c.closePath();c.fill();
- rr(c,-49,-66,29,24,7,'#8a5a3b');egg(c,62,19,7,7,'#8a5a3b');
+ rr(c,-49,-66,29,24,7,'#8a5a3b');c.fillStyle='#8a5a3b';c.beginPath();c.arc(62,19,7,0,Math.PI*2);c.fill();
  c.strokeStyle='#fff2a6';c.lineWidth=7;c.lineCap='round';c.beginPath();
  c.moveTo(-35,-30);c.bezierCurveTo(-36,10,-8,37,31,35);c.stroke();
  c.strokeStyle='#eab43d';c.lineWidth=4;c.beginPath();c.moveTo(-11,-42);c.bezierCurveTo(-9,0,18,22,47,23);c.stroke();
