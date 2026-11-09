@@ -1,29 +1,45 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>QUOTA PANIC: OFFICE ATTACK</title>
-<meta name="description" content="Six office microgames, two cartoon bosses, a fast timer and three precious lives.">
+<meta name="description" content="Fast cartoon office microgames, two hilarious bosses and three precious lives.">
 <link rel="stylesheet" href="./office-attack/style.css">
 <link rel="stylesheet" href="./office-attack/research.css"></head>
 <body>
 <main id="game" aria-label="QUOTA PANIC: OFFICE ATTACK">
 <canvas id="stage" tabindex="0" aria-label="Arcade microgames: follow the one-word command using your mouse"></canvas>
-<div id="hud" aria-live="off"><div id="lives" aria-label="3 hearts"></div><div id="round"></div><button id="mute" type="button" aria-label="Toggle sound">♫</button></div>
+<div id="side-hud" aria-label="Game status">
+  <section class="side-status" aria-label="Remaining lives">
+    <span class="hud-label">LIVES</span>
+    <div id="lives" class="heart-stack" role="img" aria-label="3 hearts remaining"><span class="heart-full">♥</span><span class="heart-full">♥</span><span class="heart-full">♥</span></div>
+  </section>
+  <section id="deadline-ui" class="deadline-clock-card" hidden role="timer" aria-live="off" aria-label="Time remaining">
+    <span class="hud-label">TIME</span>
+    <strong id="deadline-seconds">4.8s</strong>
+    <div class="deadline-track" role="meter" aria-label="Time remaining" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="deadline-fill"></span></div>
+  </section>
+  <div class="side-hud-mark" aria-hidden="true">QP</div>
+</div>
+<div id="hud" aria-live="off">
+  <div class="hud-center"><span class="hud-label">OFFICE ATTACK</span><strong id="round"></strong></div>
+  <button id="mute" type="button" aria-label="Toggle sound">♪</button>
+</div>
 <div id="splash" class="overlay"><div class="poster">
 <div class="kicker">OFFICE HOURS PRESENTS</div><h1>QUOTA<br><em>PANIC!</em></h1>
-<p class="sub">SIX OFFICE DISASTERS. TWO BIG BOSSES.</p>
+<p class="sub">OFFICE DISASTERS. TWO BIG BOSSES.</p>
 <p class="instruction">Click. Catch. Drag. React.<br>Faster every round. Three mistakes and you're fired.</p>
 <button id="play" type="button">CLOCK IN ►</button>
 <button id="marathon-title" class="marathon-toggle" type="button" aria-pressed="false" title="Automatically continue after each celebration, without playing the microgames for you">MARATHON: OFF</button>
 <p class="marathon-explain">AUTO-CONTINUE BREAKS · YOU STILL PLAY</p>
 <p class="micro">MOUSE OR TOUCH · ESC TO PAUSE · M TO MUTE</p></div>
-<img class="poster-printer" src="./office-attack/icons/computer.png" alt="" aria-hidden="true"></div>
+<div class="poster-character" aria-hidden="true"><div class="celebrate-worker office-worker"><span class="worker-eyes"></span><span class="worker-mouth"></span><span class="worker-arm arm-left"></span><span class="worker-arm arm-right"></span><span class="worker-tie"></span><span class="coffee-hat"></span></div><span class="poster-spark">✦</span></div></div>
 <div id="pause" class="overlay hidden"><div class="modal"><h2>PAUSED</h2><p>No overtime. Not yet.</p><button id="resume">RESUME ►</button></div></div>
 <div id="intermission" class="overlay intermission hidden" role="status" aria-live="polite">
-  <div class="inter-art" aria-hidden="true"><img src="./office-attack/icons/tick.png" alt=""><span class="inter-stars">✦ ✦ ✦</span></div>
-  <div class="inter-copy"><div class="kicker">SIX DOWN. KEEP MOVING.</div>
+  <div id="inter-confetti" class="confetti-sheet" aria-hidden="true"></div>
+  <div class="inter-art" aria-hidden="true"><div class="celebrate-worker"><span class="party-hat"></span><span class="worker-eyes"></span><span class="worker-mouth"></span><span class="worker-arm arm-left"></span><span class="worker-arm arm-right"></span><span class="worker-tie"></span></div><span class="inter-stars">✦ ✦ ✦</span></div>
+  <div class="inter-copy"><div class="kicker" id="inter-kicker">CHAPTER CLEAR · TAKE A BREATHER</div>
     <h2 id="inter-title">SPEED UP!</h2><p id="inter-tagline">THE BOSS IS DOWN!</p>
     <div class="inter-stats"><span id="inter-score">00 POINTS</span><span id="inter-lives">♥ ♥ ♥</span></div>
-    <div id="inter-speed">NEXT: FASTER!</div><div class="inter-meter"><div id="inter-fill"></div></div>
+    <div id="inter-speed">NEXT: FASTER!</div>
     <div class="break-actions" aria-label="Rest break controls">
       <button id="inter-research-open" type="button" aria-haspopup="dialog" aria-controls="inter-research">WHY MICROGAMES? <span aria-hidden="true">?</span></button>
       <button id="inter-marathon" class="marathon-toggle" type="button" aria-pressed="false" title="Toggle automatic continuation after the celebration">MARATHON: OFF</button>
@@ -50,7 +66,7 @@
           <h4>ONE COMMAND. ONE PANIC.</h4>
           <p>Nintendo describes <i>WarioWare</i>'s challenges as lasting seconds. The player learns a simple action immediately, then tries to execute it as the pace rises.</p>
           <p>Melbourne's <i>Dumb Ways to Die</i> turned rail-safety messages into quick, absurd survival games. Its three-life structure helped shape our office-disaster format.</p>
-          <p class="research-application"><b>OUR RESPONSE</b> Readable verbs, expressive failures, six distinct interactions and two bosses. No upgrade menu between every game.</p>
+          <p class="research-application"><b>OUR RESPONSE</b> Readable verbs, expressive failures, distinct interactions and two bosses. No upgrade menu between every game.</p>
           <div class="research-sources">PRIMARY SOURCES <a target="_blank" rel="noopener noreferrer" href="https://www.nintendo.com/au/games/nintendo-switch/warioware-move-it/">Nintendo · WarioWare</a> <a target="_blank" rel="noopener noreferrer" href="https://www.gamesforchange.org/games/dumb-ways-to-die/">Games for Change · Dumb Ways</a></div>
         </article>
         <article class="research-topic" data-research-page="portable" hidden>
@@ -75,11 +91,11 @@
   </section>
 </div>
 <div id="ending" class="overlay ending hidden" role="dialog" aria-labelledby="end-title" aria-modal="true">
-  <div class="end-art" aria-hidden="true"><img src="./office-attack/icons/tick.png" alt=""><span class="end-flourish">✦ ✦ ✦</span></div>
+  <div class="end-art" aria-hidden="true"><div class="celebrate-worker"><span class="party-hat"></span><span class="worker-eyes"></span><span class="worker-mouth"></span><span class="worker-arm arm-left"></span><span class="worker-arm arm-right"></span><span class="worker-tie"></span></div><span class="end-flourish">✦ ✦ ✦</span></div>
   <div class="modal end-copy"><div class="kicker" id="end-kicker">SHIFT COMPLETE</div>
     <h2 id="end-title">SHIFT CONQUERED!</h2>
     <div class="end-scorecard"><div id="end-grade">S</div><div class="end-tally"><p id="end-score"></p><p id="end-bosses"></p><p id="end-detail"></p></div></div>
-    <button id="again">PLAY AGAIN ►</button><p class="micro">SIX MICROGAMES · TWO BOSSES · ZERO UPGRADES</p>
+    <button id="again">PLAY AGAIN ►</button><p class="micro">TINY GAMES · TWO BOSSES · ZERO UPGRADES</p>
   </div>
 </div><div id="sr" class="sr-only" aria-live="polite"></div>
 </main>

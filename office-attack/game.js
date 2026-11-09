@@ -11,7 +11,7 @@ const ui={
  resume:document.getElementById('resume'),
  interTitle:document.getElementById('inter-title'),interTag:document.getElementById('inter-tagline'),
  interScore:document.getElementById('inter-score'),interLives:document.getElementById('inter-lives'),
- interSpeed:document.getElementById('inter-speed'),interFill:document.getElementById('inter-fill'),
+ interSpeed:document.getElementById('inter-speed'),
  endTitle:document.getElementById('end-title'),endScore:document.getElementById('end-score'),
  endGrade:document.getElementById('end-grade'),endBosses:document.getElementById('end-bosses'),
  endDetail:document.getElementById('end-detail'),endKicker:document.getElementById('end-kicker'),
@@ -20,6 +20,9 @@ const ui={
  interResearchOpen:document.getElementById('inter-research-open'),interResearch:document.getElementById('inter-research'),
  researchClose:document.getElementById('research-close'),researchBack:document.getElementById('research-back')
 };
+const deadline={shell:document.getElementById('deadline-ui'),seconds:document.getElementById('deadline-seconds'),fill:document.getElementById('deadline-fill'),track:document.querySelector('.deadline-track')};
+const BATCH_SIZE=Math.min(8,ALL_IDS.length);
+const FIRST_BREAK=BATCH_SIZE,SECOND_BREAK=BATCH_SIZE*2+1;
 const WW=960,HH=540,clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
 const query=new URLSearchParams(location.search);
 const givenSeed=Number(query.get('seed'));const seed=Number.isInteger(givenSeed)&&givenSeed>=0&&query.has('seed')?givenSeed:(Date.now()>>>0);
@@ -72,17 +75,19 @@ function pointer(e){
  return {x:(e.clientX-r.left-measure.offsetX)/measure.scale,
  y:(e.clientY-r.top-measure.offsetY)/measure.scale,id:e.pointerId};
 }
+paintHearts(hud.lives,3);
 let marathonMode=false;
-let state={mode:'title',queue:[],index:0,rounds:18,lives:3,score:0,combo:0,
+let state={mode:'title',queue:[],index:0,rounds:BATCH_SIZE*3,lives:3,score:0,combo:0,
  current:null,id:'',level:1,remaining:0,duration:0,t:0,period:0,feedback:'',done:false,
  flash:0,shake:0,particles:[],cursor:{x:480,y:380},resultTimer:0,correct:0,wrong:0,history:[],best:0};
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const k=Math.floor(rand()*(i+1));[arr[i],arr[k]]=[arr[k],arr[i]]}return arr}
 function buildQueue(){
  const q=[];
  for(let cycle=0;cycle<3;cycle++){
-  const seq=shuffle([...ALL_IDS]);
-  if(cycle===0){const i=seq.indexOf('stamp');[seq[0],seq[i]]=[seq[i],seq[0]]}
-  if(cycle>0&&seq[0]===q[q.length-1]){[seq[0],seq[1]]=[seq[1],seq[0]]}
+  const pool=shuffle([...ALL_IDS]);
+  if(cycle===0){const i=pool.indexOf('stamp');if(i>=0){pool.splice(i,1);pool.unshift('stamp')}}
+  const seq=pool.slice(0,BATCH_SIZE);
+  if(cycle>0&&seq.length>1&&seq[0]===q[q.length-1]){[seq[0],seq[1]]=[seq[1],seq[0]]}
   q.push(...seq);
   if(cycle===0)q.push('boss-printer');
  }
@@ -98,7 +103,7 @@ function api(){
 }
 function beginGame(){
  initAudio();
- state={...state,mode:'active',queue:buildQueue(),index:0,lives:3,score:0,combo:0,bossWins:0,interTime:0,
+ state={...state,mode:'active',queue:buildQueue(),index:0,rounds:BATCH_SIZE*3,lives:3,score:0,combo:0,bossWins:0,interTime:0,
   history:[],correct:0,wrong:0,particles:[],flash:0,shake:0,period:0,cursor:{x:480,y:380},done:false};
  for(const v of [ui.title,ui.ending,ui.pause,ui.inter])v.classList.add('hidden');
  beatStep=0;
@@ -109,7 +114,7 @@ function beginGame(){
 function startRound(){
  if(state.index>=state.queue.length){finish();return}
  const priorMinis=completedMinis();
- state.level=Math.min(3,1+Math.floor(priorMinis/6));
+ state.level=Math.min(3,1+Math.floor(priorMinis/BATCH_SIZE));
  state.id=state.queue[state.index];
  state.current=GAMES.find(g=>g.id===state.id)||BOSSES.find(g=>g.id===state.id);
  if(!state.current)throw Error('No authored microgame for '+state.id);
@@ -119,17 +124,29 @@ function startRound(){
    state.level===1?4.8:state.level===2?4.05:3.65;
  state.remaining=state.duration;
  state.current.enter(state,api());
- hud.lives.textContent='♥'.repeat(state.lives)+'♡'.repeat(3-state.lives);
- hud.lives.setAttribute('aria-label',state.lives+' hearts remaining');
+ paintHearts(hud.lives,state.lives);
  hud.round.textContent=isBoss(state.id)?
   (state.id==='boss-printer'?'BOSS 1 / 2':'FINAL BOSS'):
-  String(state.index+1).padStart(2,'0')+' / '+state.rounds;
+  String(completedMinis()+1).padStart(2,'0')+' / '+state.rounds;
  ui.sr.textContent=state.current.cmd+' '+state.current.hint;
  if(isBoss(state.id))sfx('boss');
 }
+function showerPaperConfetti(){
+ const sheet=document.getElementById('inter-confetti');
+ sheet.replaceChildren();
+ for(let i=0;i<36;i++){
+  const bit=document.createElement('i');
+  bit.style.setProperty('--x',((i*47)%100)+'%');
+  bit.style.setProperty('--delay',((i*7)%21)*.03+'s');
+  bit.style.setProperty('--fall',(2.1+(i%5)*.19)+'s');
+  bit.style.setProperty('--tilt',((i*83)%220-110)+'deg');
+  bit.style.background=['#fff8db','#f27769','#8bd8bb','#f8cf68'][i%4];
+  sheet.append(bit);
+ }
+}
 function startIntermission(){
  state.mode='intermission';
- state.interDuration=state.index===7?3.95:3.55;
+ state.interDuration=state.index===FIRST_BREAK?3.25:3.05;
  state.interTime=state.interDuration;
  state.interAutoRemaining=.84;
  state.interReadMore=false;
@@ -139,12 +156,13 @@ function startIntermission(){
  ui.interRestNote.textContent=marathonMode?'MARATHON ON: next game begins after the celebration. Open research to hold.':'RELAXED BREAK: press Continue when ready. Reading is optional.';
  ui.interResearch.classList.add('hidden');
  ui.inter.classList.remove('hidden');
- ui.interTitle.textContent=state.index===7?'BOSS DOWN!':'SPEED UP!';
- ui.interTag.textContent=state.index===7?'PRINTER: DEFEATED. YOU: STILL EMPLOYED.':'YOU SURVIVED THE SECOND BATCH!';
+ showerPaperConfetti();
+ ui.interTitle.textContent=state.index===FIRST_BREAK?'LEVEL CLEAR!':'KEEP GOING!';
+ ui.interTag.textContent=state.index===FIRST_BREAK?BATCH_SIZE+' DISASTERS SURVIVED. HR IS WATCHING.':(BATCH_SIZE*2)+' JOBS DONE. PAPER HERO!';
  ui.interScore.textContent=String(state.score).padStart(2,'0')+' POINTS';
  ui.interLives.textContent='♥'.repeat(state.lives)+'♡'.repeat(3-state.lives);
- ui.interSpeed.textContent=state.index===7?'NEXT: FASTER!':'FINAL BATCH: MAX PANIC!';
- ui.interFill.style.transform='scaleX(1)';
+ ui.interSpeed.textContent=state.index===FIRST_BREAK?'NEXT: PRINTER PANIC!':'FINAL BATCH: MAX PANIC!';
+
  ui.sr.textContent=ui.interTitle.textContent+'. '+ui.interScore.textContent+'. '+state.lives+' lives.';
  sfx('speed');
 }
@@ -170,7 +188,7 @@ function settle(good,x=480,y=340){
   burst(x,y,'#6ce7ae');sfx('win');
   if(isBoss(state.id))sfx('bosswin');
  }else{
-  state.lives--;state.combo=0;sfx('lose');burst(x,y,'#fb6751');
+  state.lives--;state.combo=0;paintHearts(hud.lives,state.lives);sfx('lose');burst(x,y,'#fb6751');
  }
 }
 function finish(){
@@ -313,7 +331,7 @@ function update(dt){
     startRound();
    }else{
     state.index++;
-    if(state.index===7||state.index===13)startIntermission();
+    if(state.index===FIRST_BREAK||state.index===SECOND_BREAK)startIntermission();
     else startRound();
    }
   }
@@ -321,7 +339,6 @@ function update(dt){
   // Reading means time is genuinely paused: no automation, no hidden timer.
   if(ui.interResearch.classList.contains('hidden')){
    state.interTime=Math.max(0,state.interTime-dt);
-   ui.interFill.style.transform='scaleX('+(state.interTime/state.interDuration)+')';
    if(state.interTime<=0&&ui.interContinue.disabled){
     ui.interContinue.disabled=false;
     ui.interContinue.textContent='CONTINUE ►';
@@ -343,36 +360,82 @@ function update(dt){
  for(const p of state.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=250*dt;p.life-=dt}
  state.particles=state.particles.filter(p=>p.life>0);
 }
-function drawDeadline(g,c){
- const ratio=g.mode==='result'?0:Math.max(0,g.remaining/g.duration);
- const danger=ratio<.25;
- const barX=134,barY=506,barW=674;
- rr(c,103,491,753,44,19,'#193d41');
- const fill=c.createLinearGradient(140,0,790,0);
- fill.addColorStop(0,'#ffeea2');fill.addColorStop(.65,'#f7c85a');fill.addColorStop(1,'#65e6ac');
- if(ratio>.003)rr(c,barX,barY,barW*ratio,14,6,danger?'#f75a4f':fill);
- c.save();c.translate(111,513);c.rotate(Math.sin(g.t*4)*.075);
- drawIcon(c,'clock',0,0,61,61);c.restore();
- if(danger){c.save();c.globalAlpha=.5+Math.sin(g.t*22)*.42;c.fillStyle='#ff57514d';c.fillRect(104,492,742,40);c.restore()}
- ink(c,'DEADLINE',224,480,17,danger?'#a5352e':'#315355');
- ink(c,Math.max(0,g.remaining).toFixed(1)+'s',824,484,25,danger?'#e24c42':'#204b4b','right');
+function updateDeadlineHud(){
+ const playing=['active','result','pause'].includes(state.mode)&&!!state.current;
+ deadline.shell.hidden=!playing;
+ if(!playing)return;
+ const ratio=Math.max(0,Math.min(1,state.remaining/Math.max(.001,state.duration)));
+ const won=state.mode==='result'&&state.history.at(-1)?.success;
+ const lost=state.mode==='result'&&!won;
+ deadline.shell.classList.toggle('panic',state.mode==='active'&&ratio<=.25);
+ deadline.shell.classList.toggle('critical',state.mode==='active'&&ratio<=.1);
+ deadline.shell.classList.toggle('win',state.mode==='result'&&won);
+ deadline.shell.classList.toggle('fail',state.mode==='result'&&lost);
+ deadline.seconds.textContent=won?'NICE!':lost?'LATE!':Math.max(0,state.remaining).toFixed(1)+'s';
+ deadline.fill.style.transform='scaleY('+(won?1:ratio)+')';
+ deadline.track.setAttribute('aria-valuenow',String(Math.round(ratio*100)));
+ deadline.shell.setAttribute('aria-label',won?'Round cleared':lost?'Time expired':Math.max(0,state.remaining).toFixed(1)+' seconds remaining');
+}
+function paintHearts(el,lives){
+ el.replaceChildren();
+ for(let i=0;i<3;i++){
+  const heart=document.createElement('span');
+  heart.className=i<lives?'heart-full':'heart-empty';
+  heart.textContent=i<lives?'♥':'♡';
+  el.append(heart);
+ }
+ el.setAttribute('aria-label',lives+' hearts remaining');
+}
+function portraitStaging(g,c,m){
+ const {width,height,scale,offsetY}=m;
+ if(height<=width*1.22||offsetY<52||!g.current||g.mode==='title')return;
+ const top=offsetY;
+ const lowerTop=offsetY+HH*scale;
+ c.save();
+ // The full-height portrait composition restores a large, legible imperative
+ // while the original microgame hit coordinates stay perfectly unchanged.
+ c.textAlign='center';c.textBaseline='middle';
+ c.font='900 '+Math.round(Math.min(60,width*.145))+'px Impact,Arial,sans-serif';
+ c.fillStyle='#235052';
+ c.fillText(g.current.cmd,width/2,Math.max(47,top*.38));
+ const hint=g.current.hint||'';
+ c.font='800 '+Math.round(Math.min(16,Math.max(11,(width-18)/Math.max(1,hint.length*.58))))+'px Arial,sans-serif';
+ c.fillStyle='#466563';
+ c.fillText(hint,width/2,Math.max(74,top*.65),width-20);
+ if(lowerTop<height-70){
+  const x=width*.5,y=lowerTop+(height-lowerTop)*.49;
+  const wobble=Math.sin(g.t*8)*.065;
+  c.translate(x,y);c.rotate(wobble);
+  // A chunky, expressive worker. No legacy image atlas or fine black outlines.
+  c.strokeStyle='#efad79';c.lineWidth=13;c.lineCap='round';
+  c.beginPath();c.moveTo(-39,-8);c.lineTo(-59,12+Math.sin(g.t*8)*7);c.moveTo(39,-8);c.lineTo(59,8-Math.sin(g.t*8)*7);c.stroke();
+  c.fillStyle='#f6b57e';c.beginPath();c.ellipse(0,0,45,57,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#e89a66';c.beginPath();c.ellipse(0,40,35,14,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#2d4d4a';
+  for(const ex of [-16,16]){c.beginPath();c.ellipse(ex,-13,4.5,7.3,0,0,Math.PI*2);c.fill()}
+  c.fillStyle='#8c4b4a';c.beginPath();c.ellipse(1,18,8,8+Math.sin(g.t*9)*3,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#d85d5a';c.beginPath();c.moveTo(-4,34);c.lineTo(5,34);c.lineTo(11,54);c.lineTo(-10,54);c.fill();
+  c.restore();
+ }
 }
 function draw(){
  const {width,height,dpr,scale,offsetX,offsetY}=measure;
  c.setTransform(dpr,0,0,dpr,0,0);
- c.fillStyle='#20393b';c.fillRect(0,0,width,height);
+ c.fillStyle=state.current?.bg||'#b9dfd2';c.fillRect(0,0,width,height);
  c.save();c.translate(offsetX,offsetY);c.scale(scale,scale);
  if(state.shake>0)c.translate((Math.random()-.5)*state.shake,(Math.random()-.5)*state.shake);
  const active=state.current;
  c.fillStyle=active?.bg||'#315250';c.fillRect(0,0,WW,HH);
  if(active&&state.mode!=='title'){
   active.draw(state,c);
+  if(!(height>width*1.22&&offsetY>52)){
   c.save();
   c.shadowColor='#15303766';c.shadowBlur=3;
   ink(c,active.cmd,480,104,84,'#fff9e9');
   c.restore();
   ink(c,active.hint,480,157,20,'#214243');
-  drawDeadline(state,c);
+  }
+  // Dedicated timer dock lives outside the stage: never cover gameplay.
   if(state.mode==='result'){
    c.fillStyle=state.history.at(-1)?.success?'#4ee9a54d':'#f55c5966';c.fillRect(0,0,WW,HH);
    c.save();c.shadowColor='#11272b88';c.shadowOffsetY=8;c.shadowBlur=0;
@@ -384,13 +447,14 @@ function draw(){
  for(const p of state.particles)confetti(c,p.x,p.y,p.r,p.color);
  if(state.flash>0){c.fillStyle=state.feedback==='NICE!'?'#ffffff15':'#e9413829';c.fillRect(0,0,WW,HH)}
  vignette(c);c.restore();
+ portraitStaging(state,c,measure);
 }
 let frameCount=0;let last=performance.now();
 function frame(now){
  frameCount++;
  const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
  if(state.mode!=='pause'&&state.mode!=='title'&&state.mode!=='end')update(dt);
- draw();requestAnimationFrame(frame);
+ updateDeadlineHud();draw();requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 Object.defineProperty(window,'__officeAttackQA',{value:Object.freeze({
@@ -408,6 +472,11 @@ Object.defineProperty(window,'__officeAttackQA',{value:Object.freeze({
  cursor:state.cursor,forms:state.forms,workerX:state.workerX,workerY:state.workerY,
  trayX:state.trayX,docs:state.docs,drag:state.drag,leaks:state.leaks,
  needle:state.needle,zone:state.zone,playerX:state.playerX,hazards:state.hazards,warnings:state.warnings,safeT:state.safeT,
- shredded:state.shredded,required:state.required,stamped:state.stamped,grade:ui.endGrade.textContent,
+ shredded:state.shredded,required:state.required,stamped:state.stamped,
+ plugX:state.plugX,plugY:state.plugY,plugTarget:state.plugTarget,plugPorts:state.plugPorts,plugDrag:state.plugDrag,
+ cleanProgress:state.cleanProgress,cleanNeed:state.cleanNeed,cleanDrag:state.cleanDrag,
+ sortItems:state.sortItems,sortBins:state.sortBins,sorted:state.sorted,sortDrag:state.sortDrag,
+ popup:state.popup,shutTotal:state.shutTotal,shutClosed:state.shutClosed,
+ grade:ui.endGrade.textContent,
  spriteReady:HD.complete&&!!HD.naturalWidth&&iconsReady(),soundEvents,seed,resultTimer:state.resultTimer,frameCount,visibility:document.visibilityState,focus:document.hasFocus()
  }))}),configurable:false});
