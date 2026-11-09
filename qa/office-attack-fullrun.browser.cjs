@@ -50,18 +50,18 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
      await page.waitForFunction(()=>window.__officeAttackQA.snapshot().bossCooldown<=0,{timeout:1200});
      await click(480,428); // second miss must lose exactly one heart
      await page.waitForFunction(()=>{const x=window.__officeAttackQA.snapshot();return x.mode==='result'&&!x.history.at(-1)?.success&&x.id==='boss-printer'},{timeout:1800});
-     const bad=await snap();assert.equal(bad.lives,2);assert.equal(bad.index,6);assert.equal(bad.score,6);
-     await active(6);assert.equal((await snap()).bossHits,0,'boss retry must clear previous partial counter');
+     const bad=await snap();assert.equal(bad.lives,2);assert.equal(bad.index,8);assert.equal(bad.score,6);
+     await active(8);assert.equal((await snap()).bossHits,0,'boss retry must clear previous partial counter');
      console.log('PASS genuine failed printer timing costs one heart, same boss retries');
    }
    if(bossRetries&&round===25){
      // Do nothing and let the incoming red memo hit the worker.
      await page.waitForFunction(()=>{const x=window.__officeAttackQA.snapshot();return x.mode==='result'&&!x.history.at(-1)?.success&&x.id==='boss-manager'},{timeout:7000});
-     const bad=await snap();assert.equal(bad.lives,1);assert.equal(bad.index,19);assert.equal(bad.bossWins,1);
-     await active(19);assert.equal((await snap()).bossHits,0);
+     const bad=await snap();assert.equal(bad.lives,1);assert.equal(bad.index,25);assert.equal(bad.bossWins,1);
+     await active(25);assert.equal((await snap()).bossHits,0);
      console.log('PASS real manager attack expiration costs heart and forces same boss retry');
    }
-   if(round<30)await page.screenshot({path:path.join(out,'micro-'+s.id+'-level1.png')});
+   if(round<30)await page.screenshot({path:path.join(out,'micro-'+s.id+'-level'+s.level+'.png')});
    console.log('ROUND',round+1,s.id,'level',s.level,'timer',s.remaining.toFixed(2));
    if(s.id==='stamp'){
      for(const f of s.forms.filter(x=>x.ok)){await click(f.x,f.y);await sleep(45)}
